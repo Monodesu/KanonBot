@@ -12,7 +12,7 @@ namespace KanonBot.Drivers
     public class CQ : IDriver
     {
         IWebsocketClient client;
-        Action<Chain>? onMessage;
+        Action<Chain>? msgAction;
         public CQ(string url)
         {
             var factory = new Func<ClientWebSocket>(() =>
@@ -49,12 +49,12 @@ namespace KanonBot.Drivers
 
         void ParseMessage(ResponseMessage msg)
         {
-            this.onMessage!(new Chain().msg(msg.Text));
+            this.msgAction!(new Chain().msg(msg.Text));
         }
 
-        public IDriver SubscribeMessage(Action<Chain> action)
+        public IDriver onMessage(Action<Chain> action)
         {
-            this.onMessage = action;
+            this.msgAction = action;
             return this;
         }
 

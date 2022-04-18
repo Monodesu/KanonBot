@@ -38,7 +38,8 @@ Console.WriteLine(config);
 
 var drivers = new Drivers();
 drivers.append(
-    new CQ($"ws://{config.cqhttp?.host}:{config.cqhttp?.port}").SubscribeMessage((msg) =>
+    new CQ($"ws://{config.cqhttp?.host}:{config.cqhttp?.port}")
+    .onMessage((msg) =>
     {
         Console.WriteLine(msg);
     }

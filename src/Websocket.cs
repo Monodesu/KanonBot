@@ -8,7 +8,7 @@ namespace KanonBot.WebSocket
 {
     public interface IDriver
     {
-        IDriver SubscribeMessage(Action<Chain> action);
+        IDriver onMessage(Action<Chain> action);
         Task Connect();
     }
 
