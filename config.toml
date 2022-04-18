@@ -1,0 +1,25 @@
+debug = true
+
+[osu]
+client_id = 0
+client_secret = ""
+
+[cqhttp]
+host = "localhost"
+port = 7700
+http_port = 5700
+management_group = "localhost"
+
+[oss]
+access_key_id = ""
+access_key_secret = ""
+endpoint = ""
+bucket_name = ""
+
+[database]
+type = "mysql"
+host = ""
+port = 3306
+db = "kanonbot"
+user = ""
+password = ""
