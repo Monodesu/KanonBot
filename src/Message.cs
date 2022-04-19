@@ -43,11 +43,11 @@ public class Image : IMsg
         switch (this.t)
         {
             case Type.file:
-                return $"<image:file:///{this.value}>";
+                return $"<image;file:///{this.value}>";
             case Type.base64:
-                return $"<image:base64:///{this.value}>";
+                return $"<image;base64:///{this.value}>";
             case Type.url:
-                return $"<image:file:///{this.value}>";
+                return $"<image;file:///{this.value}>";
         }
         // 保险
         return "";

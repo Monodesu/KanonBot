@@ -38,11 +38,17 @@ Console.WriteLine(config);
 
 var drivers = new Drivers();
 drivers.append(
-    new CQ($"ws://{config.cqhttp?.host}:{config.cqhttp?.port}")
-    .onMessage((msg) =>
+    new CQ.Driver($"ws://{config.cqhttp?.host}:{config.cqhttp?.port}")
+    .onMessage((client, msg) =>
     {
         Console.WriteLine(msg);
-    }
-));
+        // client.Send("xxxxx");
+    })
+    .onEvent((client, e) =>
+    {
+        Console.WriteLine(e);
+        // client.Send("xxxxx");
+    })
+);
 drivers.StartAll();
 ExitEvent.WaitOne();

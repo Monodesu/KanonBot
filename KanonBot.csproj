@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Tomlyn" Version="0.14.1" />
     <PackageReference Include="Websocket.Client" Version="4.4.43" />
   </ItemGroup>

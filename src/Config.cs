@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Tomlyn;
+using KanonBot.Serializer;
 using Tomlyn.Model;
 
 namespace KanonBot.Config;
@@ -89,7 +89,7 @@ public class Config : ITomlMetadataProvider
         {
             c = f.ReadToEnd();
         }
-        return Toml.ToModel<Config>(c);
+        return Toml.Deserialize<Config>(c);
     }
 
     public void save(string path) {
@@ -100,6 +100,6 @@ public class Config : ITomlMetadataProvider
     }
 
     public override string ToString() {
-        return Toml.FromModel(this);
+        return Toml.Serialize(this);
     }
 }
