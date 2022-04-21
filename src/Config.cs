@@ -1,12 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+#pragma warning disable IDE1006 // ÃüÃûÑùÊ½
+
 using KanonBot.Serializer;
 using Tomlyn.Model;
 
 namespace KanonBot.Config;
 
+public class Mail : ITomlMetadataProvider
+{
+    public string? smtp_host { get; set; }
+    public int smtp_port { get; set; }
+    public string? username { get; set; }
+    public string? password { get; set; }
+    TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
+
+}
 public class Database : ITomlMetadataProvider
 {
     public string? type { get; set; } = "mysql";
@@ -33,7 +40,6 @@ public class OSS : ITomlMetadataProvider
     TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
 
 }
-
 public class CQhttp : ITomlMetadataProvider
 {
     public string? host { get; set; }
@@ -42,7 +48,6 @@ public class CQhttp : ITomlMetadataProvider
     public string? managementGroup { get; set; }
     TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
 }
-
 public class Config : ITomlMetadataProvider
 {
     public static Config? inner;
@@ -52,6 +57,7 @@ public class Config : ITomlMetadataProvider
     public CQhttp? cqhttp { get; set; }
     public OSS? oss { get; set; }
     public Database? database { get; set; }
+    public Mail? mail { get; set; }
     TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
     public static Config Default() {
         return new Config() {
@@ -79,12 +85,18 @@ public class Config : ITomlMetadataProvider
                 db = "kanonbot",
                 user = "",
                 password = ""
+            },
+            mail = new() {
+                smtp_host = "localhost",
+                smtp_port = 587,
+                username = "",
+                password = ""
             }
         };
     } 
 
     public static Config load(string path) {
-        String c;
+        string c;
         using (var f = File.OpenText(path))
         {
             c = f.ReadToEnd();

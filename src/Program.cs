@@ -1,38 +1,11 @@
-﻿using System.Net.WebSockets;
-// See https://aka.ms/new-console-template for more information
-// Console.WriteLine("Hello, World!");
-// int a = 0;
-// while (true)
-// {
-//     Console.WriteLine("hello1");
-//     await Task.Delay(100);
-// }
-
-using KanonBot.Message;
+﻿using KanonBot.Message;
 using KanonBot.Config;
 using KanonBot.WebSocket;
 using KanonBot.Drivers;
-using Tomlyn;
-using Websocket.Client;
 
-
-// test area start
-KanonBot.KanonBotImage image = new();
-var raw = File.ReadAllText("E:\\.KanonBotTest\\test.txt").Split("\r\n");
-foreach (string s in raw)
-{
-    image.Parse(s);
-}
-image.SaveAsFile("E:\\.KanonBotTest\\test.png");
-Environment.Exit(-1);
-// test area end
-
-// Console.WriteLine("Init");
 var ExitEvent = new ManualResetEvent(false);
-var c = new Chain().msg("hello").image("C:\\hello.png", Image.Type.file).msg("test\nhaha");
-c.append(new RawMessage("Test"));
-Console.WriteLine(c);
 
+#region 加载配置文件
 var configPath = "config.toml";
 if (File.Exists(configPath))
 {
@@ -45,8 +18,52 @@ else
 }
 
 var config = Config.inner!;
+#endregion
 
-Console.WriteLine(config);
+#region 功能测试区
+//var c = new Chain().msg("hello").image("C:\\hello.png", Image.Type.file).msg("test\nhaha");
+//c.append(new RawMessage("Test"));
+//Console.WriteLine(c);
+
+//Console.WriteLine(config);
+
+//////////////////////////////////////////////////////////////////////////////// test area start
+
+// 自定义info图片测试
+/*
+KanonBot.KanonBotImage image = new();
+var raw = File.ReadAllText("E:\\.KanonBotTest\\test.txt").Split("\r\n");
+foreach (string s in raw)
+{
+    image.Parse(s);
+}
+image.SaveAsFile("E:\\.KanonBotTest\\test.png");
+*/
+
+
+// 邮件测试
+/*
+KanonBot.Mail.MailStruct ms = new()
+{
+    MailTo = new string[] { "deleted" },
+    Subject = "你好！",
+    Body = "你好！这是一封来自猫猫的测试邮件！"
+};
+KanonBot.Mail.Send(ms); Environment.Exit(0);
+*/
+
+
+
+
+
+
+
+
+
+// Environment.Exit(0);
+//////////////////////////////////////////////////////////////////////////////// test area end
+
+#endregion
 
 var drivers = new Drivers();
 drivers.append(
