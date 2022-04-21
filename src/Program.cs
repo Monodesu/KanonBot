@@ -15,6 +15,18 @@ using KanonBot.Drivers;
 using Tomlyn;
 using Websocket.Client;
 
+
+// test area start
+KanonBot.KanonBotImage image = new();
+var raw = File.ReadAllText("E:\\.KanonBotTest\\test.txt").Split("\r\n");
+foreach (string s in raw)
+{
+    image.Parse(s);
+}
+image.SaveAsFile("E:\\.KanonBotTest\\test.png");
+Environment.Exit(-1);
+// test area end
+
 // Console.WriteLine("Init");
 var ExitEvent = new ManualResetEvent(false);
 var c = new Chain().msg("hello").image("C:\\hello.png", Image.Type.file).msg("test\nhaha");

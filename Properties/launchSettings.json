@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "KanonBot": {
+      "commandName": "Project",
+      "commandLineArgs": "Image -n \"我是文件名\" -p \"cut\" -s 17x87"
+    }
+  }
+}
