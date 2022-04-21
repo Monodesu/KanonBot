@@ -10,13 +10,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.2.0-2.final" />
+    <PackageReference Include="MySql.Data" Version="8.0.28" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta16" />
     <PackageReference Include="SixLabors.ImageSharp" Version="2.1.0" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
+    <PackageReference Include="SqlSugarCore" Version="5.0.7.5" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22114.1" />
     <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta3.22114.1" />
-    <PackageReference Include="Tomlyn" Version="0.14.1" />
+    <PackageReference Include="Tomlyn" Version="0.14.2" />
     <PackageReference Include="Websocket.Client" Version="4.4.43" />
   </ItemGroup>
 

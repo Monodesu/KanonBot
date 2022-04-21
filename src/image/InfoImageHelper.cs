@@ -52,15 +52,18 @@ public class ResizeOption
 }
 public class KanonBotImage
 {
+
+    #region 变量
     // workingFileName 永远使用第一条调用Image命令行导入图像时所使用的图像名称
     private string workingFileName = "";
-    RootCommand rootCommand = new RootCommand();
+    RootCommand rootCommand = new();
     private Dictionary<string, Image> WorkList = new();
     Command imageCommand = new("Image");
     Command roundCommand = new("Round");
     Command drawCommand = new("Draw");
     Command drawtextCommand = new("DrawText");
     Command resizeCommand = new("Resize");
+    #endregion
 
     public KanonBotImage()
     {
@@ -178,7 +181,7 @@ public class KanonBotImage
     {
         var args = CommandLineParser.SplitCommandLineIntoArguments(commandline, true).ToArray();
         if (args.Length == 0) return; //不处理空命令
-        int a = rootCommand.InvokeAsync(args).Result;
+        _ = rootCommand.InvokeAsync(args).Result;
     }
 
     /// <summary>
