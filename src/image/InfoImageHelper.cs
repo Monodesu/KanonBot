@@ -297,6 +297,57 @@ public class KanonBotImage
     }
 
     /// <summary>
+    /// 
+    /// *****代码需测试*****
+    /// 
+    /// 处理自动位移图像，用于自定义等级进度条的绘制
+    /// pos_x与pos_y必须位于绘制点的起始位置
+    /// direction指定了是从左到右绘制，从右到左绘制，从下到上绘制，还是从上到下绘制
+    /// 要注意的是，无论direction是什么，在测试绘制时，都需要在代码中按照100%位移结束后的位置设定pos
+    /// </summary>
+    /// <param name="dest_name">目标图像名(Target)</param>
+    /// <param name="source_name">原始图像名</param>
+    /// <param name="pos_x"></param>
+    /// <param name="pos_y"></param>
+    /// <param name="value">进度，从0到100</param>
+    /// <param name="direction">LR RL UD DU(left to right / up to down)</param>
+    public void Automatic_Displacement_ImageProcessor(string dest_name, string source_name, int pos_x, int pos_y, int value, float alpha, string direction) //LevelBar
+    {
+        var source_img_size = WorkList[source_name].Size();
+        var point = Get_ADIP_Pos(pos_x, pos_y, source_img_size.Width, source_img_size.Height, value, direction);
+
+        WorkList[dest_name].Mutate(x => x.DrawImage(WorkList[source_name], point, alpha));
+    }
+
+    /// <summary>
+    /// 计算坐标
+    /// </summary>
+    private Point Get_ADIP_Pos(int pos_x, int pos_y, int width, int height, int value, string direction)
+    {
+        Point point = new();
+        switch (direction)
+        {
+            default: //LR
+                point.X = pos_x - width * (value / 100);
+                point.Y = pos_y;
+                break;
+            case "RL":
+                point.X = (pos_x + width) - width * (value / 100);
+                point.Y = pos_y;
+                break;
+            case "UD":
+                point.X = pos_x;
+                point.Y = pos_y - height * (value / 100);
+                break;
+            case "DU":
+                point.X = pos_x;
+                point.Y = (pos_y + height) - height * (value / 100);
+                break;
+        }
+        return point;
+    }
+
+    /// <summary>
     /// 将结果保存到文件
     /// </summary>
     /// <param name="name">目标图像名(Target)</param>
