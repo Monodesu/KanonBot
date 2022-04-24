@@ -14,152 +14,85 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.Fonts;
 using Microsoft.CodeAnalysis;
+using CommandLine;
 
 namespace KanonBot;
-public class ImageOption
+
+[Verb("Image")]
+public class ImageOptions
 {
+    [Option('n', "name", Required = true)]
     public string? Name { get; set; }
+    [Option('p', "path", Required = true)]
     public string? Path { get; set; } //可以是URL
+    [Option('s', "size", Required = true)]
     public string? Size { get; set; }
 }
-public class RoundOption
+
+[Verb("Round")]
+public class RoundOptions
 {
+    [Option('n', "name", Required = true)]
     public string? Name { get; set; }
+    [Option('s', "size", Required = true)]
     public string? Size { get; set; }
+    [Option('r', "radius", Required = true)]
     public int? Radius { get; set; }
 }
-public class DrawOption
+
+[Verb("Draw")]
+public class DrawOptions
 {
+    [Option('d', "dest_name", Required = true)]
     public string? Dest_name { get; set; }
+    [Option('s', "source_name", Required = true)]
     public string? Source_name { get; set; }
+    [Option('a', "alpha", Required = true)]
     public float? Alpha { get; set; }
+    [Option('p', "pos", Required = true)]
     public string? Pos { get; set; }
 }
-public class DrawTextOption
+
+[Verb("DrawText")]
+public class DrawTextOptions
 {
+    [Option('n', "image_name", Required = true)]
     public string? Image_Name { get; set; }
+    [Option('t', "text", Required = true)]
     public string? Text { get; set; }
+    [Option('f', "font", Required = true)]
     public string? Font { get; set; }
+    [Option('c', "font_color", Required = true)]
     public string? Font_Color { get; set; }
+    [Option('s', "font_size", Required = true)]
     public float? Font_Size { get; set; } //px
+    [Option('a', "align", Required = true)]
     public string? Align { get; set; } //center left right
+    [Option('p', "pos", Required = true)]
     public string? Pos { get; set; }
 }
-public class ResizeOption
+
+[Verb("Resize")]
+public class ResizeOptions
 {
+    [Option('n', "name", Required = true)]
     public string? Name { get; set; }
+    [Option('s', "size", Required = true)]
     public string? Size { get; set; }
 }
+
 public class KanonBotImage
 {
 
     #region 变量
     // workingFileName 永远使用第一条调用Image命令行导入图像时所使用的图像名称
     private string workingFileName = "";
-    RootCommand rootCommand = new();
     private Dictionary<string, Image> WorkList = new();
-    Command imageCommand = new("Image");
-    Command roundCommand = new("Round");
-    Command drawCommand = new("Draw");
-    Command drawtextCommand = new("DrawText");
-    Command resizeCommand = new("Resize");
+
     #endregion
 
-    public KanonBotImage()
-    {
-        string[] temp;
-        #region Image
-        imageCommand.Add(new Option<string>(new string[] { "--name", "-n" }));
-        imageCommand.Add(new Option<string>(new string[] { "--path", "-p" }));
-        imageCommand.Add(new Option<string>(new string[] { "--size", "-s" }));
-        imageCommand.Handler = CommandHandler.Create<ImageOption>((imageOption) =>
-        {
-            if (imageOption.Name == null || imageOption.Path == null || imageOption.Size == null) return; // 拒绝处理参数不全的命令
-            try { temp = imageOption.Size.Split('x'); } catch { return; }
+    public KanonBotImage() { }
 
-            Image_Processor(imageOption.Name, imageOption.Path, int.Parse(temp[0]), int.Parse(temp[1]));
-        });
-        #endregion
-
-        #region Round
-        roundCommand.Add(new Option<string>(new string[] { "--name", "-n" }));
-        roundCommand.Add(new Option<string>(new string[] { "--size", "-s" }));
-        roundCommand.Add(new Option<int>(new string[] { "--radius", "-r" }));
-        roundCommand.Handler = CommandHandler.Create<RoundOption>((roundOption) =>
-        {
-            if (roundOption.Name == null || roundOption.Size == null || roundOption.Radius == null) return; // 拒绝处理参数不全的命令
-            try { temp = roundOption.Size.Split('x'); } catch { return; }
-
-            Round_Processor(roundOption.Name, int.Parse(temp[0]), int.Parse(temp[1]), roundOption.Radius.Value);
-        });
-        #endregion
-
-        #region Draw
-        drawCommand.Add(new Option<string>(new string[] { "--dest_name", "-d" }));
-        drawCommand.Add(new Option<string>(new string[] { "--source_name", "-s" }));
-        drawCommand.Add(new Option<float>(new string[] { "--alpha", "-a" }));
-        drawCommand.Add(new Option<string>(new string[] { "--pos", "-p" }));
-        drawCommand.Handler = CommandHandler.Create<DrawOption>((drawOption) =>
-        {
-            if (drawOption.Dest_name == null || drawOption.Source_name == null || drawOption.Alpha == null || drawOption.Pos == null) return; // 拒绝处理参数不全的命令
-            try { temp = drawOption.Pos.Split('x'); } catch { return; }
-
-            Draw_Processor(drawOption.Dest_name, drawOption.Source_name, drawOption.Alpha.Value, int.Parse(temp[0]), int.Parse(temp[1]));
-        });
-        #endregion
-
-        #region DrawText
-        drawtextCommand.Add(new Option<string>(new string[] { "--image_name", "-n" }));
-        drawtextCommand.Add(new Option<string>(new string[] { "--text", "-t" }));
-        drawtextCommand.Add(new Option<string>(new string[] { "--font", "-f" }));
-        drawtextCommand.Add(new Option<string>(new string[] { "--font_color", "-c" })); //HEX
-        drawtextCommand.Add(new Option<float>(new string[] { "--font_size", "-s" }));  //font size (px)
-        drawtextCommand.Add(new Option<string>(new string[] { "--align", "-a" })); //left right center
-        drawtextCommand.Add(new Option<string>(new string[] { "--pos", "-p" }));
-        drawtextCommand.Handler = CommandHandler.Create<DrawTextOption>((drawTextOption) =>
-        {
-            if (
-            drawTextOption.Image_Name == null ||
-            drawTextOption.Text == null ||
-            drawTextOption.Font == null ||
-            drawTextOption.Font_Color == null ||
-            drawTextOption.Font_Size == null ||
-            drawTextOption.Align == null ||
-            drawTextOption.Pos == null) return; // 拒绝处理参数不全的命令
-            try { temp = drawTextOption.Pos.Split('x'); } catch { return; }
-
-            DrawText_Processor(
-                drawTextOption.Text,
-                drawTextOption.Image_Name,
-                drawTextOption.Font,
-                Color.ParseHex(drawTextOption.Font_Color),
-                drawTextOption.Font_Size.Value,
-                int.Parse(temp[0]),
-                int.Parse(temp[1]),
-                drawTextOption.Align);
-        });
-        #endregion
-
-        #region Resize
-        resizeCommand.Add(new Option<string>(new string[] { "--name", "-n" }));
-        resizeCommand.Add(new Option<string>(new string[] { "--size", "-s" }));
-        resizeCommand.Handler = CommandHandler.Create<ResizeOption>((resizeOption) =>
-        {
-            if (resizeOption.Name == null || resizeOption.Size == null) return; // 拒绝处理参数不全的命令
-            try { temp = resizeOption.Size.Split('x'); } catch { return; }
-
-            Resize_Processor(resizeOption.Name, int.Parse(temp[0]), int.Parse(temp[1]));
-        });
-        #endregion
-
-        #region Invoke
-        rootCommand.AddCommand(imageCommand);
-        rootCommand.AddCommand(roundCommand);
-        rootCommand.AddCommand(drawCommand);
-        rootCommand.AddCommand(drawtextCommand);
-        rootCommand.AddCommand(resizeCommand);
-        #endregion
-    }
     /// <summary>
     /// Image --name/-n --path/-p --size-s
     /// Image -n image1 -p https://localhost/1.png --size 100x100
@@ -177,11 +110,48 @@ public class KanonBotImage
     /// Resize -n image1 -s 50x50
     /// </summary>
     /// <param name="commandline">传入的命令行</param>
-    public void Parse(string commandline)
+    public bool Parse(string commandline)
     {
         var args = CommandLineParser.SplitCommandLineIntoArguments(commandline, true).ToArray();
-        if (args.Length == 0) return; //不处理空命令
-        _ = rootCommand.InvokeAsync(args).Result;
+        if (args.Length == 0) return false; //不处理空命令
+
+        return CommandLine.Parser.Default.ParseArguments<ImageOptions, RoundOptions, DrawOptions, DrawTextOptions, ResizeOptions>(args)
+            .MapResult(
+                (ImageOptions opts) =>
+                {
+                    var temp = opts.Size!.Split('x');
+                    Image_Processor(opts.Name!, opts.Path!, int.Parse(temp[0]), int.Parse(temp[1]));
+                    return true;
+                },
+                (RoundOptions opts) =>
+                {
+                    var temp = opts.Size!.Split('x');
+                    Round_Processor(opts.Name!, int.Parse(temp[0]), int.Parse(temp[1]), opts.Radius!.Value);
+                    return true;
+                },
+                (DrawTextOptions opts) =>
+                {
+                    var temp = opts.Pos!.Split('x');
+                    DrawText_Processor(
+                        opts.Text!,
+                        opts.Image_Name!,
+                        opts.Font!,
+                        Color.ParseHex(opts.Font_Color),
+                        opts.Font_Size!.Value,
+                        int.Parse(temp[0]),
+                        int.Parse(temp[1]),
+                        opts.Align!
+                    );
+                    return true;
+                },
+                (ResizeOptions opts) =>
+                {
+                    var temp = opts.Size!.Split('x');
+                    Resize_Processor(opts.Name!, int.Parse(temp[0]), int.Parse(temp[1]));
+                    return true;
+                },
+                errs => false
+            );
     }
 
     /// <summary>
@@ -388,7 +358,7 @@ static class BuildCornersClass
     }
     public static IImageProcessingContext RoundCorner(this IImageProcessingContext processingContext, Size size, float cornerRadius)
     {
-        return processingContext.Resize(new ResizeOptions
+        return processingContext.Resize(new SixLabors.ImageSharp.Processing.ResizeOptions
         {
             Size = size,
             Mode = ResizeMode.Crop

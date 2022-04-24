@@ -1,4 +1,4 @@
-#pragma warning disable IDE1006 // ÃüÃûÑùÊ½
+#pragma warning disable IDE1006 // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½
 
 using KanonBot.Serializer;
 using Tomlyn.Model;
@@ -51,7 +51,6 @@ public class CQhttp : ITomlMetadataProvider
 public class Config : ITomlMetadataProvider
 {
     public static Config? inner;
-    public string? Global { get; set; }
     public bool debug { get; set; }
     public OSU? osu { get; set; }
     public CQhttp? cqhttp { get; set; }
@@ -113,5 +112,9 @@ public class Config : ITomlMetadataProvider
 
     public override string ToString() {
         return Toml.Serialize(this);
+    }
+
+    public string ToJson() {
+        return Json.Serialize(this);
     }
 }
