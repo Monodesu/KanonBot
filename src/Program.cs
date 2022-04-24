@@ -1,4 +1,5 @@
-﻿using KanonBot.Message;
+﻿using Img = KanonBot.Image;
+using Msg = KanonBot.Message;
 using KanonBot.Config;
 using KanonBot.WebSocket;
 using KanonBot.Drivers;
@@ -25,25 +26,26 @@ var config = Config.inner!;
 // Console.WriteLine(config);
 // Console.WriteLine(config.ToJson());
 
-// var c = new Chain().msg("hello").image("C:\\hello.png", Image.Type.file).msg("test\nhaha");
-// c.append(new RawMessage("Test"));
+// var c = new Msg.Chain().msg("hello").image("C:\\hello.png", Image.Type.file).msg("test\nhaha");
+// c.append(new Msg.RawMessage("Test"));
 // Console.WriteLine(c);
 
 
 //////////////////////////////////////////////////////////////////////////////// test area start
 
 // 自定义info图片测试
-// KanonBot.KanonBotImage image = new();
-// var lines = File.ReadLines("./test files/ImageHelper示例文件.txt");
-// try
-// {
-//     foreach (string s in lines)
-//     {
-//         image.Parse(s.Trim());
-//     }
-//     image.SaveAsFile("./test files/ImageHelper示例文件.png");
-// }
-// catch (Exception ex) { Console.WriteLine("图片生成失败：" + ex.Message); }
+Img.Helper helper = new();
+var lines = File.ReadLines("./test files/ImageHelper示例文件.txt");
+try
+{
+    foreach (string s in lines)
+    {
+        helper.Parse(s.Trim());
+    }
+    var image = helper.Build();
+    image.SaveAsFile("./test files/ImageHelper示例文件.png");
+}
+catch (Exception ex) { Console.WriteLine("图片生成失败：" + ex.Message); }
 
 
 

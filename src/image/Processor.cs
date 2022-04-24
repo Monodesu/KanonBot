@@ -12,147 +12,23 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Drawing;
+using Img = SixLabors.ImageSharp.Image;
 using SixLabors.Fonts;
 using Microsoft.CodeAnalysis;
 using CommandLine;
 
-namespace KanonBot;
+namespace KanonBot.Image;
 
-[Verb("Image")]
-public class ImageOptions
-{
-    [Option('n', "name", Required = true)]
-    public string? Name { get; set; }
-    [Option('p', "path", Required = true)]
-    public string? Path { get; set; } //可以是URL
-    [Option('s', "size", Required = true)]
-    public string? Size { get; set; }
-}
-
-[Verb("Round")]
-public class RoundOptions
-{
-    [Option('n', "name", Required = true)]
-    public string? Name { get; set; }
-    [Option('s', "size", Required = true)]
-    public string? Size { get; set; }
-    [Option('r', "radius", Required = true)]
-    public int? Radius { get; set; }
-}
-
-[Verb("Draw")]
-public class DrawOptions
-{
-    [Option('d', "dest_name", Required = true)]
-    public string? Dest_name { get; set; }
-    [Option('s', "source_name", Required = true)]
-    public string? Source_name { get; set; }
-    [Option('a', "alpha", Required = true)]
-    public float? Alpha { get; set; }
-    [Option('p', "pos", Required = true)]
-    public string? Pos { get; set; }
-}
-
-[Verb("DrawText")]
-public class DrawTextOptions
-{
-    [Option('n', "image_name", Required = true)]
-    public string? Image_Name { get; set; }
-    [Option('t', "text", Required = true)]
-    public string? Text { get; set; }
-    [Option('f', "font", Required = true)]
-    public string? Font { get; set; }
-    [Option('c', "font_color", Required = true)]
-    public string? Font_Color { get; set; }
-    [Option('s', "font_size", Required = true)]
-    public float? Font_Size { get; set; } //px
-    [Option('a', "align", Required = true)]
-    public string? Align { get; set; } //center left right
-    [Option('p', "pos", Required = true)]
-    public string? Pos { get; set; }
-}
-
-[Verb("Resize")]
-public class ResizeOptions
-{
-    [Option('n', "name", Required = true)]
-    public string? Name { get; set; }
-    [Option('s', "size", Required = true)]
-    public string? Size { get; set; }
-}
-
-public class KanonBotImage
+public class Processor
 {
 
+    
     #region 变量
     // workingFileName 永远使用第一条调用Image命令行导入图像时所使用的图像名称
     private string workingFileName = "";
-    private Dictionary<string, Image> WorkList = new();
+    private Dictionary<string, Img> WorkList = new();
 
     #endregion
-
-    public KanonBotImage() { }
-
-    /// <summary>
-    /// Image --name/-n --path/-p --size-s
-    /// Image -n image1 -p https://localhost/1.png --size 100x100
-    /// 
-    /// Round --name/-n --size/-s --radius/-r
-    /// Round -n image1 -s 100x100 -r 25
-    /// 
-    /// Draw --dest_name/d --source_name/s --alpha/-a --pos/-p
-    /// Draw -d image1 -s image2 -a 1 -p 1x1
-    /// 
-    /// DrawText --image_name/-n --text/-t --font/-f --font_color/-c --font_size/-s --align/-a --pos/-p
-    /// DrawText -n image1 -t "你好啊" -f "HarmonyOS_Sans_Medium" -c "#f47920" -a left -p 10x120
-    /// 
-    /// Resize --name/-n --size/-s
-    /// Resize -n image1 -s 50x50
-    /// </summary>
-    /// <param name="commandline">传入的命令行</param>
-    public bool Parse(string commandline)
-    {
-        var args = CommandLineParser.SplitCommandLineIntoArguments(commandline, true).ToArray();
-        if (args.Length == 0) return false; //不处理空命令
-
-        return CommandLine.Parser.Default.ParseArguments<ImageOptions, RoundOptions, DrawOptions, DrawTextOptions, ResizeOptions>(args)
-            .MapResult(
-                (ImageOptions opts) =>
-                {
-                    var temp = opts.Size!.Split('x');
-                    Image_Processor(opts.Name!, opts.Path!, int.Parse(temp[0]), int.Parse(temp[1]));
-                    return true;
-                },
-                (RoundOptions opts) =>
-                {
-                    var temp = opts.Size!.Split('x');
-                    Round_Processor(opts.Name!, int.Parse(temp[0]), int.Parse(temp[1]), opts.Radius!.Value);
-                    return true;
-                },
-                (DrawTextOptions opts) =>
-                {
-                    var temp = opts.Pos!.Split('x');
-                    DrawText_Processor(
-                        opts.Text!,
-                        opts.Image_Name!,
-                        opts.Font!,
-                        Color.ParseHex(opts.Font_Color),
-                        opts.Font_Size!.Value,
-                        int.Parse(temp[0]),
-                        int.Parse(temp[1]),
-                        opts.Align!
-                    );
-                    return true;
-                },
-                (ResizeOptions opts) =>
-                {
-                    var temp = opts.Size!.Split('x');
-                    Resize_Processor(opts.Name!, int.Parse(temp[0]), int.Parse(temp[1]));
-                    return true;
-                },
-                errs => false
-            );
-    }
 
     /// <summary>
     /// 处理Image命令
@@ -161,7 +37,7 @@ public class KanonBotImage
     /// <param name="path">图像路径，使用网页图片链接，在传入值为new时，则新建一个空白的透明画布</param>
     /// <param name="width">图像宽度</param>
     /// <param name="height">图像高度</param>
-    public void Image_Processor(string name, string path, int width, int height)
+    public void Image(string name, string path, int width, int height)
     {
         if (path.ToLower() == "new")
         {
@@ -171,7 +47,7 @@ public class KanonBotImage
         else
         {
             if (workingFileName == "") workingFileName = name;
-            WorkList.Add(name, Image.Load(path));
+            WorkList.Add(name, Img.Load(path));
             WorkList[name].Mutate(x => x.Resize(width, height));
         }
     }
@@ -183,7 +59,7 @@ public class KanonBotImage
     /// <param name="width">图像宽度</param>
     /// <param name="height">图像高度</param>
     /// <param name="radius">圆角半径</param>
-    public void Round_Processor(string name, int width, int height, int radius)
+    public void Round(string name, int width, int height, int radius)
     {
         WorkList[name].Mutate(x => x.Resize(width, height).RoundCorner(new Size(width, height), radius));
     }
@@ -197,7 +73,7 @@ public class KanonBotImage
     /// <param name="alpha">透明度</param>
     /// <param name="pos_x"></param>
     /// <param name="pos_y"></param>
-    public void Draw_Processor(string dest_name, string source_name, float alpha, int pos_x, int pos_y)
+    public void Draw(string dest_name, string source_name, float alpha, int pos_x, int pos_y)
     {
         WorkList[dest_name].Mutate(x => x.DrawImage(WorkList[source_name], new Point(pos_x, pos_y), alpha));
     }
@@ -213,7 +89,7 @@ public class KanonBotImage
     /// <param name="pos_x"></param>
     /// <param name="pos_y"></param>
     /// <param name="align">left right center</param>
-    public void DrawText_Processor(string text, string name, string font, Color color, float size, int pos_x, int pos_y, string align)
+    public void DrawText(string text, string name, string font, Color color, float size, int pos_x, int pos_y, string align)
     {
         //构建text options 与 draw options
         var fonts = new FontCollection();
@@ -261,7 +137,7 @@ public class KanonBotImage
     /// <param name="name">目标图像名(Target)</param>
     /// <param name="width"></param>
     /// <param name="height"></param>
-    public void Resize_Processor(string name, int width, int height)
+    public void Resize(string name, int width, int height)
     {
         WorkList[name].Mutate(x => x.Resize(new Size(width, height)));
     }
@@ -281,7 +157,7 @@ public class KanonBotImage
     /// <param name="pos_y"></param>
     /// <param name="value">进度，从0到100</param>
     /// <param name="direction">LR RL UD DU(left to right / up to down)</param>
-    public void Automatic_Displacement_ImageProcessor(string dest_name, string source_name, int pos_x, int pos_y, int value, float alpha, string direction) //LevelBar
+    public void AutomaticDisplacementImage(string dest_name, string source_name, int pos_x, int pos_y, int value, float alpha, string direction) //LevelBar
     {
         var source_img_size = WorkList[source_name].Size();
         var point = Get_ADIP_Pos(pos_x, pos_y, source_img_size.Width, source_img_size.Height, value, direction);
@@ -326,12 +202,14 @@ public class KanonBotImage
     {
         WorkList[workingFileName].SaveAsPng(path);
     }
-    ~KanonBotImage()
+
+    ~Processor()
     {
         WorkList.Clear();
         return;
     }
 }
+
 static class BuildCornersClass
 {
     #region BuildCorners

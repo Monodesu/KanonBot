@@ -1,4 +1,4 @@
-#pragma warning disable IDE1006 // ������ʽ
+#pragma warning disable IDE1006 // 命名样式
 
 using KanonBot.Serializer;
 using Tomlyn.Model;
