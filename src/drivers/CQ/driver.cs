@@ -17,14 +17,16 @@ public partial class CQ
     {
         public static readonly string ClientName = "CQ";
         IWebsocketClient client;
-        Action<IDriver, MessageEvent> msgAction;
+        Action<Target> msgAction;
         Action<IDriver, IEvent> eventAction;
+        API api;
         public Driver(string url)
         {
             // 初始化变量
 
-            this.msgAction = (c, m) => {};
+            this.msgAction = (t) => {};
             this.eventAction = (c, e) => {};
+            this.api = new(this);
 
             // 初始化ws
 
@@ -67,8 +69,16 @@ public partial class CQ
                     switch ((string?)m["post_type"])
                     {
                         case "message":
-                            Console.WriteLine(m);
-                            this.msgAction(this, new MessageEvent(Message.Parse(m["message"].ToArray())));
+                            dynamic obj = (string?)m["message_type"] switch {
+                                "private" => m.ToObject<Model.PrivateMessage>(),
+                                "group" => m.ToObject<Model.GroupMessage>()
+                            };
+                            var target = new Target{
+                                msg = Message.Parse(obj.MessageList),
+                                raw = obj,
+                                api = this.api
+                            };
+                            this.msgAction(target);
                             break;
 
                         case "meta_event":
@@ -92,7 +102,7 @@ public partial class CQ
             }
         }
 
-        public IDriver onMessage(Action<IDriver, MessageEvent> action)
+        public IDriver onMessage(Action<Target> action)
         {
             this.msgAction = action;
             return this;

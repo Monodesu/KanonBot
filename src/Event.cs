@@ -23,20 +23,6 @@ public class RawEvent : IEvent
     }
 }
 
-public class MessageEvent : IEvent
-{
-    public Message.Chain value;
-    public MessageEvent(Message.Chain message)
-    {
-        this.value = message;
-    }
-
-    public override string ToString()
-    {
-        return value.ToString();
-    }
-}
-
 public class HeartBeat : IEvent
 {
     public DateTime value;

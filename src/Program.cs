@@ -69,12 +69,10 @@ var ExitEvent = new ManualResetEvent(false);
 var drivers = new Drivers();
 drivers.append(
     new CQ.Driver($"ws://{config.cqhttp?.host}:{config.cqhttp?.port}")
-    .onMessage((client, msg) =>
+    .onMessage((target) =>
     {
-        Console.WriteLine(msg);
-        var api = new CQ.API(client);
-        // 测试复读机
-        api.SendGroupMessage(195135404, msg.value);
+        Console.WriteLine(target.msg);
+        target.api.SendGroupMessage(195135404, target.msg);
     })
     .onEvent((client, e) =>
     {

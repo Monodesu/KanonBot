@@ -34,12 +34,11 @@ public partial class CQ
             return ListSegment;
         }
 
-        public static Chain Parse(JToken[] msg)
+        public static Chain Parse(List<Model.Segment> MessageList)
         {
             var chain = new Chain();
-            foreach (var s in msg)
+            foreach (var obj in MessageList)
             {
-                var obj = s.ToObject<Model.Segment>();
                 chain.append(
                     obj.msgType switch {
                         Enums.SegmentType.Text => new RawMessage(obj.rawData["text"].ToString()),

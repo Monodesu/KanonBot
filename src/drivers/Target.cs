@@ -15,12 +15,14 @@ public class Target
     // 这里的account是一个字符串，可以是qq号，discord号，等等
     // 之后将会自动解析成猫猫独有的账户类型以统一管理
     public string account;
-    // 原平台的message
-    public string rawMessage;
-    
-    public Target(Msg.Chain msg)
+    // 原平台结构
+    public dynamic raw;
+
+    // 原平台接口
+    public dynamic api;
+    public void reply(Msg.Chain msgChain)
     {
-        this.msg = msg;
+
     }
     
 }

@@ -10,6 +10,27 @@ public partial class CQ
     public class Model
     {
 
+        public class Anonymous
+        {
+            /// <summary>
+            /// 匿名用户 flag
+            /// </summary>
+            [JsonProperty(PropertyName = "flag")]
+            public string Flag { get; init; }
+
+            /// <summary>
+            /// 匿名用户 ID
+            /// </summary>
+            [JsonProperty(PropertyName = "id")]
+            public long Id { get; init; }
+
+            /// <summary>
+            /// 匿名用户名称
+            /// </summary>
+            [JsonProperty(PropertyName = "name")]
+            public string Name { get; init; }
+        }
+
         public struct Segment
         {
             /// <summary>
@@ -173,7 +194,7 @@ public partial class CQ
             /// 发送人信息
             /// </summary>
             [JsonProperty(PropertyName = "sender")]
-            public GroupSenderInfo SenderInfo { get; set; }
+            public Sender SenderInfo { get; set; }
 
             /// <summary>
             /// 消息序号
