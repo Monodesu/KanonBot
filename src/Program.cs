@@ -4,8 +4,6 @@ using KanonBot.Config;
 using KanonBot.WebSocket;
 using KanonBot.Drivers;
 
-var ExitEvent = new ManualResetEvent(false);
-
 #region 加载配置文件
 var configPath = "config.toml";
 if (File.Exists(configPath))
@@ -34,18 +32,18 @@ var config = Config.inner!;
 //////////////////////////////////////////////////////////////////////////////// test area start
 
 // 自定义info图片测试
-Img.Helper helper = new();
-var lines = File.ReadLines("./test files/ImageHelper示例文件.txt");
-try
-{
-    foreach (string s in lines)
-    {
-        helper.Parse(s.Trim());
-    }
-    var image = helper.Build();
-    image.SaveAsFile("./test files/ImageHelper示例文件.png");
-}
-catch (Exception ex) { Console.WriteLine("图片生成失败：" + ex.Message); }
+// Img.Helper helper = new();
+// var lines = File.ReadLines("./test files/ImageHelper示例文件.txt");
+// try
+// {
+//     foreach (string s in lines)
+//     {
+//         helper.Parse(s.Trim());
+//     }
+//     var image = helper.Build();
+//     image.SaveAsFile("./test files/ImageHelper示例文件.png");
+// }
+// catch (Exception ex) { Console.WriteLine("图片生成失败：" + ex.Message); }
 
 
 
@@ -61,28 +59,25 @@ catch (Exception ex) { Console.WriteLine("图片生成失败：" + ex.Message); 
 
 
 
-
-
-
-
-
-Environment.Exit(0);
+// CQ.Message.Build(new Msg.Chain().msg("hello").image("C:\\hello.png", Msg.ImageSegment.Type.file).msg("test\nhaha"));
+// Environment.Exit(0);
 //////////////////////////////////////////////////////////////////////////////// test area end
 
 #endregion
 
+var ExitEvent = new ManualResetEvent(false);
 var drivers = new Drivers();
 drivers.append(
     new CQ.Driver($"ws://{config.cqhttp?.host}:{config.cqhttp?.port}")
     .onMessage((client, msg) =>
     {
         Console.WriteLine(msg);
-        // client.Send("xxxxx");
+        var api = new CQ.API(client);
+        // 测试复读机
+        api.SendGroupMessage(195135404, msg.value);
     })
     .onEvent((client, e) =>
     {
-        Console.WriteLine(e);
-        // client.Send("xxxxx");
     })
 );
 drivers.StartAll();

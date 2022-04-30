@@ -45,7 +45,7 @@ public class CQhttp : ITomlMetadataProvider
     public string? host { get; set; }
     public int port { get; set; }
     public int httpPort { get; set; }
-    public string? managementGroup { get; set; }
+    public long? managementGroup { get; set; }
     TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
 }
 public class Config : ITomlMetadataProvider
@@ -66,7 +66,7 @@ public class Config : ITomlMetadataProvider
                 clientSecret = ""
             },
             cqhttp = new() {
-                managementGroup = "localhost",
+                managementGroup = 0,
                 host = "localhost",
                 httpPort = 5700,
                 port = 6700

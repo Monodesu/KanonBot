@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KanonBot.Message;
 using KanonBot.Event;
+using KanonBot.Serializer;
+using Newtonsoft.Json.Linq;
 
 namespace KanonBot.WebSocket;
 
@@ -12,6 +14,7 @@ public interface IDriver
     IDriver onMessage(Action<IDriver, MessageEvent> action);
     IDriver onEvent(Action<IDriver, IEvent> action);
     void Send(string message);
+    void Send(Object obj) => Send(Json.Serialize(obj));
     Task Connect();
 }
 

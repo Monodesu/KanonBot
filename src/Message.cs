@@ -3,12 +3,12 @@ using System;
 
 namespace KanonBot.Message;
 
-public interface IMsg
+public interface IMsgSegment
 {
-    string toRaw();
+    string Build();
 }
 
-public class RawMessage : IMsg
+public class RawMessage : IMsgSegment
 {
     public string value;
     public RawMessage(string msg)
@@ -16,37 +16,56 @@ public class RawMessage : IMsg
         this.value = msg;
     }
 
-    public string toRaw()
+    public string Build()
     {
         return value;
     }
 }
+public class AtSegment : IMsgSegment
+{
+    public enum Platform
+    {
+        QQ
+    }
+    public Platform platform;
+    public string value;
+    public AtSegment(string target, Platform platform)
+    {
+        this.value = target;
+        this.platform = platform;
+    }
 
-public class Image : IMsg
+    public string Build()
+    {
+        return $"<at;{platform.ToString()}={value}>";
+    }
+}
+
+public class ImageSegment : IMsgSegment
 {
     public enum Type
     {
-        file,
-        base64,
-        url
+        File,
+        Base64,
+        Url
     }
     public Type t;
     public string value;
-    public Image(string value, Type t)
+    public ImageSegment(string value, Type t)
     {
         this.value = value;
         this.t = t;
     }
 
-    public string toRaw()
+    public string Build()
     {
         switch (this.t)
         {
-            case Type.file:
+            case Type.File:
                 return $"<image;file:///{this.value}>";
-            case Type.base64:
+            case Type.Base64:
                 return $"<image;base64:///{this.value}>";
-            case Type.url:
+            case Type.Url:
                 return $"<image;file:///{this.value}>";
         }
         // 保险
@@ -56,13 +75,13 @@ public class Image : IMsg
 
 public class Chain
 {
-    List<IMsg> msgList;
+    List<IMsgSegment> msgList;
     public Chain()
     {
         this.msgList = new();
     }
 
-    public void append(IMsg n)
+    public void append(IMsgSegment n)
     {
         this.msgList.Add(n);
     }
@@ -73,24 +92,29 @@ public class Chain
         return this;
     }
 
-    public Chain image(string v, Image.Type t)
+    public Chain image(string v, ImageSegment.Type t)
     {
-        this.append(new Image(v, t));
+        this.append(new ImageSegment(v, t));
         return this;
     }
 
-    public string build()
+    public List<IMsgSegment> GetList()
+    {
+        return this.msgList;
+    }
+
+    public string Build()
     {
         var raw = "";
         foreach (var item in this.msgList)
         {
-            raw += item.toRaw();
+            raw += item.Build();
         }
         return raw;
     }
 
     public override string ToString()
     {
-        return this.build();
+        return this.Build();
     }
 }

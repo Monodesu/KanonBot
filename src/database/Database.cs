@@ -11,7 +11,7 @@ using SqlSugar;
 using System.Data;
 namespace KanonBot.Database;
 
-public class Mysql
+public class Model
 {
     #region SqlSugar
     private static Config.Config config = Config.Config.inner!;

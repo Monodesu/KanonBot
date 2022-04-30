@@ -67,7 +67,8 @@ public partial class CQ
                     switch ((string?)m["post_type"])
                     {
                         case "message":
-                            this.msgAction(this, new MessageEvent(new Chain().msg(msg.Text)));
+                            Console.WriteLine(m);
+                            this.msgAction(this, new MessageEvent(Message.Parse(m["message"].ToArray())));
                             break;
 
                         case "meta_event":
