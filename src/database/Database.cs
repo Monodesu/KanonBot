@@ -15,7 +15,7 @@ namespace KanonBot.Database;
 
 public class Client
 {
-    private static Config.Config config = Config.Config.inner!;
+    private static Config.Base config = Config.inner!;
     
     static private SqlSugarClient GetInstance()
     {

@@ -3,118 +3,147 @@
 using KanonBot.Serializer;
 using Tomlyn.Model;
 
-namespace KanonBot.Config;
+namespace KanonBot;
+public class Config
+{
+    public static Base? inner;
+    public class Mail : ITomlMetadataProvider
+    {
+        public string? smtpHost { get; set; }
+        public int smtpPort { get; set; }
+        public string? userName { get; set; }
+        public string? passWord { get; set; }
+        TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
 
-public class Mail : ITomlMetadataProvider
-{
-    public string? smtp_host { get; set; }
-    public int smtp_port { get; set; }
-    public string? username { get; set; }
-    public string? password { get; set; }
-    TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
+    }
+    public class Database : ITomlMetadataProvider
+    {
+        public string? type { get; set; }
+        public string? host { get; set; }
+        public int port { get; set; }
+        public string? db { get; set; }
+        public string? user { get; set; }
+        public string? password { get; set; }
+        TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
 
-}
-public class Database : ITomlMetadataProvider
-{
-    public string? type { get; set; } = "mysql";
-    public string? host { get; set; }
-    public int port { get; set; }
-    public string? db { get; set; }
-    public string? user { get; set; }
-    public string? password { get; set; }
-    TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
+    }
+    public class OSU : ITomlMetadataProvider
+    {
+        public int clientId { get; set; }
+        public string? clientSecret { get; set; }
+        TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
+    }
+    public class OSS : ITomlMetadataProvider
+    {
+        public string? accessKeyId { get; set; }
+        public string? accessKeySecret { get; set; }
+        public string? endPoint { get; set; }
+        public string? bucketName { get; set; }
+        TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
 
-}
-public class OSU : ITomlMetadataProvider
-{
-    public int clientId { get; set; }
-    public string? clientSecret { get; set; }
-    TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
-}
-public class OSS : ITomlMetadataProvider
-{
-    public string? accessKeyId { get; set; }
-    public string? accessKeySecret { get; set; }
-    public string? endpoint { get; set; }
-    public string? bucketName { get; set; }
-    TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
-
-}
-public class CQhttp : ITomlMetadataProvider
-{
-    public string? host { get; set; }
-    public int port { get; set; }
-    public int httpPort { get; set; }
-    public long? managementGroup { get; set; }
-    TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
-}
-public class Config : ITomlMetadataProvider
-{
-    public static Config? inner;
-    public bool debug { get; set; }
-    public OSU? osu { get; set; }
-    public CQhttp? cqhttp { get; set; }
-    public OSS? oss { get; set; }
-    public Database? database { get; set; }
-    public Mail? mail { get; set; }
-    TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
-    public static Config Default() {
-        return new Config() {
-            debug = true,
-            osu = new() {
-                clientId = 0,
-                clientSecret = ""
-            },
-            cqhttp = new() {
-                managementGroup = 0,
-                host = "localhost",
-                httpPort = 5700,
-                port = 6700
-            },
-            oss = new() {
-                accessKeyId = "",
-                accessKeySecret = "",
-                endpoint = "",
-                bucketName = ""
-            },
-            database = new() {
-                type = "mysql",
-                host = "",
-                port = 3306,
-                db = "kanonbot",
-                user = "",
-                password = ""
-            },
-            mail = new() {
-                smtp_host = "localhost",
-                smtp_port = 587,
-                username = "",
-                password = ""
+    }
+    public class OneBot : ITomlMetadataProvider
+    {
+        public string? host { get; set; }
+        public int port { get; set; }
+        public int httpPort { get; set; }
+        public long? managementGroup { get; set; }
+        TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
+    }
+    public class Guild : ITomlMetadataProvider
+    {
+        public string? endPoint { get; set; }
+        public long appID { get; set; }
+        public string? secret { get; set; }
+        public string? token { get; set; }
+        TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
+    }
+    public class Base : ITomlMetadataProvider
+    {
+        public bool debug { get; set; }
+        public OSU? osu { get; set; }
+        public OneBot? ontbot { get; set; }
+        public Guild? guild { get; set; }
+        public OSS? oss { get; set; }
+        public Database? database { get; set; }
+        public Mail? mail { get; set; }
+        TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
+        public static Base Default()
+        {
+            return new Base()
+            {
+                debug = true,
+                osu = new()
+                {
+                    clientId = 0,
+                    clientSecret = ""
+                },
+                ontbot = new()
+                {
+                    managementGroup = 0,
+                    host = "localhost",
+                    httpPort = 5700,
+                    port = 6700
+                },
+                guild = new()
+                {
+                    appID = 0,
+                    secret = "",
+                    token = "",
+                    endPoint = "https://sandbox.api.sgroup.qq.com"
+                },
+                oss = new()
+                {
+                    accessKeyId = "",
+                    accessKeySecret = "",
+                    endPoint = "",
+                    bucketName = ""
+                },
+                database = new()
+                {
+                    type = "mysql",
+                    host = "",
+                    port = 3306,
+                    db = "kanonbot",
+                    user = "",
+                    password = ""
+                },
+                mail = new()
+                {
+                    smtpHost = "localhost",
+                    smtpPort = 587,
+                    userName = "",
+                    passWord = ""
+                }
+            };
+        }
+        public void save(string path)
+        {
+            using (var f = new StreamWriter(path))
+            {
+                f.Write(this.ToString());
             }
-        };
-    } 
+        }
 
-    public static Config load(string path) {
+        public override string ToString()
+        {
+            return Toml.Serialize(this);
+        }
+
+        public string ToJson()
+        {
+            return Json.Serialize(this);
+        }
+    }
+
+
+    public static Base load(string path)
+    {
         string c;
         using (var f = File.OpenText(path))
         {
             c = f.ReadToEnd();
         }
-        return Toml.Deserialize<Config>(c);
-    }
-
-    public void save(string path) {
-        using (var f = new StreamWriter(path))
-        {
-            f.Write(this.ToString());
-        }
-    }
-
-    public override string ToString() {
-        return Toml.Serialize(this);
-    }
-
-    public string ToJson() {
-        return Json.Serialize(this);
+        return Toml.Deserialize<Base>(c);
     }
 }

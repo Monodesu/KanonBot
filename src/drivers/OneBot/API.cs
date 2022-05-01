@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using KanonBot.Message;
-using KanonBot.WebSocket;
 using KanonBot.Serializer;
 namespace KanonBot.Drivers;
 public partial class OneBot
@@ -20,7 +19,7 @@ public partial class OneBot
         public class RetCallback
         {
             public AutoResetEvent ResetEvent { get; } = new AutoResetEvent(false);
-            public Models.CQResponse Data { get; set; }
+            public Models.CQResponse? Data { get; set; }
         }
         public Dictionary<Guid, RetCallback> CallbackList = new();
         public void Echo(Models.CQResponse res)
@@ -33,7 +32,7 @@ public partial class OneBot
             this.CallbackList[req.Echo] = new RetCallback();    // 创建回调
             this.driver.Send(req);                              // 发送
             this.CallbackList[req.Echo].ResetEvent.WaitOne();   // 等待回调
-            var ret = this.CallbackList[req.Echo].Data;         // 获取回调
+            var ret = this.CallbackList[req.Echo].Data!;         // 获取回调
             this.CallbackList.Remove(req.Echo);                 // 移除回调
             return ret;
         }
@@ -57,7 +56,7 @@ public partial class OneBot
 
             var res = this.Send(req);
             if (res.Status == "ok")
-                return (long)res.Data["message_id"];
+                return (long)res.Data["message_id"]!;
             else
                 return -1;
         }
@@ -80,7 +79,7 @@ public partial class OneBot
 
             var res = this.Send(req);
             if (res.Status == "ok")
-                return (long)res.Data["message_id"];
+                return (long)res.Data["message_id"]!;
             else
                 return -1;
         }

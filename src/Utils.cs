@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 namespace KanonBot;
 class Utils
 {
-    public static string GetDesc(object value)
+    public static string GetDesc(object? value)
     {
-        FieldInfo fieldInfo = value.GetType().GetField(value.ToString()!);
+        FieldInfo? fieldInfo = value!.GetType().GetField(value.ToString()!);
         if (fieldInfo == null) return string.Empty;
         DescriptionAttribute[] attributes = (DescriptionAttribute[])fieldInfo
            .GetCustomAttributes(typeof(DescriptionAttribute), false);

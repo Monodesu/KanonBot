@@ -1,14 +1,15 @@
 ﻿using System.Reflection.Metadata;
 using Img = KanonBot.Image;
 using Msg = KanonBot.Message;
-using KanonBot.Event;
-using KanonBot.Config;
-using KanonBot.WebSocket;
 using KanonBot.Drivers;
+using KanonBot.Event;
+using KanonBot;
 using KanonBot.Serializer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
+using Flurl;
+using Flurl.Http;
 
 #region 初始化
 Console.WriteLine("---KanonBot---");
@@ -19,7 +20,7 @@ if (File.Exists(configPath))
 }
 else
 {
-    Config.inner = Config.Default();
+    Config.inner = Config.Base.Default();
     Config.inner.save(configPath);
 }
 
@@ -83,6 +84,15 @@ Log.Information("初始化成功 {@config}", config);
 // KanonBot.Mail.Send(ms);
 
 
+// var result = await "https://sandbox.api.sgroup.qq.com"
+//     .AppendPathSegment("gateway")
+//     .WithHeader("Authorization", $"Bot {config.guild?.appID}.{config.guild?.token}")
+//     .OnError((response) => { Log.Error("{@0}", response.Response.GetJsonAsync().Result); })
+//     .GetJsonAsync<JObject>();
+    
+// Log.Debug("{0}", ((string?)result["url"]));
+
+
 // Environment.Exit(0);
 //////////////////////////////////////////////////////////////////////////////// test area end
 #endregion
@@ -90,33 +100,36 @@ Log.Information("初始化成功 {@config}", config);
 
 var ExitEvent = new ManualResetEvent(false);
 var drivers = new Drivers();
-drivers.append(
-    new OneBot.Driver($"ws://{config.cqhttp?.host}:{config.cqhttp?.port}")
-    .onMessage((target) =>
-    {
-        Log.Information("← 收到消息 {msg}", target.msg);
-        Log.Debug("↑ 详情 {@raw}", target.raw);
-        var res = target.api.SendGroupMessage(195135404, target.msg);
-        Log.Debug("→ 发送消息ID {@res}", res);
-    })
-    .onEvent((client, e) =>
-    {
-        switch (e)
-        {
-            case HeartBeat h:
-                Log.Debug("收到心跳包 {h}", h);
-                break;
-            case Lifecycle l:
-                Log.Information("收到生命周期事件 {h}", l);
-                break;
-            case RawEvent r:
-                Log.Information("收到事件 {r}", r);
-                break;
-            default:
-                break;
-        }
+// drivers.append(
+//     new OneBot($"ws://{config.ontbot?.host}:{config.ontbot?.port}")
+//     .onMessage((target) =>
+//     {
+//         Log.Information("← 收到消息 {msg}", target.msg);
+//         Log.Debug("↑ 详情 {@raw}", target.raw);
+//         var res = target.api!.SendGroupMessage(195135404, target.msg);
+//         Log.Debug("→ 发送消息ID {@res}", res);
+//     })
+//     .onEvent((client, e) =>
+//     {
+//         switch (e)
+//         {
+//             case HeartBeat h:
+//                 Log.Debug("收到心跳包 {h}", h);
+//                 break;
+//             case Lifecycle l:
+//                 Log.Information("收到生命周期事件 {h}", l);
+//                 break;
+//             case RawEvent r:
+//                 Log.Information("收到事件 {r}", r);
+//                 break;
+//             default:
+//                 break;
+//         }
         
-    })
+//     })
+// );
+drivers.append(
+    new Guild()
 );
 drivers.StartAll();
 ExitEvent.WaitOne();

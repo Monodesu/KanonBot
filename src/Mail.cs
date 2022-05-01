@@ -8,7 +8,7 @@ using Serilog;
 namespace KanonBot;
 public static class Mail
 {
-    private static Config.Config config = Config.Config.inner!;
+    private static Config.Base config = Config.inner!;
     public struct MailStruct
     {
         public string[] MailTo; //收件人，可添加多个
@@ -31,12 +31,12 @@ public static class Mail
         MailMessage message = new();
         if (ms.MailTo.Length == 0) return; foreach (string s in ms.MailTo) { message.To.Add(s); } //设置收件人
         if (ms.MailCC.Length > 0) foreach (string s in ms.MailCC) { message.CC.Add(s); } //设置发件人
-        message.From = new MailAddress(config.mail.username); //设置发件人
+        message.From = new MailAddress(config.mail.userName); //设置发件人
         message.Subject = ms.Subject;
         message.Body = ms.Body;
         message.IsBodyHtml = ms.IsBodyHtml;
-        SmtpClient client = new SmtpClient(config.mail.smtp_host, config.mail.smtp_port); //设置邮件服务器
-        client.Credentials = new System.Net.NetworkCredential(config.mail.username, config.mail.password); //设置邮箱用户名与密码
+        SmtpClient client = new SmtpClient(config.mail.smtpHost, config.mail.smtpPort); //设置邮件服务器
+        client.Credentials = new System.Net.NetworkCredential(config.mail.userName, config.mail.passWord); //设置邮箱用户名与密码
         client.EnableSsl = true; //启用SSL
         client.Send(message); //发送
     }

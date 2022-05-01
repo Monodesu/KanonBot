@@ -47,12 +47,12 @@ public class JsonEnumConverter : JsonConverter
         return enumType.IsEnum;
     }
 
-    public override object? ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
     {
         if (reader.Value is long)
             return Enum.ToObject(objectType, reader.Value);
 
-        string description = (string)reader.Value;
+        string description = (string)reader.Value!;
 
         if (description is null) return null;
 
@@ -74,9 +74,9 @@ public class JsonEnumConverter : JsonConverter
         throw new ArgumentException("Not found.", nameof(description));
     }
 
-    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
     {
-        if (string.IsNullOrEmpty(value.ToString()))
+        if (string.IsNullOrEmpty(value!.ToString()))
         {
             writer.WriteValue("");
             return;

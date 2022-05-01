@@ -1,3 +1,5 @@
+#pragma warning disable CS8618 // 非null 字段未初始化
+
 using Newtonsoft.Json;
 using System.ComponentModel;
 using KanonBot.Message;
@@ -131,19 +133,19 @@ public partial class OneBot
             /// 事件发生的时间戳
             /// </summary>
             [JsonProperty(PropertyName = "time", NullValueHandling = NullValueHandling.Ignore)]
-            public long Time { get; set; }
+            public long? Time { get; set; }
 
             /// <summary>
             /// 收到事件的机器人 QQ 号
             /// </summary>
             [JsonProperty(PropertyName = "self_id", NullValueHandling = NullValueHandling.Ignore)]
-            public long SelfId { get; set; }
+            public long? SelfId { get; set; }
 
             /// <summary>
             /// 事件类型
             /// </summary>
             [JsonProperty(PropertyName = "post_type", NullValueHandling = NullValueHandling.Ignore)]
-            public string PostType { get; set; }
+            public string? PostType { get; set; }
         }
 
         public class CQMessageEventBase : CQEventBase
@@ -203,7 +205,7 @@ public partial class OneBot
             /// 匿名信息
             /// </summary>
             [JsonProperty(PropertyName = "anonymous", NullValueHandling = NullValueHandling.Ignore)]
-            public Anonymous Anonymous { get; set; }
+            public Anonymous? Anonymous { get; set; }
 
             /// <summary>
             /// 发送人信息

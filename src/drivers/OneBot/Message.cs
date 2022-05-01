@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using KanonBot.Message;
-using KanonBot.WebSocket;
 using KanonBot.Serializer;
 using Serilog;
 namespace KanonBot.Drivers;
@@ -50,10 +49,10 @@ public partial class OneBot
             {
                 chain.append(
                     obj.msgType switch {
-                        Enums.SegmentType.Text => new TextSegment(obj.rawData["text"].ToString()),
-                        Enums.SegmentType.Image => new ImageSegment(obj.rawData["file"].ToString(), ImageSegment.Type.File),
-                        Enums.SegmentType.At => new AtSegment(obj.rawData["qq"].ToString(), Platform.OneBot),
-                        Enums.SegmentType.Face => new FaceSegment(obj.rawData["id"].ToString()),
+                        Enums.SegmentType.Text => new TextSegment(obj.rawData["text"]!.ToString()),
+                        Enums.SegmentType.Image => new ImageSegment(obj.rawData["file"]!.ToString(), ImageSegment.Type.File),
+                        Enums.SegmentType.At => new AtSegment(obj.rawData["qq"]!.ToString(), Platform.OneBot),
+                        Enums.SegmentType.Face => new FaceSegment(obj.rawData["id"]!.ToString()),
                         _ => new RawMessage(obj.msgType.ToString(), obj.rawData)
                     }
                 );
