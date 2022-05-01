@@ -39,7 +39,7 @@ internal static class Settings
 
 
 // https://justsimplycode.com/2021/08/01/custom-json-converter-to-de-serialise-enum-description-value-to-enum-value/
-public class EnumConverter : JsonConverter
+public class JsonEnumConverter : JsonConverter
 {
     public override bool CanConvert(Type objectType)
     {

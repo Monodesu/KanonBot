@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System.ComponentModel;
 using KanonBot.Message;
+using KanonBot.Serializer;
 using Newtonsoft.Json.Linq;
 
 // 部分参考 https://github.com/DeepOceanSoft/Sora
@@ -38,7 +39,7 @@ public partial class OneBot
             /// 消息段类型
             /// </summary>
             [JsonProperty(PropertyName = "type")]
-            [JsonConverter(typeof(EnumConverter))]
+            [JsonConverter(typeof(JsonEnumConverter))]
             public Enums.SegmentType msgType { get; init; }
 
             /// <summary>
@@ -51,7 +52,7 @@ public partial class OneBot
         public struct SendMessage
         {
             [JsonProperty(PropertyName = "message_type")]
-            [JsonConverter(typeof(EnumConverter))]
+            [JsonConverter(typeof(JsonEnumConverter))]
             public Enums.MessageType MessageType { get; set; }
             [JsonProperty(PropertyName = "user_id")]
             public long? UserId { get; set; }
@@ -67,7 +68,7 @@ public partial class OneBot
         {
 
             [JsonProperty(PropertyName = "action")]
-            [JsonConverter(typeof(EnumConverter))]
+            [JsonConverter(typeof(JsonEnumConverter))]
             public Enums.Actions action { get; init; }
 
             [JsonProperty(PropertyName = "echo")]
@@ -94,7 +95,7 @@ public partial class OneBot
         {
 
             [JsonProperty(PropertyName = "sub_type")]
-            [JsonConverter(typeof(EnumConverter))]
+            [JsonConverter(typeof(JsonEnumConverter))]
             public Enums.GroupRequestType RequestType { get; init; }
             [JsonProperty(PropertyName = "approve")]
             public bool Approve { get; set; }
@@ -106,7 +107,7 @@ public partial class OneBot
         public class Sender
         {
             [JsonProperty(PropertyName = "role")]
-            [JsonConverter(typeof(EnumConverter))]
+            [JsonConverter(typeof(JsonEnumConverter))]
             public Enums.GroupRole Role { get; set; }
             [JsonProperty(PropertyName = "user_id")]
             public long UserId { get; set; }

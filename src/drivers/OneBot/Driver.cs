@@ -57,7 +57,13 @@ public partial class OneBot
             //     Console.WriteLine($"Disconnection happened, type: {info.Type}"));
             
             // 拿Tasks异步执行
-            client.MessageReceived.Subscribe(msgAction => Task.Run(() => this.Parse(msgAction)));
+            client.MessageReceived.Subscribe(msgAction => Task.Run(() => {
+                try
+                {
+                    this.Parse(msgAction);
+                }
+                catch (System.Exception ex) { Log.Error("未捕获的异常 ↓\n{ex}", ex); }
+            }));
 
             this.client = client;
         }
