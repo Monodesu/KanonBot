@@ -3,6 +3,7 @@
 #pragma warning disable CS8604 // 解引用可能出现空引用。
 
 using System.Net.Mail;
+using Serilog;
 
 namespace KanonBot;
 public static class Mail
@@ -26,7 +27,7 @@ public static class Mail
     }
     public static void Send(MailStruct ms)
     {
-        Console.WriteLine(config.ToString());
+        Log.Debug(config.ToString());
         MailMessage message = new();
         if (ms.MailTo.Length == 0) return; foreach (string s in ms.MailTo) { message.To.Add(s); } //设置收件人
         if (ms.MailCC.Length > 0) foreach (string s in ms.MailCC) { message.CC.Add(s); } //设置发件人

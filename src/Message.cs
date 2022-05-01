@@ -1,5 +1,8 @@
 using System.IO;
 using System;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using KanonBot.Drivers;
 
 namespace KanonBot.Message;
 
@@ -10,23 +13,47 @@ public interface IMsgSegment
 
 public class RawMessage : IMsgSegment
 {
+    public JObject value;
+    public string type;
+    public RawMessage(string type, JObject value)
+    {
+        this.type = type;
+        this.value = value;
+    }
+
+    public string Build()
+    {
+        return $"<raw;{type}={value.ToString(Formatting.None)}>";
+    }
+}
+public class TextSegment : IMsgSegment
+{
     public string value;
-    public RawMessage(string msg)
+    public TextSegment(string msg)
     {
         this.value = msg;
     }
 
     public string Build()
     {
-        return value;
+        return value.ToString();
+    }
+}
+public class FaceSegment : IMsgSegment
+{
+    public string value;
+    public FaceSegment(string value)
+    {
+        this.value = value;
+    }
+
+    public string Build()
+    {
+        return $"<Face;id={value}>";
     }
 }
 public class AtSegment : IMsgSegment
 {
-    public enum Platform
-    {
-        QQ
-    }
     public Platform platform;
     public string value;
     public AtSegment(string target, Platform platform)
@@ -88,7 +115,7 @@ public class Chain
 
     public Chain msg(string v)
     {
-        this.append(new RawMessage(v));
+        this.append(new TextSegment(v));
         return this;
     }
 

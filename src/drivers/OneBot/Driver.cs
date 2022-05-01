@@ -8,14 +8,15 @@ using KanonBot.WebSocket;
 using KanonBot.Message;
 using KanonBot.Serializer;
 using KanonBot.Event;
+using Serilog;
 using KanonBot;
 
 namespace KanonBot.Drivers;
-public partial class CQ
+public partial class OneBot
 {
     public class Driver : IDriver
     {
-        public static readonly string ClientName = "CQ";
+        public static readonly Platform platform = Platform.OneBot;
         IWebsocketClient client;
         Action<Target> msgAction;
         Action<IDriver, IEvent> eventAction;
@@ -47,19 +48,21 @@ public partial class CQ
 
             var client = new WebsocketClient(new Uri(url), factory);
 
-            client.Name = "KanonBot";
+            client.Name = "OneBot";
             client.ReconnectTimeout = TimeSpan.FromSeconds(30);
             client.ErrorReconnectTimeout = TimeSpan.FromSeconds(30);
             // client.ReconnectionHappened.Subscribe(info =>
             //     Console.WriteLine($"Reconnection happened, type: {info.Type}, url: {client.Url}"));
             // client.DisconnectionHappened.Subscribe(info =>
             //     Console.WriteLine($"Disconnection happened, type: {info.Type}"));
-            client.MessageReceived.Subscribe(this.ParseMessage);
+            
+            // 拿Tasks异步执行
+            client.MessageReceived.Subscribe(msgAction => Task.Run(() => this.Parse(msgAction)));
 
             this.client = client;
         }
 
-        void ParseMessage(ResponseMessage msg)
+        void Parse(ResponseMessage msg)
         {
             var m = Json.ToLinq(msg.Text);
             if (m != null)
@@ -70,8 +73,8 @@ public partial class CQ
                     {
                         case "message":
                             dynamic obj = (string?)m["message_type"] switch {
-                                "private" => m.ToObject<Model.PrivateMessage>(),
-                                "group" => m.ToObject<Model.GroupMessage>()
+                                "private" => m.ToObject<Models.PrivateMessage>(),
+                                "group" => m.ToObject<Models.GroupMessage>()
                             };
                             var target = new Target{
                                 msg = Message.Parse(obj.MessageList),
@@ -84,13 +87,11 @@ public partial class CQ
                         case "meta_event":
                             var metaEventType = (string?)m["meta_event_type"];
                             if (metaEventType == "heartbeat")
-                            {
                                 this.eventAction(this, new HeartBeat((long)m["time"]!));
-                            }
+                            else if (metaEventType == "lifecycle")
+                                this.eventAction(this, new Lifecycle((string)m["self_id"]!, Platform.OneBot));
                             else
-                            {
                                 this.eventAction(this, new RawEvent(m));
-                            }
                             
                             break;
 
@@ -98,6 +99,11 @@ public partial class CQ
                             this.eventAction(this, new RawEvent(m));
                             break;
                     }
+                }
+                // 处理回执消息
+                if (m["echo"] != null)
+                {
+                    this.api.Echo(m.ToObject<Models.CQResponse>());
                 }
             }
         }

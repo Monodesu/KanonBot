@@ -3,11 +3,12 @@ using System.ComponentModel;
 using KanonBot.Message;
 using Newtonsoft.Json.Linq;
 
+// 部分参考 https://github.com/DeepOceanSoft/Sora
 
 namespace KanonBot.Drivers;
-public partial class CQ
+public partial class OneBot
 {
-    public class Model
+    public class Models
     {
 
         public class Anonymous
@@ -74,6 +75,19 @@ public partial class CQ
 
             [JsonProperty(PropertyName = "params")]
             public dynamic Params { get; init; } = new { };
+        }
+        public class CQResponse
+        {
+
+            [JsonProperty(PropertyName = "status")]
+            public string Status { get; init; }
+            [JsonProperty(PropertyName = "retcode")]
+            public int RetCode { get; init; }
+            [JsonProperty(PropertyName = "echo")]
+            public Guid Echo { get; init; }
+            [JsonProperty(PropertyName = "data")]
+            public JObject Data { get; init; }
+
         }
 
         public class CQGroupAddRequest

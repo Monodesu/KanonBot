@@ -1,10 +1,14 @@
-﻿using Img = KanonBot.Image;
+﻿using System.Reflection.Metadata;
+using Img = KanonBot.Image;
 using Msg = KanonBot.Message;
+using KanonBot.Event;
 using KanonBot.Config;
 using KanonBot.WebSocket;
 using KanonBot.Drivers;
+using Serilog;
 
-#region 加载配置文件
+#region 初始化
+Console.WriteLine("---KanonBot---");
 var configPath = "config.toml";
 if (File.Exists(configPath))
 {
@@ -17,11 +21,20 @@ else
 }
 
 var config = Config.inner!;
+
+var log = new LoggerConfiguration()
+                .WriteTo.Console()
+                .WriteTo.File("logs/log-.log", rollingInterval: RollingInterval.Day);
+
+if (config.debug)
+    log = log.MinimumLevel.Debug();
+                
+Log.Logger = log.CreateLogger();
+Log.Information("初始化成功 {@config}", config);
 #endregion
 
 #region 功能测试区
 
-// Console.WriteLine(config);
 // Console.WriteLine(config.ToJson());
 
 // var c = new Msg.Chain().msg("hello").image("C:\\hello.png", Image.Type.file).msg("test\nhaha");
@@ -68,15 +81,33 @@ var config = Config.inner!;
 var ExitEvent = new ManualResetEvent(false);
 var drivers = new Drivers();
 drivers.append(
-    new CQ.Driver($"ws://{config.cqhttp?.host}:{config.cqhttp?.port}")
+    new OneBot.Driver($"ws://{config.cqhttp?.host}:{config.cqhttp?.port}")
     .onMessage((target) =>
     {
-        Console.WriteLine(target.msg);
-        target.api.SendGroupMessage(195135404, target.msg);
+        Log.Information("收到消息 {msg}", target.msg);
+        Log.Debug("↑ 接上 {@raw}", target.raw);
+        var res = target.api.SendGroupMessage(195135404, target.msg);
+        Log.Debug("→ 发送消息ID {@res}", res);
     })
     .onEvent((client, e) =>
     {
+        switch (e)
+        {
+            case HeartBeat h:
+                Log.Debug("收到心跳包 {h}", h);
+                break;
+            case Lifecycle l:
+                Log.Information("收到生命周期事件 {h}", l);
+                break;
+            case RawEvent r:
+                Log.Information("收到事件 {r}", r);
+                break;
+            default:
+                break;
+        }
+        
     })
 );
 drivers.StartAll();
 ExitEvent.WaitOne();
+Log.CloseAndFlush();

@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using System.ComponentModel;
 
 namespace KanonBot.Drivers;
-public partial class CQ
+public partial class OneBot
 {
     public class Enums
     {

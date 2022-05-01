@@ -22,7 +22,8 @@ public class Target
     public dynamic api;
     public void reply(Msg.Chain msgChain)
     {
-
+        throw new NotImplementedException();
+        // 还没写
     }
     
 }
