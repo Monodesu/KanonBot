@@ -9,5 +9,6 @@ namespace KanonBot.Drivers;
 
 public enum Platform
 {
+    Unknown,
     OneBot
 }

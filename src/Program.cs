@@ -5,6 +5,9 @@ using KanonBot.Event;
 using KanonBot.Config;
 using KanonBot.WebSocket;
 using KanonBot.Drivers;
+using KanonBot.Serializer;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 
 #region 初始化
@@ -34,15 +37,25 @@ Log.Information("初始化成功 {@config}", config);
 #endregion
 
 #region 功能测试区
-
-// Console.WriteLine(config.ToJson());
-
-// var c = new Msg.Chain().msg("hello").image("C:\\hello.png", Image.Type.file).msg("test\nhaha");
-// c.append(new Msg.RawMessage("Test"));
-// Console.WriteLine(c);
-
-
 //////////////////////////////////////////////////////////////////////////////// test area start
+
+
+// Log.Debug("{0}", config.ToJson());
+
+
+// var c = new Msg.Chain().msg("hello").image("C:\\hello.png", Msg.ImageSegment.Type.File).msg("test\nhaha");
+// c.append(new Msg.RawMessage("Test", new JObject { { "test", "test" } }));
+// Log.Debug("{0}", c);
+// Log.Debug("{0}", c.StartsWith("he"));
+// Log.Debug("{0}", c.StartsWith("!"));
+// Log.Debug("{0}", c.StartsWith(""));
+
+// var c1 = OneBot.Message.Build(c);
+// Log.Debug("{0}", Json.Serialize(c1));
+// var c2 = OneBot.Message.Parse(c1);
+// Log.Debug("{0}", c2);
+
+
 
 // 自定义info图片测试
 // Img.Helper helper = new();
@@ -56,7 +69,7 @@ Log.Information("初始化成功 {@config}", config);
 //     var image = helper.Build();
 //     image.SaveAsFile("./test files/ImageHelper示例文件.png");
 // }
-// catch (Exception ex) { Console.WriteLine("图片生成失败：" + ex.Message); }
+// catch (Exception ex) { Log.Error("图片生成失败：{0}", ex.Message); }
 
 
 
@@ -67,16 +80,13 @@ Log.Information("初始化成功 {@config}", config);
 //     Subject = "你好！",
 //     Body = "你好！这是一封来自猫猫的测试邮件！"
 // };
-// KanonBot.Mail.Send(ms); Environment.Exit(0);
+// KanonBot.Mail.Send(ms);
 
 
-
-
-// CQ.Message.Build(new Msg.Chain().msg("hello").image("C:\\hello.png", Msg.ImageSegment.Type.file).msg("test\nhaha"));
 // Environment.Exit(0);
 //////////////////////////////////////////////////////////////////////////////// test area end
-
 #endregion
+
 
 var ExitEvent = new ManualResetEvent(false);
 var drivers = new Drivers();
@@ -84,8 +94,8 @@ drivers.append(
     new OneBot.Driver($"ws://{config.cqhttp?.host}:{config.cqhttp?.port}")
     .onMessage((target) =>
     {
-        Log.Information("收到消息 {msg}", target.msg);
-        Log.Debug("↑ 接上 {@raw}", target.raw);
+        Log.Information("← 收到消息 {msg}", target.msg);
+        Log.Debug("↑ 详情 {@raw}", target.raw);
         var res = target.api.SendGroupMessage(195135404, target.msg);
         Log.Debug("→ 发送消息ID {@res}", res);
     })

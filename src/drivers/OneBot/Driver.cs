@@ -8,6 +8,7 @@ using KanonBot.WebSocket;
 using KanonBot.Message;
 using KanonBot.Serializer;
 using KanonBot.Event;
+using Newtonsoft.Json;
 using Serilog;
 using KanonBot;
 
@@ -78,10 +79,18 @@ public partial class OneBot
                     switch ((string?)m["post_type"])
                     {
                         case "message":
-                            dynamic obj = (string?)m["message_type"] switch {
-                                "private" => m.ToObject<Models.PrivateMessage>(),
-                                "group" => m.ToObject<Models.GroupMessage>()
-                            };
+                            dynamic obj;
+                            try
+                            {
+                                obj = (string?)m["message_type"] switch {
+                                    "private" => m.ToObject<Models.PrivateMessage>(),
+                                    "group" => m.ToObject<Models.GroupMessage>()
+                                };
+                            }
+                            catch (JsonSerializationException ex)
+                            {
+                                throw new NotSupportedException($"不支持的消息格式，请使用数组消息格式");
+                            }
                             var target = new Target{
                                 msg = Message.Parse(obj.MessageList),
                                 raw = obj,

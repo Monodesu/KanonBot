@@ -144,4 +144,12 @@ public class Chain
     {
         return this.Build();
     }
+
+    public bool StartsWith(string s)
+    {
+        if (this.msgList.Count == 0)
+            return false;
+        else
+            return this.msgList[0] is TextSegment t && t.value.StartsWith(s);
+    }
 }
