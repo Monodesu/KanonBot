@@ -363,4 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 cqhttp/
+logs/
 config.toml
