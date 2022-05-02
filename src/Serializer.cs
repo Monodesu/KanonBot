@@ -52,14 +52,13 @@ public class JsonEnumConverter : JsonConverter
         if (reader.Value is long)
             return Enum.ToObject(objectType, reader.Value);
 
-        string description = (string)reader.Value!;
+        string description = reader.Value?.ToString() ?? string.Empty;
 
         if (description is null) return null;
 
         foreach (var field in objectType.GetFields())
         {
-            if (Attribute.GetCustomAttribute(field,
-            typeof(DescriptionAttribute)) is DescriptionAttribute attribute)
+            if (Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute)) is DescriptionAttribute attribute)
             {
                 if (attribute.Description == description)
                     return field.GetValue(null);

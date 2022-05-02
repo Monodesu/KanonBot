@@ -1,0 +1,26 @@
+{
+    "author": {
+        "avatar": "http://txx",
+        "bot": false,
+        "id": "xxxxxxxxxxxxx",
+        "username": "xx"
+    },
+    "channel_id": "xxxxxxxxxx",
+    "content": "<@!xxxxxx> ",
+    "guild_id": "xxxxxx",
+    "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "member": {
+        "joined_at": "2022-04-21T12:47:37+08:00",
+        "nick": "xxxxxxxxxxxx",
+        "roles": ["2"]
+    },
+    "mentions": [{
+        "avatar": "xxxxxxxxxxxx",
+        "bot": true,
+        "id": "xxxxxxxxxxxxxx",
+        "username": "xxxxxxxxxxxxxxxx"
+    }],
+    "seq": 1,
+    "seq_in_channel": "1",
+    "timestamp": "2022-05-02T12:10:28+08:00"
+}

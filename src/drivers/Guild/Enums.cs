@@ -10,6 +10,18 @@ public partial class Guild
 {
     public class Enums
     {
+        public enum DefaultRole
+        {
+            // 全体成员
+            Member = 1,
+            // 管理员
+            GuildAdmin = 2,
+            // 群主/创建者
+            Owner = 3,
+            // 子频道管理员
+            ChannelAdmin = 4,
+        }
+
         /// <summary>
         /// 操作码
         /// 0	Dispatch	Receive	服务端进行消息推送
@@ -97,7 +109,7 @@ public partial class Guild
             //  - AUDIO_START           // 音频开始播放时
             //  - AUDIO_FINISH          // 音频播放结束时
             Audio = 1 << 29, // 音频机器人事件
-            IntentGuildAtMessage = 1 << 30, // 只接收@消息事件
+            GuildAtMessage = 1 << 30, // 只接收@消息事件
 
             None = 0,
         }
@@ -113,6 +125,18 @@ public partial class Guild
             /// </summary>
             [Description("")]
             Unknown,
+            
+            /// <summary>
+            /// 鉴权成功
+            /// </summary>
+            [Description("READY")]
+            Ready,
+
+            /// <summary>
+            /// 恢复连接成功
+            /// </summary>
+            [Description("RESUMED")]
+            Resumed,
 
             // GUILDS (1 << 0)
 

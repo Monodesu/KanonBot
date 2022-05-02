@@ -9,22 +9,19 @@ using KanonBot.Serializer;
 using KanonBot.Event;
 using Newtonsoft.Json;
 using Serilog;
-using Flurl;
-using Flurl.Http;
 using Newtonsoft.Json.Linq;
 using System.Timers;
 
 namespace KanonBot.Drivers;
 public partial class Guild : IDriver
 {
-
-    public static readonly string DefaultEndPoint = "https://api.sgroup.qq.com";
-    public static readonly string SandboxEndPoint = "https://sandbox.api.sgroup.qq.com";
     public static readonly Platform platform = Platform.Guild;
     IWebsocketClient client;
     Action<Target> msgAction;
     Action<IDriver, IEvent> eventAction;
-    string authToken;
+    API api;
+    string AuthToken;
+    Guid? SessionId;
     Enums.Intent intents;
     System.Timers.Timer heartbeatTimer = new();
     int lastSeq = 0;
@@ -32,23 +29,16 @@ public partial class Guild : IDriver
     {
         // 初始化变量
 
-        this.authToken = $"Bot {appID}.{token}";
+        this.AuthToken = $"Bot {appID}.{token}";
         this.intents = intents;
 
         this.msgAction = (t) => { };
         this.eventAction = (c, e) => { };
+        this.api = new(AuthToken, sandbox);
 
         // 获取频道ws地址
 
-        var res = (sandbox ? SandboxEndPoint : DefaultEndPoint)
-            .AppendPathSegments("gateway", "bot")
-            .WithHeader("Authorization", this.authToken)
-            .GetJsonAsync<JObject>()
-            .Result;
-
-        Log.Debug("Guild.Driver.Init {0}", res.ToString(Formatting.None));
-
-        var url = res["url"]!.ToString();
+        var url = api.GetWebsocketUrl();
 
         // 初始化ws
 
@@ -64,7 +54,7 @@ public partial class Guild : IDriver
 
                 }
             };
-            client.Options.SetRequestHeader("Authorization", this.authToken);
+            client.Options.SetRequestHeader("Authorization", this.AuthToken);
             return client;
         });
 
@@ -91,32 +81,75 @@ public partial class Guild : IDriver
         this.client = client;
     }
 
+    void Dispatch<T>(Models.PayloadBase<T> obj)
+    {
+        switch (obj.Type)
+        {
+            case Enums.EventType.Ready:
+                var readyData = (obj.Data as JObject)?.ToObject<Models.ReadyData>();
+                Log.Debug("鉴权成功 {@0}", readyData);
+                this.SessionId = readyData!.SessionId;
+                break;
+            case Enums.EventType.AtMessageCreate:
+                var MessageData = (obj.Data as JObject)?.ToObject<Models.MessageData>();
+                Log.Debug("收到消息 {@0}", MessageData);
+                var res = api.SendMessage(MessageData!.ChannelID, MessageData.Content, MessageData.ID).Result;
+                break;
+            case Enums.EventType.Resumed:
+                // 恢复连接成功
+                // 不做任何事
+                break;
+            default:
+                Log.Debug("收到事件: {@0} 数据: {1}", obj, (obj.Data as JToken)?.ToString(Formatting.None) ?? null);
+                break;
+        }
+    }
+
     void Parse(ResponseMessage msg)
     {
         var obj = Json.Deserialize<Models.PayloadBase<JToken>>(msg.Text)!;
-        Log.Debug("收到消息: {@0} 数据: {1}", obj, obj.Data.ToString(Formatting.None));
+        // Log.Debug("收到消息: {@0} 数据: {1}", obj, obj.Data?.ToString(Formatting.None) ?? null);
 
         if (obj.Seq != null)
             this.lastSeq = obj.Seq.Value;   // 存储最后一次seq
 
         switch (obj.Operation)
         {
+            case Enums.OperationCode.Dispatch:
+                this.Dispatch(obj);
+                break;
             case Enums.OperationCode.Hello:
                 var heartbeatInterval = (obj.Data as JObject)!["heartbeat_interval"]!.Value<int>();
                 
                 SetHeartBeatTicker(heartbeatInterval);  // 设置心跳定时器
-            
-                var j = Json.Serialize(new Models.PayloadBase<Models.IdentityData> {    // 鉴权
+                
+                this.Send(this.SessionId switch {
+                    null => Json.Serialize(new Models.PayloadBase<Models.IdentityData> {    // 鉴权
                     Operation = Enums.OperationCode.Identify,
                     Data = new Models.IdentityData{
-                        Token = this.authToken,
+                        Token = this.AuthToken,
                         Intents = this.intents,
                         Shard = new int[] { 0, 1 },
                     }
+                    }),
+                    not null => Json.Serialize(new Models.PayloadBase<Models.ResumeData> {    // 鉴权
+                    Operation = Enums.OperationCode.Resume,
+                    Data = new Models.ResumeData{
+                        Token = this.AuthToken,
+                        SessionId = this.SessionId.Value,
+                        Seq = this.lastSeq,
+                    }
+                    })
                 });
-                Log.Debug(j);
-                
-                this.Send(j);
+                break;
+            case Enums.OperationCode.Reconnect:
+                this.client.Reconnect();    // 重连
+                break;
+            case Enums.OperationCode.InvalidSession:
+                this.client.Dispose();      // 销毁客户端
+                throw new KanonError("无效的sessionLog，需要重新鉴权");
+            case Enums.OperationCode.HeartbeatACK:
+                // 无需处理
                 break;
             default:
                 break;
@@ -126,7 +159,6 @@ public partial class Guild : IDriver
 
     void SetHeartBeatTicker(int interval)
     {
-        HeartBeatTicker();
         this.heartbeatTimer = new System.Timers.Timer(interval);    // 初始化定时器
         this.heartbeatTimer.Elapsed += (s, e) =>
         {
@@ -138,7 +170,7 @@ public partial class Guild : IDriver
 
     void HeartBeatTicker()
     {
-        Log.Debug("Sending heartbeat..");   // log（仅测试）
+        // Log.Debug("Sending heartbeat..");   // log（仅测试）
         var j = Json.Serialize(new Models.PayloadBase<Models.IdentityData> {
             Operation = Enums.OperationCode.Heartbeat,
             Seq = this.lastSeq

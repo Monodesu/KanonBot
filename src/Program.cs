@@ -129,7 +129,7 @@ var drivers = new Drivers();
 //     })
 // );
 drivers.append(
-    new Guild(config.guild!.appID, config.guild.token!, Guild.Enums.Intent.GuildMessages, config.guild.sandbox)
+    new Guild(config.guild!.appID, config.guild.token!, Guild.Enums.Intent.GuildAtMessage, config.guild.sandbox)
 );
 drivers.StartAll();
 ExitEvent.WaitOne();
