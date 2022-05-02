@@ -12,18 +12,94 @@ public partial class Guild
     {
         /// <summary>
         /// 操作码
+        /// 0	Dispatch	Receive	服务端进行消息推送
+        /// 1	Heartbeat	Send/Receive	客户端或服务端发送心跳
+        /// 2	Identify	Send	客户端发送鉴权
+        /// 6	Resume	Send	客户端恢复连接
+        /// 7	Reconnect	Receive	服务端通知客户端重新连接
+        /// 9	Invalid Session	Receive	当identify或resume的时候，如果参数有错，服务端会返回该消息
+        /// 10	Hello	Receive	当客户端与网关建立ws连接之后，网关下发的第一条消息
+        /// 11	Heartbeat ACK	Receive/Reply	当发送心跳成功之后，就会收到该消息
+        /// 12	HTTP Callback ACK	Reply	仅用于 http 回调模式的回包，代表机器人收到了平台推送的数据
         /// </summary>
         public enum OperationCode
         {
-            Dispatch,
-            Heartbeat,
-            Identify,
-            Resume,
-            Reconnect,
-            InvalidSession,
-            Hello,
-            HeartbeatACK,
-            HTTPCallbackACK,
+            Dispatch = 0,
+            Heartbeat = 1,
+            Identify = 2,
+            Resume = 6,
+            Reconnect = 7,
+            InvalidSession = 9,
+            Hello = 10,
+            HeartbeatACK = 11,
+            HTTPCallbackACK = 12,
+        }
+
+        /// <summary>
+        /// websocket intent 声明
+        /// </summary>
+        public enum Intent
+        {
+            // Guilds 包含
+            // - GUILD_CREATE
+            // - GUILD_UPDATE
+            // - GUILD_DELETE
+            // - GUILD_ROLE_CREATE
+            // - GUILD_ROLE_UPDATE
+            // - GUILD_ROLE_DELETE
+            // - CHANNEL_CREATE
+            // - CHANNEL_UPDATE
+            // - CHANNEL_DELETE
+            // - CHANNEL_PINS_UPDATE
+            Guilds = 1 << 0,
+
+            // GuildMembers 包含
+            // - GUILD_MEMBER_ADD
+            // - GUILD_MEMBER_UPDATE
+            // - GUILD_MEMBER_REMOVE
+            GuildMembers = 1 << 1,
+
+            GuildBans = 1 << 2,
+            GuildEmojis = 1 << 3,
+            GuildIntegrations = 1 << 4,
+            GuildWebhooks = 1 << 5,
+            GuildInvites = 1 << 6,
+            GuildVoiceStates = 1 << 7,
+            GuildPresences = 1 << 8,
+            GuildMessages = 1 << 9,
+
+            // GuildMessageReactions 包含
+            // - MESSAGE_REACTION_ADD
+            // - MESSAGE_REACTION_REMOVE
+            GuildMessageReactions = 1 << 10,
+
+            GuildMessageTyping = 1 << 11,
+            DirectMessages = 1 << 12,
+            DirectMessageReactions = 1 << 13,
+            DirectMessageTyping = 1 << 14,
+
+            Interaction = 1 << 26, // 互动事件
+
+            Audit = 1 << 27, // 审核事件
+
+            // Forum 论坛事件
+            //  - THREAD_CREATE     // 当用户创建主题时
+            //  - THREAD_UPDATE     // 当用户更新主题时
+            //  - THREAD_DELETE     // 当用户删除主题时
+            //  - POST_CREATE       // 当用户创建帖子时
+            //  - POST_DELETE       // 当用户删除帖子时
+            //  - REPLY_CREATE      // 当用户回复评论时
+            //  - REPLY_DELETE      // 当用户回复评论时
+            //  - FORUM_PUBLISH_AUDIT_RESULT      // 当用户发表审核通过时
+            Forum = 1 << 28, // 论坛事件
+
+            // Audio
+            //  - AUDIO_START           // 音频开始播放时
+            //  - AUDIO_FINISH          // 音频播放结束时
+            Audio = 1 << 29, // 音频机器人事件
+            IntentGuildAtMessage = 1 << 30, // 只接收@消息事件
+
+            None = 0,
         }
 
         /// <summary>
@@ -227,10 +303,6 @@ public partial class Guild
             /// </summary>
             [Description("PUBLIC_MESSAGE_DELETE")]
             PublicMessageDelete,
-
-
-
-
         }
 
     }

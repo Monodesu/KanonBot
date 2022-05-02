@@ -52,7 +52,7 @@ public class Config
     }
     public class Guild : ITomlMetadataProvider
     {
-        public string? endPoint { get; set; }
+        public bool sandbox { get; set; }
         public long appID { get; set; }
         public string? secret { get; set; }
         public string? token { get; set; }
@@ -90,7 +90,7 @@ public class Config
                     appID = 0,
                     secret = "",
                     token = "",
-                    endPoint = "https://sandbox.api.sgroup.qq.com"
+                    sandbox = true
                 },
                 oss = new()
                 {
