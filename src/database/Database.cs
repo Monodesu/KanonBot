@@ -1,15 +1,7 @@
 #pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable IDE0044 // 添加只读修饰符
-#pragma warning disable IDE1006 // 命名样式
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SqlSugar;
 using Serilog;
-using System.Data;
 
 namespace KanonBot.Database;
 
@@ -51,7 +43,7 @@ public class Client
             verify = verify,
             gen_time = Utils.GetTimeStamp(false)
         };
-        try { db.Insertable<Model.MailVerify>(newverify).ExecuteCommand(); return true; } catch { return false; }
+        try { db.Insertable(newverify).ExecuteCommand(); return true; } catch { return false; }
     }
 
     static public bool IsRegd(string mailAddr)
@@ -63,11 +55,38 @@ public class Client
         return false;
     }
 
+    static public bool IsRegd(string uid, string platform)
+    {
+        var db = GetInstance();
+        switch (platform)
+        {
+            case "qq":
+                var li1 = db.Queryable<Model.Users>().Where(it => it.qq_id == long.Parse(uid)).Select(it => it.uid).ToList();
+                if (li1.Count > 0) return true;
+                return false;
+            case "qguild":
+                var li2 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == uid).Select(it => it.uid).ToList();
+                if (li2.Count > 0) return true;
+                return false;
+            case "khl":
+                var li3 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == uid).Select(it => it.uid).ToList();
+                if (li3.Count > 0) return true;
+                return false;
+            case "discord":
+                var li4 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == uid).Select(it => it.uid).ToList();
+                if (li4.Count > 0) return true;
+                return false;
+            default:
+                return true;
+        }
+    }
+
     static public Model.Users GetUsers(string mailAddr)
     {
         var db = GetInstance();
         return db.Queryable<Model.Users>().Where(it => it.email == mailAddr).First();
     }
+
     static public Model.Users? GetUsersByUID(string UID, string platform)
     {
         var db = GetInstance();
@@ -92,5 +111,32 @@ public class Client
             default:
                 return null;
         }
+    }
+
+    static public Model.Users_osu GetOSUUsers(long osu_uid)
+    {
+        var db = GetInstance();
+        return db.Queryable<Model.Users_osu>().Where(it => it.osu_uid == osu_uid).First();
+    }
+
+    static public Model.Users_osu GetOSUUsersByUID(long kanon_uid)
+    {
+        var db = GetInstance();
+        return db.Queryable<Model.Users_osu>().Where(it => it.uid == kanon_uid).First();
+    }
+
+    static public bool InsertOsuUser(long kanon_uid, long osu_uid, int customBannerStatus)
+    {
+        //customBannerStatus: 0=没有自定义banner 1=在猫猫上设置了自定义banner 2=在osuweb上设置了自定义banner但是猫猫上没有
+        var d = new Model.Users_osu()
+        {
+            uid = kanon_uid,
+            osu_uid = osu_uid,
+            osu_mode = "osu",
+            customBannerStatus = customBannerStatus
+        };
+        var d2 = GetInstance();
+        try { d2.Insertable(d).ExecuteCommand(); return true; } catch { return false; }
+
     }
 }

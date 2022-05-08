@@ -1,14 +1,7 @@
 ﻿#pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable IDE0044 // 添加只读修饰符
 #pragma warning disable IDE1006 // 命名样式
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SqlSugar;
-using System.Data;
 
 namespace KanonBot.Database;
 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using KanonBot.Drivers;
+﻿using KanonBot.Drivers;
 using KanonBot.src.functions;
 
 namespace KanonBot.src.command_parser
@@ -32,8 +27,7 @@ namespace KanonBot.src.command_parser
                 switch (rootCmd)
                 {
                     case "reg": Accounts.regAccount(target, childCmd); return;
-                    case "bind":
-                        return;
+                    case "bind":Accounts.bindService(target, childCmd); return;
                     case "info":
                         return;
                     case "recent":

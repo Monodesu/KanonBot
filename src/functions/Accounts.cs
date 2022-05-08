@@ -1,10 +1,12 @@
-﻿using System;
+﻿#pragma warning disable CS8602 // 解引用可能出现空引用。
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using KanonBot.Drivers;
 using KanonBot.Message;
+using KanonBot.src.API;
 
 namespace KanonBot.src.functions
 {
@@ -32,14 +34,12 @@ namespace KanonBot.src.functions
                 target.reply(new Chain().msg("请输入有效的电子邮件地址。"));
                 return;
             }
-
             string uid = "-1", platform = "none";
             bool is_regd = false;
             is_regd = Database.Client.IsRegd(mailAddr);
             Database.Model.Users dbuser = new();
+
             if (is_regd) dbuser = Database.Client.GetUsers(mailAddr);
-
-
             switch (target.socket) //获取用户ID及平台信息 平台： qq qguild khl discord 四个
             {
                 case Guild:
@@ -78,9 +78,6 @@ namespace KanonBot.src.functions
                     break;
                 default: break;
             }
-
-
-
             if (is_regd) //检查此邮箱是否已存在于数据库中
             {
                 // 如果存在，执行绑定
@@ -126,13 +123,66 @@ namespace KanonBot.src.functions
             }
         }
 
-        public static void bindService(Target target)
+        public static void bindService(Target target, string cmd)
         {
-            //检测此账户有没有绑定到kanon账户上
-            //没有提示使用reg命令注册
-            //如果有，则执行绑定其他平台操作，如osu，steam。
+            string uid = "-1", platform = "none";
+            switch (target.socket)
+            {
+                case Guild:
+                    if (target.raw is Guild.Models.MessageData g)
+                    {
+                        uid = g.Author.ID; platform = "qguild";
+                        if (!Database.Client.IsRegd(uid, platform))
+                        {
+                            target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return;
+                        }
+                    }
+                    break;
+                case OneBot.Server:
+                    if (target.raw is OneBot.Models.Sender o)
+                    {
+                        uid = o.UserId.ToString(); platform = "qq";
+                        if (!Database.Client.IsRegd(uid, platform))
+                        {
+                            target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return;
+                        }
+                    }
+                    break;
+                default: return;
+            }
 
+            cmd = cmd.Trim();
+            string childCmd_1 = cmd[..cmd.IndexOf(" ")];
+            string childCmd_2 = cmd[(cmd.IndexOf(" ") + 1)..];
 
+            if (childCmd_1 == "osu")
+            {
+                Osu.UserInfo online_osu_userinfo = new();
+                var globaluserinfo = Database.Client.GetUsersByUID(uid, platform);
+
+                // 检查用户是否已绑定osu账户
+                var osuuserinfo = Database.Client.GetOSUUsersByUID(globaluserinfo.uid);
+                if (osuuserinfo != null) { target.reply(new Chain().msg($"您已经与osu uid为 {osuuserinfo.osu_uid} 的用户绑定过了。")); return; }
+
+                // 通过osu username搜索osu用户id
+                try { online_osu_userinfo = Osu.GetUser(childCmd_2); }
+                catch { target.reply(new Chain().msg($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。")); return; }
+
+                // 检查要绑定的osu是否没有被Kanon用户绑定过
+                var db_osu_userinfo = Database.Client.GetOSUUsers(online_osu_userinfo.userId);
+                if (db_osu_userinfo == null)
+                {
+                    // 没被他人绑定，开始绑定流程
+                    if (Database.Client.InsertOsuUser(globaluserinfo.uid, online_osu_userinfo.userId, online_osu_userinfo.coverUrl == "" ? 0 : 2))
+                    { target.reply(new Chain().msg($"绑定成功，已将osu用户 {online_osu_userinfo.userId} 绑定至Kanon账户 {globaluserinfo.uid} 。")); }
+                    else { target.reply(new Chain().msg($"绑定失败，请稍后再试。")); }
+                }
+                else { target.reply(new Chain().msg($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果您认为他人恶意绑定了您的账户，请联系管理员。")); return; }
+            }
+            else
+            {
+                target.reply(new Chain().msg("请按照以下格式进行绑定。\r\n !set osu 您的osu用户名")); return;
+            }
         }
     }
 }

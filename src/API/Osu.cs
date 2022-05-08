@@ -1,13 +1,8 @@
 ﻿#pragma warning disable CS8604 // 引用类型参数可能为 null。
 #pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable CS8600 // 将 null 字面量或可能为 null 的值转换为非 null 类型。
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Threading.Tasks;
 using System.Net;
 using Serilog;
 

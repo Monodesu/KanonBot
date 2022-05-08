@@ -1,13 +1,7 @@
 ﻿#pragma warning disable CS8625 // 无法将 null 字面量转换为非 null 的引用类型。
-using System.Threading;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 
 namespace KanonBot.src
 {
