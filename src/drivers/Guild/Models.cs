@@ -12,6 +12,44 @@ public partial class Guild
 {
     public class Models
     {
+        public class SendMessageData
+        {
+            /// <summary>
+            /// 消息内容，文本内容，支持内嵌格式
+            /// </summary>
+            [JsonProperty(PropertyName = "content")]
+            public string? Content { get; set; }
+            /// <summary>
+            /// 图片url地址，平台会转存该图片，用于下发图片消息
+            /// </summary>
+            [JsonProperty(PropertyName = "image")]
+            public string? ImageUrl { get; set; }
+            /// <summary>
+            /// 要回复的消息id(Message.id), 在 AT_CREATE_MESSAGE 事件中获取。
+            /// </summary>
+            [JsonProperty(PropertyName = "msg_id")]
+            public string? MessageId { get; set; }
+            /// <summary>
+            /// 引用消息对象
+            /// </summary>
+            [JsonProperty(PropertyName = "message_reference")]
+            public MessageReference? MessageReference { get; set; }
+
+            // TODO: 下列消息的解析
+
+            /// <summary>
+            /// embed
+            /// </summary>
+            [JsonProperty(PropertyName = "embed")]
+            public JToken? Embed { get; set; }
+            /// <summary>
+            /// ark消息
+            /// </summary>
+            [JsonProperty(PropertyName = "ark")]
+            public JToken? Ark { get; set; }
+
+            public SendMessageData Build(Chain msgChain) => Message.Build(this, msgChain);
+        }
         public class PayloadBase<T>
         {
             /// <summary>
@@ -161,6 +199,11 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "mention_everyone")]
             public bool? MentionEveryone { get; set; }
+            /// <summary>
+            /// 引用消息对象
+            /// </summary>
+            [JsonProperty(PropertyName = "message_reference")]
+            public MessageReference? MessageReference { get; set; }
 
             // TODO: 下列消息的解析
 
@@ -168,18 +211,30 @@ public partial class Guild
             /// 附件
             /// </summary>
             [JsonProperty(PropertyName = "attachments")]
-            public JToken? Attachments { get; set; }
+            public List<JToken>? Attachments { get; set; }
             /// <summary>
             /// embed
             /// </summary>
             [JsonProperty(PropertyName = "embeds")]
-            public JToken? Embeds { get; set; }
+            public List<JToken>? Embeds { get; set; }
             /// <summary>
             /// ark消息
             /// </summary>
             [JsonProperty(PropertyName = "ark")]
             public JToken? Ark { get; set; }
-
+        }
+        public class MessageReference
+        {
+            /// <summary>
+            /// 消息 ID
+            /// </summary>
+            [JsonProperty(PropertyName = "message_id")]
+            public string MessageId { get; set; }
+            /// <summary>
+            /// 是否忽略获取引用消息详情错误，默认否
+            /// </summary>
+            [JsonProperty(PropertyName = "ignore_get_message_error")]
+            public bool IgnoreGetMessageError { get; set; } = false;
         }
 
         public class ReadyData

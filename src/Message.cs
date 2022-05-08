@@ -11,11 +11,11 @@ public interface IMsgSegment
     string Build();
 }
 
-public class RawMessage : IMsgSegment
+public class RawSegment : IMsgSegment
 {
-    public JObject value;
+    public Object value;
     public string type;
-    public RawMessage(string type, JObject value)
+    public RawSegment(string type, Object value)
     {
         this.type = type;
         this.value = value;
@@ -23,7 +23,10 @@ public class RawMessage : IMsgSegment
 
     public string Build()
     {
-        return $"<raw;{type}={value.ToString(Formatting.None)}>";
+        return value switch {
+            JObject j => $"<raw;{type}={j.ToString(Formatting.None)}>",
+            _ => $"<raw;{type}={value}>",
+        };
     }
 }
 public class TextSegment : IMsgSegment
@@ -39,10 +42,10 @@ public class TextSegment : IMsgSegment
         return value.ToString();
     }
 }
-public class FaceSegment : IMsgSegment
+public class EmojiSegment : IMsgSegment
 {
     public string value;
-    public FaceSegment(string value)
+    public EmojiSegment(string value)
     {
         this.value = value;
     }
@@ -55,6 +58,7 @@ public class FaceSegment : IMsgSegment
 public class AtSegment : IMsgSegment
 {
     public Platform platform;
+    // all 表示全体成员
     public string value;
     public AtSegment(string target, Platform platform)
     {
@@ -72,7 +76,7 @@ public class ImageSegment : IMsgSegment
 {
     public enum Type
     {
-        File,
+        File,   // 如果是file就是文件地址
         Base64,
         Url
     }
@@ -89,11 +93,11 @@ public class ImageSegment : IMsgSegment
         switch (this.t)
         {
             case Type.File:
-                return $"<image;file:///{this.value}>";
+                return $"<image;file={this.value}>";
             case Type.Base64:
-                return $"<image;base64:///{this.value}>";
+                return $"<image;base64>";
             case Type.Url:
-                return $"<image;file:///{this.value}>";
+                return $"<image;url={this.value}>";
         }
         // 保险
         return "";
@@ -108,20 +112,20 @@ public class Chain
         this.msgList = new();
     }
 
-    public void append(IMsgSegment n)
+    public void Add(IMsgSegment n)
     {
         this.msgList.Add(n);
     }
 
     public Chain msg(string v)
     {
-        this.append(new TextSegment(v));
+        this.Add(new TextSegment(v));
         return this;
     }
 
     public Chain image(string v, ImageSegment.Type t)
     {
-        this.append(new ImageSegment(v, t));
+        this.Add(new ImageSegment(v, t));
         return this;
     }
 

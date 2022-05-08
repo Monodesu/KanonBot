@@ -34,15 +34,14 @@ public partial class Guild
                 .Result["url"]!.ToString();
         }
 
-        async public Task<Models.MessageData> SendMessage(string ChannelID, string Content, string MsgID)
+        async public Task<Models.MessageData> SendMessage(string ChannelID, Models.SendMessageData data)
         {
             return await this.http()
                 .AppendPathSegments("channels", ChannelID, "messages")
-                .PostJsonAsync(new 
-                    { content = Content, msg_id = MsgID }
-                )
+                .PostJsonAsync(data)
                 .ReceiveJson<Models.MessageData>();
         }
+
 
 
     }

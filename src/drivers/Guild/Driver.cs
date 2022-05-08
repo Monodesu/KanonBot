@@ -19,7 +19,7 @@ public partial class Guild : ISocket, IDriver
     IWebsocketClient instance;
     Action<Target> msgAction;
     Action<ISocket, IEvent> eventAction;
-    API api;
+    public API api;
     string AuthToken;
     Guid? SessionId;
     Enums.Intent intents;
@@ -87,20 +87,24 @@ public partial class Guild : ISocket, IDriver
         {
             case Enums.EventType.Ready:
                 var readyData = (obj.Data as JObject)?.ToObject<Models.ReadyData>();
-                Log.Debug("鉴权成功 {@0}", readyData);
                 this.SessionId = readyData!.SessionId;
+                Log.Information("鉴权成功 {@0}", readyData);
+                this.eventAction(this, new Ready(readyData.User.ID, Platform.Guild));
                 break;
             case Enums.EventType.AtMessageCreate:
                 var MessageData = (obj.Data as JObject)?.ToObject<Models.MessageData>();
-                Log.Debug("收到消息 {@0}", MessageData);
-                var res = api.SendMessage(MessageData!.ChannelID, MessageData.Content, MessageData.ID).Result;
+                this.msgAction(new Target() {
+                    msg = Message.Parse(MessageData!),
+                    raw = MessageData,
+                    socket = this
+                });
                 break;
             case Enums.EventType.Resumed:
                 // 恢复连接成功
                 // 不做任何事
                 break;
             default:
-                Log.Debug("收到事件: {@0} 数据: {1}", obj, (obj.Data as JToken)?.ToString(Formatting.None) ?? null);
+                this.eventAction(this, new RawEvent(obj));
                 break;
         }
     }
@@ -146,7 +150,7 @@ public partial class Guild : ISocket, IDriver
                 this.instance.Reconnect();    // 重连
                 break;
             case Enums.OperationCode.InvalidSession:
-                this.instance.Dispose();      // 销毁客户端
+                this.Dispose();      // 销毁客户端
                 throw new KanonError("无效的sessionLog，需要重新鉴权");
             case Enums.OperationCode.HeartbeatACK:
                 // 无需处理

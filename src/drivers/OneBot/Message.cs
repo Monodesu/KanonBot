@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using KanonBot.Message;
+using KanonBot.API;
 using KanonBot.Serializer;
 using Serilog;
 namespace KanonBot.Drivers;
@@ -21,13 +22,21 @@ public partial class OneBot
                         },
                         ImageSegment image => new Models.Segment {
                             msgType = Enums.SegmentType.Image,
-                            rawData = new JObject { { "file", image.value } }
+                            rawData = image.t switch {
+                                ImageSegment.Type.Base64 => new JObject { { "file", $"base64://{image.value}" } },
+                                ImageSegment.Type.Url => new JObject { { "file", image.value } },
+                                ImageSegment.Type.File => new JObject { { "file", OSS.PutFile(Utils.LoadFile2Stream(image.value), "jpg", true) } }, // 这里还有缺陷，如果图片上传失败的话，还是会尝试发送
+                                _ => throw new ArgumentException("不支持的图片类型")
+                            }
                         },
-                        AtSegment at => new Models.Segment {
-                            msgType = Enums.SegmentType.At,
-                            rawData = new JObject { { "qq", at.value } }
+                        AtSegment at => at.platform switch {
+                            Platform.OneBot => new Models.Segment {
+                                msgType = Enums.SegmentType.At,
+                                rawData = new JObject { { "qq", at.value } }
+                            },
+                            _ => throw new ArgumentException("不支持的平台类型")
                         },
-                        FaceSegment face => new Models.Segment {
+                        EmojiSegment face => new Models.Segment {
                             msgType = Enums.SegmentType.Face,
                             rawData = new JObject { { "id", face.value } }
                         },
@@ -47,13 +56,13 @@ public partial class OneBot
             var chain = new Chain();
             foreach (var obj in MessageList)
             {
-                chain.append(
+                chain.Add(
                     obj.msgType switch {
                         Enums.SegmentType.Text => new TextSegment(obj.rawData["text"]!.ToString()),
-                        Enums.SegmentType.Image => new ImageSegment(obj.rawData["file"]!.ToString(), ImageSegment.Type.File),
+                        Enums.SegmentType.Image => new ImageSegment(obj.rawData["url"]!.ToString(), ImageSegment.Type.Url),
                         Enums.SegmentType.At => new AtSegment(obj.rawData["qq"]!.ToString(), Platform.OneBot),
-                        Enums.SegmentType.Face => new FaceSegment(obj.rawData["id"]!.ToString()),
-                        _ => new RawMessage(obj.msgType.ToString(), obj.rawData)
+                        Enums.SegmentType.Face => new EmojiSegment(obj.rawData["id"]!.ToString()),
+                        _ => new RawSegment(obj.msgType.ToString(), obj.rawData)
                     }
                 );
             }

@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="aliyun.OSS.SDK.NetCore" Version="2.13.0" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="Fleck" Version="1.2.0" />
     <PackageReference Include="Flurl.Http" Version="3.2.3" />

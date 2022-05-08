@@ -43,9 +43,13 @@ public class Drivers
 
     public void StartAll()
     {
-        var tasks = new Task[this.driverList.Count];
-        for (int i = 0; i < this.driverList.Count; i++)
-            tasks[i] = driverList[i].Start();
-        Task.WaitAll(tasks);
+        foreach (var driver in this.driverList)
+            driver.Start();
+    }
+
+    public void StopAll()
+    {
+        foreach (var driver in this.driverList)
+            driver.Dispose();
     }
 }

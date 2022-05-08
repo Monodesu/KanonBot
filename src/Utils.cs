@@ -10,6 +10,20 @@ using System.Threading.Tasks;
 namespace KanonBot;
 class Utils
 {
+    public static Stream LoadFile2Stream(string filePath)
+    {
+        FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        return fs;
+    }
+
+    public static Stream Byte2Stream(byte[] buffer)
+    {
+        Stream stream = new MemoryStream(buffer);
+        //设置 stream 的 position 为流的开始
+        stream.Seek(0, SeekOrigin.Begin);
+        return stream;
+    }
+
     public static string GetDesc(object? value)
     {
         FieldInfo? fieldInfo = value!.GetType().GetField(value.ToString()!);
@@ -33,6 +47,22 @@ class Utils
     }
     public static double log1p(double x)
         => Math.Abs(x) > 1e-4 ? Math.Log(1.0 + x) : (-0.5 * x + 1.0) * x;
+
+    public static string GuildUnEscape(string str)
+    {
+        str = str.Replace("&amp;", "&");
+        str = str.Replace("&lt;", "<");
+        str = str.Replace("&gt;", ">");
+        return str;
+    }
+
+    public static string GuildEscape(string str)
+    {
+        str = str.Replace("&", "&amp;");
+        str = str.Replace("<", "&lt;");
+        str = str.Replace(">", "&gt;");
+        return str;
+    }
 
     public static string CQUnEscape(string str)
     {

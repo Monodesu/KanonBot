@@ -13,24 +13,27 @@ public interface IEvent
 
 public class RawEvent : IEvent
 {
-    public JObject value;
-    public RawEvent(JObject e)
+    public object value;
+    public RawEvent(object e)
     {
         this.value = e;
     }
 
     public override string ToString()
     {
-        return value.ToString(Formatting.None);
+        return value switch {
+            JObject j => j.ToString(Formatting.None),
+            _ => $"{value}",
+        };
     }
 }
 
 
-public class Lifecycle : IEvent
+public class Ready : IEvent
 {
     public string selfId;
     public Platform platform;
-    public Lifecycle(string selfId, Platform platform)
+    public Ready(string selfId, Platform platform)
     {
         this.selfId = selfId;
         this.platform = platform;
@@ -38,7 +41,7 @@ public class Lifecycle : IEvent
 
     public override string ToString()
     {
-        return $"<lifecycle;selfId={this.selfId},platform={this.platform}>";
+        return $"<ready;selfId={this.selfId},platform={this.platform}>";
     }
 }
 

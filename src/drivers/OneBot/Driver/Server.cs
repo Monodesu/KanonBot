@@ -17,14 +17,17 @@ public partial class OneBot
 {
     public class Server : OneBot, IDriver
     {
-        public class Socket : ISocket {
+        public class Socket : ISocket
+        {
             public API api;
             IWebSocketConnection socket;
-            public Socket(IWebSocketConnection socket) {
+            public Socket(IWebSocketConnection socket)
+            {
                 this.api = new(this);
                 this.socket = socket;
             }
-            public void Send(string message) {
+            public void Send(string message)
+            {
                 this.socket.Send(message);
             }
         }
@@ -34,7 +37,25 @@ public partial class OneBot
         {
             var server = new WebSocketServer(url);
             server.RestartAfterListenError = true;
-
+            Fleck.FleckLog.LogAction = (level, message, ex) =>
+            {
+                switch (level)
+                {
+                    case LogLevel.Debug:
+                        // 不要debug
+                        // Log.Debug($"[{OneBot.platform} Core] {message}", ex);
+                        break;
+                    case LogLevel.Error:
+                        Log.Error($"[{OneBot.platform} Core] {message}", ex);
+                        break;
+                    case LogLevel.Warn:
+                        Log.Warning($"[{OneBot.platform} Core] {message}", ex);
+                        break;
+                    default:
+                        Log.Information($"[{OneBot.platform} Core] {message}", ex);
+                        break;
+                }
+            };
             this.instance = server;
             this.clients = new();
         }
@@ -61,17 +82,21 @@ public partial class OneBot
                 return;
             }
 
-            
 
+            socket.OnError = (e) =>
+            {
+                this.Disconnect(socket);
+                Log.Error($"[{OneBot.platform} Core] {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 连接异常断开");
+            };
             socket.OnOpen = () =>
             {
                 this.clients.Add(socket.ConnectionInfo.Id, new Socket(socket));
-                Log.Information($"连接[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
+                Log.Information($"[{OneBot.platform} Core] 收到来自 {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 的连接");
             };
             socket.OnClose = () =>
             {
                 this.Disconnect(socket);
-                Log.Information($"断开[{socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort}]");
+                Log.Information($"[{OneBot.platform} Core] {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 连接断开");
             };
             socket.OnMessage = message => Task.Run(() =>
             {
@@ -79,9 +104,10 @@ public partial class OneBot
                 {
                     this.Parse(message, this.clients[socket.ConnectionInfo.Id]);
                 }
-                catch (Exception ex) { 
+                catch (Exception ex)
+                {
                     Log.Error("未捕获的异常 ↓\n{ex}", ex);
-                    socket.Close();
+                    this.Disconnect(socket);
                 }
             });
         }
@@ -114,7 +140,7 @@ public partial class OneBot
                             {
                                 msg = Message.Parse(obj!.MessageList),
                                 raw = obj,
-                                api = socket.api
+                                socket = socket
                             };
                             this.msgAction(target);
                             break;
@@ -122,12 +148,17 @@ public partial class OneBot
                         case "meta_event":
                             var metaEventType = (string?)m["meta_event_type"];
                             if (metaEventType == "heartbeat")
+                            {
                                 this.eventAction(socket, new HeartBeat((long)m["time"]!));
+                            }
                             else if (metaEventType == "lifecycle")
-                                this.eventAction(socket, new Lifecycle((string)m["self_id"]!, Platform.OneBot));
+                            {
+                                this.eventAction(socket, new Ready((string)m["self_id"]!, Platform.OneBot));
+                            }
                             else
+                            {
                                 this.eventAction(socket, new RawEvent(m));
-
+                            }
                             break;
 
                         default:

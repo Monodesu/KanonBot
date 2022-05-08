@@ -35,6 +35,7 @@ public class Config
     }
     public class OSS : ITomlMetadataProvider
     {
+        public string? url { get; set; }
         public string? accessKeyId { get; set; }
         public string? accessKeySecret { get; set; }
         public string? endPoint { get; set; }
@@ -96,6 +97,7 @@ public class Config
                 },
                 oss = new()
                 {
+                    url = "",
                     accessKeyId = "",
                     accessKeySecret = "",
                     endPoint = "",

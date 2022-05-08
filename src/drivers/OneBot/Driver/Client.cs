@@ -18,7 +18,7 @@ public partial class OneBot
     {
 
         IWebsocketClient instance;
-        API api;
+        public API api;
 
         public Client(string url)
         {
@@ -96,7 +96,7 @@ public partial class OneBot
                             {
                                 msg = Message.Parse(obj!.MessageList),
                                 raw = obj,
-                                api = this.api
+                                socket = this
                             };
                             this.msgAction(target);
                             break;
@@ -106,7 +106,7 @@ public partial class OneBot
                             if (metaEventType == "heartbeat")
                                 this.eventAction(this, new HeartBeat((long)m["time"]!));
                             else if (metaEventType == "lifecycle")
-                                this.eventAction(this, new Lifecycle((string)m["self_id"]!, Platform.OneBot));
+                                this.eventAction(this, new Ready((string)m["self_id"]!, Platform.OneBot));
                             else
                                 this.eventAction(this, new RawEvent(m));
 
