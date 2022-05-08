@@ -40,4 +40,16 @@ public class Client
 
         return db;
     }
+
+
+    static public bool SetVerifyMail(string mailAddr,string verify)
+    {
+        var db = GetInstance();
+        var newverify = new Model.MailVerify()
+        {
+            mailAddr = mailAddr,
+            verify = verify
+        };
+        try { db.Insertable<Model.MailVerify>(newverify).ExecuteCommand(); return true; } catch { return false; }
+    }
 }

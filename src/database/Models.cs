@@ -104,4 +104,11 @@ public class Model
         public string? name_chinese { get; set; }
         public string? description { get; set; }
     }
+    [SugarTable("mail_verify")]
+    public class MailVerify
+    {
+        public string? mailAddr { get; set; }
+        public string? verify { get; set; }
+        public string? gen_time { get; set; }
+    }
 }
