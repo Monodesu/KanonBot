@@ -29,6 +29,7 @@ public class Model
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public long uid { get; set; }
+        [SugarColumn(IsPrimaryKey = true)]
         public string? email { get; set; }
         public string? passwd { get; set; }
         public long qq_id { get; set; }

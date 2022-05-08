@@ -80,14 +80,14 @@ class Utils
         return str;
     }
 
-    public static string RandomStr(int length)
+    public static string RandomStr(int length, bool URLparameter = false)
     {
         Random r = new Random(DateTime.Now.Millisecond + DateTime.Now.Second + DateTime.Now.Minute);
         string s = "", str = "";
         str += "0123456789";
         str += "abcdefghijklmnopqrstuvwxyz";
         str += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        str += "!_-@#$%+^&()[]'~`";
+        if (!URLparameter) str += "!_-@#$%+^&()[]'~`";
         for (int i = 0; i < length; i++)
         {
             s += str.Substring(r.Next(0, str.Length - 1), 1);
@@ -231,6 +231,41 @@ class Utils
                 break;
         }
         return "";
+    }
+
+    public static bool IsMailAddr(string str)
+    {
+        string emailStr = @"([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,5})+";
+        Regex emailReg = new(emailStr);
+        if (emailReg.IsMatch(str))
+            return true;
+        return false;
+    }
+
+    public static string GetTimeStamp(bool isMillisec)
+    {
+        TimeSpan ts = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+        if (!isMillisec) return Convert.ToInt64(ts.TotalSeconds).ToString();
+        else return Convert.ToInt64(ts.TotalMilliseconds).ToString();
+    }
+
+    public static string HideMailAddr(string mailAddr)
+    {
+        var t1 = mailAddr.Split('@');
+        string[] t2 = new string[t1[0].Length];
+        for (int i = 0; i < t1[0].Length; i++) { t2[i] = "*"; }
+        t2[0] = t1[0][0].ToString();
+        t2[t1[0].Length - 1] = t1[0][t1[0].Length - 1].ToString();
+        string ret = "";
+        foreach (string s in t2) { ret += s; }
+        ret += "@";
+        t2 = new string[t1[1].Length];
+        for (int i = 0; i < t1[1].Length; i++) { t2[i] = "*"; }
+        t2[0] = t1[1][0].ToString();
+        t2[t1[1].Length - 1] = t1[1][t1[1].Length - 1].ToString();
+        t2[t1[1].IndexOf(".")] = "[dot]";
+        foreach (string s in t2) { ret += s; }
+        return ret;
     }
 }
 

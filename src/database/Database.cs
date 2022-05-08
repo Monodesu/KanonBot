@@ -16,7 +16,7 @@ namespace KanonBot.Database;
 public class Client
 {
     private static Config.Base config = Config.inner!;
-    
+
     static private SqlSugarClient GetInstance()
     {
         // 暂时只有Mysql
@@ -42,14 +42,55 @@ public class Client
     }
 
 
-    static public bool SetVerifyMail(string mailAddr,string verify)
+    static public bool SetVerifyMail(string mailAddr, string verify)
     {
         var db = GetInstance();
         var newverify = new Model.MailVerify()
         {
             mailAddr = mailAddr,
-            verify = verify
+            verify = verify,
+            gen_time = Utils.GetTimeStamp(false)
         };
         try { db.Insertable<Model.MailVerify>(newverify).ExecuteCommand(); return true; } catch { return false; }
+    }
+
+    static public bool IsRegd(string mailAddr)
+    {
+        var db = GetInstance();
+        var li = db.Queryable<Model.Users>().Where(it => it.email == mailAddr).Select(it => it.uid).ToList();
+        if (li.Count > 0)
+            return true;
+        return false;
+    }
+
+    static public Model.Users GetUsers(string mailAddr)
+    {
+        var db = GetInstance();
+        return db.Queryable<Model.Users>().Where(it => it.email == mailAddr).First();
+    }
+    static public Model.Users? GetUsersByUID(string UID, string platform)
+    {
+        var db = GetInstance();
+        switch (platform)
+        {
+            case "qq":
+                var li1 = db.Queryable<Model.Users>().Where(it => it.qq_id == long.Parse(UID)).ToList();
+                if (li1.Count > 0) return li1[0];
+                return null;
+            case "qguild":
+                var li2 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == UID).ToList();
+                if (li2.Count > 0) return li2[0];
+                return null;
+            case "khl":
+                var li3 = db.Queryable<Model.Users>().Where(it => it.khl_uid == UID).ToList();
+                if (li3.Count > 0) return li3[0];
+                return null;
+            case "discord":
+                var li4 = db.Queryable<Model.Users>().Where(it => it.discord_uid == UID).ToList();
+                if (li4.Count > 0) return li4[0];
+                return null;
+            default:
+                return null;
+        }
     }
 }

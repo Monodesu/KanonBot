@@ -5,6 +5,7 @@ using KanonBot.Drivers;
 using KanonBot.Event;
 using KanonBot;
 using KanonBot.Serializer;
+using KanonBot.src.command_parser;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
@@ -34,6 +35,10 @@ if (config.debug)
     log = log.MinimumLevel.Debug();
                 
 Log.Logger = log.CreateLogger();
+//初始化kanonbot相关内容
+KanonBot.src.API.Osu.CheckToken();
+
+//结束
 Log.Information("初始化成功 {@config}", config);
 #endregion
 
@@ -42,8 +47,10 @@ Log.Information("初始化成功 {@config}", config);
 
 
 // Log.Debug("{0}", config.ToJson());
-
-
+//JArray j = new();
+//KanonBot.src.API.Osu.BeapmapInfo b = KanonBot.src.API.Osu.GetBeatmap(3563009);
+//Console.WriteLine(b.title);
+//Console.WriteLine(b.playCount);
 // var c = new Msg.Chain().msg("hello").image("C:\\hello.png", Msg.ImageSegment.Type.File).msg("test\nhaha");
 // c.append(new Msg.RawMessage("Test", new JObject { { "test", "test" } }));
 // Log.Debug("{0}", c);
@@ -89,7 +96,7 @@ Log.Information("初始化成功 {@config}", config);
 //     .WithHeader("Authorization", $"Bot {config.guild?.appID}.{config.guild?.token}")
 //     .OnError((response) => { Log.Error("{@0}", response.Response.GetJsonAsync().Result); })
 //     .GetJsonAsync<JObject>();
-    
+
 // Log.Debug("{0}", ((string?)result["url"]));
 
 
@@ -108,21 +115,21 @@ drivers.append(
         Log.Information("← 收到消息 {0}", target.msg);
         Log.Information("↑ 详情 {@0}", target.raw!);
         Log.Information("↑ 详情 {0}", Json.Serialize((target.raw! as OneBot.Models.CQMessageEventBase)!.MessageList));
-        switch (target.raw)
-        {
-            case OneBot.Models.GroupMessage g:
-                if (g.GroupId == config.onebot!.managementGroup) 
-                {
-                    target.reply(target.msg);
-                }
-                break;
-            case OneBot.Models.PrivateMessage p:
-                target.reply(target.msg);
-                break;
-        }
+        // switch (target.raw)
+        // {
+        //     case OneBot.Models.GroupMessage g:
+        //         if (g.GroupId == config.onebot!.managementGroup) 
+        //         {
+        //             target.reply(target.msg);
+        //         }
+        //         break;
+        //     case OneBot.Models.PrivateMessage p:
+        //         target.reply(target.msg);
+        //         break;
+        // }
         // var res = api.SendGroupMessage(xxxxx, target.msg);
         // Log.Information("→ 发送消息ID {@0}", res);
-        
+        Universal.Parser(target);
     })
     .onEvent((client, e) =>
     {
@@ -159,7 +166,8 @@ drivers.append(
         //     MessageReference = new() { MessageId = messageData.ID }
         // }.Build(target.msg)).Result;
         // Log.Information("→ 发送消息ID {@0}", res);
-        target.reply(target.msg);
+        // target.reply(target.msg);
+        Universal.Parser(target);
     })
     .onEvent((client, e) =>
     {
