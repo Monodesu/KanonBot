@@ -47,6 +47,7 @@ public class Config
         public string? host { get; set; }
         public int port { get; set; }
         public int httpPort { get; set; }
+        public int serverPort { get; set; }
         public long? managementGroup { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
     }
@@ -82,6 +83,7 @@ public class Config
                 {
                     managementGroup = 0,
                     host = "localhost",
+                    serverPort = 7700,
                     httpPort = 5700,
                     port = 6700
                 },

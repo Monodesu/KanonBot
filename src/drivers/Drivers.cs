@@ -19,10 +19,14 @@ public enum Platform
 public interface IDriver
 {
     IDriver onMessage(Action<Target> action);
-    IDriver onEvent(Action<IDriver, IEvent> action);
+    IDriver onEvent(Action<ISocket, IEvent> action);
+    Task Start();
+    void Dispose();
+}
+public interface ISocket
+{
     void Send(string message);
     void Send(Object obj) => Send(Json.Serialize(obj));
-    Task Connect();
 }
 
 public class Drivers
@@ -41,7 +45,7 @@ public class Drivers
     {
         var tasks = new Task[this.driverList.Count];
         for (int i = 0; i < this.driverList.Count; i++)
-            tasks[i] = driverList[i].Connect();
+            tasks[i] = driverList[i].Start();
         Task.WaitAll(tasks);
     }
 }

@@ -100,8 +100,35 @@ Log.Information("初始化成功 {@config}", config);
 
 var ExitEvent = new ManualResetEvent(false);
 var drivers = new Drivers();
+drivers.append(
+    new OneBot.Server($"ws://0.0.0.0:{config.ontbot?.serverPort}")
+    .onMessage((target) =>
+    {
+        Log.Information("← 收到消息 {msg}", target.msg);
+        Log.Debug("↑ 详情 {@raw}", target.raw);
+        var res = target.api!.SendGroupMessage(195135404, target.msg);
+        Log.Debug("→ 发送消息ID {@res}", res);
+    })
+    .onEvent((client, e) =>
+    {
+        switch (e)
+        {
+            case HeartBeat h:
+                Log.Debug("收到心跳包 {h}", h);
+                break;
+            case Lifecycle l:
+                Log.Information("收到生命周期事件 {h}", l);
+                break;
+            case RawEvent r:
+                Log.Information("收到事件 {r}", r);
+                break;
+            default:
+                break;
+        }
+    })
+);
 // drivers.append(
-//     new OneBot($"ws://{config.ontbot?.host}:{config.ontbot?.port}")
+//     new OneBot.Client($"ws://{config.ontbot?.host}:{config.ontbot?.port}")
 //     .onMessage((target) =>
 //     {
 //         Log.Information("← 收到消息 {msg}", target.msg);
@@ -125,12 +152,11 @@ var drivers = new Drivers();
 //             default:
 //                 break;
 //         }
-        
 //     })
 // );
-drivers.append(
-    new Guild(config.guild!.appID, config.guild.token!, Guild.Enums.Intent.GuildAtMessage, config.guild.sandbox)
-);
+// drivers.append(
+//     new Guild(config.guild!.appID, config.guild.token!, Guild.Enums.Intent.GuildAtMessage, config.guild.sandbox)
+// );
 drivers.StartAll();
 ExitEvent.WaitOne();
 Log.CloseAndFlush();

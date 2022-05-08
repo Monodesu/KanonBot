@@ -13,12 +13,12 @@ using Newtonsoft.Json.Linq;
 using System.Timers;
 
 namespace KanonBot.Drivers;
-public partial class Guild : IDriver
+public partial class Guild : ISocket, IDriver
 {
     public static readonly Platform platform = Platform.Guild;
-    IWebsocketClient client;
+    IWebsocketClient instance;
     Action<Target> msgAction;
-    Action<IDriver, IEvent> eventAction;
+    Action<ISocket, IEvent> eventAction;
     API api;
     string AuthToken;
     Guid? SessionId;
@@ -78,7 +78,7 @@ public partial class Guild : IDriver
             catch (Exception ex) { Log.Error("未捕获的异常 ↓\n{ex}", ex); }
         }));
 
-        this.client = client;
+        this.instance = client;
     }
 
     void Dispatch<T>(Models.PayloadBase<T> obj)
@@ -143,10 +143,10 @@ public partial class Guild : IDriver
                 });
                 break;
             case Enums.OperationCode.Reconnect:
-                this.client.Reconnect();    // 重连
+                this.instance.Reconnect();    // 重连
                 break;
             case Enums.OperationCode.InvalidSession:
-                this.client.Dispose();      // 销毁客户端
+                this.instance.Dispose();      // 销毁客户端
                 throw new KanonError("无效的sessionLog，需要重新鉴权");
             case Enums.OperationCode.HeartbeatACK:
                 // 无需处理
@@ -186,7 +186,7 @@ public partial class Guild : IDriver
         this.msgAction = action;
         return this;
     }
-    public IDriver onEvent(Action<IDriver, IEvent> action)
+    public IDriver onEvent(Action<ISocket, IEvent> action)
     {
         this.eventAction = action;
         return this;
@@ -194,11 +194,16 @@ public partial class Guild : IDriver
 
     public void Send(string message)
     {
-        this.client.Send(message);
+        this.instance.Send(message);
     }
 
-    public Task Connect()
+    public Task Start()
     {
-        return this.client.Start();
+        return this.instance.Start();
+    }
+
+    public void Dispose()
+    {
+        this.instance.Dispose();
     }
 }

@@ -8,10 +8,10 @@ public partial class OneBot
     // API 部分 * 包装 Driver
     public class API
     {
-        IDriver driver;
-        public API(IDriver driver)
+        ISocket socket;
+        public API(ISocket socket)
         {
-            this.driver = driver;
+            this.socket = socket;
         }
 
 
@@ -30,7 +30,7 @@ public partial class OneBot
         private Models.CQResponse Send(Models.CQRequest req)
         {
             this.CallbackList[req.Echo] = new RetCallback();    // 创建回调
-            this.driver.Send(req);                              // 发送
+            this.socket.Send(req);                              // 发送
             this.CallbackList[req.Echo].ResetEvent.WaitOne();   // 等待回调
             var ret = this.CallbackList[req.Echo].Data!;         // 获取回调
             this.CallbackList.Remove(req.Echo);                 // 移除回调
