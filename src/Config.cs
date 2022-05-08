@@ -64,7 +64,7 @@ public class Config
     {
         public bool debug { get; set; }
         public OSU? osu { get; set; }
-        public OneBot? ontbot { get; set; }
+        public OneBot? onebot { get; set; }
         public Guild? guild { get; set; }
         public OSS? oss { get; set; }
         public Database? database { get; set; }
@@ -80,7 +80,7 @@ public class Config
                     clientId = 0,
                     clientSecret = ""
                 },
-                ontbot = new()
+                onebot = new()
                 {
                     managementGroup = 0,
                     host = "localhost",

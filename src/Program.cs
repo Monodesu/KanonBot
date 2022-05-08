@@ -101,7 +101,7 @@ Log.Information("初始化成功 {@config}", config);
 var ExitEvent = new ManualResetEvent(false);
 var drivers = new Drivers();
 drivers.append(
-    new OneBot.Server($"ws://0.0.0.0:{config.ontbot?.serverPort}")
+    new OneBot.Server($"ws://0.0.0.0:{config.onebot?.serverPort}")
     .onMessage((target) =>
     {
         var api = (target.socket as OneBot.Server.Socket)!.api;
@@ -111,7 +111,7 @@ drivers.append(
         switch (target.raw)
         {
             case OneBot.Models.GroupMessage g:
-                if (g.GroupId == config.ontbot!.managementGroup) 
+                if (g.GroupId == config.onebot!.managementGroup) 
                 {
                     target.reply(target.msg);
                 }
