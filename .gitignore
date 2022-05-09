@@ -365,3 +365,4 @@ FodyWeavers.xsd
 cqhttp/
 logs/
 config.toml
+work/

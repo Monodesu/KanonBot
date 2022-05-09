@@ -160,7 +160,7 @@ drivers.append(
         var messageData = (target.raw as Guild.Models.MessageData)!;
         Log.Information("← 收到消息 {0}", target.msg);
         Log.Information("↑ 详情 {@0}", messageData);
-        Log.Information("↑ {@0}", Json.Serialize(messageData.Attachments));
+        Log.Information("↑ 附件 {@0}", Json.Serialize(messageData.Attachments));
         // var res = api.SendMessage(messageData.ChannelID, new Guild.Models.SendMessageData() {
         //     MessageId = messageData.ID,
         //     MessageReference = new() { MessageId = messageData.ID }

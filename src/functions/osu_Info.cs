@@ -82,7 +82,7 @@ namespace KanonBot.functions
             if (data.prevUserInfo.daysBefore > 0) isDataOfDayAvaiavle = true;
             MemoryStream img = LegacyImage.Draw.DrawInfo(data, bannerStatus, isBonded, isDataOfDayAvaiavle);
             img.TryGetBuffer(out ArraySegment<byte> buffer);
-            target.reply(new Chain().msg("test").image($"{Convert.ToBase64String(buffer.Array, 0, (int)img.Length)}", ImageSegment.Type.Base64));
+            target.reply(new Chain().msg("test").image(Convert.ToBase64String(buffer.Array, 0, (int)img.Length), ImageSegment.Type.Base64));
             //AnnualPass(data.userInfo.userId, data.userInfo.mode, data.userInfo.totalHits); //季票内容
         }
     }
