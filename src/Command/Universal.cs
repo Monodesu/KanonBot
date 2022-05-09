@@ -7,21 +7,21 @@ namespace KanonBot.command_parser
     {
         public static void Parser(Target target)
         {
-            var cmd = String.Empty;
+            string? cmd = null;
             var msg = target.msg;
-            var isCommand = true;
+            if (msg.StartsWith(new Message.AtSegment(target.account!, target.platform!.Value)))
+                msg = Message.Chain.FromList(msg.ToList().Slice(1, msg.Length()));
+
             if (msg.StartsWith("!") || msg.StartsWith("/") || msg.StartsWith("！"))
-                cmd = msg.Build();
-            else if (msg.StartsWith(new Message.AtSegment(target.account!, target.platform!.Value)))
-                cmd = Message.Chain.FromList(msg.ToList().Slice(1, msg.Length())).Build();
-            else
-                isCommand = false;
-
-
-            if (isCommand)
             {
-                // cmd = cmd[0] < 0 ? cmd[3..] : cmd[1..]; // c#用utf8编码，无需处理中文
+                cmd = msg.Build();
                 cmd = cmd.Substring(1); //删除命令唤起符
+                // cmd = cmd[0] < 0 ? cmd[3..] : cmd[1..]; // c#用utf8编码，无需处理中文
+            }
+
+
+            if (cmd != null)
+            {
                 cmd = cmd.ToLower(); //转小写
                 cmd = Utils.ToDBC(cmd); //转半角
                 // cmd = Utils.ParseAt(cmd);
