@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using System.Net;
 using Serilog;
 
-namespace KanonBot.src.API
+namespace KanonBot.API
 {
     public static class Osu
     {

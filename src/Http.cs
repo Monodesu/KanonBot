@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 
-namespace KanonBot.src
+namespace KanonBot
 {
     public class Http
     {

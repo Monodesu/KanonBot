@@ -1,18 +1,19 @@
 ﻿#pragma warning disable CS8602 // 解引用可能出现空引用。
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using KanonBot.Drivers;
 using KanonBot.Message;
-using KanonBot.src.API;
+using KanonBot.API;
 
-namespace KanonBot.src.functions
+namespace KanonBot.functions
 {
     public static class Accounts
     {
-        public static void regAccount(Target target, string cmd)
+        public struct AccInfo
+        {
+            public string platform;
+            public string uid;
+        }
+        public static void RegAccount(Target target, string cmd)
         {
             //var is_private_msg = target.raw switch
             //{
@@ -123,7 +124,7 @@ namespace KanonBot.src.functions
             }
         }
 
-        public static void bindService(Target target, string cmd)
+        public static void BindService(Target target, string cmd)
         {
             string uid = "-1", platform = "none";
             switch (target.socket)
@@ -183,6 +184,41 @@ namespace KanonBot.src.functions
             {
                 target.reply(new Chain().msg("请按照以下格式进行绑定。\r\n !set osu 您的osu用户名")); return;
             }
+        }
+
+        public static long CheckAccount(string uid, string platform)
+        {
+            var globaluserinfo = Database.Client.GetUsersByUID(uid, platform);
+            if (globaluserinfo?.uid == null) return -1;
+            return globaluserinfo.uid;
+        }
+
+        public static Database.Model.Users_osu? CheckOsuAccount(long uid)
+        {
+            var db_osu_userinfo = Database.Client.GetOSUUsersByUID(uid);
+            if (db_osu_userinfo == null) return null;
+            return db_osu_userinfo;
+        }
+
+        public static AccInfo GetAccInfo(Target target)
+        {
+            switch (target.socket)
+            {
+                case Guild:
+                    if (target.raw is Guild.Models.MessageData g)
+                    {
+                        return new AccInfo() { platform = "qguild", uid = g.Author.ID };
+                    }
+                    break;
+                case OneBot.Server:
+                    if (target.raw is OneBot.Models.Sender o)
+                    {
+                        return new AccInfo() { platform = "qq", uid = o.UserId.ToString() };
+                    }
+                    break;
+                default: return new() { platform = "", uid = "" };
+            }
+            return new() { platform = "", uid = "" };
         }
     }
 }

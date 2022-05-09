@@ -5,7 +5,7 @@ using KanonBot.Drivers;
 using KanonBot.Event;
 using KanonBot;
 using KanonBot.Serializer;
-using KanonBot.src.command_parser;
+using KanonBot.command_parser;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
@@ -36,7 +36,7 @@ if (config.debug)
                 
 Log.Logger = log.CreateLogger();
 //初始化kanonbot相关内容
-KanonBot.src.API.Osu.CheckToken();
+KanonBot.API.Osu.CheckToken();
 
 //结束
 Log.Information("初始化成功 {@config}", config);

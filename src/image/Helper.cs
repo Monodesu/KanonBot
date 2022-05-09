@@ -1,18 +1,6 @@
 ﻿#pragma warning disable IDE0044 // 添加只读修饰符
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.CommandLine;
-using System.CommandLine.NamingConventionBinder;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Drawing;
-using SixLabors.Fonts;
 using Microsoft.CodeAnalysis;
 using CommandLine;
 

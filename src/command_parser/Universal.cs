@@ -1,7 +1,7 @@
 ﻿using KanonBot.Drivers;
-using KanonBot.src.functions;
+using KanonBot.functions;
 
-namespace KanonBot.src.command_parser
+namespace KanonBot.command_parser
 {
     public static class Universal
     {
@@ -26,10 +26,9 @@ namespace KanonBot.src.command_parser
                 catch { rootCmd = cmd; }
                 switch (rootCmd)
                 {
-                    case "reg": Accounts.regAccount(target, childCmd); return;
-                    case "bind":Accounts.bindService(target, childCmd); return;
-                    case "info":
-                        return;
+                    case "reg": Accounts.RegAccount(target, childCmd); return;
+                    case "bind": Accounts.BindService(target, childCmd); return;
+                    case "info": OSU.Info(target, childCmd); return;
                     case "recent":
                         return;
                     case "re":
