@@ -13,7 +13,8 @@ public class Target
 
     // 这里的account是一个字符串，可以是qq号，discord号，等等
     // 之后将会自动解析成猫猫独有的账户类型以统一管理
-    // public string account = String.Empty;
+    public Platform? platform;
+    public string? account;
 
     // 原平台消息结构
     public object? raw;

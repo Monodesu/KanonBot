@@ -25,6 +25,7 @@ public interface IDriver
 }
 public interface ISocket
 {
+    string? selfID { get; }
     void Send(string message);
     void Send(Object obj) => Send(Json.Serialize(obj));
 }

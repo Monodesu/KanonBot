@@ -5,7 +5,7 @@ using Serilog;
 
 
 namespace KanonBot.API;
-public class OSS
+public class Ali
 {
     private static Config.OSS config = Config.inner!.oss!;
     public static string? PutFile(string key, Stream data)

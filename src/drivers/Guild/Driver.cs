@@ -16,6 +16,7 @@ namespace KanonBot.Drivers;
 public partial class Guild : ISocket, IDriver
 {
     public static readonly Platform platform = Platform.Guild;
+    public string? selfID { get; private set; }
     IWebsocketClient instance;
     Action<Target> msgAction;
     Action<ISocket, IEvent> eventAction;
@@ -88,12 +89,15 @@ public partial class Guild : ISocket, IDriver
             case Enums.EventType.Ready:
                 var readyData = (obj.Data as JObject)?.ToObject<Models.ReadyData>();
                 this.SessionId = readyData!.SessionId;
+                this.selfID = readyData.User.ID;
                 Log.Information("鉴权成功 {@0}", readyData);
                 this.eventAction(this, new Ready(readyData.User.ID, Platform.Guild));
                 break;
             case Enums.EventType.AtMessageCreate:
                 var MessageData = (obj.Data as JObject)?.ToObject<Models.MessageData>();
                 this.msgAction(new Target() {
+                    platform = Platform.Guild,
+                    account = this.selfID,
                     msg = Message.Parse(MessageData!),
                     raw = MessageData,
                     socket = this

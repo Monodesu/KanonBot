@@ -29,7 +29,7 @@ namespace KanonBot.functions
                 { target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return; }
 
                 // 验证osu信息
-                var DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform).uid);
+                var DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid);
                 if (DBOsuInfo == null)
                 { target.reply(new Chain().msg("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。")); return; }
 
@@ -82,7 +82,7 @@ namespace KanonBot.functions
             if (data.prevUserInfo.daysBefore > 0) isDataOfDayAvaiavle = true;
             MemoryStream img = LegacyImage.Draw.DrawInfo(data, bannerStatus, isBonded, isDataOfDayAvaiavle);
             img.TryGetBuffer(out ArraySegment<byte> buffer);
-            target.reply(new Chain().msg("test").image(Convert.ToBase64String(buffer.Array, 0, (int)img.Length), ImageSegment.Type.Base64));
+            target.reply(new Chain().msg("test").image(Convert.ToBase64String(buffer.Array!, 0, (int)img.Length), ImageSegment.Type.Base64));
             //AnnualPass(data.userInfo.userId, data.userInfo.mode, data.userInfo.totalHits); //季票内容
         }
     }

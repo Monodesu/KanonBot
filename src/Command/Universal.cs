@@ -7,15 +7,24 @@ namespace KanonBot.command_parser
     {
         public static void Parser(Target target)
         {
-            string cmd;
-            if (target.msg.GetList()[0] is Message.AtSegment) { cmd = target.msg.GetList()[1].Build().ToString(); }
-            else cmd = target.msg.GetList()[0].Build().ToString();
-            if (cmd.IndexOf("!") == 0 || cmd.IndexOf("/") == 0 || cmd.IndexOf("！") == 0)
+            var cmd = String.Empty;
+            var msg = target.msg;
+            var isCommand = true;
+            if (msg.StartsWith("!") || msg.StartsWith("/") || msg.StartsWith("！"))
+                cmd = msg.Build();
+            else if (msg.StartsWith(new Message.AtSegment(target.account!, target.platform!.Value)))
+                cmd = Message.Chain.FromList(msg.ToList().Slice(1, msg.Length())).Build();
+            else
+                isCommand = false;
+
+
+            if (isCommand)
             {
-                cmd = cmd[0] < 0 ? cmd[3..] : cmd[1..]; //删除命令唤起符
+                // cmd = cmd[0] < 0 ? cmd[3..] : cmd[1..]; // c#用utf8编码，无需处理中文
+                cmd = cmd.Substring(1); //删除命令唤起符
                 cmd = cmd.ToLower(); //转小写
                 cmd = Utils.ToDBC(cmd); //转半角
-                                        // cmd = Utils.ParseAt(cmd);
+                // cmd = Utils.ParseAt(cmd);
 
                 string rootCmd, childCmd = "";
                 try
@@ -26,6 +35,7 @@ namespace KanonBot.command_parser
                 catch { rootCmd = cmd; }
                 switch (rootCmd)
                 {
+                    case "test": Test.run(target, childCmd); return;
                     case "reg": Accounts.RegAccount(target, childCmd); return;
                     case "bind": Accounts.BindService(target, childCmd); return;
                     case "info": OSU.Info(target, childCmd); return;

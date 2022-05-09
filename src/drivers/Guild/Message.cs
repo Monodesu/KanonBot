@@ -18,10 +18,10 @@ public partial class Guild
         public static Models.SendMessageData Build(Models.SendMessageData data, Chain msgChain)
         {
             var content = String.Empty;
-            foreach (var msg in msgChain.GetList())
+            foreach (var msg in msgChain.ToList())
             {
                 var tmp = msg switch {
-                    TextSegment text => text.value,
+                    TextSegment text => Utils.GuildEscape(text.value),
                     EmojiSegment face => $"<emoji:{face.value}>",
                     AtSegment at => at.platform switch {
                         Platform.Guild => at.value switch {
@@ -37,9 +37,9 @@ public partial class Guild
 
                 if (msg is ImageSegment image) {
                     data.ImageUrl = image.t switch {
-                        ImageSegment.Type.Base64 => OSS.PutFile(Utils.Byte2Stream(Convert.FromBase64String(image.value)), "jpg", true),
+                        ImageSegment.Type.Base64 => Ali.PutFile(Utils.Byte2Stream(Convert.FromBase64String(image.value)), "jpg", true),
                         ImageSegment.Type.Url => image.value,
-                        ImageSegment.Type.File => OSS.PutFile(Utils.LoadFile2Stream(image.value), "jpg", true),
+                        ImageSegment.Type.File => Ali.PutFile(Utils.LoadFile2Stream(image.value), "jpg", true),
                         _ => throw new ArgumentException("不支持的图片类型")
                     };
                 }

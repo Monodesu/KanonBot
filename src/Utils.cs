@@ -3,8 +3,13 @@ using System.Reflection;
 using System.ComponentModel;
 
 namespace KanonBot;
-class Utils
+
+static class Utils
 {
+    public static List<T> Slice<T>(this List<T> myList, int startIndex, int endIndex)
+    {
+        return myList.Skip(startIndex).Take(endIndex - startIndex + 1).ToList();
+    }
     public static Stream LoadFile2Stream(string filePath)
     {
         FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -258,7 +263,7 @@ class Utils
         for (int i = 0; i < t1[1].Length; i++) { t2[i] = "*"; }
         t2[0] = t1[1][0].ToString();
         t2[t1[1].Length - 1] = t1[1][t1[1].Length - 1].ToString();
-        t2[t1[1].IndexOf(".")] = "[dot]";
+        t2[t1[1].IndexOf(".")] = ".";
         foreach (string s in t2) { ret += s; }
         return ret;
     }

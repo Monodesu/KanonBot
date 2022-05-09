@@ -21,10 +21,12 @@ public partial class OneBot
         {
             public API api;
             IWebSocketConnection socket;
+            public string? selfID { get; private set; }
             public Socket(IWebSocketConnection socket)
             {
                 this.api = new(this);
                 this.socket = socket;
+                this.selfID = socket.ConnectionInfo.Headers["X-Self-ID"];
             }
             public void Send(string message)
             {
@@ -64,11 +66,6 @@ public partial class OneBot
         {
             // 获取请求头数据
             // 数据验证失败后直接断开链接
-            if (!socket.ConnectionInfo.Headers.TryGetValue("X-Self-ID", out string? selfId))
-            {
-                this.Disconnect(socket);
-                return;
-            }
 
             if (!socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role", out string? role))
             {
@@ -138,6 +135,8 @@ public partial class OneBot
                             }
                             var target = new Target
                             {
+                                platform = Platform.OneBot,
+                                account = socket.selfID,
                                 msg = Message.Parse(obj!.MessageList),
                                 raw = obj,
                                 socket = socket

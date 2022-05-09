@@ -112,6 +112,11 @@ public class Chain
         this.msgList = new();
     }
 
+    public static Chain FromList(List<IMsgSegment> list)
+    {
+        return new Chain { msgList = list };
+    }
+
     public void Add(IMsgSegment n)
     {
         this.msgList.Add(n);
@@ -129,10 +134,11 @@ public class Chain
         return this;
     }
 
-    public List<IMsgSegment> GetList()
+    public List<IMsgSegment> ToList()
     {
         return this.msgList;
     }
+
 
     public string Build()
     {
@@ -148,12 +154,20 @@ public class Chain
     {
         return this.Build();
     }
-
+    
+    public int Length() => this.msgList.Count;
     public bool StartsWith(string s)
     {
         if (this.msgList.Count == 0)
             return false;
         else
             return this.msgList[0] is TextSegment t && t.value.StartsWith(s);
+    }
+    public bool StartsWith(AtSegment at)
+    {
+        if (this.msgList.Count == 0)
+            return false;
+        else
+            return this.msgList[0] is AtSegment t && t.value == at.value && t.platform == at.platform;
     }
 }

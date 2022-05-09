@@ -19,7 +19,7 @@ public partial class OneBot
 
         IWebsocketClient instance;
         public API api;
-
+        public string? selfID { get; private set; }
         public Client(string url)
         {
             // 初始化
@@ -94,6 +94,8 @@ public partial class OneBot
                             }
                             var target = new Target
                             {
+                                platform = Platform.OneBot,
+                                account = this.selfID,
                                 msg = Message.Parse(obj!.MessageList),
                                 raw = obj,
                                 socket = this
@@ -104,11 +106,18 @@ public partial class OneBot
                         case "meta_event":
                             var metaEventType = (string?)m["meta_event_type"];
                             if (metaEventType == "heartbeat")
+                            {
                                 this.eventAction(this, new HeartBeat((long)m["time"]!));
+                            }
                             else if (metaEventType == "lifecycle")
-                                this.eventAction(this, new Ready((string)m["self_id"]!, Platform.OneBot));
+                            {
+                                this.selfID = (string)m["self_id"]!;
+                                this.eventAction(this, new Ready(this.selfID, Platform.OneBot));
+                            }
                             else
+                            {
                                 this.eventAction(this, new RawEvent(m));
+                            }
 
                             break;
 
