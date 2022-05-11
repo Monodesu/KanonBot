@@ -87,7 +87,7 @@ namespace KanonBot.LegacyImage
             {
                 Http.DownloadFile(data.userInfo.avatarUrl, avatarPath);
             }
-            Img avatar = Img.Load(avatarPath);
+            Img avatar = Img.Load(avatarPath).CloneAs<Rgba32>();
             avatar.Mutate(x => x.Resize(190, 190).RoundCorner(new Size(190, 190), 40));
             info.Mutate(x => x.DrawImage(avatar, new Point(39, 55), 1));
 
@@ -650,7 +650,7 @@ namespace KanonBot.LegacyImage
                 {
                     Http.DownloadFile(data.scoreInfo.userAvatarUrl, avatarPath);
                 }
-                Img avatar = Img.Load(avatarPath);
+                Img avatar = Img.Load(avatarPath).CloneAs<Rgba32>();
                 avatar.Mutate(x => x.Resize(80, 80).RoundCorner(new Size(80, 80), 40));
                 score.Mutate(
                     x => x.Fill(
@@ -769,6 +769,7 @@ namespace KanonBot.LegacyImage
 
                 // score
                 textOptions.HorizontalAlignment = HorizontalAlignment.Center;
+                textOptions.Font = new Font(TorusRegular, 40);
                 textOptions.Origin = new PointF(980, 750);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, data.scoreInfo.score.ToString("N0"), new SolidBrush(Color.White), null));
                 if (data.scoreInfo.mode == "fruits")

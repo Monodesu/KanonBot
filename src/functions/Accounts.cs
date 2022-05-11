@@ -186,13 +186,16 @@ namespace KanonBot.functions
             }
         }
 
-        public static long CheckAccount(string uid, string platform)
+        public static Database.Model.Users GetAccount(string uid, string platform)
         {
             var globaluserinfo = Database.Client.GetUsersByUID(uid, platform);
-            if (globaluserinfo?.uid == null) return -1;
-            return globaluserinfo.uid;
+            return globaluserinfo!;
         }
-
+        public static Database.Model.Users GetAccount(long osu_uid)
+        {
+            var globaluserinfo = Database.Client.GetUsersByOsuUID(osu_uid);
+            return globaluserinfo!;
+        }
         public static Database.Model.Users_osu? CheckOsuAccount(long uid)
         {
             var db_osu_userinfo = Database.Client.GetOSUUsersByUID(uid);

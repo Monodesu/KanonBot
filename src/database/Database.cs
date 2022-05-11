@@ -112,6 +112,20 @@ public class Client
                 return null;
         }
     }
+    static public Model.Users? GetUsersByOsuUID(long osu_uid)
+    {
+        var db = GetInstance();
+        var li1 = db.Queryable<Model.Users>().Where(it => it.uid == GetOsuUsersByOsuUID(osu_uid).uid).ToList();
+        if (li1.Count > 0) return li1[0];
+        return null;
+    }
+    static public Model.Users_osu? GetOsuUsersByOsuUID(long osu_uid)
+    {
+        var db = GetInstance();
+        var li1 = db.Queryable<Model.Users_osu>().Where(it => it.osu_uid == osu_uid).ToList();
+        if (li1.Count > 0) return li1[0];
+        return null;
+    }
 
     static public Model.Users_osu GetOSUUsers(long osu_uid)
     {

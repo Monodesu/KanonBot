@@ -19,7 +19,7 @@ namespace KanonBot.functions.osu
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (Accounts.CheckAccount(AccInfo.uid, AccInfo.platform) == -1)
+                if (Accounts.GetAccount(AccInfo.uid, AccInfo.platform)!.uid == -1)
                 { target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return; }
 
                 // 验证osu信息
@@ -28,13 +28,15 @@ namespace KanonBot.functions.osu
                 { target.reply(new Chain().msg("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。")); return; }
 
                 // 验证osu信息
-                OnlineOsuInfo = Osu.GetUser(DBOsuInfo.osu_uid);
+                try { OnlineOsuInfo = Osu.GetUser(DBOsuInfo.osu_uid); }
+                catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 is_bounded = true;
             }
             else
             {
                 // 验证osu信息
-                OnlineOsuInfo = Osu.GetUser(command.osu_username);
+                try { OnlineOsuInfo = Osu.GetUser(command.osu_username); }
+                catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 is_bounded = false;
             }
 
