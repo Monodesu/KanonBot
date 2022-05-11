@@ -1,5 +1,6 @@
 ﻿using KanonBot.Drivers;
 using KanonBot.functions;
+using KanonBot.functions.osu;
 
 namespace KanonBot.command_parser
 {
@@ -38,15 +39,14 @@ namespace KanonBot.command_parser
                     case "test": Test.run(target, childCmd); return;
                     case "reg": Accounts.RegAccount(target, childCmd); return;
                     case "bind": Accounts.BindService(target, childCmd); return;
-                    case "info": OSU.Info(target, childCmd); return;
+                    case "info": Info.Execute(target, childCmd); return;
                     case "recent":
                         return;
                     case "re":
                         return;
                     case "pr":
                         return;
-                    case "bp":
-                        return;
+                    case "bp": BestPerformance.Execute(target, childCmd); return;
                     case "score":
                         return;
                     case "ppvs":

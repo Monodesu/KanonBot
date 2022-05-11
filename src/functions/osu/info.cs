@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using KanonBot.Drivers;
+﻿using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
 
-namespace KanonBot.functions
+namespace KanonBot.functions.osu
 {
-    public static class OSU
+    public class Info
     {
-        public static void Info(Target target, string cmd)
+        public static void Execute(Target target, string cmd)
         {
             LegacyImage.Draw.UserPanelData data = new();
             int bannerStatus = 0;

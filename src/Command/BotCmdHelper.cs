@@ -13,7 +13,8 @@ namespace KanonBot
             public string osu_mode, osu_username, osu_mods;           //用于获取具体要查询的模式，未提供返回osu
             public long
                 osu_user_id,
-                bid, order_number; //用于info的查询n天之前、pr，bp的序号，score的bid，如未提供则返回0
+                bid; 
+            public int order_number;//用于info的查询n天之前、pr，bp的序号，score的bid，如未提供则返回0
             public bool res; //是否输出高精度图片
             public bool selfquery;
         }
@@ -68,9 +69,9 @@ namespace KanonBot
                     // arg2 = osu_mode
                     // arg3 = osu_days_before_to_query
                     param.osu_username = arg1;
-                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2)) : "";
+                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2[1..])) : "";
                     if (arg3 == "") param.order_number = 0;
-                    else param.order_number = long.Parse(arg3[1..]);
+                    else param.order_number = int.Parse(arg3[1..]);
                     if (param.osu_username == "") param.selfquery = true;
                 }
                 // 处理pr/bp/re解析
@@ -80,9 +81,9 @@ namespace KanonBot
                     // arg2 = osu_mode
                     // arg3 = order_number (序号)
                     param.osu_username = arg1;
-                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2)) : "";
+                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2[1..])) : "";
                     if (arg3 == "") param.order_number = 1; //成绩必须为1
-                    else param.order_number = long.Parse(arg3[1..]);
+                    else param.order_number = int.Parse(arg3[1..]);
                     if (param.osu_username == "") param.selfquery = true;
                 }
                 // 处理score解析
@@ -93,10 +94,10 @@ namespace KanonBot
                     // arg3 = bid
                     // arg4 = mods
                     param.osu_username = arg1;
-                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2)) : "";
+                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2[1..])) : "";
                     param.osu_mods = arg4;
-                    if (arg3 == "") param.order_number = -1; //bid必须有效，否则返回错误
-                    else param.order_number = long.Parse(arg3[1..]);
+                    if (arg3 == "") param.order_number = 1; //bid必须有效，否则返回1
+                    else { var index = int.Parse(arg3[1..]); param.order_number = index < 1 ? -1 : index; }
                     if (param.osu_username == "") param.selfquery = true;
                 }
             }
