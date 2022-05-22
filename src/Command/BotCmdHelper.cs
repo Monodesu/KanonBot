@@ -13,7 +13,7 @@ namespace KanonBot
             public string osu_mode, osu_username, osu_mods;           //用于获取具体要查询的模式，未提供返回osu
             public long
                 osu_user_id,
-                bid; 
+                bid;
             public int order_number;//用于info的查询n天之前、pr，bp的序号，score的bid，如未提供则返回0
             public bool res; //是否输出高精度图片
             public bool selfquery;
@@ -89,15 +89,15 @@ namespace KanonBot
                 // 处理score解析
                 else if (type == Func_type.Score)
                 {
-                    // arg1 = username
+                    // arg1 = bid
                     // arg2 = osu_mode
-                    // arg3 = bid
+                    // arg3 = username
                     // arg4 = mods
-                    param.osu_username = arg1;
+                    param.osu_username = arg3;
                     param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2[1..])) : "";
-                    param.osu_mods = arg4;
-                    if (arg3 == "") param.order_number = 1; //bid必须有效，否则返回1
-                    else { var index = int.Parse(arg3[1..]); param.order_number = index < 1 ? -1 : index; }
+                    param.osu_mods = arg4 != "" ? arg4[1..] : "";
+                    if (arg1 == "") param.order_number = -1; //bid必须有效，否则返回 -1
+                    else { var index = int.Parse(arg1); param.order_number = index < 1 ? -1 : index; }
                     if (param.osu_username == "") param.selfquery = true;
                 }
             }

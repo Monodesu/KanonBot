@@ -1,11 +1,10 @@
 ﻿using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
-using Polly;
 
 namespace KanonBot.functions.osu
 {
-    public class BestPerformance
+    public class Score
     {
         public static void Execute(Target target, string cmd)
         {
@@ -14,7 +13,7 @@ namespace KanonBot.functions.osu
             Database.Model.Users_osu DBOsuInfo;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.BestPerformance);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Score);
             if (command.selfquery)
             {
                 // 验证账户
@@ -55,15 +54,31 @@ namespace KanonBot.functions.osu
             // 解析模式
             try { mode = Osu.Modes[int.Parse(command.osu_mode)]; } catch { mode = "osu"; }
 
-            // 判断给定的bp序号是否在合法的范围内
-            // if (command.order_number == -1) { target.reply(new Chain().msg("猫猫找不到该BP。")); return; }
+            // 解析Mod
+            List<string> mods = new();
+            try
+            {
+                mods = Enumerable.Range(0, command.osu_mods.Length / 2)
+                    .Select(p =>
+                        new string(
+                            command.osu_mods
+                            .AsSpan()
+                            .Slice(p * 2, 2)
+                        ).ToUpper()
+                    ).ToList<string>();
+            }
+            catch { }
 
+            // 判断是否给定了bid
+            if (command.order_number == -1) { target.reply(new Chain().msg("猫猫找不到该谱面。")); return; }
             var scorePanelData = new LegacyImage.Draw.ScorePanelData();
-            List<Osu.ScoreInfo> scoreInfos;
-            try { scoreInfos = Osu.GetUserScores(OnlineOsuInfo.userId, "best", mode, 1, command.order_number - 1); }
-            catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply(new Chain().msg("猫猫找不到该BP。")); return; } else throw; }
-            if (scoreInfos.Count > 0) scorePanelData.scoreInfo = scoreInfos[0];
-            else { target.reply(new Chain().msg("猫猫找不到该BP。")); return; }
+
+            try
+            {
+                var hasScore = Osu.GetUserBeatmapScore(out scorePanelData.scoreInfo, OnlineOsuInfo.userId, command.order_number, mods, mode);
+                if (!hasScore) { target.reply(new Chain().msg("猫猫没有找到你的成绩")); return; }
+            }
+            catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply(new Chain().msg("猫猫没有找到该谱面。")); return; } else throw; }
 
             // 获取绘制数据
             try
@@ -175,4 +190,9 @@ namespace KanonBot.functions.osu
             target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)img.Length), ImageSegment.Type.Base64));
         }
     }
+
+
+
+
 }
+

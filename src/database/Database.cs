@@ -153,4 +153,52 @@ public class Client
         try { d2.Insertable(d).ExecuteCommand(); return true; } catch { return false; }
 
     }
+
+    static public bool UpdateOsuPPlusData(API.Osu.PPlusInfo ppdata, long osu_uid)
+    {
+        if (ppdata.is_valid)
+        {
+            var db = GetInstance();
+            var data = db.Queryable<Model.OsuPPlus>().First(it => it.uid == osu_uid);
+            if (data != null)
+            {
+                var result = db.Updateable<Model.OsuPPlus>()
+                                .SetColumns(it => new Model.OsuPPlus()
+                                {
+                                    pp = ppdata.pp,
+                                    acc = ppdata.acc,
+                                    flow = ppdata.flow,
+                                    jump = ppdata.jump,
+                                    pre = ppdata.pre,
+                                    spd = ppdata.spd,
+                                    sta = ppdata.sta
+                                })
+                                .Where(it => it.uid == osu_uid)
+                                .ExecuteCommandHasChange();
+                if (!result) { return false; }
+                return true;
+            }
+            // 数据库没有数据，新插入数据
+            try
+            {
+                var init = new Model.OsuPPlus();
+                init.uid = osu_uid;
+                init.pp = ppdata.pp;
+                init.acc = ppdata.acc;
+                init.flow = ppdata.flow;
+                init.jump = ppdata.jump;
+                init.pre = ppdata.pre;
+                init.spd = ppdata.spd;
+                init.sta = ppdata.sta;
+                db.Insertable(init).ExecuteCommand();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
 }

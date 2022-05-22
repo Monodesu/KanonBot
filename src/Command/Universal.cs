@@ -40,31 +40,27 @@ namespace KanonBot.command_parser
                     case "reg": Accounts.RegAccount(target, childCmd); return;
                     case "bind": Accounts.BindService(target, childCmd); return;
                     case "info": Info.Execute(target, childCmd); return;
-                    case "recent":
-                        return;
-                    case "re":
-                        return;
-                    case "pr":
-                        return;
+                    case "recent": Recent.Execute(target, childCmd, true); return;
+                    case "re": Recent.Execute(target, childCmd, true); return;
+                    case "pr": Recent.Execute(target, childCmd, false); return;
                     case "bp": BestPerformance.Execute(target, childCmd); return;
-                    case "score":
-                        return;
-                    case "ppvs":
-                        return;
-                    case "badge":
-                        return;
-                    case "help":
-                        return;
+                    case "score": Score.Execute(target, childCmd); return;
+                    case "help": Help.Execute(target, childCmd); return;
+                    case "update": Update.Execute(target, childCmd); return;
                     case "set": // set osu_mode/osu_infopanel
-                        return;
-                    case "update":
                         return;
                     case "get": // get bonuspp/elo/rolecost/bpht/todaybp/annualpass
                         return;
-                    // Admin
-                    case "sudo":
+                    case "badge":
                         return;
-                    case "su":
+                    case "ppvs":
+                        return;
+
+
+                    // Admin
+                    case "sudo": //管理员
+                        return;
+                    case "su": //超级管理员
                         return;
                     case "dailyupdate":
                         return;

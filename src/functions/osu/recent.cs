@@ -1,20 +1,19 @@
 ﻿using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
-using Polly;
 
 namespace KanonBot.functions.osu
 {
-    public class BestPerformance
+    public class Recent
     {
-        public static void Execute(Target target, string cmd)
+        public static void Execute(Target target, string cmd, bool includeFails = false)
         {
             var is_bounded = false;
             Osu.UserInfo OnlineOsuInfo;
             Database.Model.Users_osu DBOsuInfo;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.BestPerformance);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Recent);
             if (command.selfquery)
             {
                 // 验证账户
@@ -55,15 +54,15 @@ namespace KanonBot.functions.osu
             // 解析模式
             try { mode = Osu.Modes[int.Parse(command.osu_mode)]; } catch { mode = "osu"; }
 
-            // 判断给定的bp序号是否在合法的范围内
-            // if (command.order_number == -1) { target.reply(new Chain().msg("猫猫找不到该BP。")); return; }
+            // 判断给定的序号是否在合法的范围内
+            // if (command.order_number == -1) { target.reply(new Chain().msg("猫猫找不到该最近游玩的成绩。")); return; }
 
             var scorePanelData = new LegacyImage.Draw.ScorePanelData();
             List<Osu.ScoreInfo> scoreInfos;
-            try { scoreInfos = Osu.GetUserScores(OnlineOsuInfo.userId, "best", mode, 1, command.order_number - 1); }
-            catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply(new Chain().msg("猫猫找不到该BP。")); return; } else throw; }
+            try { scoreInfos = Osu.GetUserScores(OnlineOsuInfo.userId, "recent", mode, 1, command.order_number - 1, includeFails); }
+            catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply(new Chain().msg("猫猫找不到该最近游玩的成绩。")); return; } else throw; }
             if (scoreInfos.Count > 0) scorePanelData.scoreInfo = scoreInfos[0];
-            else { target.reply(new Chain().msg("猫猫找不到该BP。")); return; }
+            else { target.reply(new Chain().msg("猫猫找不到该最近游玩的成绩。")); return; }
 
             // 获取绘制数据
             try

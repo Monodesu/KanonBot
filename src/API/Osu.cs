@@ -118,6 +118,7 @@ namespace KanonBot.API
         }
         public struct PPlusInfo
         {
+            public bool is_valid;
             public float pp;
             public int jump,
                 flow,
@@ -523,8 +524,9 @@ namespace KanonBot.API
                 pplus.acc = (int)data["AccuracyTotal"];
                 pplus.spd = (int)data["SpeedTotal"];
                 pplus.sta = (int)data["StaminaTotal"];
+                pplus.is_valid = true;
             }
-            catch { pplus.pp = 0; pplus.jump = 0; pplus.flow = 0; pplus.pre = 0; pplus.acc = 0; pplus.spd = 0; pplus.sta = 0; }
+            catch { pplus.is_valid = false; pplus.pp = 0; pplus.jump = 0; pplus.flow = 0; pplus.pre = 0; pplus.acc = 0; pplus.spd = 0; pplus.sta = 0; }
             return pplus;
         }
     }
