@@ -3,7 +3,7 @@ using KanonBot.Message;
 using KanonBot.API;
 using Polly;
 
-namespace KanonBot.functions.osu
+namespace KanonBot.functions.osubot
 {
     public class BestPerformance
     {

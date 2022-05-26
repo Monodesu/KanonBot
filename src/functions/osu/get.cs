@@ -9,7 +9,7 @@ using KanonBot.API;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
-namespace KanonBot.functions.osu
+namespace KanonBot.functions.osubot
 {
     public class Get
     {

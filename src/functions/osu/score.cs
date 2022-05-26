@@ -2,7 +2,7 @@
 using KanonBot.Message;
 using KanonBot.API;
 
-namespace KanonBot.functions.osu
+namespace KanonBot.functions.osubot
 {
     public class Score
     {

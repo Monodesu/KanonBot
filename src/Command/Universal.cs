@@ -1,6 +1,6 @@
 ﻿using KanonBot.Drivers;
 using KanonBot.functions;
-using KanonBot.functions.osu;
+using KanonBot.functions.osubot;
 
 namespace KanonBot.command_parser
 {
