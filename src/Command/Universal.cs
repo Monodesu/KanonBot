@@ -1,6 +1,6 @@
 ﻿using KanonBot.Drivers;
 using KanonBot.functions;
-using KanonBot.functions.osu;
+using KanonBot.functions.osubot;
 
 namespace KanonBot.command_parser
 {
@@ -47,9 +47,9 @@ namespace KanonBot.command_parser
                     case "score": Score.Execute(target, childCmd); return;
                     case "help": Help.Execute(target, childCmd); return;
                     case "update": Update.Execute(target, childCmd); return;
-                    case "set": // set osu_mode/osu_infopanel
-                        return;
                     case "get": // get bonuspp/elo/rolecost/bpht/todaybp/annualpass
+                        return;
+                    case "set": // set osu_mode/osu_infopanel
                         return;
                     case "badge":
                         return;
