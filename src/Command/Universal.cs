@@ -55,6 +55,7 @@ namespace KanonBot.command_parser
                         return;
                     case "ppvs":
                         return;
+                    case "leeway": Leeway.Execute(target, childCmd); return;
 
 
                     // Admin

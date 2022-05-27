@@ -25,7 +25,8 @@ namespace KanonBot
             BestPerformance,
             Recent,
             PassRecent,
-            Score
+            Score,
+            Leeway
         }
 
         public static Bot_Parameter CmdParser(string cmd, Func_type type)
@@ -99,6 +100,18 @@ namespace KanonBot
                     if (arg1 == "") param.order_number = -1; //bid必须有效，否则返回 -1
                     else { var index = int.Parse(arg1); param.order_number = index < 1 ? -1 : index; }
                     if (param.osu_username == "") param.selfquery = true;
+                }
+                else if (type == Func_type.Leeway)
+                {
+                    // arg1 = bid
+                    // arg2 = osu_mode
+                    // arg3 = 
+                    // arg4 = mods
+                    if (arg1 == "") param.order_number = 0; // 若bid为空，返回0
+                    else { var index = int.Parse(arg1); param.order_number = index < 1 ? -1 : index; }
+                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2[1..])) : "";
+                    param.osu_mods = arg4 != "" ? arg4[1..] : "";
+                    param.selfquery = true; // 只查自己
                 }
             }
             else
