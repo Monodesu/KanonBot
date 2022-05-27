@@ -64,6 +64,7 @@ namespace KanonBot.functions.osubot
                 try
                 {
                     scoreInfos = Osu.GetUserScores(OnlineOsuInfo.userId, "recent", mode, 1, command.order_number - 1, true); // 查询玩家recent
+                    if (scoreInfos.ToArray()[0].mode != "osu") { target.reply(new Chain().msg("Leeway仅支持osu!std模式。")); return; } // 检查谱面是否是std
                     bid = scoreInfos.ToArray()[0].beatmapId; // 从recent获取bid
                 }
                 catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply(new Chain().msg("猫猫找不到该最近游玩的成绩。")); return; } else throw; }
@@ -72,18 +73,20 @@ namespace KanonBot.functions.osubot
             }
 
             // 尝试寻找玩家在该谱面的最高成绩
-            bool hasScore = false;
+            bool hasScore;
             long score = 0;
             var scoreData = new Osu.ScoreInfo();
             List<string> empty_mods = new(); // 要的是最高分，直接给传一个空集合得了
             try
             {
                 hasScore = Osu.GetUserBeatmapScore(out scoreData, OnlineOsuInfo.userId, command.order_number, empty_mods, mode);
-                if (hasScore) { score = scoreData.score; }
+                if (scoreData.mode != "osu") { target.reply(new Chain().msg("Leeway仅支持osu!std模式。")); return; } // 检查谱面是否是std
+                if (hasScore) {
+                    score = scoreData.score;
+                }
             }
             catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply(new Chain().msg("猫猫没有找到该谱面。")); return; } else throw; }
 
-             
 
             // LeewayCalculator
             string beatmap;
@@ -94,12 +97,10 @@ namespace KanonBot.functions.osubot
             Leeway_Calculator lc = new Leeway_Calculator(); // 实例化
 
             string[] mods = lc.GetMods(command.osu_mods.ToUpper()); // 获取mods
-
             int maxScore = lc.CalculateMaxScore(beatmap, mods); // 计算理论值
             string modsString = lc.GetModsString(mods); // 获取模式字符串
 
             string str = "";
-
             str += string.Concat(new string[]
             {
                     bid.ToString(),
