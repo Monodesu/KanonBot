@@ -15,15 +15,11 @@ namespace KanonBot.Drivers;
 public partial class OneBot
 {
     public static readonly Platform platform = Platform.OneBot;
-    Action<Target> msgAction;
-    Action<ISocket, IEvent> eventAction;
+    event IDriver.MessageDelegate? msgAction;
+    event IDriver.EventDelegate? eventAction;
     public OneBot()
     {
         // 初始化变量
-
-        this.msgAction = (t) => { };
-        this.eventAction = (c, e) => { };
-
     }
 
 

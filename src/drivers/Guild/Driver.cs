@@ -18,8 +18,8 @@ public partial class Guild : ISocket, IDriver
     public static readonly Platform platform = Platform.Guild;
     public string? selfID { get; private set; }
     IWebsocketClient instance;
-    Action<Target> msgAction;
-    Action<ISocket, IEvent> eventAction;
+    event IDriver.MessageDelegate? msgAction;
+    event IDriver.EventDelegate? eventAction;
     public API api;
     string AuthToken;
     Guid? SessionId;
@@ -33,8 +33,6 @@ public partial class Guild : ISocket, IDriver
         this.AuthToken = $"Bot {appID}.{token}";
         this.intents = intents;
 
-        this.msgAction = (t) => { };
-        this.eventAction = (c, e) => { };
         this.api = new(AuthToken, sandbox);
 
         // 获取频道ws地址
@@ -91,11 +89,11 @@ public partial class Guild : ISocket, IDriver
                 this.SessionId = readyData!.SessionId;
                 this.selfID = readyData.User.ID;
                 Log.Information("鉴权成功 {@0}", readyData);
-                this.eventAction(this, new Ready(readyData.User.ID, Platform.Guild));
+                this.eventAction?.Invoke(this, new Ready(readyData.User.ID, Platform.Guild));
                 break;
             case Enums.EventType.AtMessageCreate:
                 var MessageData = (obj.Data as JObject)?.ToObject<Models.MessageData>();
-                this.msgAction(new Target() {
+                this.msgAction?.Invoke(new Target() {
                     platform = Platform.Guild,
                     account = this.selfID,
                     msg = Message.Parse(MessageData!),
@@ -108,7 +106,7 @@ public partial class Guild : ISocket, IDriver
                 // 不做任何事
                 break;
             default:
-                this.eventAction(this, new RawEvent(obj));
+                this.eventAction?.Invoke(this, new RawEvent(obj));
                 break;
         }
     }
@@ -189,14 +187,14 @@ public partial class Guild : ISocket, IDriver
 
 
 
-    public IDriver onMessage(Action<Target> action)
+    public IDriver onMessage(IDriver.MessageDelegate action)
     {
-        this.msgAction = action;
+        this.msgAction += action;
         return this;
     }
-    public IDriver onEvent(Action<ISocket, IEvent> action)
+    public IDriver onEvent(IDriver.EventDelegate action)
     {
-        this.eventAction = action;
+        this.eventAction += action;
         return this;
     }
 

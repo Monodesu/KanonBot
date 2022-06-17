@@ -13,13 +13,16 @@ public enum Platform
 {
     Unknown,
     OneBot,
-    Guild
+    Guild,
+    Kaiheila
 }
 
 public interface IDriver
 {
-    IDriver onMessage(Action<Target> action);
-    IDriver onEvent(Action<ISocket, IEvent> action);
+    delegate void MessageDelegate(Target target);
+    delegate void EventDelegate(ISocket socket, IEvent kevent);
+    IDriver onMessage(MessageDelegate action);
+    IDriver onEvent(EventDelegate action);
     Task Start();
     void Dispose();
 }

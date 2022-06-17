@@ -100,29 +100,29 @@ public partial class OneBot
                                 raw = obj,
                                 socket = this
                             };
-                            this.msgAction(target);
+                            this.msgAction?.Invoke(target);
                             break;
 
                         case "meta_event":
                             var metaEventType = (string?)m["meta_event_type"];
                             if (metaEventType == "heartbeat")
                             {
-                                this.eventAction(this, new HeartBeat((long)m["time"]!));
+                                this.eventAction?.Invoke(this, new HeartBeat((long)m["time"]!));
                             }
                             else if (metaEventType == "lifecycle")
                             {
                                 this.selfID = (string)m["self_id"]!;
-                                this.eventAction(this, new Ready(this.selfID, Platform.OneBot));
+                                this.eventAction?.Invoke(this, new Ready(this.selfID, Platform.OneBot));
                             }
                             else
                             {
-                                this.eventAction(this, new RawEvent(m));
+                                this.eventAction?.Invoke(this, new RawEvent(m));
                             }
 
                             break;
 
                         default:
-                            this.eventAction(this, new RawEvent(m));
+                            this.eventAction?.Invoke(this, new RawEvent(m));
                             break;
                     }
                 }
@@ -134,14 +134,14 @@ public partial class OneBot
             }
         }
 
-        public IDriver onMessage(Action<Target> action)
+        public IDriver onMessage(IDriver.MessageDelegate action)
         {
-            this.msgAction = action;
+            this.msgAction += action;
             return this;
         }
-        public IDriver onEvent(Action<ISocket, IEvent> action)
+        public IDriver onEvent(IDriver.EventDelegate action)
         {
-            this.eventAction = action;
+            this.eventAction += action;
             return this;
         }
 

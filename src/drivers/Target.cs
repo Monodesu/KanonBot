@@ -21,6 +21,12 @@ public class Target
 
     // 原平台接口
     public ISocket? socket;
+
+    public bool reply(string m)
+    {
+        return this.reply(new Msg.Chain().msg(m));
+    }
+
     public bool reply(Msg.Chain msgChain)
     {
         switch (this.socket!)
