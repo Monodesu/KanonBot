@@ -37,7 +37,7 @@ public partial class Guild : ISocket, IDriver
 
         // 获取频道ws地址
 
-        var url = api.GetWebsocketUrl();
+        var url = api.GetWebsocketUrl().Result;
 
         // 初始化ws
 
@@ -153,7 +153,7 @@ public partial class Guild : ISocket, IDriver
                 break;
             case Enums.OperationCode.InvalidSession:
                 this.Dispose();      // 销毁客户端
-                throw new KanonError("无效的sessionLog，需要重新鉴权");
+                throw new KanonError("无效的session，需要重新鉴权");
             case Enums.OperationCode.HeartbeatACK:
                 // 无需处理
                 break;

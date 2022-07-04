@@ -14,7 +14,7 @@ public enum Platform
     Unknown,
     OneBot,
     Guild,
-    Kaiheila
+    KOOK
 }
 
 public interface IDriver

@@ -383,7 +383,7 @@ namespace KanonBot.LegacyImage
                             //Logger.Warning(msg);
                             try
                             {
-                                hasBG = Osu.SayoDownloadBeatmapBackgroundImg(data.scoreInfo.beatmapInfo.beatmapsetId, data.scoreInfo.beatmapInfo.beatmapId, bgPath);
+                                hasBG = Osu.SayoDownloadBeatmapBackgroundImg(data.scoreInfo.beatmapInfo.beatmapsetId, data.scoreInfo.beatmapInfo.beatmapId, bgPath).Result;
                             }
                             catch (Exception ex1)
                             {
@@ -398,7 +398,7 @@ namespace KanonBot.LegacyImage
                         Log.Warning(msg);
                         try
                         {
-                            hasBG = Osu.SayoDownloadBeatmapBackgroundImg(data.scoreInfo.beatmapInfo.beatmapsetId, data.scoreInfo.beatmapInfo.beatmapId, bgPath);
+                            hasBG = Osu.SayoDownloadBeatmapBackgroundImg(data.scoreInfo.beatmapInfo.beatmapsetId, data.scoreInfo.beatmapInfo.beatmapId, bgPath).Result;
                         }
                         catch (Exception ex1)
                         {

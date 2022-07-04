@@ -6,7 +6,7 @@ namespace KanonBot.functions.osubot
 {
     public class Info
     {
-        public static void Execute(Target target, string cmd)
+        async public static void Execute(Target target, string cmd)
         {
             #region 验证
             LegacyImage.Draw.UserPanelData data = new();
@@ -30,18 +30,18 @@ namespace KanonBot.functions.osubot
                 var AccInfo = Accounts.GetAccInfo(target);
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
-                { target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return; }
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
                 if (DBOsuInfo == null)
-                { target.reply(new Chain().msg("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。")); return; }
+                { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 取mode信息
                 if (command.osu_mode == "") data.userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(DBOsuInfo.osu_uid, data.userInfo.mode); }
+                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, data.userInfo.mode); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 is_bounded = true;
             }
@@ -51,7 +51,7 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") data.userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(command.osu_username, data.userInfo.mode); }
+                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, data.userInfo.mode); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
@@ -62,7 +62,7 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         data.userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = Osu.GetUser(command.osu_username, data.userInfo.mode); }
+                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, data.userInfo.mode); }
                         catch { OnlineOsuInfo = new Osu.UserInfo(); }
                     }
                 }
@@ -71,8 +71,8 @@ namespace KanonBot.functions.osubot
             // 验证osu信息
             if (OnlineOsuInfo.userName == null)
             {
-                if (is_bounded) { target.reply(new Chain().msg("被办了。")); return; }
-                target.reply(new Chain().msg("猫猫没有找到此用户。")); return;
+                if (is_bounded) { target.reply("被办了。"); return; }
+                target.reply("猫猫没有找到此用户。"); return;
             }
             #endregion
 

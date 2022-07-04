@@ -47,7 +47,7 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        private static void Bonuspp(Target target, string cmd)
+        async private static void Bonuspp(Target target, string cmd)
         {
             #region 验证
             Osu.UserInfo userInfo = new();
@@ -69,18 +69,18 @@ namespace KanonBot.functions.osubot
                 var AccInfo = Accounts.GetAccInfo(target);
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
-                { target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return; }
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
                 if (DBOsuInfo == null)
-                { target.reply(new Chain().msg("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。")); return; }
+                { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 取mode信息
                 if (command.osu_mode == "") userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
+                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 is_bounded = true;
             }
@@ -90,7 +90,7 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(command.osu_username, userInfo.mode!); }
+                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode!); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
@@ -101,7 +101,7 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = Osu.GetUser(command.osu_username, userInfo.mode); }
+                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode); }
                         catch { OnlineOsuInfo = new Osu.UserInfo(); }
                     }
                 }
@@ -110,19 +110,19 @@ namespace KanonBot.functions.osubot
             // 验证osu信息
             if (OnlineOsuInfo.userName == null)
             {
-                if (is_bounded) { target.reply(new Chain().msg("被办了。")); return; }
-                target.reply(new Chain().msg("猫猫没有找到此用户。")); return;
+                if (is_bounded) { target.reply("被办了。"); return; }
+                target.reply("猫猫没有找到此用户。"); return;
             }
             #endregion
 
             // 计算bonuspp
             if (OnlineOsuInfo.pp == 0)
             {
-                target.reply(new Chain().msg($"你最近还没有玩过{OnlineOsuInfo.mode}模式呢。。"));
+                target.reply($"你最近还没有玩过{OnlineOsuInfo.mode}模式呢。。");
                 return;
             }
             List<Osu.ScoreInfo> allBP;
-            allBP = Osu.GetUserScores(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
+            allBP = await Osu.GetUserScores(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
             double scorePP = 0.0, bounsPP = 0.0, pp = 0.0, sumOxy = 0.0, sumOx2 = 0.0, avgX = 0.0, avgY = 0.0, sumX = 0.0;
             List<double> ys = new();
             for (int i = 0; i < allBP.Count; ++i)
@@ -179,10 +179,10 @@ namespace KanonBot.functions.osubot
                 $"原始PP：{scorePP.ToString("0.##")}pp\n" +
                 $"Bonus PP：{bounsPP.ToString("0.##")}pp\n" +
                 $"共计算出 {rankedScores} 个被记录的ranked谱面成绩。";
-            target.reply(new Chain().msg(str));
+            target.reply(str);
         }
 
-        private static void Elo(Target target, string cmd)
+        async private static void Elo(Target target, string cmd)
         {
             #region 验证
             Osu.UserInfo userInfo = new();
@@ -204,18 +204,18 @@ namespace KanonBot.functions.osubot
                 var AccInfo = Accounts.GetAccInfo(target);
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
-                { target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return; }
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
                 if (DBOsuInfo == null)
-                { target.reply(new Chain().msg("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。")); return; }
+                { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 取mode信息
                 if (command.osu_mode == "") userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
+                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 is_bounded = true;
             }
@@ -225,7 +225,7 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(command.osu_username, userInfo.mode!); }
+                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode!); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
@@ -236,7 +236,7 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = Osu.GetUser(command.osu_username, userInfo.mode); }
+                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode); }
                         catch { OnlineOsuInfo = new Osu.UserInfo(); }
                     }
                 }
@@ -245,14 +245,14 @@ namespace KanonBot.functions.osubot
             // 验证osu信息
             if (OnlineOsuInfo.userName == null)
             {
-                if (is_bounded) { target.reply(new Chain().msg("被办了。")); return; }
-                target.reply(new Chain().msg("猫猫没有找到此用户。")); return;
+                if (is_bounded) { target.reply("被办了。"); return; }
+                target.reply("猫猫没有找到此用户。"); return;
             }
             #endregion
 
             try
             {
-                JObject eloInfo = Osu.GetUserEloInfo(OnlineOsuInfo.userId)!;
+                JObject? eloInfo = await Osu.GetUserEloInfo(OnlineOsuInfo.userId);
                 foreach (var key in eloInfo!)
                 {
                     switch (key.Key)
@@ -261,26 +261,26 @@ namespace KanonBot.functions.osubot
                             switch ((int)eloInfo["code"]!)
                             {
                                 case 40009:
-                                    target.reply(new Chain().msg(eloInfo["message"]!.ToString()));
+                                    target.reply(eloInfo["message"]!.ToString());
                                     break;
                                 case 40004:
-                                    target.reply(new Chain().msg($"{(string)eloInfo["message"]!}\n{OnlineOsuInfo.userName}的初始ELO为: {eloInfo["elo"]}"));
+                                    target.reply($"{(string)eloInfo["message"]!}\n{OnlineOsuInfo.userName}的初始ELO为: {eloInfo["elo"]}");
                                     break;
                             }
                             return;
                         case "elo":
-                            target.reply(new Chain().msg($"{OnlineOsuInfo.userName}的ELO为: {eloInfo["elo"]}"));
+                            target.reply($"{OnlineOsuInfo.userName}的ELO为: {eloInfo["elo"]}");
                             return;
                     }
                 }
             }
             catch (Exception ex)
             {
-                target.reply(new Chain().msg($"查询失败, 失败信息: {ex.Message}"));
+                target.reply($"查询失败, 失败信息: {ex.Message}");
             }
         }
 
-        private static void Rolecost(Target target, string cmd)
+        async private static void Rolecost(Target target, string cmd)
         {
             cmd = cmd.Trim();
             Func<Osu.UserInfo, Osu.PPlusInfo, double> occost = (userInfo, pppData) =>
@@ -362,18 +362,18 @@ namespace KanonBot.functions.osubot
                 var AccInfo = Accounts.GetAccInfo(target);
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
-                { target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return; }
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
                 if (DBOsuInfo == null)
-                { target.reply(new Chain().msg("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。")); return; }
+                { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 取mode信息
                 if (command.osu_mode == "") userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
+                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 is_bounded = true;
             }
@@ -383,7 +383,7 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(command.osu_username, userInfo.mode!); }
+                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode!); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
@@ -394,7 +394,7 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = Osu.GetUser(command.osu_username, userInfo.mode); }
+                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode); }
                         catch { OnlineOsuInfo = new Osu.UserInfo(); }
                     }
                 }
@@ -403,31 +403,31 @@ namespace KanonBot.functions.osubot
             // 验证osu信息
             if (OnlineOsuInfo.userName == null)
             {
-                if (is_bounded) { target.reply(new Chain().msg("被办了。")); return; }
-                target.reply(new Chain().msg("猫猫没有找到此用户。")); return;
+                if (is_bounded) { target.reply("被办了。"); return; }
+                target.reply("猫猫没有找到此用户。"); return;
             }
             #endregion
 
             switch (cmd)
             {
                 case "occ":
-                    try { OnlineOsuInfo = Osu.GetUser(OnlineOsuInfo.userId, "osu"); }
-                    catch { target.reply(new Chain().msg($"获取用户信息失败了，请稍后再试。")); }
-                    target.reply(new Chain().msg($"在猫猫杯S1中，{OnlineOsuInfo.userName} 的cost为：{occost(OnlineOsuInfo, pppData)}"));
+                    try { OnlineOsuInfo = await Osu.GetUser(OnlineOsuInfo.userId, "osu"); }
+                    catch { target.reply($"获取用户信息失败了，请稍后再试。"); }
+                    target.reply($"在猫猫杯S1中，{OnlineOsuInfo.userName} 的cost为：{occost(OnlineOsuInfo, pppData)}");
                     break;
                 case "onc":
-                    try { OnlineOsuInfo = Osu.GetUser(OnlineOsuInfo.userId, "osu"); }
-                    catch { target.reply(new Chain().msg($"获取用户信息失败了，请稍后再试。")); }
+                    try { OnlineOsuInfo = await Osu.GetUser(OnlineOsuInfo.userId, "osu"); }
+                    catch { target.reply($"获取用户信息失败了，请稍后再试。"); }
                     var onc = occost(OnlineOsuInfo, pppData);
                     if (onc == -1)
-                        target.reply(new Chain().msg($"{OnlineOsuInfo.userName} 不在参赛范围内。"));
+                        target.reply($"{OnlineOsuInfo.userName} 不在参赛范围内。");
                     else
-                        target.reply(new Chain().msg($"在ONC中，{userInfo.userName} 的cost为：{onc}"));
+                        target.reply($"在ONC中，{userInfo.userName} 的cost为：{onc}");
                     break;
                 case "ost":
-                    try { OnlineOsuInfo = Osu.GetUser(OnlineOsuInfo.userId, "osu"); }
-                    catch { target.reply(new Chain().msg($"获取用户信息失败了，请稍后再试。")); }
-                    var eloInfo = Osu.GetUserEloInfo(userInfo.userId);
+                    try { OnlineOsuInfo = await Osu.GetUser(OnlineOsuInfo.userId, "osu"); }
+                    catch { target.reply($"获取用户信息失败了，请稍后再试。"); }
+                    var eloInfo = await Osu.GetUserEloInfo(userInfo.userId);
                     int elo = 0;
                     foreach (var key in eloInfo!)
                     {
@@ -437,7 +437,7 @@ namespace KanonBot.functions.osubot
                                 switch ((int)eloInfo["code"]!)
                                 {
                                     case 40009:
-                                        target.reply(new Chain().msg(eloInfo["message"]!.ToString()));
+                                        target.reply(eloInfo["message"]!.ToString());
                                         break;
                                     case 40004:
                                         elo = 0;
@@ -451,8 +451,8 @@ namespace KanonBot.functions.osubot
                     }
                     if (elo != 0)
                     {
-                        var matchId = Osu.GetUserEloRecentPlay(userInfo.userId);
-                        var body = Osu.GetMatchInfo(matchId)!["result"]!.ToObject<JObject>();
+                        var matchId = await Osu.GetUserEloRecentPlay(userInfo.userId);
+                        var body = (await Osu.GetMatchInfo(matchId))!["result"]!.ToObject<JObject>();
                         TimeSpan ts = new();
                         foreach (var item in body!)
                         {
@@ -465,15 +465,15 @@ namespace KanonBot.functions.osubot
                             elo = 0;
                         }
                     }
-                    target.reply(new Chain().msg($"在OST中，{userInfo.userName} 的cost为：{ostcost(userInfo.globalRank, elo)}"));
+                    target.reply($"在OST中，{userInfo.userName} 的cost为：{ostcost(userInfo.globalRank, elo)}");
                     break;
                 default:
-                    target.reply(new Chain().msg($"请输入要查询cost的比赛名称的缩写。"));
+                    target.reply($"请输入要查询cost的比赛名称的缩写。");
                     break;
             }
         }
 
-        private static void Bpht(Target target, string cmd)
+        async private static void Bpht(Target target, string cmd)
         {
             #region 验证
             Osu.UserInfo userInfo = new();
@@ -495,18 +495,18 @@ namespace KanonBot.functions.osubot
                 var AccInfo = Accounts.GetAccInfo(target);
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
-                { target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return; }
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
                 if (DBOsuInfo == null)
-                { target.reply(new Chain().msg("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。")); return; }
+                { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 取mode信息
                 if (command.osu_mode == "") userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
+                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 is_bounded = true;
             }
@@ -516,7 +516,7 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(command.osu_username, userInfo.mode!); }
+                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode!); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
@@ -527,7 +527,7 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = Osu.GetUser(command.osu_username, userInfo.mode); }
+                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode); }
                         catch { OnlineOsuInfo = new Osu.UserInfo(); }
                     }
                 }
@@ -536,21 +536,21 @@ namespace KanonBot.functions.osubot
             // 验证osu信息
             if (OnlineOsuInfo.userName == null)
             {
-                if (is_bounded) { target.reply(new Chain().msg("被办了。")); return; }
-                target.reply(new Chain().msg("猫猫没有找到此用户。")); return;
+                if (is_bounded) { target.reply("被办了。"); return; }
+                target.reply("猫猫没有找到此用户。"); return;
             }
             #endregion
 
             List<Osu.ScoreInfo> allBP;
-            allBP = Osu.GetUserScores(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
+            allBP = await Osu.GetUserScores(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
             float totalPP = 0;
             // 如果bp数量小于10则取消
             if (allBP.Count < 10)
             {
                 if (cmd == "")
-                    target.reply(new Chain().msg("你的bp太少啦，多打些吧"));
+                    target.reply("你的bp太少啦，多打些吧");
                 else
-                    target.reply(new Chain().msg($"{OnlineOsuInfo.userName}的bp太少啦，请让ta多打些吧"));
+                    target.reply($"{OnlineOsuInfo.userName}的bp太少啦，请让ta多打些吧");
                 return;
             }
             foreach (var item in allBP)
@@ -566,10 +566,10 @@ namespace KanonBot.functions.osubot
             + $"\n你的 bp{last} 有 {allBP[last - 1].pp:0.##}pp"
             + $"\n你 bp1 与 bp{last} 相差了有 {allBP[0].pp - allBP[last - 1].pp:0.##}pp"
             + $"\n你的 bp 榜上所有成绩的平均值为 {totalPP / allBP.Count:0.##}pp";
-            target.reply(new Chain().msg(str));
+            target.reply(str);
         }
 
-        private static void TodayBP(Target target, string cmd)
+        async private static void TodayBP(Target target, string cmd)
         {
             #region 验证
             Osu.UserInfo userInfo = new();
@@ -591,18 +591,18 @@ namespace KanonBot.functions.osubot
                 var AccInfo = Accounts.GetAccInfo(target);
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
-                { target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return; }
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
                 if (DBOsuInfo == null)
-                { target.reply(new Chain().msg("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。")); return; }
+                { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 取mode信息
                 if (command.osu_mode == "") userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
+                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 is_bounded = true;
             }
@@ -612,7 +612,7 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(command.osu_username, userInfo.mode!); }
+                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode!); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
@@ -623,7 +623,7 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = Osu.GetUser(command.osu_username, userInfo.mode); }
+                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode); }
                         catch { OnlineOsuInfo = new Osu.UserInfo(); }
                     }
                 }
@@ -632,13 +632,13 @@ namespace KanonBot.functions.osubot
             // 验证osu信息
             if (OnlineOsuInfo.userName == null)
             {
-                if (is_bounded) { target.reply(new Chain().msg("被办了。")); return; }
-                target.reply(new Chain().msg("猫猫没有找到此用户。")); return;
+                if (is_bounded) { target.reply("被办了。"); return; }
+                target.reply("猫猫没有找到此用户。"); return;
             }
             #endregion
 
             List<Osu.ScoreInfo> allBP;
-            allBP = Osu.GetUserScores(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
+            allBP = await Osu.GetUserScores(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
             var str = $"";
             var t = DateTime.Now.Hour < 4 ? DateTime.Now.Date.AddDays(-1).AddHours(4) : DateTime.Now.Date.AddHours(4);
             for (int i = 0; i < allBP.Count; i++)
@@ -654,13 +654,13 @@ namespace KanonBot.functions.osubot
             if (str == "")
             {
                 if (cmd == "")
-                    target.reply(new Chain().msg($"你今天在 {OnlineOsuInfo.mode} 模式上还没有新bp呢。。"));
+                    target.reply($"你今天在 {OnlineOsuInfo.mode} 模式上还没有新bp呢。。");
                 else
-                    target.reply(new Chain().msg($"{OnlineOsuInfo.userName} 今天在 {OnlineOsuInfo.mode} 模式上还没有新bp呢。。"));
+                    target.reply($"{OnlineOsuInfo.userName} 今天在 {OnlineOsuInfo.mode} 模式上还没有新bp呢。。");
             }
             else
             {
-                target.reply(new Chain().msg($"{OnlineOsuInfo.userName} 今天在 {OnlineOsuInfo.mode} 模式上新增的BP:" + str));
+                target.reply($"{OnlineOsuInfo.userName} 今天在 {OnlineOsuInfo.mode} 模式上新增的BP:" + str);
             }
         }
 

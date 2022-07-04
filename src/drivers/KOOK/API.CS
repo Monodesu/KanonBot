@@ -6,7 +6,7 @@ using Flurl;
 using Flurl.Http;
 
 namespace KanonBot.Drivers;
-public partial class Kaiheila
+public partial class KOOK
 {
     // API 部分 * 包装 Driver
     public class API
@@ -27,6 +27,7 @@ public partial class Kaiheila
         {
             var res = this.http()
                 .AppendPathSegments("gateway", "index")
+                .SetQueryParam("compress", 0)
                 .GetJsonAsync<JObject>()
                 .Result;
 

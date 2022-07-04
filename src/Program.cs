@@ -107,83 +107,86 @@ Log.Information("初始化成功 {@config}", config);
 
 var ExitEvent = new ManualResetEvent(false);
 var drivers = new Drivers();
-drivers.append(
-    new OneBot.Server($"ws://0.0.0.0:{config.onebot?.serverPort}")
-    .onMessage((target) =>
-    {
-        var api = (target.socket as OneBot.Server.Socket)!.api;
-        Log.Information("← 收到消息 {0}", target.msg);
-        Log.Information("↑ 详情 {@0}", target.raw!);
-        Log.Information("↑ 详情 {0}", Json.Serialize((target.raw! as OneBot.Models.CQMessageEventBase)!.MessageList));
-        // switch (target.raw)
-        // {
-        //     case OneBot.Models.GroupMessage g:
-        //         if (g.GroupId == config.onebot!.managementGroup) 
-        //         {
-        //             target.reply(target.msg);
-        //         }
-        //         break;
-        //     case OneBot.Models.PrivateMessage p:
-        //         target.reply(target.msg);
-        //         break;
-        // }
-        // var res = api.SendGroupMessage(xxxxx, target.msg);
-        // Log.Information("→ 发送消息ID {@0}", res);
-        Universal.Parser(target);
-    })
-    .onEvent((client, e) =>
-    {
-        switch (e)
-        {
-            case HeartBeat h:
-                Log.Debug("收到心跳包 {h}", h);
-                break;
-            case Ready l:
-                Log.Information("收到生命周期事件 {h}", l);
-                break;
-            case RawEvent r:
-                Log.Information("收到事件 {r}", r);
-                break;
-            default:
-                break;
-        }
-    })
-);
+// drivers.append(
+//     new OneBot.Server($"ws://0.0.0.0:{config.onebot?.serverPort}")
+//     .onMessage((target) =>
+//     {
+//         var api = (target.socket as OneBot.Server.Socket)!.api;
+//         Log.Information("← 收到消息 {0}", target.msg);
+//         Log.Information("↑ 详情 {@0}", target.raw!);
+//         Log.Information("↑ 详情 {0}", Json.Serialize((target.raw! as OneBot.Models.CQMessageEventBase)!.MessageList));
+//         // switch (target.raw)
+//         // {
+//         //     case OneBot.Models.GroupMessage g:
+//         //         if (g.GroupId == config.onebot!.managementGroup) 
+//         //         {
+//         //             target.reply(target.msg);
+//         //         }
+//         //         break;
+//         //     case OneBot.Models.PrivateMessage p:
+//         //         target.reply(target.msg);
+//         //         break;
+//         // }
+//         // var res = api.SendGroupMessage(xxxxx, target.msg);
+//         // Log.Information("→ 发送消息ID {@0}", res);
+//         Universal.Parser(target);
+//     })
+//     .onEvent((client, e) =>
+//     {
+//         switch (e)
+//         {
+//             case HeartBeat h:
+//                 Log.Debug("收到心跳包 {h}", h);
+//                 break;
+//             case Ready l:
+//                 Log.Information("收到生命周期事件 {h}", l);
+//                 break;
+//             case RawEvent r:
+//                 Log.Information("收到事件 {r}", r);
+//                 break;
+//             default:
+//                 break;
+//         }
+//     })
+// );
 // drivers.append(
 //     new OneBot.Client($"ws://{config.ontbot?.host}:{config.ontbot?.port}")
 // );
+// drivers.append(
+//     new Guild(config.guild!.appID, config.guild.token!, Guild.Enums.Intent.GuildAtMessage | Guild.Enums.Intent.DirectMessages, config.guild.sandbox)
+//     .onMessage((target) =>
+//     {
+//         var api = (target.socket as Guild)!.api;
+//         var messageData = (target.raw as Guild.Models.MessageData)!;
+//         Log.Information("← 收到消息 {0}", target.msg);
+//         Log.Information("↑ 详情 {@0}", messageData);
+//         Log.Information("↑ 附件 {@0}", Json.Serialize(messageData.Attachments));
+//         // var res = api.SendMessage(messageData.ChannelID, new Guild.Models.SendMessageData() {
+//         //     MessageId = messageData.ID,
+//         //     MessageReference = new() { MessageId = messageData.ID }
+//         // }.Build(target.msg)).Result;
+//         // Log.Information("→ 发送消息ID {@0}", res);
+//         // target.reply(target.msg);
+//         Universal.Parser(target);
+//     })
+//     .onEvent((client, e) =>
+//     {
+//         switch (e)
+//         {
+//             case RawEvent r:
+//                 var data = (r.value as Guild.Models.PayloadBase<JToken>)!;
+//                 Log.Information("收到事件: {@0} 数据: {1}", data, data.Data?.ToString(Formatting.None) ?? null);
+//                 break;
+//             case Ready l:
+//                 Log.Information("收到生命周期事件 {h}", l);
+//                 break;
+//             default:
+//                 break;
+//         }
+//     })
+// );
 drivers.append(
-    new Guild(config.guild!.appID, config.guild.token!, Guild.Enums.Intent.GuildAtMessage | Guild.Enums.Intent.DirectMessages, config.guild.sandbox)
-    .onMessage((target) =>
-    {
-        var api = (target.socket as Guild)!.api;
-        var messageData = (target.raw as Guild.Models.MessageData)!;
-        Log.Information("← 收到消息 {0}", target.msg);
-        Log.Information("↑ 详情 {@0}", messageData);
-        Log.Information("↑ 附件 {@0}", Json.Serialize(messageData.Attachments));
-        // var res = api.SendMessage(messageData.ChannelID, new Guild.Models.SendMessageData() {
-        //     MessageId = messageData.ID,
-        //     MessageReference = new() { MessageId = messageData.ID }
-        // }.Build(target.msg)).Result;
-        // Log.Information("→ 发送消息ID {@0}", res);
-        // target.reply(target.msg);
-        Universal.Parser(target);
-    })
-    .onEvent((client, e) =>
-    {
-        switch (e)
-        {
-            case RawEvent r:
-                var data = (r.value as Guild.Models.PayloadBase<JToken>)!;
-                Log.Information("收到事件: {@0} 数据: {1}", data, data.Data?.ToString(Formatting.None) ?? null);
-                break;
-            case Ready l:
-                Log.Information("收到生命周期事件 {h}", l);
-                break;
-            default:
-                break;
-        }
-    })
+    new KOOK(config.kook!.token!, config.kook!.botID!)
 );
 drivers.StartAll();
 ExitEvent.WaitOne();

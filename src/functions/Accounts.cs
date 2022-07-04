@@ -23,7 +23,7 @@ namespace KanonBot.functions
             //};
             //if (!is_private_msg)
             //{
-            //    target.reply(new Chain().msg("请私聊bot以使用本功能。"));
+            //    target.reply("请私聊bot以使用本功能。");
             //    return;
             //}
 
@@ -32,7 +32,7 @@ namespace KanonBot.functions
 
             if (!Utils.IsMailAddr(mailAddr))
             {
-                target.reply(new Chain().msg("请输入有效的电子邮件地址。"));
+                target.reply("请输入有效的电子邮件地址。");
                 return;
             }
             string uid = "-1", platform = "none";
@@ -48,7 +48,7 @@ namespace KanonBot.functions
                     {
                         uid = g.Author.ID; platform = "qguild";
                         if (is_regd)
-                            if (dbuser.qq_guild_uid == g.Author.ID) { target.reply(new Chain().msg("您提供的邮箱已经与您目前的平台绑定了。")); return; }
+                            if (dbuser.qq_guild_uid == g.Author.ID) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
                         var g1 = Database.Client.GetUsersByUID(g.Author.ID, "qguild");
                         if (g1 != null)
                         {
@@ -65,7 +65,7 @@ namespace KanonBot.functions
                     {
                         uid = o.UserId.ToString(); platform = "qq";
                         if (is_regd)
-                            if (dbuser.qq_id == o.UserId) { target.reply(new Chain().msg("您提供的邮箱已经与您目前的平台绑定了。")); return; }
+                            if (dbuser.qq_id == o.UserId) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
                         var o1 = Database.Client.GetUsersByUID(o.UserId.ToString(), "qq");
                         if (o1 != null)
                         {
@@ -93,12 +93,12 @@ namespace KanonBot.functions
                 try
                 {
                     Mail.Send(ms);
-                    target.reply(new Chain().msg("绑定验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。"));
+                    target.reply("绑定验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。");
                     Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
                 }
                 catch
                 {
-                    target.reply(new Chain().msg("发送验证邮件失败，请联系管理员。"));
+                    target.reply("发送验证邮件失败，请联系管理员。");
                 }
             }
             else
@@ -114,17 +114,17 @@ namespace KanonBot.functions
                 try
                 {
                     Mail.Send(ms);
-                    target.reply(new Chain().msg("注册验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。"));
+                    target.reply("注册验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。");
                     Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
                 }
                 catch
                 {
-                    target.reply(new Chain().msg("发送验证邮件失败，请联系管理员。"));
+                    target.reply("发送验证邮件失败，请联系管理员。");
                 }
             }
         }
 
-        public static void BindService(Target target, string cmd)
+        async public static void BindService(Target target, string cmd)
         {
             string uid = "-1", platform = "none";
             switch (target.socket)
@@ -135,7 +135,7 @@ namespace KanonBot.functions
                         uid = g.Author.ID; platform = "qguild";
                         if (!Database.Client.IsRegd(uid, platform))
                         {
-                            target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return;
+                            target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
                         }
                     }
                     break;
@@ -145,7 +145,7 @@ namespace KanonBot.functions
                         uid = o.UserId.ToString(); platform = "qq";
                         if (!Database.Client.IsRegd(uid, platform))
                         {
-                            target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return;
+                            target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
                         }
                     }
                     break;
@@ -166,7 +166,7 @@ namespace KanonBot.functions
                 if (osuuserinfo != null) { target.reply(new Chain().msg($"您已经与osu uid为 {osuuserinfo.osu_uid} 的用户绑定过了。")); return; }
 
                 // 通过osu username搜索osu用户id
-                try { online_osu_userinfo = Osu.GetUser(childCmd_2); }
+                try { online_osu_userinfo = await Osu.GetUser(childCmd_2); }
                 catch { target.reply(new Chain().msg($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。")); return; }
 
                 // 检查要绑定的osu是否没有被Kanon用户绑定过
@@ -182,7 +182,7 @@ namespace KanonBot.functions
             }
             else
             {
-                target.reply(new Chain().msg("请按照以下格式进行绑定。\r\n !set osu 您的osu用户名")); return;
+                target.reply("请按照以下格式进行绑定。\r\n !set osu 您的osu用户名"); return;
             }
         }
 

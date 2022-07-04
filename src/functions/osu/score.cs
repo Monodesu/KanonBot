@@ -6,7 +6,7 @@ namespace KanonBot.functions.osubot
 {
     public class Score
     {
-        public static void Execute(Target target, string cmd)
+        async public static void Execute(Target target, string cmd)
         {
             var is_bounded = false;
             Osu.UserInfo OnlineOsuInfo;
@@ -19,22 +19,22 @@ namespace KanonBot.functions.osubot
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
                 if (Accounts.GetAccount(AccInfo.uid, AccInfo.platform)!.uid == -1)
-                { target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return; }
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
                 if (DBOsuInfo == null)
-                { target.reply(new Chain().msg("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。")); return; }
+                { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(DBOsuInfo.osu_uid); }
+                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 is_bounded = true;
             }
             else
             {
                 // 验证osu信息
-                try { OnlineOsuInfo = Osu.GetUser(command.osu_username); }
+                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username); }
                 catch { OnlineOsuInfo = new Osu.UserInfo(); }
                 is_bounded = false;
             }
@@ -42,8 +42,8 @@ namespace KanonBot.functions.osubot
             // 验证osu信息
             if (OnlineOsuInfo.userName == null)
             {
-                if (is_bounded) { target.reply(new Chain().msg("被办了。")); return; }
-                target.reply(new Chain().msg("猫猫没有找到此用户。")); return;
+                if (is_bounded) { target.reply("被办了。"); return; }
+                target.reply("猫猫没有找到此用户。"); return;
             }
 
 
@@ -70,15 +70,16 @@ namespace KanonBot.functions.osubot
             catch { }
 
             // 判断是否给定了bid
-            if (command.order_number == -1) { target.reply(new Chain().msg("猫猫找不到该谱面。")); return; }
+            if (command.order_number == -1) { target.reply("猫猫找不到该谱面。"); return; }
             var scorePanelData = new LegacyImage.Draw.ScorePanelData();
 
             try
             {
-                var hasScore = Osu.GetUserBeatmapScore(out scorePanelData.scoreInfo, OnlineOsuInfo.userId, command.order_number, mods, mode);
-                if (!hasScore) { target.reply(new Chain().msg("猫猫没有找到你的成绩")); return; }
+                var scoreData = await Osu.GetUserBeatmapScore(OnlineOsuInfo.userId, command.order_number, mods, mode);
+                if (!scoreData.HasValue) { target.reply("猫猫没有找到你的成绩"); return; }
+                scorePanelData.scoreInfo = scoreData.Value;
             }
-            catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply(new Chain().msg("猫猫没有找到该谱面。")); return; } else throw; }
+            catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply("猫猫没有找到该谱面。"); return; } else throw; }
 
             // 获取绘制数据
             try
@@ -127,7 +128,7 @@ namespace KanonBot.functions.osubot
                 {
                     if (x is HttpRequestException)
                     {
-                        target.reply(new Chain().msg("获取pp数据时超时，等会儿再试试吧.."));
+                        target.reply("获取pp数据时超时，等会儿再试试吧..");
                         isKnownException = true;
                         return true;
                     }
@@ -135,7 +136,7 @@ namespace KanonBot.functions.osubot
                     return true;
                 });
                 if (isKnownException) return;
-                target.reply(new Chain().msg("获取pp数据时超时，等会儿再试试吧.."));
+                target.reply("获取pp数据时超时，等会儿再试试吧..");
                 // TODO  ADMIN MESSAGE  SendAdminMessage(msg);
                 return;
             }

@@ -60,7 +60,7 @@ public class Config
         public string? token { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
     }
-    public class Kaiheila : ITomlMetadataProvider
+    public class KOOK : ITomlMetadataProvider
     {
         public string? botID { get; set; }
         public string? token { get; set; }
@@ -72,7 +72,7 @@ public class Config
         public OSU? osu { get; set; }
         public OneBot? onebot { get; set; }
         public Guild? guild { get; set; }
-        public Kaiheila? kaiheila { get; set; }
+        public KOOK? kook { get; set; }
         public OSS? oss { get; set; }
         public Database? database { get; set; }
         public Mail? mail { get; set; }
@@ -102,7 +102,7 @@ public class Config
                     token = "",
                     sandbox = true
                 },
-                kaiheila = new()
+                kook = new()
                 {
                     botID = "",
                     token = ""

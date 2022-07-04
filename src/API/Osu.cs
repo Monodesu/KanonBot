@@ -5,6 +5,8 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Net;
 using Serilog;
+using Flurl;
+using Flurl.Http;
 
 namespace KanonBot.API
 {
@@ -144,9 +146,15 @@ namespace KanonBot.API
 
         private static string Token = "";
         private static long TokenExpireTime = 0;
-        public static readonly string OSU_API_V1 = "https://osu.ppy.sh/api/";
-        public static readonly string OSU_API_V2 = "https://osu.ppy.sh/api/v2/";
+        public static readonly string EndPointV1 = "https://osu.ppy.sh/api/";
+        public static readonly string EndPointV2 = "https://osu.ppy.sh/api/v2/";
         public static readonly string[] Modes = { "osu", "taiko", "fruits", "mania" };
+
+        static IFlurlRequest http()
+        {
+            CheckToken();
+            return EndPointV2.WithHeader("Authorization", $"Bearer {Token}");
+        }
 
         public static void checkModes(string mode)
         {
@@ -157,7 +165,7 @@ namespace KanonBot.API
             throw new Exception("OSU 模式不正确");
         }
 
-        private static bool GetToken()
+        async private static Task<bool> GetToken()
         {
             JObject j = new()
             {
@@ -168,27 +176,29 @@ namespace KanonBot.API
                 { "code", "kanon" },
             };
 
-            var result = Http.PostAsync("https://osu.ppy.sh/oauth/token", j).Result;
+            var result = await "https://osu.ppy.sh/oauth/token".PostJsonAsync(j);
+
+
+            var body = await result.GetJsonAsync<JObject>();
             try
             {
-                Dictionary<string, string>? body = JsonConvert.DeserializeObject<Dictionary<string, string>>(result.Body);
-                Token = body?["access_token"] ?? "";
-                TokenExpireTime = DateTimeOffset.Now.ToUnixTimeSeconds() + long.Parse(body?["expires_in"] ?? "0");
+                Token = ((string?)body["access_token"]) ?? "";
+                TokenExpireTime = DateTimeOffset.Now.ToUnixTimeSeconds() + long.Parse(((string?)body["expires_in"]) ?? "0");
                 return true;
             }
             catch
             {
-                Log.Error($"获取token失败, 返回Body: \n({result.Body})");
+                Log.Error("获取token失败, 返回Body: \n({})", body.ToString());
                 return false;
             }
         }
 
-        public static void CheckToken()
+        async public static void CheckToken()
         {
             if (TokenExpireTime == 0)
             {
                 Log.Information("正在获取OSUApiV2_Token");
-                if (GetToken())
+                if (await GetToken())
                 {
                     Log.Information($"获取成功, Token: {Token.Substring(0, Console.WindowWidth - 38) + "..."}");
                     Log.Information($"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(TokenExpireTime).DateTime.ToLocalTime()}");
@@ -197,7 +207,7 @@ namespace KanonBot.API
             else if (TokenExpireTime <= DateTimeOffset.Now.ToUnixTimeSeconds())
             {
                 Log.Information("OSUApiV2_Token已过期, 正在重新获取");
-                if (GetToken())
+                if (await GetToken())
                 {
                     Log.Information($"获取成功, Token: {Token.Substring(0, Console.WindowWidth - 38) + "..."}");
                     Log.Information($"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(TokenExpireTime).DateTime.ToLocalTime()}");
@@ -206,13 +216,10 @@ namespace KanonBot.API
         }
 
         // 小夜api版（备选方案）
-        public static bool SayoDownloadBeatmapBackgroundImg(long sid, long bid, string filePath)
+        async public static Task<bool> SayoDownloadBeatmapBackgroundImg(long sid, long bid, string filePath)
         {
             var url = $"https://api.sayobot.cn/v2/beatmapinfo?K={sid}";
-            var result = Http.GetAsync(url).Result;
-            JObject body;
-            try { body = JsonConvert.DeserializeObject<JObject>(result.Body); }
-            catch { throw new Exception(result.Body); }
+            var body = await url.GetJsonAsync<JObject>();
             foreach (var item in body["data"]["bid_data"])
             {
                 if (long.Parse(item["bid"].Values().ToString()) == bid)
@@ -228,29 +235,21 @@ namespace KanonBot.API
         }
 
         // 搜索用户数量 未使用
-        public static int SearchUser(string userName, out JArray users)
+        async public static Task<JObject?> SearchUser(string userName)
         {
-            CheckToken();
-            Dictionary<string, string> headers = new();
-            headers.Add("Authorization", $"Bearer {Token}");
-            var result = Http.GetAsync(OSU_API_V2 + $"search?mode=user&query={userName}", headers).Result;
-            var body = JsonConvert.DeserializeObject<JObject>(result.Body);
-            users = (JArray)body["user"]["data"].Values();
-            return (int)body["user"]["total"];
+            var body = await http().AppendPathSegment("search").SetQueryParam("mode", "user").SetQueryParam("query", "userName").GetJsonAsync<JObject>();
+            return body["user"] as JObject;
         }
 
         // 获取特定谱面信息
-        public static BeapmapInfo GetBeatmap(long bid)
+        async public static Task<BeapmapInfo> GetBeatmap(long bid)
         {
-            CheckToken();
-            Dictionary<string, string> headers = new();
-            headers.Add("Authorization", $"Bearer {Token}");
-            var url = OSU_API_V2 + $"beatmaps/{bid}";
-            var result = Http.GetAsync(url, headers).Result;
-            if (result.Status != HttpStatusCode.OK || result.Body.Length < 20) { throw new Exception(result.Body); }
-            JObject beatmap;
-            try { beatmap = JsonConvert.DeserializeObject<JObject>(result.Body); }
-            catch { throw new Exception(result.Body); }
+            var beatmap = await http()
+                .AppendPathSegment("beatmaps")
+                .AppendPathSegment(bid)
+                .GetJsonAsync<JObject>();
+
+
             BeapmapInfo beatmapInfo = new();
             var beatmapSet = beatmap["beatmapset"];
             beatmapInfo.mode = beatmap["mode"].ToString();
@@ -290,16 +289,20 @@ namespace KanonBot.API
         }
 
         // 获取用户成绩
-        public static List<ScoreInfo> GetUserScores(long userId, string scoreType = "recent", string mode = "osu", int limit = 1, int offset = 0, bool includeFails = true)
+        async public static Task<List<ScoreInfo>> GetUserScores(long userId, string scoreType = "recent", string mode = "osu", int limit = 1, int offset = 0, bool includeFails = true)
         {
             checkModes(mode);
-            CheckToken();
-            Dictionary<string, string> headers = new();
-            headers.Add("Authorization", $"Bearer {Token}");
-            var url = OSU_API_V2 + $"users/{userId}/scores/{scoreType}?include_fails={(includeFails ? 1 : 0)}&limit={limit}&offset={offset}&mode={mode}";
-            var result = Http.GetAsync(url, headers).Result;
-            JArray body;
-            try { body = JsonConvert.DeserializeObject<JArray>(result.Body); } catch { throw new Exception(result.Body); }
+            var body = await http()
+                .AppendPathSegment("users")
+                .AppendPathSegment(userId)
+                .AppendPathSegment("scores")
+                .AppendPathSegment(scoreType)
+                .SetQueryParam("include_fails", includeFails ? 1 : 0)
+                .SetQueryParam("limit", limit)
+                .SetQueryParam("offset", offset)
+                .SetQueryParam("mode", mode)
+                .GetJsonAsync<JArray>();
+
             List<ScoreInfo> scoreInfos = new();
             foreach (var score in body)
             {
@@ -368,18 +371,24 @@ namespace KanonBot.API
         }
 
         // 获取用户在特定谱面上的成绩
-        public static bool GetUserBeatmapScore(out ScoreInfo scoreInfo, long userId, long bid, List<string> mods, string mode = "osu")
+        async public static Task<ScoreInfo?> GetUserBeatmapScore(long userId, long bid, List<string> mods, string mode = "osu")
         {
             checkModes(mode);
-            CheckToken();
-            scoreInfo = new();
-            var url = OSU_API_V2 + $"beatmaps/{bid}/scores/users/{userId}?mode={mode}";
-            foreach (var item in mods) { url += $"&mods[]={item}"; }
-            Dictionary<string, string> headers = new();
-            headers.Add("Authorization", $"Bearer {Token}");
-            var result = Http.GetAsync(url, headers).Result;
-            if (result.Status != HttpStatusCode.OK) return false;
-            var body = JsonConvert.DeserializeObject<JObject>(result.Body);
+
+            var req = http()
+                .AppendPathSegment("beatmaps")
+                .AppendPathSegment(bid)
+                .AppendPathSegment("scores")
+                .AppendPathSegment("users")
+                .AppendPathSegment(userId)
+                .SetQueryParam("mode", mode);
+
+            foreach (var mod in mods) { req.SetQueryParam("mods[]", mod); }
+
+            var body = await req.GetJsonAsync<JObject>();
+
+
+            ScoreInfo scoreInfo = new();
             var score = body["score"];
             scoreInfo.mode = mode;
             scoreInfo.scoreType = "score"; // 这边的scoreType固定为score，对应指令score
@@ -404,20 +413,21 @@ namespace KanonBot.API
             var s_mods = JsonConvert.DeserializeObject<JArray>(score["mods"].ToString());
             foreach (var mod in s_mods) { scoreInfo.mods.Add(mod.ToString()); }
             scoreInfo.beatmapId = (long)score["beatmap"]["id"];
-            scoreInfo.beatmapInfo = GetBeatmap(scoreInfo.beatmapId);
-            return true;
+            scoreInfo.beatmapInfo = await GetBeatmap(scoreInfo.beatmapId);
+            return scoreInfo;
         }
 
         // 通过osu uid获取用户信息
-        public static UserInfo GetUser(long userId, string mode = "osu")
+        async public static Task<UserInfo> GetUser(long userId, string mode = "osu")
         {
             checkModes(mode);
-            CheckToken();
-            Dictionary<string, string> headers = new();
-            headers.Add("Authorization", $"Bearer {Token}");
-            var result = Http.GetAsync(OSU_API_V2 + $"users/{userId}/{mode}", headers).Result;
-            if (result.Status != HttpStatusCode.OK || result.Body.Length < 20) { throw new Exception(result.Body); }
-            var body = JsonConvert.DeserializeObject<JObject>(result.Body);
+
+            var body = await http()
+                .AppendPathSegment("users")
+                .AppendPathSegment(userId)
+                .AppendPathSegment(mode)
+                .GetJsonAsync<JObject>();
+
             UserInfo userInfo = new();
             try { userInfo.country = body["country_code"].ToString(); } catch { userInfo.country = "XX"; }
             userInfo.userName = body["username"].ToString();
@@ -448,15 +458,17 @@ namespace KanonBot.API
         }
 
         // 通过osu username获取用户信息
-        public static UserInfo GetUser(string userName, string mode = "osu")
+        async public static Task<UserInfo> GetUser(string userName, string mode = "osu")
         {
             checkModes(mode);
-            CheckToken();
-            Dictionary<string, string> headers = new();
-            headers.Add("Authorization", $"Bearer {Token}");
-            var result = Http.GetAsync(OSU_API_V2 + $"users/{userName}/{mode}?key=username", headers).Result;
-            if (result.Status != HttpStatusCode.OK || result.Body.Length < 20) { throw new Exception(result.Body); }
-            var body = JsonConvert.DeserializeObject<JObject>(result.Body);
+
+            var body = await http()
+                .AppendPathSegment("users")
+                .AppendPathSegment(userName)
+                .AppendPathSegment(mode)
+                .SetQueryParam("key", "username")
+                .GetJsonAsync<JObject>();
+
             UserInfo userInfo = new();
             try { userInfo.country = body["country_code"].ToString(); } catch { userInfo.country = "XX"; }
             userInfo.userName = body["username"].ToString();
@@ -487,36 +499,33 @@ namespace KanonBot.API
         }
 
         // 获取用户Elo信息
-        public static JObject? GetUserEloInfo(long uid)
+        async public static Task<JObject?> GetUserEloInfo(long uid)
         {
-            var r = Http.GetAsync($"http://api.osuwiki.cn:5005/api/users/elo/{uid}").Result;
-            return JsonConvert.DeserializeObject<JObject>(r.Body);
+            return await $"http://api.osuwiki.cn:5005/api/users/elo/{uid}".GetJsonAsync<JObject>();
         }
 
         // 获取用户最近的elo游戏记录
-        public static int GetUserEloRecentPlay(long uid)
+        async public static Task<int> GetUserEloRecentPlay(long uid)
         {
-            var r = Http.GetAsync($"http://api.osuwiki.cn:5005/api/users/recentPlay/{uid}").Result;
-            var body = JsonConvert.DeserializeObject<JObject>(r.Body);
+            var body = await $"http://api.osuwiki.cn:5005/api/users/recentPlay/{uid}".GetJsonAsync<JObject>();
             try { return (int)body["match_id"]; }
             catch { return 0; }
         }
 
         // 获取比赛信息
-        public static JObject? GetMatchInfo(long matchId)
+        async public static Task<JObject?> GetMatchInfo(long matchId)
         {
-            var r = Http.GetAsync($"http://api.osuwiki.cn:5005/api/matches/{matchId}").Result;
-            return JsonConvert.DeserializeObject<JObject>(r.Body);
+            return await $"http://api.osuwiki.cn:5005/api/matches/{matchId}".GetJsonAsync<JObject>();
         }
 
         // 获取pp+数据
-        public static PPlusInfo GetUserPlusData(long uid)
+        async public static Task<PPlusInfo> GetUserPlusData(long uid)
         {
-            var r = Http.GetAsync($"https://syrin.me/pp+/api/user/{uid}/").Result;
+            var data = await $"https://syrin.me/pp+/api/user/{uid}/".GetJsonAsync<JObject>();
+
             PPlusInfo pplus = new();
             try
             {
-                var data = JsonConvert.DeserializeObject<JObject>(r.Body);
                 pplus.pp = (float)data["PerformanceTotal"];
                 pplus.jump = (int)data["JumpAimTotal"];
                 pplus.flow = (int)data["FlowAimTotal"];

@@ -7,7 +7,7 @@ namespace KanonBot.functions.osubot
 {
     public class Leeway
     {
-        public static void Execute(Target target, string cmd)
+        async public static void Execute(Target target, string cmd)
         {
             Osu.UserInfo OnlineOsuInfo;
             Database.Model.Users_osu DBOsuInfo;
@@ -20,15 +20,15 @@ namespace KanonBot.functions.osubot
             // 验证账户
             var AccInfo = Accounts.GetAccInfo(target);
             if (Accounts.GetAccount(AccInfo.uid, AccInfo.platform)!.uid == -1)
-            { target.reply(new Chain().msg("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。")); return; }
+            { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
             // 验证osu信息
             DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
             if (DBOsuInfo == null)
-            { target.reply(new Chain().msg("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。")); return; }
+            { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
             // 验证osu信息
-            try { OnlineOsuInfo = Osu.GetUser(DBOsuInfo.osu_uid); }
+            try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid); }
             catch { OnlineOsuInfo = new Osu.UserInfo(); }
             //}
             //else
@@ -42,9 +42,9 @@ namespace KanonBot.functions.osubot
             // 验证osu信息
             if (OnlineOsuInfo.userName == null)
             {
-                //if (is_bounded) { target.reply(new Chain().msg("被办了。")); return; }
-                //target.reply(new Chain().msg("猫猫没有找到此用户。")); return;
-                target.reply(new Chain().msg("被办了。")); return;
+                //if (is_bounded) { target.reply("被办了。"); return; }
+                //target.reply("猫猫没有找到此用户。"); return;
+                target.reply("被办了。"); return;
             }
 
 
@@ -54,7 +54,7 @@ namespace KanonBot.functions.osubot
 
             // 解析模式
             try { mode = Osu.Modes[int.Parse(command.osu_mode)]; } catch { mode = "osu"; }
-            if (mode != "osu") { target.reply(new Chain().msg("Leeway仅支持osu!std模式。")); return; }
+            if (mode != "osu") { target.reply("Leeway仅支持osu!std模式。"); return; }
 
             long bid;
             if (command.order_number == 0) // 检查玩家是否指定bid
@@ -62,11 +62,11 @@ namespace KanonBot.functions.osubot
                 List<Osu.ScoreInfo> scoreInfos;
                 try
                 {
-                    scoreInfos = Osu.GetUserScores(OnlineOsuInfo.userId, "recent", mode, 1, command.order_number - 1, true); // 查询玩家recent
-                    if (scoreInfos.ToArray()[0].mode != "osu") { target.reply(new Chain().msg("Leeway仅支持osu!std模式。")); return; } // 检查谱面是否是std
+                    scoreInfos = await Osu.GetUserScores(OnlineOsuInfo.userId, "recent", mode, 1, command.order_number - 1, true); // 查询玩家recent
+                    if (scoreInfos.ToArray()[0].mode != "osu") { target.reply("Leeway仅支持osu!std模式。"); return; } // 检查谱面是否是std
                     bid = scoreInfos.ToArray()[0].beatmapId; // 从recent获取bid
                 }
-                catch { target.reply(new Chain().msg("猫猫找不到该最近游玩的成绩。")); return; }
+                catch { target.reply("猫猫找不到该最近游玩的成绩。"); return; }
             }
             else
             {
@@ -74,22 +74,23 @@ namespace KanonBot.functions.osubot
             }
 
             // 尝试寻找玩家在该谱面的最高成绩
-            bool hasScore;
             long score;
-            Osu.ScoreInfo scoreData;
+            Osu.ScoreInfo? scoreData;
             List<string> empty_mods = new(); // 要的是最高分，直接给传一个空集合得了
             try
             {
-                hasScore = Osu.GetUserBeatmapScore(out scoreData, OnlineOsuInfo.userId, command.order_number, empty_mods, mode);
-                if (!hasScore)
+                scoreData = await Osu.GetUserBeatmapScore(OnlineOsuInfo.userId, command.order_number, empty_mods, mode);
+                if (scoreData.HasValue)
                 {
-                    target.reply(new Chain().msg("猫猫没有找到你在这张谱面上的成绩。")); return;
+                    target.reply("猫猫没有找到你在这张谱面上的成绩。"); return;
                 }
                 else
-                    score = scoreData.score;
-                if (scoreData.mode != "osu") { target.reply(new Chain().msg("Leeway仅支持osu!std模式。")); return; } // 检查谱面是否是std
+                {
+                    score = scoreData.Value.score;
+                }
+                if (scoreData.Value.mode != "osu") { target.reply("Leeway仅支持osu!std模式。"); return; } // 检查谱面是否是std
             }
-            catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply(new Chain().msg("猫猫没有找到该谱面。")); return; } else throw; }
+            catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply("猫猫没有找到该谱面。"); return; } else throw; }
 
 
             // LeewayCalculator
@@ -104,7 +105,7 @@ namespace KanonBot.functions.osubot
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                target.reply(new Chain().msg("读取谱面文件失败，请稍后再试")); return;
+                target.reply("读取谱面文件失败，请稍后再试"); return;
             }
 
             Leeway_Calculator lc = new(); // 实例化
@@ -126,9 +127,9 @@ namespace KanonBot.functions.osubot
                     ")"
             });
 
-            if (hasScore)
+            if (scoreData.HasValue)
             {
-                str += string.Format("\n你的成绩：{0:n0} (+{1})", (int)score, lc.GetModsString(scoreData.mods.ToArray()));
+                str += string.Format("\n你的成绩：{0:n0} (+{1})", (int)score, lc.GetModsString(scoreData.Value.mods.ToArray()));
             }
             else
             {

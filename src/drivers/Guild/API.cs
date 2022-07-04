@@ -26,12 +26,9 @@ public partial class Guild
             return this.EndPoint.WithHeader("Authorization", this.AuthToken);
         }
 
-        public string GetWebsocketUrl()
+        async public Task<string> GetWebsocketUrl()
         {
-            return this.http()
-                .AppendPathSegments("gateway", "bot")
-                .GetJsonAsync<JObject>()
-                .Result["url"]!.ToString();
+            return (await this.http().AppendPathSegments("gateway", "bot").GetJsonAsync<JObject>())["url"]!.ToString();
         }
 
         async public Task<Models.MessageData> SendMessage(string ChannelID, Models.SendMessageData data)
