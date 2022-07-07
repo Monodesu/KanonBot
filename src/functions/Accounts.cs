@@ -158,7 +158,7 @@ namespace KanonBot.functions
 
             if (childCmd_1 == "osu")
             {
-                Osu.UserInfo online_osu_userinfo = new();
+                OSU.UserInfo online_osu_userinfo = new();
                 var globaluserinfo = Database.Client.GetUsersByUID(uid, platform);
 
                 // 检查用户是否已绑定osu账户
@@ -166,7 +166,7 @@ namespace KanonBot.functions
                 if (osuuserinfo != null) { target.reply(new Chain().msg($"您已经与osu uid为 {osuuserinfo.osu_uid} 的用户绑定过了。")); return; }
 
                 // 通过osu username搜索osu用户id
-                try { online_osu_userinfo = await Osu.GetUser(childCmd_2); }
+                try { online_osu_userinfo = await OSU.GetUserLegacy(childCmd_2); }
                 catch { target.reply(new Chain().msg($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。")); return; }
 
                 // 检查要绑定的osu是否没有被Kanon用户绑定过

@@ -14,6 +14,19 @@
             "problemMatcher": "$msCompile",
         },
         {
+            "label": "test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/KanonBot.csproj",
+                "-l",
+                "console;verbosity=detailed",
+            ],
+            "problemMatcher": "$msCompile",
+            
+        },
+        {
             "label": "publish",
             "command": "dotnet",
             "type": "process",

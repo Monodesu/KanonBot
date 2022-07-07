@@ -9,7 +9,7 @@ namespace KanonBot.functions.osubot
     {
         async public static void Execute(Target target, string cmd)
         {
-            Osu.UserInfo OnlineOsuInfo;
+            OSU.UserInfo OnlineOsuInfo;
             Database.Model.Users_osu DBOsuInfo;
 
             // 解析指令
@@ -28,8 +28,8 @@ namespace KanonBot.functions.osubot
             { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
             // 验证osu信息
-            try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid); }
-            catch { OnlineOsuInfo = new Osu.UserInfo(); }
+            try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid); }
+            catch { OnlineOsuInfo = new OSU.UserInfo(); }
             //}
             //else
             //{
@@ -53,16 +53,16 @@ namespace KanonBot.functions.osubot
 
 
             // 解析模式
-            try { mode = Osu.Modes[int.Parse(command.osu_mode)]; } catch { mode = "osu"; }
+            try { mode = OSU.Modes[int.Parse(command.osu_mode)]; } catch { mode = "osu"; }
             if (mode != "osu") { target.reply("Leeway仅支持osu!std模式。"); return; }
 
             long bid;
             if (command.order_number == 0) // 检查玩家是否指定bid
             {
-                List<Osu.ScoreInfo> scoreInfos;
+                List<OSU.ScoreInfo> scoreInfos;
                 try
                 {
-                    scoreInfos = await Osu.GetUserScores(OnlineOsuInfo.userId, "recent", mode, 1, command.order_number - 1, true); // 查询玩家recent
+                    scoreInfos = await OSU.GetUserScoresLegacy(OnlineOsuInfo.userId, "recent", mode, 1, command.order_number - 1, true); // 查询玩家recent
                     if (scoreInfos.ToArray()[0].mode != "osu") { target.reply("Leeway仅支持osu!std模式。"); return; } // 检查谱面是否是std
                     bid = scoreInfos.ToArray()[0].beatmapId; // 从recent获取bid
                 }
@@ -75,11 +75,11 @@ namespace KanonBot.functions.osubot
 
             // 尝试寻找玩家在该谱面的最高成绩
             long score;
-            Osu.ScoreInfo? scoreData;
+            OSU.ScoreInfo? scoreData;
             List<string> empty_mods = new(); // 要的是最高分，直接给传一个空集合得了
             try
             {
-                scoreData = await Osu.GetUserBeatmapScore(OnlineOsuInfo.userId, command.order_number, empty_mods, mode);
+                scoreData = await OSU.GetUserBeatmapScoreLegacy(OnlineOsuInfo.userId, command.order_number, empty_mods, mode);
                 if (scoreData.HasValue)
                 {
                     target.reply("猫猫没有找到你在这张谱面上的成绩。"); return;

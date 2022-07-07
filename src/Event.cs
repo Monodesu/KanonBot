@@ -47,7 +47,7 @@ public class Ready : IEvent
 
 public class HeartBeat : IEvent
 {
-    public DateTime value;
+    public DateTimeOffset value;
     public HeartBeat(long timestamp)
     {
         this.value = Utils.TimeStampSecToDateTime(timestamp).ToLocalTime();

@@ -14,6 +14,7 @@ namespace KanonBot.Serializer;
 public static class Json
 {
     public static string Serialize(object? self) => JsonConvert.SerializeObject(self, Settings.Json);
+    public static string Serialize(object? self, Formatting format) => JsonConvert.SerializeObject(self, format);
     public static T? Deserialize<T>(string json) => JsonConvert.DeserializeObject<T>(json, Settings.Json);
     public static JObject ToLinq(string json) => JObject.Parse(json);
 }
@@ -30,6 +31,7 @@ internal static class Settings
     {
         MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
         DateParseHandling = DateParseHandling.None,
+        Formatting = Formatting.None,
         Converters = {
             new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
         },

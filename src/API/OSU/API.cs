@@ -1,6 +1,7 @@
-﻿#pragma warning disable CS8604 // 引用类型参数可能为 null。
-#pragma warning disable CS8602 // 解引用可能出现空引用。
-#pragma warning disable CS8600 // 将 null 字面量或可能为 null 的值转换为非 null 类型。
+﻿// #pragma warning disable CS8604 // 引用类型参数可能为 null。
+// #pragma warning disable CS8602 // 解引用可能出现空引用。
+// #pragma warning disable CS8600 // 将 null 字面量或可能为 null 的值转换为非 null 类型。
+#pragma warning disable CS8618 // 非null 字段未初始化
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Net;
@@ -10,73 +11,53 @@ using Flurl.Http;
 
 namespace KanonBot.API
 {
-    public static class Osu
+    public partial class OSU
     {
         private static Config.Base config = Config.inner!;
-        public enum Mods
+        public class BeapmapInfo
         {
-            None = 0,
-            NoFail = 1,
-            Easy = 2,
-            TouchDevice = 4,
-            Hidden = 8,
-            HardRock = 16,
-            SuddenDeath = 32,
-            DoubleTime = 64,
-            Relax = 128,
-            HalfTime = 256,
-            Nightcore = 512, // Only set along with DoubleTime. i.e: NC only gives 576
-            Flashlight = 1024,
-            Autoplay = 2048,
-            SpunOut = 4096,
-            Relax2 = 8192, // Autopilot
-            Perfect = 16384, // Only set along with SuddenDeath. i.e: PF only gives 16416
-            Key4 = 32768,
-            Key5 = 65536,
-            Key6 = 131072,
-            Key7 = 262144,
-            Key8 = 524288,
-            FadeIn = 1048576,
-            Random = 2097152,
-            Cinema = 4194304,
-            Target = 8388608,
-            Key9 = 16777216,
-            KeyCoop = 33554432,
-            Key1 = 67108864,
-            Key3 = 134217728,
-            Key2 = 268435456,
-            ScoreV2 = 536870912,
-            Mirror = 1073741824,
-            KeyMod = Key1 | Key2 | Key3 | Key4 | Key5 | Key6 | Key7 | Key8 | Key9 | KeyCoop,
-            FreeModAllowed =
-            NoFail | Easy | Hidden | HardRock | SuddenDeath | Flashlight | FadeIn | Relax | Relax2 | SpunOut | KeyMod,
-            ScoreIncreaseMods = Hidden | HardRock | DoubleTime | Flashlight | FadeIn
-        }
-        public struct BeapmapInfo
-        {
-            public string mode, beatmapStatus;
-            public long beatmapId,
-                beatmapsetId,
-                creatorId,
-                hitLength,     // 第一个note到最后一个note的时长
-                totalLength,
-                totalPlaycount,
-                playCount,
-                passCount;
-            public int favouriteCount,
-                circleCount,
-                sliderCount,
-                spinnerCount,
-                maxCombo;
+            public string mode { get; set; }
+            public string beatmapStatus { get; set; }
 
+            public long beatmapId { get; set; }
+            public long beatmapsetId { get; set; }
+            public long creatorId { get; set; }
+            public long hitLength { get; set; }     // 第一个note到最后一个note的时长
+            public long totalLength { get; set; }
+            public long totalPlaycount { get; set; }
+            public long playCount { get; set; }
+            public long passCount { get; set; }
+            public int favouriteCount { get; set; }
+            public int circleCount { get; set; }
+            public int sliderCount { get; set; }
+            public int spinnerCount { get; set; }
+            public int maxCombo { get; set; }
+
+            public float BPM { get; set; }
+            public float circleSize { get; set; }
+            public float approachRate { get; set; }
             // Accuracy == OverallDifficulty(OD)
-            public float BPM, circleSize, approachRate, accuracy, HPDrainRate, difficultyRating;
-            public List<string> tags;
-            public bool hasVideo, isNSFW, canDownload;
-            public string previewUrl, artist, artistUnicode, title, titleUnicode, creator, source, version, fileChecksum, backgroundImgUrl, musicUrl;
-            public DateTime submitTime,
-            lastUpdateTime,
-            rankedTime;
+            public float accuracy { get; set; }
+            public float HPDrainRate { get; set; }
+            public float difficultyRating { get; set; }
+            public List<string> tags { get; set; }
+            public bool hasVideo { get; set; }
+            public bool isNSFW { get; set; }
+            public bool canDownload { get; set; }
+            public string previewUrl { get; set; }
+            public string artist { get; set; }
+            public string artistUnicode { get; set; }
+            public string title { get; set; }
+            public string titleUnicode { get; set; }
+            public string creator { get; set; }
+            public string source { get; set; }
+            public string version { get; set; }
+            public string fileChecksum { get; set; }
+            public string backgroundImgUrl { get; set; }
+            public string musicUrl { get; set; }
+            public DateTimeOffset submitTime { get; set; }
+            public DateTimeOffset lastUpdateTime { get; set; }
+            public DateTimeOffset rankedTime { get; set; }
         }
         public struct PPInfo
         {
@@ -95,7 +76,7 @@ namespace KanonBot.API
         {
             public long userId;
             public string userName, country, mode, coverUrl, avatarUrl;
-            public DateTime registedTimestamp;
+            public DateTimeOffset registedTimestamp;
             public long playCount,
                 // v2不提供
                 // n300,
@@ -140,7 +121,7 @@ namespace KanonBot.API
             public bool hasReplay, convert; //是否为转铺
             public string rank, mode, scoreType, userName, userAvatarUrl;
             public List<string> mods;
-            public DateTime achievedTime;
+            public DateTimeOffset achievedTime;
             public BeapmapInfo beatmapInfo;
         }
 
@@ -152,8 +133,8 @@ namespace KanonBot.API
 
         static IFlurlRequest http()
         {
-            CheckToken();
-            return EndPointV2.WithHeader("Authorization", $"Bearer {Token}");
+            CheckToken().Wait();
+            return EndPointV2.WithHeader("Authorization", $"Bearer {Token}").AllowHttpStatus(HttpStatusCode.NotFound);
         }
 
         public static void checkModes(string mode)
@@ -193,7 +174,7 @@ namespace KanonBot.API
             }
         }
 
-        async public static void CheckToken()
+        async public static Task CheckToken()
         {
             if (TokenExpireTime == 0)
             {
@@ -215,23 +196,164 @@ namespace KanonBot.API
             }
         }
 
+
+        // 获取特定谱面信息
+        async public static Task<Models.Beatmap?> GetBeatmap(long bid)
+        {
+            var res = await http()
+                .AppendPathSegment("beatmaps")
+                .AppendPathSegment(bid)
+                .GetAsync();
+
+            if (res.StatusCode == 404)
+                return null;
+            else
+                return await res.GetJsonAsync<Models.Beatmap>();
+        }
+
+
+        // 获取用户成绩
+        // Score type. Must be one of these: best, firsts, recent.
+        // 默认 best
+        async public static Task<Models.Score[]?> GetUserScores(long userId, Enums.UserScoreType scoreType = Enums.UserScoreType.Best, Enums.Mode mode = Enums.Mode.OSU, bool includeFails = true, int limit = 1, int offset = 0)
+        {
+            var res = await http()
+                .AppendPathSegment("users")
+                .AppendPathSegment(userId)
+                .AppendPathSegment("scores")
+                .AppendPathSegment(scoreType.ToScoreTypeStr())
+                .SetQueryParam("include_fails", includeFails ? 1 : 0)
+                .SetQueryParam("limit", limit)
+                .SetQueryParam("offset", offset)
+                .SetQueryParam("mode", mode.ToModeStr())
+                .GetAsync();
+
+            if (res.StatusCode == 404)
+                return null;
+            else
+                return await res.GetJsonAsync<Models.Score[]>();
+        }
+
+        // 获取用户在特定谱面上的成绩
+        async public static Task<Models.BeatmapScore?> GetUserBeatmapScore(long UserId, long bid, string[] mods, Enums.Mode mode = Enums.Mode.OSU)
+        {
+            var req = http()
+                .AppendPathSegment("beatmaps")
+                .AppendPathSegment(bid)
+                .AppendPathSegment("scores")
+                .AppendPathSegment("users")
+                .AppendPathSegment(UserId)
+                .SetQueryParam("mode", mode.ToModeStr());
+
+            foreach (var mod in mods) { req.SetQueryParam("mods[]", mod); }
+
+            var res = await req.GetAsync();
+            if (res.StatusCode == 404)
+                return null;
+            else
+                return await res.GetJsonAsync<Models.BeatmapScore>();
+        }
+
+        // 获取用户在特定谱面上的成绩
+        // 返回null代表找不到beatmap / beatmap无排行榜
+        // 返回[]则用户无在此谱面的成绩
+        async public static Task<Models.Score[]?> GetUserBeatmapScores(long UserId, long bid, Enums.Mode mode = Enums.Mode.OSU)
+        {
+            var res = await http()
+                .AppendPathSegment("beatmaps")
+                .AppendPathSegment(bid)
+                .AppendPathSegment("scores")
+                .AppendPathSegment("users")
+                .AppendPathSegment(UserId)
+                .AppendPathSegment("all")
+                .SetQueryParam("mode", mode.ToModeStr())
+                .GetAsync();
+
+            if (res.StatusCode == 404)
+                return null;
+            else
+                return (await res.GetJsonAsync<JObject>())["scores"]!.ToObject<Models.Score[]>();
+        }
+
+        // 通过osu uid获取用户信息
+        async public static Task<Models.User?> GetUser(long userId, Enums.Mode mode = Enums.Mode.OSU)
+        {
+            var res = await http()
+                .AppendPathSegment("users")
+                .AppendPathSegment(userId)
+                .AppendPathSegment(mode.ToModeStr())
+                .GetAsync();
+
+            if (res.StatusCode == 404)
+                return null;
+            else
+                return await res.GetJsonAsync<Models.User>();
+        }
+
+        // 通过osu username获取用户信息
+        async public static Task<Models.User?> GetUser(string userName, Enums.Mode mode = Enums.Mode.OSU)
+        {
+            var res = await http()
+                .AppendPathSegment("users")
+                .AppendPathSegment(userName)
+                .AppendPathSegment(mode.ToModeStr())
+                .SetQueryParam("key", "username")
+                .GetAsync();
+
+            if (res.StatusCode == 404)
+                return null;
+            else
+                return await res.GetJsonAsync<Models.User>();
+        }
+
+        // 获取谱面参数
+        async public static Task<Models.BeatmapAttributes?> GetBeatmapAttributes(long bid, string[] mods, Enums.Mode mode = Enums.Mode.OSU)
+        {
+            JObject j = new()
+            {
+                { "mods", new JArray(mods) },
+                { "ruleset", mode.ToModeStr() },
+            };
+
+            var res = await http()
+                .AppendPathSegment("beatmaps")
+                .AppendPathSegment(bid)
+                .AppendPathSegment("attributes")
+                .PostJsonAsync(j);
+
+            if (res.StatusCode == 404)
+            {
+                return null;
+            }
+            else
+            {
+                var body = await res.GetJsonAsync<JObject>();
+                var beatmap = body["attributes"]!.ToObject<Models.BeatmapAttributes>()!;
+                beatmap.Mode = mode;
+                return beatmap;
+            }
+        }
+
+
         // 小夜api版（备选方案）
-        async public static Task<bool> SayoDownloadBeatmapBackgroundImg(long sid, long bid, string filePath)
+        async public static Task<string?> SayoDownloadBeatmapBackgroundImg(long sid, long bid, string folderPath, string? fileName = null)
         {
             var url = $"https://api.sayobot.cn/v2/beatmapinfo?K={sid}";
-            var body = await url.GetJsonAsync<JObject>();
-            foreach (var item in body["data"]["bid_data"])
+            var body = await url.GetJsonAsync<JObject>()!;
+            if (fileName == null)
+                fileName = $"{bid}.png";
+
+            foreach (var item in body["data"]!["bid_data"]!)
             {
-                if (long.Parse(item["bid"].Values().ToString()) == bid)
+                if (((long)item["bid"]!) == bid)
                 {
                     string bgFileName;
-                    try { bgFileName = item["bg"].Values().ToString(); }
-                    catch { return false; }
-                    Http.DownloadFile($"https://dl.sayobot.cn/beatmaps/files/{sid}/{bgFileName}", filePath);
-                    return true;
+                    try { bgFileName = ((string?)item["bg"])!; }
+                    catch { return null; }
+                    return await $"https://dl.sayobot.cn/beatmaps/files/{sid}/{bgFileName}".DownloadFileAsync(folderPath, fileName);
                 }
             }
-            return false;
+            return null;
         }
 
         // 搜索用户数量 未使用
@@ -242,12 +364,15 @@ namespace KanonBot.API
         }
 
         // 获取特定谱面信息
-        async public static Task<BeapmapInfo> GetBeatmap(long bid)
+        async public static Task<BeapmapInfo> GetBeatmapLegacy(long bid)
         {
             var beatmap = await http()
                 .AppendPathSegment("beatmaps")
                 .AppendPathSegment(bid)
                 .GetJsonAsync<JObject>();
+
+            if (beatmap.GetValue("error") != null)
+                throw new KanonError(beatmap.ToString());
 
 
             BeapmapInfo beatmapInfo = new();
@@ -289,7 +414,7 @@ namespace KanonBot.API
         }
 
         // 获取用户成绩
-        async public static Task<List<ScoreInfo>> GetUserScores(long userId, string scoreType = "recent", string mode = "osu", int limit = 1, int offset = 0, bool includeFails = true)
+        async public static Task<List<ScoreInfo>> GetUserScoresLegacy(long userId, string scoreType = "recent", string mode = "osu", int limit = 1, int offset = 0, bool includeFails = true)
         {
             checkModes(mode);
             var body = await http()
@@ -326,7 +451,7 @@ namespace KanonBot.API
                 try { scoreInfo.hasReplay = (bool)score["replay"]; } catch { scoreInfo.hasReplay = false; }
                 try { scoreInfo.convert = (bool)score["convert"]; } catch { scoreInfo.convert = false; }
                 scoreInfo.rank = score["rank"].ToString();
-                scoreInfo.achievedTime = DateTime.Parse(score["created_at"].ToString());
+                scoreInfo.achievedTime = DateTimeOffset.Parse(score["created_at"].ToString());
                 var mods = JsonConvert.DeserializeObject<JArray>(score["mods"].ToString());
                 scoreInfo.mods = new();
                 foreach (var mod in mods) { scoreInfo.mods.Add(mod.ToString()); }
@@ -371,7 +496,7 @@ namespace KanonBot.API
         }
 
         // 获取用户在特定谱面上的成绩
-        async public static Task<ScoreInfo?> GetUserBeatmapScore(long userId, long bid, List<string> mods, string mode = "osu")
+        async public static Task<ScoreInfo?> GetUserBeatmapScoreLegacy(long userId, long bid, List<string> mods, string mode = "osu")
         {
             checkModes(mode);
 
@@ -384,8 +509,12 @@ namespace KanonBot.API
                 .SetQueryParam("mode", mode);
 
             foreach (var mod in mods) { req.SetQueryParam("mods[]", mod); }
-
-            var body = await req.GetJsonAsync<JObject>();
+            JObject body;
+            var res = await req.GetAsync();
+            if (res.StatusCode == 404)
+                return null;
+            else
+                body = await res.GetJsonAsync<JObject>();
 
 
             ScoreInfo scoreInfo = new();
@@ -408,17 +537,17 @@ namespace KanonBot.API
             try { scoreInfo.acc = (float)score["accuracy"]; } catch { scoreInfo.acc = 0; }
             try { scoreInfo.hasReplay = (bool)score["replay"]; } catch { scoreInfo.hasReplay = false; }
             scoreInfo.rank = score["rank"].ToString();
-            scoreInfo.achievedTime = DateTime.Parse(score["created_at"].ToString());
+            scoreInfo.achievedTime = DateTimeOffset.Parse(score["created_at"].ToString());
             scoreInfo.mods = new();
             var s_mods = JsonConvert.DeserializeObject<JArray>(score["mods"].ToString());
             foreach (var mod in s_mods) { scoreInfo.mods.Add(mod.ToString()); }
             scoreInfo.beatmapId = (long)score["beatmap"]["id"];
-            scoreInfo.beatmapInfo = await GetBeatmap(scoreInfo.beatmapId);
+            scoreInfo.beatmapInfo = await GetBeatmapLegacy(scoreInfo.beatmapId);
             return scoreInfo;
         }
 
         // 通过osu uid获取用户信息
-        async public static Task<UserInfo> GetUser(long userId, string mode = "osu")
+        async public static Task<UserInfo> GetUserLegacy(long userId, string mode = "osu")
         {
             checkModes(mode);
 
@@ -427,6 +556,9 @@ namespace KanonBot.API
                 .AppendPathSegment(userId)
                 .AppendPathSegment(mode)
                 .GetJsonAsync<JObject>();
+
+            if (body.GetValue("error") != null)
+                throw new KanonError(body.ToString());
 
             UserInfo userInfo = new();
             try { userInfo.country = body["country_code"].ToString(); } catch { userInfo.country = "XX"; }
@@ -450,7 +582,7 @@ namespace KanonBot.API
             try { userInfo.A = (int)statistics["grade_counts"]["a"]; } catch { userInfo.A = 0; }
             try { userInfo.level = (int)statistics["level"]["current"]; } catch { userInfo.level = 0; }
             try { userInfo.levelProgress = (int)statistics["level"]["progress"]; } catch { userInfo.levelProgress = 0; }
-            userInfo.registedTimestamp = DateTime.Parse(body["join_date"].ToString());
+            userInfo.registedTimestamp = DateTimeOffset.Parse(body["join_date"].ToString());
             try { userInfo.pp = (float)statistics["pp"]; } catch { userInfo.pp = 0; }
             userInfo.mode = mode;
             userInfo.daysBefore = 0;
@@ -458,7 +590,7 @@ namespace KanonBot.API
         }
 
         // 通过osu username获取用户信息
-        async public static Task<UserInfo> GetUser(string userName, string mode = "osu")
+        async public static Task<UserInfo> GetUserLegacy(string userName, string mode = "osu")
         {
             checkModes(mode);
 
@@ -469,6 +601,9 @@ namespace KanonBot.API
                 .SetQueryParam("key", "username")
                 .GetJsonAsync<JObject>();
 
+            if (body.GetValue("error") != null)
+                throw new KanonError(body.ToString());
+
             UserInfo userInfo = new();
             try { userInfo.country = body["country_code"].ToString(); } catch { userInfo.country = "XX"; }
             userInfo.userName = body["username"].ToString();
@@ -491,7 +626,7 @@ namespace KanonBot.API
             try { userInfo.A = (int)statistics["grade_counts"]["a"]; } catch { userInfo.A = 0; }
             try { userInfo.level = (int)statistics["level"]["current"]; } catch { userInfo.level = 0; }
             try { userInfo.levelProgress = (int)statistics["level"]["progress"]; } catch { userInfo.levelProgress = 0; }
-            userInfo.registedTimestamp = DateTime.Parse(body["join_date"].ToString());
+            userInfo.registedTimestamp = DateTimeOffset.Parse(body["join_date"].ToString());
             try { userInfo.pp = (float)statistics["pp"]; } catch { userInfo.pp = 0; }
             userInfo.mode = mode;
             userInfo.daysBefore = 0;

@@ -25,9 +25,6 @@ public partial class KOOK : ISocket, IDriver
     event IDriver.EventDelegate? eventAction;
     string token;
     public API api;
-    Guid? SessionId;
-    System.Timers.Timer heartbeatTimer = new();
-    int lastSeq = 0;
     public KOOK(string token, string botID)
     {
         // 初始化变量

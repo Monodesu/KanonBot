@@ -91,7 +91,7 @@ public partial class Guild
             /// 用户加入频道的时间
             /// </summary>
             [JsonProperty(PropertyName = "joined_at")]
-            public DateTime JoinedAt { get; set; }
+            public DateTimeOffset JoinedAt { get; set; }
             /// <summary>
             /// 用户在频道内的身份组ID
             /// </summary>
@@ -188,12 +188,12 @@ public partial class Guild
             /// 消息创建时间
             /// </summary>
             [JsonProperty(PropertyName = "timestamp")]
-            public DateTime Time { get; set; }
+            public DateTimeOffset Time { get; set; }
             /// <summary>
             /// 消息编辑时间
             /// </summary>
             [JsonProperty(PropertyName = "edited_timestamp")]
-            public DateTime? EditedTime { get; set; }
+            public DateTimeOffset? EditedTime { get; set; }
             /// <summary>
             /// 是否是@全员消息
             /// </summary>

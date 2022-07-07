@@ -30,15 +30,9 @@ var config = Config.inner!;
 var log = new LoggerConfiguration()
                 .WriteTo.Console()
                 .WriteTo.File("logs/log-.log", rollingInterval: RollingInterval.Day);
-
 if (config.debug)
     log = log.MinimumLevel.Debug();
-                
 Log.Logger = log.CreateLogger();
-//初始化kanonbot相关内容
-KanonBot.API.Osu.CheckToken();
-
-//结束
 Log.Information("初始化成功 {@config}", config);
 #endregion
 

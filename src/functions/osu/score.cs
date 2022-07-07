@@ -9,7 +9,7 @@ namespace KanonBot.functions.osubot
         async public static void Execute(Target target, string cmd)
         {
             var is_bounded = false;
-            Osu.UserInfo OnlineOsuInfo;
+            OSU.UserInfo OnlineOsuInfo;
             Database.Model.Users_osu DBOsuInfo;
 
             // 解析指令
@@ -27,15 +27,15 @@ namespace KanonBot.functions.osubot
                 { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = true;
             }
             else
             {
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = false;
             }
 
@@ -52,7 +52,7 @@ namespace KanonBot.functions.osubot
 
 
             // 解析模式
-            try { mode = Osu.Modes[int.Parse(command.osu_mode)]; } catch { mode = "osu"; }
+            try { mode = OSU.Modes[int.Parse(command.osu_mode)]; } catch { mode = "osu"; }
 
             // 解析Mod
             List<string> mods = new();
@@ -75,7 +75,7 @@ namespace KanonBot.functions.osubot
 
             try
             {
-                var scoreData = await Osu.GetUserBeatmapScore(OnlineOsuInfo.userId, command.order_number, mods, mode);
+                var scoreData = await OSU.GetUserBeatmapScoreLegacy(OnlineOsuInfo.userId, command.order_number, mods, mode);
                 if (!scoreData.HasValue) { target.reply("猫猫没有找到你的成绩"); return; }
                 scorePanelData.scoreInfo = scoreData.Value;
             }
@@ -178,7 +178,7 @@ namespace KanonBot.functions.osubot
                     scorePanelData.ppStats = new();
                     for (var i = 0; i < 6; i++)
                     {
-                        Osu.PPInfo.PPStat ppStat = new();
+                        OSU.PPInfo.PPStat ppStat = new();
                         ppStat.total = -1;
                         scorePanelData.ppStats.Add(ppStat);
                     }

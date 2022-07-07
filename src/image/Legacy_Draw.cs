@@ -16,25 +16,25 @@ namespace KanonBot.LegacyImage
     {
         public class UserPanelData
         {
-            public Osu.UserInfo userInfo;
-            public Osu.UserInfo prevUserInfo;
-            public Osu.PPlusInfo pplusInfo;
+            public OSU.UserInfo userInfo;
+            public OSU.UserInfo prevUserInfo;
+            public OSU.PPlusInfo pplusInfo;
             public string? customPanel;
             public int badgeId = -1;
         }
         public class ScorePanelData
         {
-            public Osu.PPInfo ppInfo;
-            public List<Osu.PPInfo.PPStat>? ppStats;
-            public Osu.ScoreInfo scoreInfo;
+            public OSU.PPInfo ppInfo;
+            public List<OSU.PPInfo.PPStat>? ppStats;
+            public OSU.ScoreInfo scoreInfo;
 
         }
         public class PPVSPanelData
         {
             public string? u1Name;
             public string? u2Name;
-            public Osu.PPlusInfo u1;
-            public Osu.PPlusInfo u2;
+            public OSU.PPlusInfo u1;
+            public OSU.PPlusInfo u2;
         }
 
         //customBannerStatus 0=没有自定义banner 1=在猫猫上设置了自定义banner 
@@ -369,47 +369,21 @@ namespace KanonBot.LegacyImage
                 else if (data.scoreInfo.mode == "mania") panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2-mania.png");
                 else panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2.png");
                 // bg
-                var bgPath = $"work/background/{data.scoreInfo.beatmapInfo.beatmapId}.png";
-                var hasBG = false;
+                var bgPath = $"./work/background/{data.scoreInfo.beatmapInfo.beatmapId}.png";
                 if (!File.Exists(bgPath))
                 {
                     try
                     {
-                        //hasBG = Kanon.DownloadBeatmapBackgroundImg(data.scoreInfo.beatmapInfo.beatmapId, bgPath);
-                        hasBG = false; //暂时停止从kanon API获取背景图片
-                        if (!hasBG)
-                        {
-                            //var msg = $"无法从KanonAPI获取背景图片，尝试从SayoAPI下载";
-                            //Logger.Warning(msg);
-                            try
-                            {
-                                hasBG = Osu.SayoDownloadBeatmapBackgroundImg(data.scoreInfo.beatmapInfo.beatmapsetId, data.scoreInfo.beatmapInfo.beatmapId, bgPath).Result;
-                            }
-                            catch (Exception ex1)
-                            {
-                                var msg = $"从小夜API下载背景图片时发生了一处异常\n异常类型: {ex1.GetType()}\n异常信息: '{ex1.Message}'";
-                                Log.Warning(msg);
-                            }
-                        }
+                        bgPath = OSU.SayoDownloadBeatmapBackgroundImg(data.scoreInfo.beatmapInfo.beatmapsetId, data.scoreInfo.beatmapInfo.beatmapId, "./work/background/").Result;
                     }
                     catch (Exception ex)
                     {
                         var msg = $"从KanonAPI下载背景图片时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
                         Log.Warning(msg);
-                        try
-                        {
-                            hasBG = Osu.SayoDownloadBeatmapBackgroundImg(data.scoreInfo.beatmapInfo.beatmapsetId, data.scoreInfo.beatmapInfo.beatmapId, bgPath).Result;
-                        }
-                        catch (Exception ex1)
-                        {
-                            msg = $"从小夜API下载背景图片时发生了一处异常\n异常类型: {ex1.GetType()}\n异常信息: '{ex1.Message}'";
-                            Log.Warning(msg);
-                        }
                     }
                 }
-                else { hasBG = true; }
                 Img bg;
-                try { if (hasBG) bg = Img.Load(bgPath); else bg = Img.Load("./work/legacy/load-failed-img.png"); }
+                try { bg = Img.Load(bgPath).CloneAs<Rgba32>(); }
                 catch { bg = Img.Load("./work/legacy/load-failed-img.png"); }
                 var smallBg = bg.Clone(x => x.RoundCorner(new Size(433, 296), 20));
                 Img backBlack = new Image<Rgba32>(1950 - 2, 1088);

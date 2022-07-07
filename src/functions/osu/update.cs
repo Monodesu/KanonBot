@@ -9,7 +9,7 @@ namespace KanonBot.functions.osubot
         async public static void Execute(Target target, string cmd)
         {
             #region 验证
-            Osu.UserInfo OnlineOsuInfo;
+            OSU.UserInfo OnlineOsuInfo;
             Database.Model.Users_osu DBOsuInfo;
             bool is_bounded;
 
@@ -28,15 +28,15 @@ namespace KanonBot.functions.osubot
                 { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = true;
             }
             else
             {
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = false;
             }
 
@@ -53,7 +53,7 @@ namespace KanonBot.functions.osubot
             try { File.Delete($"./work/avatar/{OnlineOsuInfo.userId}.png"); } catch { }
             target.reply("主要数据已更新完毕，pp+数据正在后台更新，请稍后使用info功能查看结果。");
 
-            try { Database.Client.UpdateOsuPPlusData(await API.Osu.GetUserPlusData(OnlineOsuInfo.userId), OnlineOsuInfo.userId); }
+            try { Database.Client.UpdateOsuPPlusData(await API.OSU.GetUserPlusData(OnlineOsuInfo.userId), OnlineOsuInfo.userId); }
             catch { }//更新pp+失败，不返回信息
         }
     }

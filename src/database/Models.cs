@@ -74,7 +74,7 @@ public class Model
         [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
         public string? gamemode { get; set; }
         [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
-        public DateTime lastupdate { get; set; }
+        public DateTimeOffset lastupdate { get; set; }
     }
 
     [SugarTable("osu_performancepointplus_record")]

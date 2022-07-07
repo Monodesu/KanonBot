@@ -50,11 +50,11 @@ namespace KanonBot.functions.osubot
         async private static void Bonuspp(Target target, string cmd)
         {
             #region 验证
-            Osu.UserInfo userInfo = new();
+            OSU.UserInfo userInfo = new();
             bool is_bounded = false;
             Database.Model.Users DBUser = new();
             Database.Model.Users_osu DBOsuInfo;
-            Osu.UserInfo OnlineOsuInfo;
+            OSU.UserInfo OnlineOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
@@ -80,8 +80,8 @@ namespace KanonBot.functions.osubot
                 if (command.osu_mode == "") userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid, userInfo.mode!); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = true;
             }
             else
@@ -90,8 +90,8 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode!); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, userInfo.mode!); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
                 if (DBOsuInfo != null)
@@ -101,8 +101,8 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode); }
-                        catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                        try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, userInfo.mode); }
+                        catch { OnlineOsuInfo = new OSU.UserInfo(); }
                     }
                 }
             }
@@ -121,8 +121,8 @@ namespace KanonBot.functions.osubot
                 target.reply($"你最近还没有玩过{OnlineOsuInfo.mode}模式呢。。");
                 return;
             }
-            List<Osu.ScoreInfo> allBP;
-            allBP = await Osu.GetUserScores(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
+            List<OSU.ScoreInfo> allBP;
+            allBP = await OSU.GetUserScoresLegacy(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
             double scorePP = 0.0, bounsPP = 0.0, pp = 0.0, sumOxy = 0.0, sumOx2 = 0.0, avgX = 0.0, avgY = 0.0, sumX = 0.0;
             List<double> ys = new();
             for (int i = 0; i < allBP.Count; ++i)
@@ -185,11 +185,11 @@ namespace KanonBot.functions.osubot
         async private static void Elo(Target target, string cmd)
         {
             #region 验证
-            Osu.UserInfo userInfo = new();
+            OSU.UserInfo userInfo = new();
             bool is_bounded = false;
             Database.Model.Users DBUser = new();
             Database.Model.Users_osu DBOsuInfo;
-            Osu.UserInfo OnlineOsuInfo;
+            OSU.UserInfo OnlineOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
@@ -215,8 +215,8 @@ namespace KanonBot.functions.osubot
                 if (command.osu_mode == "") userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid, userInfo.mode!); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = true;
             }
             else
@@ -225,8 +225,8 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode!); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, userInfo.mode!); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
                 if (DBOsuInfo != null)
@@ -236,8 +236,8 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode); }
-                        catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                        try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, userInfo.mode); }
+                        catch { OnlineOsuInfo = new OSU.UserInfo(); }
                     }
                 }
             }
@@ -252,7 +252,7 @@ namespace KanonBot.functions.osubot
 
             try
             {
-                JObject? eloInfo = await Osu.GetUserEloInfo(OnlineOsuInfo.userId);
+                JObject? eloInfo = await OSU.GetUserEloInfo(OnlineOsuInfo.userId);
                 foreach (var key in eloInfo!)
                 {
                     switch (key.Key)
@@ -283,7 +283,7 @@ namespace KanonBot.functions.osubot
         async private static void Rolecost(Target target, string cmd)
         {
             cmd = cmd.Trim();
-            Func<Osu.UserInfo, Osu.PPlusInfo, double> occost = (userInfo, pppData) =>
+            Func<OSU.UserInfo, OSU.PPlusInfo, double> occost = (userInfo, pppData) =>
             {
                 double a, c, z, p;
                 p = userInfo.pp;
@@ -293,7 +293,7 @@ namespace KanonBot.functions.osubot
                 c = Math.Min(0.00930973 * Math.Pow(p / 1000, 2.64192) * Math.Pow(z / 4000, 1.48422), 7) + Math.Min(a / 7554280, 3);
                 return Math.Round(c, 2);
             };
-            Func<Osu.UserInfo, double> oncost = (userInfo) =>
+            Func<OSU.UserInfo, double> oncost = (userInfo) =>
             {
                 double fx, pp;
                 pp = userInfo.pp;
@@ -340,14 +340,14 @@ namespace KanonBot.functions.osubot
                 }
                 return Math.Round(cost, 2);
             };
-            Osu.PPlusInfo pppData = new();
+            OSU.PPlusInfo pppData = new();
 
             #region 验证
-            Osu.UserInfo userInfo = new();
+            OSU.UserInfo userInfo = new();
             bool is_bounded = false;
             Database.Model.Users DBUser = new();
             Database.Model.Users_osu DBOsuInfo;
-            Osu.UserInfo OnlineOsuInfo;
+            OSU.UserInfo OnlineOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
@@ -373,8 +373,8 @@ namespace KanonBot.functions.osubot
                 if (command.osu_mode == "") userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid, userInfo.mode!); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = true;
             }
             else
@@ -383,8 +383,8 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode!); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, userInfo.mode!); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
                 if (DBOsuInfo != null)
@@ -394,8 +394,8 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode); }
-                        catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                        try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, userInfo.mode); }
+                        catch { OnlineOsuInfo = new OSU.UserInfo(); }
                     }
                 }
             }
@@ -411,12 +411,12 @@ namespace KanonBot.functions.osubot
             switch (cmd)
             {
                 case "occ":
-                    try { OnlineOsuInfo = await Osu.GetUser(OnlineOsuInfo.userId, "osu"); }
+                    try { OnlineOsuInfo = await OSU.GetUserLegacy(OnlineOsuInfo.userId, "osu"); }
                     catch { target.reply($"获取用户信息失败了，请稍后再试。"); }
                     target.reply($"在猫猫杯S1中，{OnlineOsuInfo.userName} 的cost为：{occost(OnlineOsuInfo, pppData)}");
                     break;
                 case "onc":
-                    try { OnlineOsuInfo = await Osu.GetUser(OnlineOsuInfo.userId, "osu"); }
+                    try { OnlineOsuInfo = await OSU.GetUserLegacy(OnlineOsuInfo.userId, "osu"); }
                     catch { target.reply($"获取用户信息失败了，请稍后再试。"); }
                     var onc = occost(OnlineOsuInfo, pppData);
                     if (onc == -1)
@@ -425,9 +425,9 @@ namespace KanonBot.functions.osubot
                         target.reply($"在ONC中，{userInfo.userName} 的cost为：{onc}");
                     break;
                 case "ost":
-                    try { OnlineOsuInfo = await Osu.GetUser(OnlineOsuInfo.userId, "osu"); }
+                    try { OnlineOsuInfo = await OSU.GetUserLegacy(OnlineOsuInfo.userId, "osu"); }
                     catch { target.reply($"获取用户信息失败了，请稍后再试。"); }
-                    var eloInfo = await Osu.GetUserEloInfo(userInfo.userId);
+                    var eloInfo = await OSU.GetUserEloInfo(userInfo.userId);
                     int elo = 0;
                     foreach (var key in eloInfo!)
                     {
@@ -451,12 +451,12 @@ namespace KanonBot.functions.osubot
                     }
                     if (elo != 0)
                     {
-                        var matchId = await Osu.GetUserEloRecentPlay(userInfo.userId);
-                        var body = (await Osu.GetMatchInfo(matchId))!["result"]!.ToObject<JObject>();
+                        var matchId = await OSU.GetUserEloRecentPlay(userInfo.userId);
+                        var body = (await OSU.GetMatchInfo(matchId))!["result"]!.ToObject<JObject>();
                         TimeSpan ts = new();
                         foreach (var item in body!)
                         {
-                            var dt = DateTime.Parse(item.Value!["start_time"]!.ToString());
+                            var dt = DateTimeOffset.Parse(item.Value!["start_time"]!.ToString());
                             ts = DateTime.Now - dt;
                             break;
                         }
@@ -476,11 +476,11 @@ namespace KanonBot.functions.osubot
         async private static void Bpht(Target target, string cmd)
         {
             #region 验证
-            Osu.UserInfo userInfo = new();
+            OSU.UserInfo userInfo = new();
             bool is_bounded = false;
             Database.Model.Users DBUser = new();
             Database.Model.Users_osu DBOsuInfo;
-            Osu.UserInfo OnlineOsuInfo;
+            OSU.UserInfo OnlineOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
@@ -506,8 +506,8 @@ namespace KanonBot.functions.osubot
                 if (command.osu_mode == "") userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid, userInfo.mode!); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = true;
             }
             else
@@ -516,8 +516,8 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode!); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, userInfo.mode!); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
                 if (DBOsuInfo != null)
@@ -527,8 +527,8 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode); }
-                        catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                        try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, userInfo.mode); }
+                        catch { OnlineOsuInfo = new OSU.UserInfo(); }
                     }
                 }
             }
@@ -541,8 +541,8 @@ namespace KanonBot.functions.osubot
             }
             #endregion
 
-            List<Osu.ScoreInfo> allBP;
-            allBP = await Osu.GetUserScores(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
+            List<OSU.ScoreInfo> allBP;
+            allBP = await OSU.GetUserScoresLegacy(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
             float totalPP = 0;
             // 如果bp数量小于10则取消
             if (allBP.Count < 10)
@@ -572,11 +572,11 @@ namespace KanonBot.functions.osubot
         async private static void TodayBP(Target target, string cmd)
         {
             #region 验证
-            Osu.UserInfo userInfo = new();
+            OSU.UserInfo userInfo = new();
             bool is_bounded = false;
             Database.Model.Users DBUser = new();
             Database.Model.Users_osu DBOsuInfo;
-            Osu.UserInfo OnlineOsuInfo;
+            OSU.UserInfo OnlineOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
@@ -602,8 +602,8 @@ namespace KanonBot.functions.osubot
                 if (command.osu_mode == "") userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, userInfo.mode!); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid, userInfo.mode!); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = true;
             }
             else
@@ -612,8 +612,8 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode!); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, userInfo.mode!); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
                 if (DBOsuInfo != null)
@@ -623,8 +623,8 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, userInfo.mode); }
-                        catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                        try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, userInfo.mode); }
+                        catch { OnlineOsuInfo = new OSU.UserInfo(); }
                     }
                 }
             }
@@ -637,8 +637,8 @@ namespace KanonBot.functions.osubot
             }
             #endregion
 
-            List<Osu.ScoreInfo> allBP;
-            allBP = await Osu.GetUserScores(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
+            List<OSU.ScoreInfo> allBP;
+            allBP = await OSU.GetUserScoresLegacy(OnlineOsuInfo.userId, "best", OnlineOsuInfo.mode!, 100, 0);
             var str = $"";
             var t = DateTime.Now.Hour < 4 ? DateTime.Now.Date.AddDays(-1).AddHours(4) : DateTime.Now.Date.AddHours(4);
             for (int i = 0; i < allBP.Count; i++)

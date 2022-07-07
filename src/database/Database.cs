@@ -154,7 +154,7 @@ public class Client
 
     }
 
-    static public bool UpdateOsuPPlusData(API.Osu.PPlusInfo ppdata, long osu_uid)
+    static public bool UpdateOsuPPlusData(API.OSU.PPlusInfo ppdata, long osu_uid)
     {
         if (ppdata.is_valid)
         {

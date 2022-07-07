@@ -6,6 +6,19 @@ namespace KanonBot;
 
 static class Utils
 {
+    public static string? GetObjectDescription(Object value) {
+        foreach (var field in value.GetType().GetFields())
+        {
+            // 获取object的类型，并遍历获取DescriptionAttribute
+            // 提取出匹配的那个
+            if (Attribute.GetCustomAttribute(field, typeof(DescriptionAttribute)) is DescriptionAttribute attribute)
+            {
+                if (field.GetValue(null)?.Equals(value) ?? false)
+                    return attribute.Description;
+            }
+        }
+        return null;
+    }
     public static List<T> Slice<T>(this List<T> myList, int startIndex, int endIndex)
     {
         return myList.Skip(startIndex).Take(endIndex - startIndex + 1).ToList();
@@ -32,13 +45,13 @@ static class Utils
            .GetCustomAttributes(typeof(DescriptionAttribute), false);
         return attributes.Length > 0 ? attributes[0].Description : string.Empty;
     }
-    public static DateTime TimeStampMilliToDateTime(int timeStamp)
+    public static DateTimeOffset TimeStampMilliToDateTime(int timeStamp)
     {
-        return DateTimeOffset.FromUnixTimeMilliseconds(timeStamp).DateTime; ;
+        return DateTimeOffset.FromUnixTimeMilliseconds(timeStamp);
     }
-    public static DateTime TimeStampSecToDateTime(long timeStamp)
+    public static DateTimeOffset TimeStampSecToDateTime(long timeStamp)
     {
-        return DateTimeOffset.FromUnixTimeSeconds(timeStamp).DateTime; ;
+        return DateTimeOffset.FromUnixTimeSeconds(timeStamp);
     }
     public static string Dict2String(Dictionary<String, Object> dict)
     {

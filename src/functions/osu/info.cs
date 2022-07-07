@@ -14,7 +14,7 @@ namespace KanonBot.functions.osubot
             bool is_bounded = false;
             Database.Model.Users DBUser = new();
             Database.Model.Users_osu DBOsuInfo;
-            Osu.UserInfo OnlineOsuInfo;
+            OSU.UserInfo OnlineOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
@@ -41,8 +41,8 @@ namespace KanonBot.functions.osubot
                 if (command.osu_mode == "") data.userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
 
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid, data.userInfo.mode); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid, data.userInfo.mode); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = true;
             }
             else
@@ -51,8 +51,8 @@ namespace KanonBot.functions.osubot
                 var temp_mode_has_value = false;
                 if (command.osu_mode == "") data.userInfo.mode = "osu"; else temp_mode_has_value = true;
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, data.userInfo.mode); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, data.userInfo.mode); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.userId);
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
                 if (DBOsuInfo != null)
@@ -62,8 +62,8 @@ namespace KanonBot.functions.osubot
                     if (!temp_mode_has_value)
                     {
                         data.userInfo.mode = DBOsuInfo.osu_mode ?? "osu";
-                        try { OnlineOsuInfo = await Osu.GetUser(command.osu_username, data.userInfo.mode); }
-                        catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                        try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username, data.userInfo.mode); }
+                        catch { OnlineOsuInfo = new OSU.UserInfo(); }
                     }
                 }
             }

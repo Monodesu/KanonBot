@@ -10,7 +10,7 @@ namespace KanonBot.functions.osubot
         async public static void Execute(Target target, string cmd)
         {
             var is_bounded = false;
-            Osu.UserInfo OnlineOsuInfo;
+            OSU.UserInfo OnlineOsuInfo;
             Database.Model.Users_osu DBOsuInfo;
 
             // 解析指令
@@ -28,15 +28,15 @@ namespace KanonBot.functions.osubot
                 { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(DBOsuInfo.osu_uid); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = true;
             }
             else
             {
                 // 验证osu信息
-                try { OnlineOsuInfo = await Osu.GetUser(command.osu_username); }
-                catch { OnlineOsuInfo = new Osu.UserInfo(); }
+                try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username); }
+                catch { OnlineOsuInfo = new OSU.UserInfo(); }
                 is_bounded = false;
             }
 
@@ -53,14 +53,14 @@ namespace KanonBot.functions.osubot
 
 
             // 解析模式
-            try { mode = Osu.Modes[int.Parse(command.osu_mode)]; } catch { mode = "osu"; }
+            try { mode = OSU.Modes[int.Parse(command.osu_mode)]; } catch { mode = "osu"; }
 
             // 判断给定的bp序号是否在合法的范围内
             // if (command.order_number == -1) { target.reply("猫猫找不到该BP。"); return; }
 
             var scorePanelData = new LegacyImage.Draw.ScorePanelData();
-            List<Osu.ScoreInfo> scoreInfos;
-            try { scoreInfos = await Osu.GetUserScores(OnlineOsuInfo.userId, "best", mode, 1, command.order_number - 1); }
+            List<OSU.ScoreInfo> scoreInfos;
+            try { scoreInfos = await OSU.GetUserScoresLegacy(OnlineOsuInfo.userId, "best", mode, 1, command.order_number - 1); }
             catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply("猫猫找不到该BP。"); return; } else throw; }
             if (scoreInfos.Count > 0) scorePanelData.scoreInfo = scoreInfos[0];
             else { target.reply("猫猫找不到该BP。"); return; }
@@ -162,7 +162,7 @@ namespace KanonBot.functions.osubot
                     scorePanelData.ppStats = new();
                     for (var i = 0; i < 6; i++)
                     {
-                        Osu.PPInfo.PPStat ppStat = new();
+                        OSU.PPInfo.PPStat ppStat = new();
                         ppStat.total = -1;
                         scorePanelData.ppStats.Add(ppStat);
                     }
