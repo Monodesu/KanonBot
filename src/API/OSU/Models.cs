@@ -908,12 +908,11 @@ namespace KanonBot.API
             public class ScoreWeight
             {
                 [JsonProperty("percentage")]
-                public int Percentage { get; set; }
+                public double Percentage { get; set; }
 
                 [JsonProperty("pp")]
                 public double PP { get; set; }
             }
         }
-
     }
 }
