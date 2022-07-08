@@ -1,4 +1,4 @@
-﻿#pragma warning disable CS8602 // 解引用可能出现空引用。
+﻿#pragma warning disable CS8618 // 非null 字段未初始化
 using KanonBot.API;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -9,6 +9,8 @@ using Img = SixLabors.ImageSharp.Image;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp.ColorSpaces;
 using Serilog;
+using Flurl;
+using Flurl.Http;
 
 namespace KanonBot.LegacyImage
 {
@@ -16,25 +18,26 @@ namespace KanonBot.LegacyImage
     {
         public class UserPanelData
         {
-            public OSU.UserInfo userInfo;
-            public OSU.UserInfo prevUserInfo;
-            public OSU.PPlusInfo pplusInfo;
+            public OSU.Models.User userInfo;
+            public OSU.Models.User? prevUserInfo;
+            public OSU.Models.PPlusData.UserData pplusInfo;
             public string? customPanel;
+            public int daysBefore = 0;
             public int badgeId = -1;
         }
         public class ScorePanelData
         {
             public OSU.PPInfo ppInfo;
             public List<OSU.PPInfo.PPStat>? ppStats;
-            public OSU.ScoreInfo scoreInfo;
+            public OSU.Models.Score scoreInfo;
 
         }
         public class PPVSPanelData
         {
-            public string? u1Name;
-            public string? u2Name;
-            public OSU.PPlusInfo u1;
-            public OSU.PPlusInfo u2;
+            public string u1Name;
+            public string u2Name;
+            public OSU.Models.PPlusData.UserData u1;
+            public OSU.Models.PPlusData.UserData u2;
         }
 
         //customBannerStatus 0=没有自定义banner 1=在猫猫上设置了自定义banner 
@@ -44,24 +47,24 @@ namespace KanonBot.LegacyImage
             var fonts = new FontCollection();
             var Exo2SemiBold = fonts.Add("./work/fonts/Exo2/Exo2-SemiBold.ttf");
             var Exo2Regular = fonts.Add("./work/fonts/Exo2/Exo2-Regular.ttf");
-            var PuHuiTiRegular = fonts.Add("./work/fonts/Alibaba-PuHuiTi/Alibaba-PuHuiTi-Regular.ttf");
+            var HaymonySans = fonts.Add("./work/fonts/HarmonyOS_Sans/HarmonyOS_Sans_Regular.ttf");
             // custom panel
             var panelPath = "./work/legacy/default-info-v1.png";
-            if (File.Exists($"./work/legacy/v1_infopanel/{data.userInfo.userId}.png")) panelPath = $"./work/legacy/v1_infopanel/{data.userInfo.userId}.png";
+            if (File.Exists($"./work/legacy/v1_infopanel/{data.userInfo.Id}.png")) panelPath = $"./work/legacy/v1_infopanel/{data.userInfo.Id}.png";
             Img panel = Img.Load(panelPath);
 
-            var coverPath = $"./work/legacy/v1_cover/{data.userInfo.userId}.png";
+            var coverPath = $"./work/legacy/v1_cover/{data.userInfo.Id}.png";
             if (customBannerStatus == 1)
             {
-                coverPath = $"./work/legacy/v1_cover/custom/{data.userInfo.userId}.png";
+                coverPath = $"./work/legacy/v1_cover/custom/{data.userInfo.Id}.png";
             }
             else if (!File.Exists(coverPath))
             {
-                if (data.userInfo.coverUrl != "")
+                try
                 {
-                    Http.DownloadFile(data.userInfo.coverUrl, coverPath);
+                    coverPath = data.userInfo.CoverUrl.DownloadFileAsync("./work/legacy/v1_cover/", $"{data.userInfo.Id}.png").Result;
                 }
-                else
+                catch
                 {
                     int n = new Random().Next(1, 6);
                     coverPath = $"./work/legacy/v1_cover/default/default_{n}.png";
@@ -82,12 +85,26 @@ namespace KanonBot.LegacyImage
 
 
             //avatar
-            var avatarPath = $"./work/avatar/{data.userInfo.userId}.png";
-            if (!File.Exists(avatarPath))
+            var avatarPath = $"./work/avatar/{data.userInfo.Id}.png";
+            Img avatar;
+            try
             {
-                Http.DownloadFile(data.userInfo.avatarUrl, avatarPath);
+                avatar = Img.Load(avatarPath).CloneAs<Rgba32>();    // 读取
             }
-            Img avatar = Img.Load(avatarPath).CloneAs<Rgba32>();
+            catch
+            {
+                try
+                {
+                    avatarPath = data.userInfo.AvatarUrl.DownloadFileAsync("./work/avatar/", $"{data.userInfo.Id}.png").Result;
+                }
+                catch (Exception ex)
+                {
+                    var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
+                    Log.Error(msg);
+                    throw;  // 下载失败直接抛出error
+                }
+                avatar = Img.Load(avatarPath).CloneAs<Rgba32>();    // 下载后再读取
+            }
             avatar.Mutate(x => x.Resize(190, 190).RoundCorner(new Size(190, 190), 40));
             info.Mutate(x => x.DrawImage(avatar, new Point(39, 55), 1));
 
@@ -112,14 +129,14 @@ namespace KanonBot.LegacyImage
                 }
             };
 
-            Img flags = Img.Load($"./work/flags/{data.userInfo.country}.png");
+            Img flags = Img.Load($"./work/flags/{data.userInfo.Country.Code}.png");
             info.Mutate(x => x.DrawImage(flags, new Point(272, 212), 1));
-            Img modeicon = Img.Load($"./work/legacy/mode_icon/{data.userInfo.mode}.png");
+            Img modeicon = Img.Load($"./work/legacy/mode_icon/{data.userInfo.PlayMode.ToModeStr()}.png");
             modeicon.Mutate(x => x.Resize(64, 64));
             info.Mutate(x => x.DrawImage(modeicon, new Point(1125, 10), 1));
 
             // pp+
-            if (data.userInfo.mode == "osu")
+            if (data.userInfo.PlayMode is OSU.Enums.Mode.OSU)
             {
                 Img ppdataPanel = Img.Load("./work/legacy/pp+-v1.png");
                 info.Mutate(x => x.DrawImage(ppdataPanel, new Point(0, 0), 1));
@@ -134,13 +151,13 @@ namespace KanonBot.LegacyImage
                 hi.strokeWidth = 2f;
                 hi.nodesize = new SizeF(5f, 5f);
                 // acc ,flow, jump, pre, speed, sta
-                var ppd = new int[6];
-                ppd[0] = data.pplusInfo.acc;
-                ppd[1] = data.pplusInfo.flow;
-                ppd[2] = data.pplusInfo.jump;
-                ppd[3] = data.pplusInfo.pre;
-                ppd[4] = data.pplusInfo.spd;
-                ppd[5] = data.pplusInfo.sta;
+                var ppd = new int[6];       // 这里就强制转换了
+                ppd[0] = (int)data.pplusInfo.AccuracyTotal;
+                ppd[1] = (int)data.pplusInfo.FlowAimTotal;
+                ppd[2] = (int)data.pplusInfo.JumpAimTotal;
+                ppd[3] = (int)data.pplusInfo.PrecisionTotal;
+                ppd[4] = (int)data.pplusInfo.SpeedTotal;
+                ppd[5] = (int)data.pplusInfo.StaminaTotal;
                 // x_offset  pp+数据的坐标偏移量
                 var x_offset = new int[6] { 372, 330, 122, 52, 128, 317 };   // pp+数据的x轴坐标
                 var multi = new double[6] { 14.1, 69.7, 1.92, 19.8, 0.588, 3.06 };
@@ -165,6 +182,7 @@ namespace KanonBot.LegacyImage
                 Img ppdataPanel = Img.Load("./work/legacy/nopp+info-v1.png");
                 info.Mutate(x => x.DrawImage(ppdataPanel, new Point(0, 0), 1));
             }
+
             // time
             var textOptions = new TextOptions(new Font(Exo2Regular, 20))
             {
@@ -173,9 +191,9 @@ namespace KanonBot.LegacyImage
             };
             textOptions.Origin = new PointF(15, 25);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, $"update: {(DateTime.Now).ToString().Replace("/", " / ")}", new SolidBrush(Color.White), null));
-            if (data.prevUserInfo.daysBefore > 1)
+            if (data.daysBefore > 1)
             {
-                textOptions = new TextOptions(new Font(PuHuiTiRegular, 20))
+                textOptions = new TextOptions(new Font(HaymonySans, 20))
                 {
                     VerticalAlignment = VerticalAlignment.Bottom,
                     HorizontalAlignment = HorizontalAlignment.Left,
@@ -183,31 +201,35 @@ namespace KanonBot.LegacyImage
                 if (isDataOfDayAvaiavle)
                 {
                     textOptions.Origin = new PointF(300, 25);
-                    info.Mutate(x => x.DrawText(drawOptions, textOptions, $"对 比 自 {data.prevUserInfo.daysBefore}天 前", new SolidBrush(Color.White), null));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, $"对比自{data.daysBefore}天前", new SolidBrush(Color.White), null));
                 }
                 else
                 {
                     textOptions.Origin = new PointF(300, 25);
-                    info.Mutate(x => x.DrawText(drawOptions, textOptions, $" 请 求 的 日 期 没 有 数 据 .." +
-                        $"当 前 数 据 对 比 自 {data.prevUserInfo.daysBefore}天 前", new SolidBrush(Color.White), null));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, $" 请求的日期没有数据.." +
+                        $"当前数据对比自{data.daysBefore}天前", new SolidBrush(Color.White), null));
                 }
             }
             // username
             textOptions.Font = new Font(Exo2SemiBold, 60);
             textOptions.Origin = new PointF(268, 140);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.userName, new SolidBrush(Color.White), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.Username, new SolidBrush(Color.White), null));
+
+            var Statistics = data.userInfo.Statistics;
+            var prevStatistics = data.prevUserInfo?.Statistics ?? null; // 没有就为空
+
             // country_rank
             string countryRank;
             if (isBonded)
             {
-                var diff = data.userInfo.countryRank - data.prevUserInfo.countryRank;
-                if (diff > 0) countryRank = string.Format("#{0:N0}(-{1:N0})", data.userInfo.countryRank, diff);
-                else if (diff < 0) countryRank = string.Format("#{0:N0}(+{1:N0})", data.userInfo.countryRank, Math.Abs(diff));
-                else countryRank = string.Format("#{0:N0}", data.userInfo.countryRank);
+                var diff = Statistics.CountryRank - prevStatistics!.CountryRank;
+                if (diff > 0) countryRank = string.Format("#{0:N0}(-{1:N0})", Statistics.CountryRank, diff);
+                else if (diff < 0) countryRank = string.Format("#{0:N0}(+{1:N0})", Statistics.CountryRank, Math.Abs(diff));
+                else countryRank = string.Format("#{0:N0}", Statistics.CountryRank);
             }
             else
             {
-                countryRank = string.Format("#{0:N0}", data.userInfo.countryRank);
+                countryRank = string.Format("#{0:N0}", Statistics.CountryRank);
             }
             textOptions.Font = new Font(Exo2SemiBold, 20);
             textOptions.Origin = new PointF(350, 260);
@@ -216,7 +238,7 @@ namespace KanonBot.LegacyImage
             string diffStr;
             if (isBonded)
             {
-                var diff = data.userInfo.globalRank - data.prevUserInfo.globalRank;
+                var diff = Statistics.GlobalRank - prevStatistics!.GlobalRank;
                 if (diff > 0) diffStr = string.Format("↓ {0:N0}", diff);
                 else if (diff < 0) diffStr = string.Format("↑ {0:N0}", Math.Abs(diff));
                 else diffStr = "↑ -";
@@ -227,14 +249,14 @@ namespace KanonBot.LegacyImage
             }
             textOptions.Font = new Font(Exo2Regular, 40);
             textOptions.Origin = new PointF(40, 410);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.globalRank), new SolidBrush(Color.White), null));
-            textOptions.Font = new Font(PuHuiTiRegular, 14);
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", Statistics.GlobalRank), new SolidBrush(Color.White), null));
+            textOptions.Font = new Font(HaymonySans, 14);
             textOptions.Origin = new PointF(40, 430);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, diffStr, new SolidBrush(Color.White), null));
             // pp
             if (isBonded)
             {
-                var diff = data.userInfo.pp - data.prevUserInfo.pp;
+                var diff = Statistics.PP - prevStatistics!.PP;
                 if (diff >= 0.01) diffStr = string.Format("↑ {0:0.##}", diff);
                 else if (diff <= -0.01) diffStr = string.Format("↓ {0:0.##}", Math.Abs(diff));
                 else diffStr = "↑ -";
@@ -245,29 +267,29 @@ namespace KanonBot.LegacyImage
             }
             textOptions.Font = new Font(Exo2Regular, 40);
             textOptions.Origin = new PointF(246, 410);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0.##}", data.userInfo.pp), new SolidBrush(Color.White), null));
-            textOptions.Font = new Font(PuHuiTiRegular, 14);
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0.##}", Statistics.PP), new SolidBrush(Color.White), null));
+            textOptions.Font = new Font(HaymonySans, 14);
             textOptions.Origin = new PointF(246, 430);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, diffStr, new SolidBrush(Color.White), null));
             // ssh ss
             textOptions.Font = new Font(Exo2Regular, 30);
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;
             textOptions.Origin = new PointF(80, 540);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.SSH.ToString(), new SolidBrush(Color.White), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, Statistics.GradeCounts.SSH.ToString(), new SolidBrush(Color.White), null));
             textOptions.Origin = new PointF(191, 540);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.SS.ToString(), new SolidBrush(Color.White), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, Statistics.GradeCounts.SS.ToString(), new SolidBrush(Color.White), null));
             textOptions.Origin = new PointF(301, 540);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.SH.ToString(), new SolidBrush(Color.White), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, Statistics.GradeCounts.SH.ToString(), new SolidBrush(Color.White), null));
             textOptions.Origin = new PointF(412, 540);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.S.ToString(), new SolidBrush(Color.White), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, Statistics.GradeCounts.S.ToString(), new SolidBrush(Color.White), null));
             textOptions.Origin = new PointF(522, 540);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.A.ToString(), new SolidBrush(Color.White), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, Statistics.GradeCounts.A.ToString(), new SolidBrush(Color.White), null));
             // level
             textOptions.Font = new Font(Exo2SemiBold, 34);
             textOptions.Origin = new PointF(1115, 385);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.level.ToString(), new SolidBrush(Color.White), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, Statistics.Level.Current.ToString(), new SolidBrush(Color.White), null));
             // Level%
-            var levelper = data.userInfo.levelProgress;
+            var levelper = Statistics.Level.Progress;
             textOptions.HorizontalAlignment = HorizontalAlignment.Right;
             textOptions.Font = new Font(Exo2SemiBold, 20);
             textOptions.Origin = new PointF(1060, 400);
@@ -290,34 +312,34 @@ namespace KanonBot.LegacyImage
             // } else {
             //     rankedScore = string.Format("{0:N0}", data.userInfo.rankedScore);
             // }
-            rankedScore = string.Format("{0:N0}", data.userInfo.rankedScore);
+            rankedScore = string.Format("{0:N0}", Statistics.RankedScore);
             textOptions.Origin = new PointF(1180, 625);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, rankedScore, new SolidBrush(Color.White), null));
             string acc;
             if (isBonded)
             {
-                var diff = data.userInfo.accuracy - data.prevUserInfo.accuracy;
-                if (diff >= 0.01) acc = string.Format("{0:0.##}%(+{1:0.##}%)", data.userInfo.accuracy, diff);
-                else if (diff <= -0.01) acc = string.Format("{0:0.##}%({1:0.##}%)", data.userInfo.accuracy, diff);
-                else acc = string.Format("{0:0.##}%", data.userInfo.accuracy);
+                var diff = Statistics.HitAccuracy - prevStatistics!.HitAccuracy;
+                if (diff >= 0.01) acc = string.Format("{0:0.##}%(+{1:0.##}%)", Statistics.HitAccuracy, diff);
+                else if (diff <= -0.01) acc = string.Format("{0:0.##}%({1:0.##}%)", Statistics.HitAccuracy, diff);
+                else acc = string.Format("{0:0.##}%", Statistics.HitAccuracy);
             }
             else
             {
-                acc = string.Format("{0:0.##}%", data.userInfo.accuracy);
+                acc = string.Format("{0:0.##}%", Statistics.HitAccuracy);
             }
             textOptions.Origin = new PointF(1180, 665);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, acc, new SolidBrush(Color.White), null));
             string playCount;
             if (isBonded)
             {
-                var diff = data.userInfo.playCount - data.prevUserInfo.playCount;
-                if (diff > 0) playCount = string.Format("{0:N0}(+{1:N0})", data.userInfo.playCount, diff);
-                else if (diff < 0) playCount = string.Format("{0:N0}({1:N0})", data.userInfo.playCount, diff);
-                else playCount = string.Format("{0:N0}", data.userInfo.playCount);
+                var diff = Statistics.PlayCount - prevStatistics!.PlayCount;
+                if (diff > 0) playCount = string.Format("{0:N0}(+{1:N0})", Statistics.PlayCount, diff);
+                else if (diff < 0) playCount = string.Format("{0:N0}({1:N0})", Statistics.PlayCount, diff);
+                else playCount = string.Format("{0:N0}", Statistics.PlayCount);
             }
             else
             {
-                playCount = string.Format("{0:N0}", data.userInfo.playCount);
+                playCount = string.Format("{0:N0}", Statistics.PlayCount);
             }
             textOptions.Origin = new PointF(1180, 705);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, playCount, new SolidBrush(Color.White), null));
@@ -330,25 +352,25 @@ namespace KanonBot.LegacyImage
             // } else {
             //     totalScore = string.Format("{0:N0}", data.userInfo.totalScore);
             // }
-            totalScore = string.Format("{0:N0}", data.userInfo.totalScore);
+            totalScore = string.Format("{0:N0}", Statistics.TotalScore);
             textOptions.Origin = new PointF(1180, 745);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, totalScore, new SolidBrush(Color.White), null));
             string totalHits;
             if (isBonded)
             {
-                var diff = data.userInfo.totalHits - data.prevUserInfo.totalHits;
-                if (diff > 0) totalHits = string.Format("{0:N0}(+{1:N0})", data.userInfo.totalHits, diff);
-                else if (diff < 0) totalHits = string.Format("{0:N0}({1:N0})", data.userInfo.totalHits, diff);
-                else totalHits = string.Format("{0:N0}", data.userInfo.totalHits);
+                var diff = Statistics.TotalHits - prevStatistics!.TotalHits;
+                if (diff > 0) totalHits = string.Format("{0:N0}(+{1:N0})", Statistics.TotalHits, diff);
+                else if (diff < 0) totalHits = string.Format("{0:N0}({1:N0})", Statistics.TotalHits, diff);
+                else totalHits = string.Format("{0:N0}", Statistics.TotalHits);
             }
             else
             {
-                totalHits = string.Format("{0:N0}", data.userInfo.totalHits);
+                totalHits = string.Format("{0:N0}", Statistics.TotalHits);
             }
             textOptions.Origin = new PointF(1180, 785);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, totalHits, new SolidBrush(Color.White), null));
             textOptions.Origin = new PointF(1180, 825);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, Utils.Duration2String(data.userInfo.playTime), new SolidBrush(Color.White), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, Utils.Duration2String(Statistics.PlayTime), new SolidBrush(Color.White), null));
             info.Mutate(x => x.RoundCorner(new Size(1200, 857), 24));
             var stream = new MemoryStream();
 
@@ -357,6 +379,42 @@ namespace KanonBot.LegacyImage
         }
         public static MemoryStream DrawScore(ScorePanelData data, bool res)
         {
+            // 先下载必要文件
+            var bgPath = $"./work/background/{data.scoreInfo.Beatmap!.BeatmapId}.png";
+            if (!File.Exists(bgPath))
+            {
+                try
+                {
+                    bgPath = OSU.SayoDownloadBeatmapBackgroundImg(data.scoreInfo.Beatmap.BeatmapsetId, data.scoreInfo.Beatmap.BeatmapId, "./work/background/").Result;
+                }
+                catch (Exception ex)
+                {
+                    var msg = $"从API下载背景图片时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
+                    Log.Warning(msg);
+                }
+            }
+
+            var avatarPath = $"./work/avatar/{data.scoreInfo.UserId}.png";
+            Img avatar;
+            try
+            {
+                avatar = Img.Load(avatarPath).CloneAs<Rgba32>();    // 读取
+            }
+            catch
+            {
+                try
+                {
+                    avatarPath = data.scoreInfo.User!.AvatarUrl.DownloadFileAsync("./work/avatar/", $"{data.scoreInfo.UserId}.png").Result;
+                }
+                catch (Exception ex)
+                {
+                    var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
+                    Log.Error(msg);
+                    throw;
+                }
+                avatar = Img.Load(avatarPath).CloneAs<Rgba32>();    // 下载后再读取
+            }
+
             using (var score = Img.Load("work/legacy/v2_scorepanel/default-score-v2.png"))
             {
                 var fonts = new FontCollection();
@@ -365,23 +423,10 @@ namespace KanonBot.LegacyImage
                 var PuHuiTiRegular = fonts.Add("./work/fonts/Alibaba-PuHuiTi/Alibaba-PuHuiTi-Regular.ttf");
 
                 Img panel;
-                if (data.scoreInfo.mode == "fruits") panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2-fruits.png");
-                else if (data.scoreInfo.mode == "mania") panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2-mania.png");
+                if (data.scoreInfo.Mode is OSU.Enums.Mode.Fruits) panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2-fruits.png");
+                else if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania) panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2-mania.png");
                 else panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2.png");
                 // bg
-                var bgPath = $"./work/background/{data.scoreInfo.beatmapInfo.beatmapId}.png";
-                if (!File.Exists(bgPath))
-                {
-                    try
-                    {
-                        bgPath = OSU.SayoDownloadBeatmapBackgroundImg(data.scoreInfo.beatmapInfo.beatmapsetId, data.scoreInfo.beatmapInfo.beatmapId, "./work/background/").Result;
-                    }
-                    catch (Exception ex)
-                    {
-                        var msg = $"从KanonAPI下载背景图片时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
-                        Log.Warning(msg);
-                    }
-                }
                 Img bg;
                 try { bg = Img.Load(bgPath).CloneAs<Rgba32>(); }
                 catch { bg = Img.Load("./work/legacy/load-failed-img.png"); }
@@ -398,10 +443,9 @@ namespace KanonBot.LegacyImage
                 // green, blue, yellow, red, purple, black
                 // [0,2), [2,3), [3,4), [4,5), [5,7), [7,?)
                 var ringFile = new string[6];
-                var mode = data.scoreInfo.mode;
-                switch (mode)
+                switch (data.scoreInfo.Mode)
                 {
-                    case "osu":
+                    case OSU.Enums.Mode.OSU:
                         ringFile[0] = "std-easy.png";
                         ringFile[1] = "std-normal.png";
                         ringFile[2] = "std-hard.png";
@@ -409,7 +453,7 @@ namespace KanonBot.LegacyImage
                         ringFile[4] = "std-expert.png";
                         ringFile[5] = "std-expertplus.png";
                         break;
-                    case "fruits":
+                    case OSU.Enums.Mode.Fruits:
                         ringFile[0] = "ctb-easy.png";
                         ringFile[1] = "ctb-normal.png";
                         ringFile[2] = "ctb-hard.png";
@@ -417,7 +461,7 @@ namespace KanonBot.LegacyImage
                         ringFile[4] = "ctb-expert.png";
                         ringFile[5] = "ctb-expertplus.png";
                         break;
-                    case "taiko":
+                    case OSU.Enums.Mode.Taiko:
                         ringFile[0] = "taiko-easy.png";
                         ringFile[1] = "taiko-normal.png";
                         ringFile[2] = "taiko-hard.png";
@@ -425,7 +469,7 @@ namespace KanonBot.LegacyImage
                         ringFile[4] = "taiko-expert.png";
                         ringFile[5] = "taiko-expertplus.png";
                         break;
-                    case "mania":
+                    case OSU.Enums.Mode.Mania:
                         ringFile[0] = "mania-easy.png";
                         ringFile[1] = "mania-normal.png";
                         ringFile[2] = "mania-hard.png";
@@ -464,14 +508,14 @@ namespace KanonBot.LegacyImage
                 diffCircle.Mutate(x => x.Resize(65, 65));
                 score.Mutate(x => x.DrawImage(diffCircle, new Point(512, 257), 1));
                 // beatmap_status
-                if (data.scoreInfo.beatmapInfo.beatmapStatus == "ranked")
+                if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.ranked)
                     score.Mutate(x => x.DrawImage(Img.Load("./work/icons/ranked.png"), new Point(415, 16), 1));
-                if (data.scoreInfo.beatmapInfo.beatmapStatus == "approved")
+                if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.approved)
                     score.Mutate(x => x.DrawImage(Img.Load("./work/icons/approved.png"), new Point(415, 16), 1));
-                if (data.scoreInfo.beatmapInfo.beatmapStatus == "loved")
+                if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.loved)
                     score.Mutate(x => x.DrawImage(Img.Load("./work/icons/loved.png"), new Point(415, 16), 1));
                 // mods
-                var mods = data.scoreInfo.mods;
+                var mods = data.scoreInfo.Mods;
                 var modp = 0;
                 foreach (var mod in mods)
                 {
@@ -482,7 +526,7 @@ namespace KanonBot.LegacyImage
                     modp += 1;
                 }
                 // rankings
-                var ranking = data.scoreInfo.rank;
+                var ranking = data.scoreInfo.Rank;
                 var rankPic = Img.Load($"./work/ranking/ranking-{ranking}.png");
                 score.Mutate(x => x.DrawImage(rankPic, new Point(913, 874), 1));
                 // text part (文字部分)
@@ -501,7 +545,7 @@ namespace KanonBot.LegacyImage
                 };
                 // beatmap_info
                 var title = "";
-                foreach (char c in data.scoreInfo.beatmapInfo.title)
+                foreach (char c in data.scoreInfo.Beatmapset!.Title)
                 {
                     title += c;
                     var m = TextMeasurer.Measure(title, textOptions);
@@ -518,7 +562,7 @@ namespace KanonBot.LegacyImage
                 // artist
                 textOptions.Font = new Font(TorusRegular, 40);
                 var artist = "";
-                foreach (char c in data.scoreInfo.beatmapInfo.artist)
+                foreach (char c in data.scoreInfo.Beatmapset.Artist)
                 {
                     artist += c;
                     var m = TextMeasurer.Measure(artist, textOptions);
@@ -534,7 +578,7 @@ namespace KanonBot.LegacyImage
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, artist, new SolidBrush(Color.White), null));
                 // creator
                 var creator = "";
-                foreach (char c in data.scoreInfo.beatmapInfo.creator)
+                foreach (char c in data.scoreInfo.Beatmapset.Creator)
                 {
                     creator += c;
                     var m = TextMeasurer.Measure(creator, textOptions);
@@ -549,7 +593,7 @@ namespace KanonBot.LegacyImage
                 textOptions.Origin = new PointF(795, 175);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, creator, new SolidBrush(Color.White), null));
                 // beatmap_id
-                var beatmap_id = data.scoreInfo.beatmapId.ToString();
+                var beatmap_id = data.scoreInfo.Beatmap.BeatmapId.ToString();
                 textOptions.Origin = new PointF(1008, 178);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, beatmap_id, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1008, 175);
@@ -558,41 +602,41 @@ namespace KanonBot.LegacyImage
                 var color = Color.ParseHex("#f1ce59");
                 textOptions.Font = new Font(TorusRegular, 24.25f);
                 // time
-                var song_time = Utils.Duration2TimeString(data.scoreInfo.beatmapInfo.totalLength);
+                var song_time = Utils.Duration2TimeString(data.scoreInfo.Beatmap.TotalLength);
                 textOptions.Origin = new PointF(1741, 127);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, song_time, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1741, 124);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, song_time, new SolidBrush(Color.White), null));
                 // bpm
-                var bpm = data.scoreInfo.beatmapInfo.BPM.ToString("0");
+                var bpm = data.scoreInfo.Beatmap.BPM.GetValueOrDefault().ToString("0");
                 textOptions.Origin = new PointF(1457, 127);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, bpm, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1457, 124);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, bpm, new SolidBrush(Color.White), null));
                 // ar
-                var ar = data.scoreInfo.beatmapInfo.approachRate.ToString("0.0#");
-                if (data.scoreInfo.mode == "osu" && data.ppInfo.approachRate != -1) ar = data.ppInfo.approachRate.ToString("0.0#");
+                var ar = data.scoreInfo.Beatmap.AR.ToString("0.0#");
+                if (data.scoreInfo.Mode is OSU.Enums.Mode.OSU && data.ppInfo.approachRate != -1) ar = data.ppInfo.approachRate.ToString("0.0#");
                 textOptions.Origin = new PointF(1457, 218);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, ar, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1457, 215);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, ar, new SolidBrush(Color.White), null));
                 // od
-                var od = data.scoreInfo.beatmapInfo.accuracy.ToString("0.0#");
-                if (data.scoreInfo.mode == "osu" && data.ppInfo.accuracy != -1) od = data.ppInfo.accuracy.ToString("0.0#");
+                var od = data.scoreInfo.Beatmap.Accuracy.ToString("0.0#");
+                if (data.scoreInfo.Mode is OSU.Enums.Mode.OSU && data.ppInfo.accuracy != -1) od = data.ppInfo.accuracy.ToString("0.0#");
                 textOptions.Origin = new PointF(1741, 218);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, od, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1741, 215);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, od, new SolidBrush(Color.White), null));
                 // cs
                 var cs = data.ppInfo.circleSize.ToString("0.0#");
-                if (data.ppInfo.circleSize == -1) cs = data.scoreInfo.beatmapInfo.circleSize.ToString("0.0#");
+                if (data.ppInfo.circleSize == -1) cs = data.scoreInfo.Beatmap.CS.ToString("0.0#");
                 textOptions.Origin = new PointF(1457, 312);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, cs, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1457, 309);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, cs, new SolidBrush(Color.White), null));
                 // hp
                 var hp = data.ppInfo.HPDrainRate.ToString("0.0#");
-                if (data.ppInfo.HPDrainRate == -1) cs = data.scoreInfo.beatmapInfo.HPDrainRate.ToString("0.0#");
+                if (data.ppInfo.HPDrainRate == -1) cs = data.scoreInfo.Beatmap.HPDrain.ToString("0.0#");
                 textOptions.Origin = new PointF(1741, 312);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, hp, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1741, 309);
@@ -604,7 +648,7 @@ namespace KanonBot.LegacyImage
                 textOptions.Origin = new PointF(584, 289);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, starText, new SolidBrush(Color.White), null));
                 var version = "";
-                foreach (char c in data.scoreInfo.beatmapInfo.version)
+                foreach (char c in data.scoreInfo.Beatmap.Version)
                 {
                     version += c;
                     var m = TextMeasurer.Measure(version, textOptions);
@@ -619,12 +663,6 @@ namespace KanonBot.LegacyImage
                 textOptions.Origin = new PointF(584, 317);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, version, new SolidBrush(Color.White), null));
                 // avatar
-                var avatarPath = $"./work/avatar/{data.scoreInfo.userId}.png";
-                if (!File.Exists(avatarPath))
-                {
-                    Http.DownloadFile(data.scoreInfo.userAvatarUrl, avatarPath);
-                }
-                Img avatar = Img.Load(avatarPath).CloneAs<Rgba32>();
                 avatar.Mutate(x => x.Resize(80, 80).RoundCorner(new Size(80, 80), 40));
                 score.Mutate(
                     x => x.Fill(
@@ -635,14 +673,14 @@ namespace KanonBot.LegacyImage
                 score.Mutate(x => x.DrawImage(avatar, new Point(40, 425), 1));
                 // username
                 textOptions.Font = new Font(TorusSemiBold, 36);
-                var username = data.scoreInfo.userName;
+                var username = data.scoreInfo.User!.Username;
                 textOptions.Origin = new PointF(145, 470);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, username, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(145, 467);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, username, new SolidBrush(Color.White), null));
                 // time
                 textOptions.Font = new Font(TorusRegular, 27.61f);
-                var time = data.scoreInfo.achievedTime.ToString("yyyy/MM/dd HH:mm:ss");
+                var time = data.scoreInfo.CreatedAt.ToString("yyyy/MM/dd HH:mm:ss");
                 textOptions.Origin = new PointF(145, 505);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, time, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(145, 502);
@@ -676,7 +714,7 @@ namespace KanonBot.LegacyImage
                 textOptions.Origin = new PointF(1812 + metric.Width, 638);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(ppTColor), null));
 
-                if (data.scoreInfo.mode == "mania" || data.scoreInfo.mode == "fruits")
+                if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania || data.scoreInfo.Mode is OSU.Enums.Mode.Fruits)
                 {
                     pptext = "-";
                     metric = TextMeasurer.Measure(pptext, textOptions);
@@ -694,7 +732,7 @@ namespace KanonBot.LegacyImage
                     {
                         try
                         {
-                            if (data.ppStats[i].total == -1) pptext = "-";
+                            if (data.ppStats![i].total == -1) pptext = "-";
                             else pptext = data.ppStats[5 - (i + 1)].total.ToString("0");
                         }
                         catch
@@ -710,7 +748,7 @@ namespace KanonBot.LegacyImage
                 }
                 // if fc
                 textOptions.Font = new Font(TorusRegular, 24.5f);
-                if (data.scoreInfo.mode == "mania")
+                if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania)
                 {
                     pptext = "-";
                 }
@@ -718,7 +756,7 @@ namespace KanonBot.LegacyImage
                 {
                     try
                     {
-                        if (data.ppStats[5].total == -1) pptext = "-";
+                        if (data.ppStats![5].total == -1) pptext = "-";
                         else pptext = data.ppStats[5].total.ToString("0");
                     }
                     catch
@@ -745,14 +783,14 @@ namespace KanonBot.LegacyImage
                 textOptions.HorizontalAlignment = HorizontalAlignment.Center;
                 textOptions.Font = new Font(TorusRegular, 40);
                 textOptions.Origin = new PointF(980, 750);
-                score.Mutate(x => x.DrawText(drawOptions, textOptions, data.scoreInfo.score.ToString("N0"), new SolidBrush(Color.White), null));
-                if (data.scoreInfo.mode == "fruits")
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, data.scoreInfo.ScoreScore.ToString("N0"), new SolidBrush(Color.White), null));
+                if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania)
                 {
                     textOptions.Font = new Font(TorusRegular, 40.00f);
-                    var great = data.scoreInfo.great.ToString();
-                    var ok = data.scoreInfo.ok.ToString();
-                    var meh = data.scoreInfo.meh.ToString();
-                    var miss = data.scoreInfo.miss.ToString();
+                    var great = data.scoreInfo.Statistics.CountGreat.ToString();
+                    var ok = data.scoreInfo.Statistics.CountOk.ToString();
+                    var meh = data.scoreInfo.Statistics.CountMeh.ToString();
+                    var miss = data.scoreInfo.Statistics.CountMiss.ToString();
 
                     // great
                     textOptions.Origin = new PointF(790, 852);
@@ -775,15 +813,15 @@ namespace KanonBot.LegacyImage
                     textOptions.Origin = new PointF(1152, 972);
                     score.Mutate(x => x.DrawText(drawOptions, textOptions, miss, new SolidBrush(Color.White), null));
                 }
-                else if (data.scoreInfo.mode == "mania")
+                else if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania)
                 {
                     textOptions.Font = new Font(TorusRegular, 35.00f);
-                    var great = data.scoreInfo.great.ToString();
-                    var ok = data.scoreInfo.ok.ToString();
-                    var meh = data.scoreInfo.meh.ToString();
-                    var miss = data.scoreInfo.miss.ToString();
-                    var geki = data.scoreInfo.geki.ToString();
-                    var katu = data.scoreInfo.katu.ToString();
+                    var great = data.scoreInfo.Statistics.CountGreat.ToString();
+                    var ok = data.scoreInfo.Statistics.CountOk.ToString();
+                    var meh = data.scoreInfo.Statistics.CountMeh.ToString();
+                    var miss = data.scoreInfo.Statistics.CountMiss.ToString();
+                    var geki = data.scoreInfo.Statistics.CountGeki.ToString();
+                    var katu = data.scoreInfo.Statistics.CountKatu.ToString();
 
                     // great
                     textOptions.Origin = new PointF(790, 837);
@@ -819,10 +857,10 @@ namespace KanonBot.LegacyImage
                 else
                 {
                     textOptions.Font = new Font(TorusRegular, 53.09f);
-                    var great = data.scoreInfo.great.ToString();
-                    var ok = data.scoreInfo.ok.ToString();
-                    var meh = data.scoreInfo.meh.ToString();
-                    var miss = data.scoreInfo.miss.ToString();
+                    var great = data.scoreInfo.Statistics.CountGreat.ToString();
+                    var ok = data.scoreInfo.Statistics.CountOk.ToString();
+                    var meh = data.scoreInfo.Statistics.CountMeh.ToString();
+                    var miss = data.scoreInfo.Statistics.CountMiss.ToString();
 
                     // great
                     textOptions.Origin = new PointF(795, 857);
@@ -848,7 +886,7 @@ namespace KanonBot.LegacyImage
 
                 // acc
                 textOptions.Font = new Font(TorusRegular, 53.56f);
-                var acc = data.scoreInfo.acc * 100f;
+                var acc = data.scoreInfo.Accuracy * 100f;
                 var hsl = new Hsl(150, 1, 1);
                 // ("#ffbd1f") idk?
                 color = Color.ParseHex("#87ff6a");
@@ -857,11 +895,11 @@ namespace KanonBot.LegacyImage
                 var acchue = new Image<Rgba32>(1950 - 2, 1088);
                 var hue = acc < 60 ? 260f : (acc - 60) * 2 + 280f;
                 textOptions.Origin = new PointF(360, 963);
-                acchue.Mutate(x => x.DrawText(drawOptions, textOptions, $"{acc.ToString("0.0#")}%", new SolidBrush(color), null).Hue(hue));
+                acchue.Mutate(x => x.DrawText(drawOptions, textOptions, $"{acc.ToString("0.0#")}%", new SolidBrush(color), null).Hue(((float)hue)));
                 score.Mutate(x => x.DrawImage(acchue, 1));
                 // combo
-                var combo = data.scoreInfo.combo;
-                if (data.scoreInfo.mode != "mania")
+                var combo = data.scoreInfo.MaxCombo;
+                if (data.scoreInfo.Mode is not OSU.Enums.Mode.Mania)
                 {
                     var maxCombo = data.ppInfo.maxCombo;
                     if (maxCombo != -1)
@@ -881,7 +919,7 @@ namespace KanonBot.LegacyImage
                         var combohue = new Image<Rgba32>(1950 - 2, 1088);
                         hue = (((float)combo / (float)maxCombo) * 100) + 260;
                         textOptions.Origin = new PointF(1588, 963);
-                        combohue.Mutate(x => x.DrawText(drawOptions, textOptions, $"{combo}x", new SolidBrush(color), null).Hue(hue));
+                        combohue.Mutate(x => x.DrawText(drawOptions, textOptions, $"{combo}x", new SolidBrush(color), null).Hue(((float)hue)));
                         score.Mutate(x => x.DrawImage(combohue, 1));
                     }
                     else
@@ -930,22 +968,22 @@ namespace KanonBot.LegacyImage
                 var multi = new double[6] { 14.1, 69.7, 1.92, 19.8, 0.588, 3.06 };
                 var exp = new double[6] { 0.769, 0.596, 0.953, 0.8, 1.175, 0.993 };
                 var u1d = new int[6];
-                u1d[0] = data.u1.acc;
-                u1d[1] = data.u1.flow;
-                u1d[2] = data.u1.jump;
-                u1d[3] = data.u1.pre;
-                u1d[4] = data.u1.spd;
-                u1d[5] = data.u1.sta;
+                u1d[0] = (int)data.u1.AccuracyTotal;
+                u1d[1] = (int)data.u1.FlowAimTotal;
+                u1d[2] = (int)data.u1.JumpAimTotal;
+                u1d[3] = (int)data.u1.PrecisionTotal;
+                u1d[4] = (int)data.u1.SpeedTotal;
+                u1d[5] = (int)data.u1.StaminaTotal;
                 var u2d = new int[6];
-                u2d[0] = data.u2.acc;
-                u2d[1] = data.u2.flow;
-                u2d[2] = data.u2.jump;
-                u2d[3] = data.u2.pre;
-                u2d[4] = data.u2.spd;
-                u2d[5] = data.u2.sta;
+                u2d[0] = (int)data.u2.AccuracyTotal;
+                u2d[1] = (int)data.u2.FlowAimTotal;
+                u2d[2] = (int)data.u2.JumpAimTotal;
+                u2d[3] = (int)data.u2.PrecisionTotal;
+                u2d[4] = (int)data.u2.SpeedTotal;
+                u2d[5] = (int)data.u2.StaminaTotal;
                 // acc ,flow, jump, pre, speed, sta
 
-                if (data.u1.pp < data.u2.pp)
+                if (data.u1.PerformanceTotal < data.u2.PerformanceTotal)
                 {
                     hi.abilityFillColor = Color.FromRgba(255, 123, 172, 50);
                     hi.abilityLineColor = Color.FromRgba(255, 123, 172, 255);
@@ -1005,20 +1043,20 @@ namespace KanonBot.LegacyImage
                     ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, u1d[i].ToString(), new SolidBrush(color), null));
                 }
                 textOptions.Origin = new PointF(664, 974);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u1.pp.ToString(), new SolidBrush(color), null));
+                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u1.PerformanceTotal.ToString(), new SolidBrush(color), null));
                 for (var i = 0; i < u2d.Length; i++)
                 {
                     textOptions.Origin = new PointF(424, y_offset[i] + 8);
                     ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, u2d[i].ToString(), new SolidBrush(color), null));
                 }
                 textOptions.Origin = new PointF(424, 974);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u2.pp.ToString(), new SolidBrush(color), null));
+                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u2.PerformanceTotal.ToString(), new SolidBrush(color), null));
 
                 // 打印数据差异
                 var diffPoint = 960;
                 color = Color.ParseHex("#ffcd22");
                 textOptions.Origin = new PointF(diffPoint, 974);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0}", (data.u2.pp - data.u1.pp)), new SolidBrush(color), null));
+                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0}", (data.u2.PerformanceTotal - data.u1.PerformanceTotal)), new SolidBrush(color), null));
                 textOptions.Origin = new PointF(diffPoint, 1060);
                 ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[2] - u1d[2]).ToString(), new SolidBrush(color), null));
                 textOptions.Origin = new PointF(diffPoint, 1144);

@@ -1,0 +1,51 @@
+{
+  "user_data": {
+    "Rank": 75801,
+    "CountryRank": 2760,
+    "UserID": 9037287,
+    "UserName": "Zh_Jk",
+    "CountryCode": "CN",
+    "PerformanceTotal": 4194.7376367012,
+    "AimTotal": 2044.1327624658525,
+    "JumpAimTotal": 1965.457680467264,
+    "FlowAimTotal": 919.7710856644018,
+    "PrecisionTotal": 451.2494446885271,
+    "SpeedTotal": 1242.4057510518437,
+    "StaminaTotal": 1042.3792683244214,
+    "AccuracyTotal": 787.5575628564072,
+    "AccuracyPercentTotal": 95.73530578613281,
+    "PlayCount": 32459,
+    "CountRankSS": 3,
+    "CountRankS": 69
+  },
+  "user_performances": {
+    "total": [{
+        "SetID": 886368,
+        "Artist": "hanser",
+        "Title": "No title",
+        "Version": "Sotarks' Sky Dream",
+        "MaxCombo": 454,
+        "UserID": 9037287,
+        "BeatmapID": 1854022,
+        "Total": 235.23690606765143,
+        "Aim": 143.5167089026433,
+        "JumpAim": 143.09149916701796,
+        "FlowAim": 0.41644703516658615,
+        "Precision": 27.104322133490186,
+        "Speed": 62.117866579736315,
+        "Stamina": 38.19972938714756,
+        "HigherSpeed": 62.117866579736315,
+        "Accuracy": 21.234379912081405,
+        "Count300": 314,
+        "Count100": 46,
+        "Count50": 0,
+        "Misses": 0,
+        "AccuracyPercent": 0.9148148148148149,
+        "Combo": 454,
+        "EnabledMods": 8,
+        "Rank": "A",
+        "Date": "2019-10-02 07:06:29"
+      }
+    ]
+  }
+}

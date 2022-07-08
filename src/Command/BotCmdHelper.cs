@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KanonBot.API;
 
 namespace KanonBot
 {
@@ -10,7 +11,8 @@ namespace KanonBot
     {
         public struct Bot_Parameter
         {
-            public string osu_mode, osu_username, osu_mods;           //用于获取具体要查询的模式，未提供返回osu
+            public OSU.Enums.Mode? osu_mode;
+            public string osu_username, osu_mods;           //用于获取具体要查询的模式，未提供返回osu
             public long
                 osu_user_id,
                 bid;
@@ -70,7 +72,7 @@ namespace KanonBot
                     // arg2 = osu_mode
                     // arg3 = osu_days_before_to_query
                     param.osu_username = arg1;
-                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2[1..])) : "";
+                    if (arg2 != "") param.osu_mode = OSU.Enums.ParseMode(int.Parse(arg2[1..]));
                     if (arg3 == "") param.order_number = 0;
                     else param.order_number = int.Parse(arg3[1..]);
                     if (param.osu_username == "") param.selfquery = true;
@@ -82,7 +84,7 @@ namespace KanonBot
                     // arg2 = osu_mode
                     // arg3 = order_number (序号)
                     param.osu_username = arg1;
-                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2[1..])) : "";
+                    if (arg2 != "") param.osu_mode = OSU.Enums.ParseMode(int.Parse(arg2[1..]));
                     if (arg3 == "") param.order_number = 1; //成绩必须为1
                     else param.order_number = int.Parse(arg3[1..]);
                     if (param.osu_username == "") param.selfquery = true;
@@ -95,7 +97,7 @@ namespace KanonBot
                     // arg3 = username
                     // arg4 = mods
                     param.osu_username = arg3;
-                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2[1..])) : "";
+                    if (arg2 != "") param.osu_mode = OSU.Enums.ParseMode(int.Parse(arg2[1..]));
                     param.osu_mods = arg4 != "" ? arg4[1..] : "";
                     if (arg1 == "") param.order_number = -1; //bid必须有效，否则返回 -1
                     else { var index = int.Parse(arg1); param.order_number = index < 1 ? -1 : index; }
@@ -109,7 +111,7 @@ namespace KanonBot
                     // arg4 = mods
                     if (arg1 == "") param.order_number = 0; // 若bid为空，返回0
                     else { var index = int.Parse(arg1); param.order_number = index < 1 ? -1 : index; }
-                    param.osu_mode = arg2 != "" ? GetMode(int.Parse(arg2[1..])) : "";
+                    if (arg2 != "") param.osu_mode = OSU.Enums.ParseMode(int.Parse(arg2[1..]));
                     param.osu_mods = arg4 != "" ? arg4[1..] : "";
                     param.selfquery = true; // 只查自己
                 }
@@ -131,18 +133,6 @@ namespace KanonBot
                 }
             }
             return param;
-        }
-
-        public static string GetMode(int i)
-        {
-            return i switch
-            {
-                0 => "osu",
-                1 => "taiko",
-                2 => "fruits",
-                3 => "mania",
-                _ => "osu",
-            };
         }
     }
 }

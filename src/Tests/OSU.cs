@@ -8,6 +8,7 @@ using KanonBot.Serializer;
 using KanonBot;
 using Newtonsoft.Json;
 using Serilog;
+using Flurl.Http;
 
 namespace KanonBot.Tests;
 
@@ -69,7 +70,7 @@ public class OSU
     public void GetUserScores()
     {
         // 查BP
-        Assert.IsTrue(API.OSU.GetUserScores(9037287, API.OSU.Enums.UserScoreType.Best, API.OSU.Enums.Mode.OSU, false, 20, 0).Result!.Length == 20);
+        Assert.IsTrue(API.OSU.GetUserScores(9037287, API.OSU.Enums.UserScoreType.Best, API.OSU.Enums.Mode.OSU, 20, 0, false).Result!.Length == 20);
         Assert.IsNull(API.OSU.GetUserScores(903728700).Result);
     }
 
@@ -87,6 +88,14 @@ public class OSU
     {
         Assert.IsTrue(API.OSU.GetUserBeatmapScores(9037287, 3657206).Result!.Length == 0);
         Assert.IsNull(API.OSU.GetUserBeatmapScores(9037287, 114514).Result);
+    }
+
+    [TestMethod]
+    public void ppplus()
+    {
+        var res = API.OSU.GetUserPlusData(9037287).Result;
+        Log.Warning("{@0}", res.User);
+        Assert.IsTrue(res.User.UserId == 9037287);
     }
 }
 

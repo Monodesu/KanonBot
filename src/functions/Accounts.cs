@@ -10,7 +10,7 @@ namespace KanonBot.functions
     {
         public struct AccInfo
         {
-            public string platform;
+            public Platform platform;
             public string uid;
         }
         public static void RegAccount(Target target, string cmd)
@@ -35,21 +35,21 @@ namespace KanonBot.functions
                 target.reply("请输入有效的电子邮件地址。");
                 return;
             }
-            string uid = "-1", platform = "none";
+            string uid = "-1";
             bool is_regd = false;
             is_regd = Database.Client.IsRegd(mailAddr);
             Database.Model.Users dbuser = new();
 
             if (is_regd) dbuser = Database.Client.GetUsers(mailAddr);
-            switch (target.socket) //获取用户ID及平台信息 平台： qq qguild khl discord 四个
+            switch (target.platform) //获取用户ID及平台信息 平台： qq qguild khl discord 四个
             {
-                case Guild:
+                case Platform.Guild:
                     if (target.raw is Guild.Models.MessageData g)
                     {
-                        uid = g.Author.ID; platform = "qguild";
+                        uid = g.Author.ID;
                         if (is_regd)
                             if (dbuser.qq_guild_uid == g.Author.ID) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
-                        var g1 = Database.Client.GetUsersByUID(g.Author.ID, "qguild");
+                        var g1 = Database.Client.GetUsersByUID(g.Author.ID, Platform.Guild);
                         if (g1 != null)
                         {
                             target.reply(new Chain()
@@ -60,13 +60,13 @@ namespace KanonBot.functions
                         }
                     }
                     break;
-                case OneBot.Server:
+                case Platform.OneBot:
                     if (target.raw is OneBot.Models.Sender o)
                     {
-                        uid = o.UserId.ToString(); platform = "qq";
+                        uid = o.UserId.ToString();
                         if (is_regd)
                             if (dbuser.qq_id == o.UserId) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
-                        var o1 = Database.Client.GetUsersByUID(o.UserId.ToString(), "qq");
+                        var o1 = Database.Client.GetUsersByUID(o.UserId.ToString(), Platform.OneBot);
                         if (o1 != null)
                         {
                             target.reply(new Chain()
@@ -87,7 +87,7 @@ namespace KanonBot.functions
                 {
                     MailTo = new string[] { mailAddr },
                     Subject = "desu.life - 请验证您的邮箱",
-                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=2",
+                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={target.platform!}&uid={uid}&op=2",
                     IsBodyHtml = false
                 };
                 try
@@ -108,7 +108,7 @@ namespace KanonBot.functions
                 {
                     MailTo = new string[] { mailAddr },
                     Subject = "desu.life - 请验证您的邮箱",
-                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=1",
+                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={target.platform!}&uid={uid}&op=1",
                     IsBodyHtml = false
                 };
                 try
@@ -126,24 +126,24 @@ namespace KanonBot.functions
 
         async public static void BindService(Target target, string cmd)
         {
-            string uid = "-1", platform = "none";
-            switch (target.socket)
+            string uid = "-1";
+            switch (target.platform)
             {
-                case Guild:
+                case Platform.Guild:
                     if (target.raw is Guild.Models.MessageData g)
                     {
-                        uid = g.Author.ID; platform = "qguild";
-                        if (!Database.Client.IsRegd(uid, platform))
+                        uid = g.Author.ID;
+                        if (!Database.Client.IsRegd(uid, Platform.Guild))
                         {
                             target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
                         }
                     }
                     break;
-                case OneBot.Server:
+                case Platform.OneBot:
                     if (target.raw is OneBot.Models.Sender o)
                     {
-                        uid = o.UserId.ToString(); platform = "qq";
-                        if (!Database.Client.IsRegd(uid, platform))
+                        uid = o.UserId.ToString();
+                        if (!Database.Client.IsRegd(uid, Platform.OneBot))
                         {
                             target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
                         }
@@ -159,7 +159,7 @@ namespace KanonBot.functions
             if (childCmd_1 == "osu")
             {
                 OSU.UserInfo online_osu_userinfo = new();
-                var globaluserinfo = Database.Client.GetUsersByUID(uid, platform);
+                var globaluserinfo = Database.Client.GetUsersByUID(uid, target.platform);
 
                 // 检查用户是否已绑定osu账户
                 var osuuserinfo = Database.Client.GetOSUUsersByUID(globaluserinfo.uid);
@@ -186,15 +186,15 @@ namespace KanonBot.functions
             }
         }
 
-        public static Database.Model.Users GetAccount(string uid, string platform)
+        public static Database.Model.Users? GetAccount(string uid, Platform platform)
         {
             var globaluserinfo = Database.Client.GetUsersByUID(uid, platform);
-            return globaluserinfo!;
+            return globaluserinfo;
         }
-        public static Database.Model.Users GetAccount(long osu_uid)
+        public static Database.Model.Users? GetAccount(long osu_uid)
         {
             var globaluserinfo = Database.Client.GetUsersByOsuUID(osu_uid);
-            return globaluserinfo!;
+            return globaluserinfo;
         }
         public static Database.Model.Users_osu? CheckOsuAccount(long uid)
         {
@@ -205,23 +205,22 @@ namespace KanonBot.functions
 
         public static AccInfo GetAccInfo(Target target)
         {
-            switch (target.socket)
+            switch (target.platform)
             {
-                case Guild:
+                case Platform.Guild:
                     if (target.raw is Guild.Models.MessageData g)
                     {
-                        return new AccInfo() { platform = "qguild", uid = g.Author.ID };
+                        return new AccInfo() { platform = Platform.Guild, uid = g.Author.ID };
                     }
                     break;
-                case OneBot.Server:
+                case Platform.OneBot:
                     if (target.raw is OneBot.Models.Sender o)
                     {
-                        return new AccInfo() { platform = "qq", uid = o.UserId.ToString() };
+                        return new AccInfo() { platform = Platform.OneBot, uid = o.UserId.ToString() };
                     }
                     break;
-                default: return new() { platform = "", uid = "" };
             }
-            return new() { platform = "", uid = "" };
+            return new() { platform = Platform.Unknown, uid = "" };
         }
     }
 }

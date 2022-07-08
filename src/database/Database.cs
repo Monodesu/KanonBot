@@ -2,6 +2,7 @@
 #pragma warning disable IDE0044 // 添加只读修饰符
 using SqlSugar;
 using Serilog;
+using KanonBot.Drivers;
 
 namespace KanonBot.Database;
 
@@ -55,27 +56,27 @@ public class Client
         return false;
     }
 
-    static public bool IsRegd(string uid, string platform)
+    static public bool IsRegd(string uid, Platform platform)
     {
         var db = GetInstance();
         switch (platform)
         {
-            case "qq":
+            case Platform.OneBot:
                 var li1 = db.Queryable<Model.Users>().Where(it => it.qq_id == long.Parse(uid)).Select(it => it.uid).ToList();
                 if (li1.Count > 0) return true;
                 return false;
-            case "qguild":
+            case Platform.Guild:
                 var li2 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == uid).Select(it => it.uid).ToList();
                 if (li2.Count > 0) return true;
                 return false;
-            case "khl":
-                var li3 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == uid).Select(it => it.uid).ToList();
+            case Platform.KOOK:
+                var li3 = db.Queryable<Model.Users>().Where(it => it.khl_uid == uid).Select(it => it.uid).ToList();
                 if (li3.Count > 0) return true;
                 return false;
-            case "discord":
-                var li4 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == uid).Select(it => it.uid).ToList();
-                if (li4.Count > 0) return true;
-                return false;
+            // case "discord":
+            //     var li4 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == uid).Select(it => it.uid).ToList();
+            //     if (li4.Count > 0) return true;
+            //     return false;
             default:
                 return true;
         }
@@ -87,27 +88,27 @@ public class Client
         return db.Queryable<Model.Users>().Where(it => it.email == mailAddr).First();
     }
 
-    static public Model.Users? GetUsersByUID(string UID, string platform)
+    static public Model.Users? GetUsersByUID(string UID, Platform platform)
     {
         var db = GetInstance();
         switch (platform)
         {
-            case "qq":
+            case Platform.OneBot:
                 var li1 = db.Queryable<Model.Users>().Where(it => it.qq_id == long.Parse(UID)).ToList();
                 if (li1.Count > 0) return li1[0];
                 return null;
-            case "qguild":
+            case Platform.Guild:
                 var li2 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == UID).ToList();
                 if (li2.Count > 0) return li2[0];
                 return null;
-            case "khl":
+            case Platform.KOOK:
                 var li3 = db.Queryable<Model.Users>().Where(it => it.khl_uid == UID).ToList();
                 if (li3.Count > 0) return li3[0];
                 return null;
-            case "discord":
-                var li4 = db.Queryable<Model.Users>().Where(it => it.discord_uid == UID).ToList();
-                if (li4.Count > 0) return li4[0];
-                return null;
+            // case "discord":  // 还没写
+            //     var li4 = db.Queryable<Model.Users>().Where(it => it.discord_uid == UID).ToList();
+            //     if (li4.Count > 0) return li4[0];
+            //     return null;
             default:
                 return null;
         }
@@ -154,51 +155,47 @@ public class Client
 
     }
 
-    static public bool UpdateOsuPPlusData(API.OSU.PPlusInfo ppdata, long osu_uid)
+    static public bool UpdateOsuPPlusData(API.OSU.Models.PPlusData.UserData ppdata, long osu_uid)
     {
-        if (ppdata.is_valid)
+        var db = GetInstance();
+        var data = db.Queryable<Model.OsuPPlus>().First(it => it.uid == osu_uid);
+        if (data != null)
         {
-            var db = GetInstance();
-            var data = db.Queryable<Model.OsuPPlus>().First(it => it.uid == osu_uid);
-            if (data != null)
-            {
-                var result = db.Updateable<Model.OsuPPlus>()
-                                .SetColumns(it => new Model.OsuPPlus()
-                                {
-                                    pp = ppdata.pp,
-                                    acc = ppdata.acc,
-                                    flow = ppdata.flow,
-                                    jump = ppdata.jump,
-                                    pre = ppdata.pre,
-                                    spd = ppdata.spd,
-                                    sta = ppdata.sta
-                                })
-                                .Where(it => it.uid == osu_uid)
-                                .ExecuteCommandHasChange();
-                if (!result) { return false; }
-                return true;
-            }
-            // 数据库没有数据，新插入数据
-            try
-            {
-                var init = new Model.OsuPPlus();
-                init.uid = osu_uid;
-                init.pp = ppdata.pp;
-                init.acc = ppdata.acc;
-                init.flow = ppdata.flow;
-                init.jump = ppdata.jump;
-                init.pre = ppdata.pre;
-                init.spd = ppdata.spd;
-                init.sta = ppdata.sta;
-                db.Insertable(init).ExecuteCommand();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return false;
-            }
+            var result = db.Updateable<Model.OsuPPlus>()
+                            .SetColumns(it => new Model.OsuPPlus()
+                            {
+                                pp = ppdata.PerformanceTotal,
+                                acc = ppdata.AccuracyTotal,
+                                flow = ppdata.FlowAimTotal,
+                                jump = ppdata.JumpAimTotal,
+                                pre = ppdata.PrecisionTotal,
+                                spd = ppdata.SpeedTotal,
+                                sta = ppdata.StaminaTotal
+                            })
+                            .Where(it => it.uid == osu_uid)
+                            .ExecuteCommandHasChange();
+            if (!result) { return false; }
             return true;
         }
-        return false;
+        // 数据库没有数据，新插入数据
+        try
+        {
+            var init = new Model.OsuPPlus();
+            init.uid = osu_uid;
+            init.pp = ppdata.PerformanceTotal;
+            init.acc = ppdata.AccuracyTotal;
+            init.flow = ppdata.FlowAimTotal;
+            init.jump = ppdata.JumpAimTotal;
+            init.pre = ppdata.PrecisionTotal;
+            init.spd = ppdata.SpeedTotal;
+            init.sta = ppdata.StaminaTotal;
+            db.Insertable(init).ExecuteCommand();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return false;
+        }
+        return true;
     }
 }

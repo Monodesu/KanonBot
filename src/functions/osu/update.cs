@@ -53,7 +53,7 @@ namespace KanonBot.functions.osubot
             try { File.Delete($"./work/avatar/{OnlineOsuInfo.userId}.png"); } catch { }
             target.reply("主要数据已更新完毕，pp+数据正在后台更新，请稍后使用info功能查看结果。");
 
-            try { Database.Client.UpdateOsuPPlusData(await API.OSU.GetUserPlusData(OnlineOsuInfo.userId), OnlineOsuInfo.userId); }
+            try { Database.Client.UpdateOsuPPlusData((await API.OSU.GetUserPlusData(OnlineOsuInfo.userId)).User, OnlineOsuInfo.userId); }
             catch { }//更新pp+失败，不返回信息
         }
     }

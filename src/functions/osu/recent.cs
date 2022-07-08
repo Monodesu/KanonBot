@@ -9,7 +9,7 @@ namespace KanonBot.functions.osubot
         async public static void Execute(Target target, string cmd, bool includeFails = false)
         {
             var is_bounded = false;
-            OSU.UserInfo OnlineOsuInfo;
+            OSU.Models.User? OnlineOsuInfo;
             Database.Model.Users_osu DBOsuInfo;
 
             // 解析指令
@@ -27,42 +27,49 @@ namespace KanonBot.functions.osubot
                 { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 验证osu信息
-                try { OnlineOsuInfo = await OSU.GetUserLegacy(DBOsuInfo.osu_uid); }
-                catch { OnlineOsuInfo = new OSU.UserInfo(); }
+                if (command.osu_mode == null) {
+                    command.osu_mode = OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
+                }
+
+                // 验证osu信息
+                OnlineOsuInfo = await OSU.GetUser(DBOsuInfo.osu_uid, command.osu_mode!.Value);
                 is_bounded = true;
             }
             else
             {
                 // 验证osu信息
-                try { OnlineOsuInfo = await OSU.GetUserLegacy(command.osu_username); }
-                catch { OnlineOsuInfo = new OSU.UserInfo(); }
+                OnlineOsuInfo = await OSU.GetUser(command.osu_username);
                 is_bounded = false;
             }
 
             // 验证osu信息
-            if (OnlineOsuInfo.userName == null)
+            if (OnlineOsuInfo == null)
             {
                 if (is_bounded) { target.reply("被办了。"); return; }
                 target.reply("猫猫没有找到此用户。"); return;
             }
 
-
-            // 查询
-            string mode;
-
-
-            // 解析模式
-            try { mode = OSU.Modes[int.Parse(command.osu_mode)]; } catch { mode = "osu"; }
+            if (!is_bounded) // 未绑定用户回数据库查询找模式
+            {
+                var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.Id);
+                DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
+                if (DBOsuInfo != null)
+                {
+                    is_bounded = true;
+                    if (command.osu_mode == null) {
+                        command.osu_mode = OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
+                    }
+                }
+            }
 
             // 判断给定的序号是否在合法的范围内
             // if (command.order_number == -1) { target.reply("猫猫找不到该最近游玩的成绩。"); return; }
 
             var scorePanelData = new LegacyImage.Draw.ScorePanelData();
-            List<OSU.ScoreInfo> scoreInfos;
-            try { scoreInfos = await OSU.GetUserScoresLegacy(OnlineOsuInfo.userId, "recent", mode, 1, command.order_number - 1, includeFails); }
-            catch (Exception e) { if (e.Message == "{\"error\":null}") { target.reply("猫猫找不到该最近游玩的成绩。"); return; } else throw; }
-            if (scoreInfos.Count > 0) scorePanelData.scoreInfo = scoreInfos[0];
-            else { target.reply("猫猫找不到该最近游玩的成绩。"); return; }
+            var scoreInfos = await OSU.GetUserScores(OnlineOsuInfo.Id, OSU.Enums.UserScoreType.Recent, command.osu_mode ?? OSU.Enums.Mode.OSU, 1, command.order_number - 1, true);
+            if (scoreInfos == null) {target.reply("查询成绩时出错。"); return;};    // 正常是找不到玩家，但是上面有验证，这里做保险
+            if (scoreInfos!.Length > 0) { scorePanelData.scoreInfo = scoreInfos[0]; }
+            else { target.reply("猫猫找不到该玩家最近游玩的成绩。"); return; }
 
             // 获取绘制数据
             try
@@ -106,10 +113,10 @@ namespace KanonBot.functions.osubot
             catch (AggregateException ae)
             {
                 var isKnownException = false;
-                var msg = $"在从KanonAPI获取PP数据时出现错误\n铺面bid: {scorePanelData.scoreInfo.beatmapInfo.beatmapId}";
+                var msg = $"在从KanonAPI获取PP数据时出现错误\n铺面bid: {scorePanelData.scoreInfo.Beatmap!.BeatmapId}";
                 ae.Handle((x) =>
                 {
-                    if (x is HttpRequestException)
+                    if (x is Flurl.Http.FlurlHttpTimeoutException)
                     {
                         target.reply("获取pp数据时超时，等会儿再试试吧..");
                         isKnownException = true;
@@ -119,12 +126,12 @@ namespace KanonBot.functions.osubot
                     return true;
                 });
                 if (isKnownException) return;
-                target.reply("获取pp数据时超时，等会儿再试试吧..");
+                target.reply("获取pp数据时出错，等会儿再试试吧..");
                 // TODO  ADMIN MESSAGE  SendAdminMessage(msg);
                 return;
             }
 
-            if (scorePanelData.scoreInfo.mode != "mania")
+            if (scorePanelData.scoreInfo.Mode is not OSU.Enums.Mode.Mania)
             {
                 // 5个acc的成绩+fc
                 try

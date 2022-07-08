@@ -28,7 +28,7 @@ namespace KanonBot.API
             return Utils.GetObjectDescription(mode)!;
         }
 
-        public static byte ToModeNum(this OSU.Enums.Mode mode)
+        public static int ToModeNum(this OSU.Enums.Mode mode)
         {
             return mode switch {
                 OSU.Enums.Mode.OSU => 0,
@@ -46,9 +46,9 @@ namespace KanonBot.API
         {
             // 方法部分
 
-            public static Mode? ParseMode(string value)
+            public static Mode? ParseMode(string? value)
             {
-                value = value.ToLower();    // 大写字符转小写
+                value = value?.ToLower();    // 大写字符转小写
                 return value switch {
                     "osu" => OSU.Enums.Mode.OSU,
                     "taiko" => OSU.Enums.Mode.Taiko,
@@ -58,7 +58,7 @@ namespace KanonBot.API
                 };
             }
 
-            public static Mode? ParseMode(byte value)
+            public static Mode? ParseMode(int value)
             {
                 return value switch {
                     0 => OSU.Enums.Mode.OSU,

@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS8602 // 解引用可能出现空引用。
-#pragma warning disable IDE0044 // 添加只读修饰符
+﻿#pragma warning disable IDE0044 // 添加只读修饰符
 #pragma warning disable IDE1006 // 命名样式
 using SqlSugar;
 
@@ -61,8 +60,8 @@ public class Model
         public long total_hit { get; set; }
         public int level { get; set; }
         public int level_percent { get; set; }
-        public float performance_point { get; set; }
-        public float accuracy { get; set; }
+        public double performance_point { get; set; }
+        public double accuracy { get; set; }
         public int count_SSH { get; set; }
         public int count_SS { get; set; }
         public int count_SH { get; set; }
@@ -82,13 +81,13 @@ public class Model
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
         public long uid { get; set; }
-        public float pp { get; set; }
-        public int jump { get; set; }
-        public int flow { get; set; }
-        public int pre { get; set; }
-        public int acc { get; set; }
-        public int spd { get; set; }
-        public int sta { get; set; }
+        public double pp { get; set; }
+        public double jump { get; set; }
+        public double flow { get; set; }
+        public double pre { get; set; }
+        public double acc { get; set; }
+        public double spd { get; set; }
+        public double sta { get; set; }
     }
 
     [SugarTable("badge_list")]

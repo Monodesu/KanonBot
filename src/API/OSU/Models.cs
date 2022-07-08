@@ -13,6 +13,146 @@ namespace KanonBot.API
         public class Models
         {
 
+            public class PPlusData
+            {
+                public UserData User { get; set; }
+
+                public UserPerformances[]? Performances { get; set; }
+
+
+                public class UserData
+                {
+                    [JsonProperty("Rank")]
+                    public int Rank { get; set; }
+
+                    [JsonProperty("CountryRank")]
+                    public int CountryRank { get; set; }
+
+                    [JsonProperty("UserID")]
+                    public long UserId { get; set; }
+
+                    [JsonProperty("UserName")]
+                    public string UserName { get; set; }
+
+                    [JsonProperty("CountryCode")]
+                    public string CountryCode { get; set; }
+
+                    [JsonProperty("PerformanceTotal")]
+                    public double PerformanceTotal { get; set; }
+
+                    [JsonProperty("AimTotal")]
+                    public double AimTotal { get; set; }
+
+                    [JsonProperty("JumpAimTotal")]
+                    public double JumpAimTotal { get; set; }
+
+                    [JsonProperty("FlowAimTotal")]
+                    public double FlowAimTotal { get; set; }
+
+                    [JsonProperty("PrecisionTotal")]
+                    public double PrecisionTotal { get; set; }
+
+                    [JsonProperty("SpeedTotal")]
+                    public double SpeedTotal { get; set; }
+
+                    [JsonProperty("StaminaTotal")]
+                    public double StaminaTotal { get; set; }
+
+                    [JsonProperty("AccuracyTotal")]
+                    public double AccuracyTotal { get; set; }
+
+                    [JsonProperty("AccuracyPercentTotal")]
+                    public double AccuracyPercentTotal { get; set; }
+
+                    [JsonProperty("PlayCount")]
+                    public int PlayCount { get; set; }
+
+                    [JsonProperty("CountRankSS")]
+                    public int CountRankSS { get; set; }
+
+                    [JsonProperty("CountRankS")]
+                    public int CountRankS { get; set; }
+                }
+
+                public class UserPerformances
+                {
+                    [JsonProperty("SetID")]
+                    public long SetId { get; set; }
+
+                    [JsonProperty("Artist")]
+                    public string Artist { get; set; }
+
+                    [JsonProperty("Title")]
+                    public string Title { get; set; }
+
+                    [JsonProperty("Version")]
+                    public string Version { get; set; }
+
+                    [JsonProperty("MaxCombo")]
+                    public int MaxCombo { get; set; }
+
+                    [JsonProperty("UserID")]
+                    public long UserId { get; set; }
+
+                    [JsonProperty("BeatmapID")]
+                    public long BeatmapId { get; set; }
+
+                    [JsonProperty("Total")]
+                    public double TotalTotal { get; set; }
+
+                    [JsonProperty("Aim")]
+                    public double Aim { get; set; }
+
+                    [JsonProperty("JumpAim")]
+                    public double JumpAim { get; set; }
+
+                    [JsonProperty("FlowAim")]
+                    public double FlowAim { get; set; }
+
+                    [JsonProperty("Precision")]
+                    public double Precision { get; set; }
+
+                    [JsonProperty("Speed")]
+                    public double Speed { get; set; }
+
+                    [JsonProperty("Stamina")]
+                    public double Stamina { get; set; }
+
+                    [JsonProperty("HigherSpeed")]
+                    public double HigherSpeed { get; set; }
+
+                    [JsonProperty("Accuracy")]
+                    public double Accuracy { get; set; }
+
+                    [JsonProperty("Count300")]
+                    public int CountGreat { get; set; }
+
+                    [JsonProperty("Count100")]
+                    public int CountOk { get; set; }
+
+                    [JsonProperty("Count50")]
+                    public int CountMeh { get; set; }
+
+                    [JsonProperty("Misses")]
+                    public int CountMiss { get; set; }
+
+                    [JsonProperty("AccuracyPercent")]
+                    public double AccuracyPercent { get; set; }
+
+                    [JsonProperty("Combo")]
+                    public int Combo { get; set; }
+
+                    [JsonProperty("EnabledMods")]
+                    public int EnabledMods { get; set; }
+
+                    [JsonProperty("Rank")]
+                    public string Rank { get; set; }
+
+                    [JsonProperty("Date")]
+                    public DateTimeOffset Date { get; set; }
+                }
+            }
+
             public class BeatmapAttributes
             {
                 public Enums.Mode Mode { get; set; }    // 不包含在json解析中，用作分辨mode
@@ -26,7 +166,7 @@ namespace KanonBot.API
                 // osu, taiko, fruits包含
                 [JsonProperty(PropertyName = "approach_rate")]
                 public float ApproachRate { get; set; }
-                
+
                 // taiko, mania包含
                 [JsonProperty(PropertyName = "great_hit_window")]
                 public float GreatHitWindow { get; set; }
@@ -55,7 +195,7 @@ namespace KanonBot.API
                 [JsonProperty(PropertyName = "score_multiplier")]
                 public float ScoreMultiplier { get; set; }
 
-                
+
             }
 
             public class Beatmap
@@ -85,6 +225,7 @@ namespace KanonBot.API
 
                 [JsonProperty(PropertyName = "version")]
                 public string Version { get; set; }
+                // Accuracy = OD
 
                 [JsonProperty(PropertyName = "accuracy")]
                 public float Accuracy { get; set; }
@@ -108,13 +249,13 @@ namespace KanonBot.API
                 public long CountSpinners { get; set; }
 
                 [JsonProperty(PropertyName = "cs")]
-                public double Cs { get; set; }
+                public double CS { get; set; }
 
                 [JsonProperty(PropertyName = "deleted_at", NullValueHandling = NullValueHandling.Ignore)]
                 public DateTimeOffset? DeletedAt { get; set; }
 
                 [JsonProperty(PropertyName = "drain")]
-                public long Drain { get; set; }
+                public long HPDrain { get; set; }
 
                 [JsonProperty(PropertyName = "hit_length")]
                 public long HitLength { get; set; }
@@ -253,7 +394,7 @@ namespace KanonBot.API
 
                 [JsonProperty(PropertyName = "ratings")]
                 public long[] Ratings { get; set; }
-                
+
                 // [JsonProperty(PropertyName = "track_id")]
                 // public JObject TrackId { get; set; }
             }
@@ -602,34 +743,34 @@ namespace KanonBot.API
             public class UserGradeCounts
             {
                 [JsonProperty("ss")]
-                public long SS { get; set; }
+                public int SS { get; set; }
 
                 [JsonProperty("ssh")]
-                public long SSH { get; set; }
+                public int SSH { get; set; }
 
                 [JsonProperty("s")]
-                public long S { get; set; }
+                public int S { get; set; }
 
                 [JsonProperty("sh")]
-                public long SH { get; set; }
+                public int SH { get; set; }
 
                 [JsonProperty("a")]
-                public long A { get; set; }
+                public int A { get; set; }
             }
 
             public class UserLevel
             {
                 [JsonProperty("current")]
-                public long Current { get; set; }
+                public int Current { get; set; }
 
                 [JsonProperty("progress")]
-                public long Progress { get; set; }
+                public int Progress { get; set; }
             }
 
             public class UserRank
             {
                 [JsonProperty("country")]
-                public long Country { get; set; }
+                public int Country { get; set; }
             }
 
             public class UserAchievement
@@ -694,14 +835,14 @@ namespace KanonBot.API
                 public long Id { get; set; }
 
                 [JsonProperty("max_combo")]
-                public long MaxCombo { get; set; }
+                public int MaxCombo { get; set; }
 
                 [JsonProperty("mode")]
                 [JsonConverter(typeof(JsonEnumConverter))]
                 public Enums.Mode Mode { get; set; }
 
                 [JsonProperty("mode_int")]
-                public long ModeInt { get; set; }
+                public int ModeInt { get; set; }
 
                 [JsonProperty("mods")]
                 public string[] Mods { get; set; }
@@ -746,28 +887,28 @@ namespace KanonBot.API
             public class ScoreStatistics
             {
                 [JsonProperty("count_100")]
-                public long Count100 { get; set; }
+                public int CountOk { get; set; }
 
                 [JsonProperty("count_300")]
-                public long Count300 { get; set; }
+                public int CountGreat { get; set; }
 
                 [JsonProperty("count_50")]
-                public long Count50 { get; set; }
+                public int CountMeh { get; set; }
 
                 [JsonProperty("count_geki")]
-                public long CountGeki { get; set; }
+                public int CountGeki { get; set; }
 
                 [JsonProperty("count_katu")]
-                public long CountKatu { get; set; }
+                public int CountKatu { get; set; }
 
                 [JsonProperty("count_miss")]
-                public long CountMiss { get; set; }
+                public int CountMiss { get; set; }
             }
 
             public class ScoreWeight
             {
                 [JsonProperty("percentage")]
-                public long Percentage { get; set; }
+                public int Percentage { get; set; }
 
                 [JsonProperty("pp")]
                 public double PP { get; set; }

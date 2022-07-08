@@ -10,7 +10,7 @@ namespace KanonBot.command_parser
         {
             string? cmd = null;
             var msg = target.msg;
-            if (msg.StartsWith(new Message.AtSegment(target.account!, target.platform!.Value)))
+            if (msg.StartsWith(new Message.AtSegment(target.account!, target.platform)))
                 msg = Message.Chain.FromList(msg.ToList().Slice(1, msg.Length()));
 
             if (msg.StartsWith("!") || msg.StartsWith("/") || msg.StartsWith("！"))
