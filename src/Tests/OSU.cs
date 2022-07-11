@@ -20,8 +20,16 @@ public class OSU
         var log = new LoggerConfiguration().WriteTo.Console();
         log = log.MinimumLevel.Warning();
         Log.Logger = log.CreateLogger();
-        var configPath = "../../../config.toml";
-        Config.inner = Config.load(configPath);
+        var configPath = "./config.toml";
+        if (File.Exists(configPath))
+        {
+            Config.inner = Config.load(configPath);
+        }
+        else
+        {
+            System.IO.Directory.SetCurrentDirectory("../../../");
+            Config.inner = Config.load(configPath);
+        }
     }
 
     [TestMethod]
@@ -94,7 +102,6 @@ public class OSU
     public void ppplus()
     {
         var res = API.OSU.GetUserPlusData(9037287).Result;
-        Log.Warning("{@0}", res.User);
         Assert.IsTrue(res.User.UserId == 9037287);
     }
 }

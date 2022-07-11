@@ -83,7 +83,7 @@ public class Processor
     {
         //构建text options 与 draw options
         var fonts = new FontCollection();
-        FontFamily ff = fonts.Add($"./work/fonts/{font}.ttf");
+        FontFamily ff = fonts.Add($"./work/fonts/{font}");
 
         var textOptions = new TextOptions(new Font(ff, size))
         {
@@ -191,6 +191,14 @@ public class Processor
     public void SaveAsFile(string path)
     {
         WorkList[workingFileName].SaveAsPng(path);
+    }
+
+    /// <summary>
+    /// 获取工作图片
+    /// </summary>
+    public Img GetWorkingImage()
+    {
+        return WorkList[workingFileName];
     }
 
     ~Processor()

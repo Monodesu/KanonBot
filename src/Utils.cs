@@ -6,7 +6,9 @@ namespace KanonBot;
 
 static class Utils
 {
-    public static string? GetObjectDescription(Object value) {
+    public static int TryGetConsoleWidth() { try { return Console.WindowWidth; } catch { return 80; } } // 获取失败返回80
+    public static string? GetObjectDescription(Object value)
+    {
         foreach (var field in value.GetType().GetFields())
         {
             // 获取object的类型，并遍历获取DescriptionAttribute

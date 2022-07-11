@@ -16,12 +16,15 @@
         {
             "label": "test",
             "command": "dotnet",
-            "type": "process",
+            "type": "shell",
             "args": [
                 "test",
                 "${workspaceFolder}/KanonBot.csproj",
                 "-l",
-                "console;verbosity=detailed",
+                "'console;verbosity=detailed'",
+                "--interactive",
+                "--filter",
+                "${input:testFilter}",
             ],
             "problemMatcher": "$msCompile",
             
@@ -50,5 +53,13 @@
             ],
             "problemMatcher": "$msCompile"
         }
+    ],
+    "inputs": [
+        {
+            "id": "testFilter",
+            "description": "请输入要测试的过滤器",
+            "default": "",
+            "type": "promptString"
+        },
     ]
 }

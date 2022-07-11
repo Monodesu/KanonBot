@@ -123,8 +123,8 @@ namespace KanonBot.functions.osubot
             str += string.Format("\n理论值：{0:n0} (+{1})", maxScore, modsString);
 
             List<int[]> spinners = lc.GetSpinners(beatmap); // 获取转盘
-            float adjustTime = lc.GetAdjustTime(mods); // 获取 adjustTime(?) | idk what the fuck is adjustTime lol
-            float od = lc.GetOD(beatmap); // 获取 OD
+            double adjustTime = lc.GetAdjustTime(mods); // 获取 adjustTime(?) | idk what the fuck is adjustTime lol
+            double od = lc.GetOD(beatmap); // 获取 OD
             int difficultyModifier = lc.GetDifficultyModifier(mods); // 计算分数增益
 
             if (spinners.Count > 0)
@@ -133,7 +133,7 @@ namespace KanonBot.functions.osubot
                 {
                     int length = spinners[i][1];
                     int combo = spinners[i][0];
-                    float rotations = lc.CalcRotations(length, adjustTime);
+                    double rotations = lc.CalcRotations(length, adjustTime);
                     int rotReq = lc.CalcRotReq(length, (double)od, difficultyModifier);
                     string amount = lc.CalcAmount((int)rotations, rotReq);
                     double leeway = lc.CalcLeeway(length, adjustTime, (double)od, difficultyModifier);

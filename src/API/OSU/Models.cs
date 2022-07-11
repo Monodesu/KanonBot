@@ -155,45 +155,46 @@ namespace KanonBot.API
 
             public class BeatmapAttributes
             {
-                public Enums.Mode Mode { get; set; }    // 不包含在json解析中，用作分辨mode
+                // 不包含在json解析中，用作分辨mode
+                public Enums.Mode Mode { get; set; }
                 [JsonProperty(PropertyName = "max_combo")]
 
                 // 共有部分
                 public int MaxCombo { get; set; }
                 [JsonProperty(PropertyName = "star_rating")]
-                public float StarRating { get; set; }
+                public double StarRating { get; set; }
 
                 // osu, taiko, fruits包含
                 [JsonProperty(PropertyName = "approach_rate")]
-                public float ApproachRate { get; set; }
+                public double ApproachRate { get; set; }
 
                 // taiko, mania包含
                 [JsonProperty(PropertyName = "great_hit_window")]
-                public float GreatHitWindow { get; set; }
+                public double GreatHitWindow { get; set; }
 
                 // osu部分
                 [JsonProperty(PropertyName = "aim_difficulty")]
-                public float AimDifficulty { get; set; }
+                public double AimDifficulty { get; set; }
                 [JsonProperty(PropertyName = "flashlight_difficulty")]
-                public float FlashlightDifficulty { get; set; }
+                public double FlashlightDifficulty { get; set; }
                 [JsonProperty(PropertyName = "overall_difficulty")]
-                public float OverallDifficulty { get; set; }
+                public double OverallDifficulty { get; set; }
                 [JsonProperty(PropertyName = "slider_factor")]
-                public float SliderFactor { get; set; }
+                public double SliderFactor { get; set; }
                 [JsonProperty(PropertyName = "speed_difficulty")]
-                public float SpeedDifficulty { get; set; }
+                public double SpeedDifficulty { get; set; }
 
                 // taiko
                 [JsonProperty(PropertyName = "stamina_difficulty")]
-                public float StaminaDifficulty { get; set; }
+                public double StaminaDifficulty { get; set; }
                 [JsonProperty(PropertyName = "rhythm_difficulty")]
-                public float RhythmDifficulty { get; set; }
+                public double RhythmDifficulty { get; set; }
                 [JsonProperty(PropertyName = "colour_difficulty")]
-                public float ColourDifficulty { get; set; }
+                public double ColourDifficulty { get; set; }
 
                 // mania
                 [JsonProperty(PropertyName = "score_multiplier")]
-                public float ScoreMultiplier { get; set; }
+                public double ScoreMultiplier { get; set; }
 
 
             }
@@ -228,13 +229,13 @@ namespace KanonBot.API
                 // Accuracy = OD
 
                 [JsonProperty(PropertyName = "accuracy")]
-                public float Accuracy { get; set; }
+                public double Accuracy { get; set; }
 
                 [JsonProperty(PropertyName = "ar")]
-                public float AR { get; set; }
+                public double AR { get; set; }
 
                 [JsonProperty(PropertyName = "bpm", NullValueHandling = NullValueHandling.Ignore)]
-                public float? BPM { get; set; }
+                public double? BPM { get; set; }
 
                 [JsonProperty(PropertyName = "convert")]
                 public bool Convert { get; set; }

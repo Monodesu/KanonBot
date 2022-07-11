@@ -127,7 +127,11 @@ public class Chain
         this.Add(new TextSegment(v));
         return this;
     }
-
+    public Chain at(string v, Platform p)
+    {
+        this.Add(new AtSegment(v, p));
+        return this;
+    }
     public Chain image(string v, ImageSegment.Type t)
     {
         this.Add(new ImageSegment(v, t));

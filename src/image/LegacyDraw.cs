@@ -47,7 +47,7 @@ namespace KanonBot.LegacyImage
             var fonts = new FontCollection();
             var Exo2SemiBold = fonts.Add("./work/fonts/Exo2/Exo2-SemiBold.ttf");
             var Exo2Regular = fonts.Add("./work/fonts/Exo2/Exo2-Regular.ttf");
-            var HaymonySans = fonts.Add("./work/fonts/HarmonyOS_Sans/HarmonyOS_Sans_Regular.ttf");
+            var HarmonySans = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
             // custom panel
             var panelPath = "./work/legacy/default-info-v1.png";
             if (File.Exists($"./work/legacy/v1_infopanel/{data.userInfo.Id}.png")) panelPath = $"./work/legacy/v1_infopanel/{data.userInfo.Id}.png";
@@ -193,7 +193,7 @@ namespace KanonBot.LegacyImage
             info.Mutate(x => x.DrawText(drawOptions, textOptions, $"update: {(DateTime.Now).ToString().Replace("/", " / ")}", new SolidBrush(Color.White), null));
             if (data.daysBefore > 1)
             {
-                textOptions = new TextOptions(new Font(HaymonySans, 20))
+                textOptions = new TextOptions(new Font(HarmonySans, 20))
                 {
                     VerticalAlignment = VerticalAlignment.Bottom,
                     HorizontalAlignment = HorizontalAlignment.Left,
@@ -250,7 +250,7 @@ namespace KanonBot.LegacyImage
             textOptions.Font = new Font(Exo2Regular, 40);
             textOptions.Origin = new PointF(40, 410);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", Statistics.GlobalRank), new SolidBrush(Color.White), null));
-            textOptions.Font = new Font(HaymonySans, 14);
+            textOptions.Font = new Font(HarmonySans, 14);
             textOptions.Origin = new PointF(40, 430);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, diffStr, new SolidBrush(Color.White), null));
             // pp
@@ -268,7 +268,7 @@ namespace KanonBot.LegacyImage
             textOptions.Font = new Font(Exo2Regular, 40);
             textOptions.Origin = new PointF(246, 410);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0.##}", Statistics.PP), new SolidBrush(Color.White), null));
-            textOptions.Font = new Font(HaymonySans, 14);
+            textOptions.Font = new Font(HarmonySans, 14);
             textOptions.Origin = new PointF(246, 430);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, diffStr, new SolidBrush(Color.White), null));
             // ssh ss
@@ -420,7 +420,7 @@ namespace KanonBot.LegacyImage
                 var fonts = new FontCollection();
                 var TorusRegular = fonts.Add("./work/fonts/Torus-Regular.ttf");
                 var TorusSemiBold = fonts.Add("./work/fonts/Torus-SemiBold.ttf");
-                var PuHuiTiRegular = fonts.Add("./work/fonts/Alibaba-PuHuiTi/Alibaba-PuHuiTi-Regular.ttf");
+                var HarmonySans = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
 
                 Img panel;
                 if (data.scoreInfo.Mode is OSU.Enums.Mode.Fruits) panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2-fruits.png");
@@ -1081,9 +1081,9 @@ namespace KanonBot.LegacyImage
         public static MemoryStream DrawString(string str, float fontSize)
         {
             var fonts = new FontCollection();
-            var HarmonySansSC = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
-            var font = new Font(HarmonySansSC, fontSize);
-            var textOptions = new TextOptions(new Font(HarmonySansSC, fontSize))
+            var HarmonySans = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
+            var font = new Font(HarmonySans, fontSize);
+            var textOptions = new TextOptions(new Font(HarmonySans, fontSize))
             {
                 VerticalAlignment = VerticalAlignment.Top,
                 HorizontalAlignment = HorizontalAlignment.Left,

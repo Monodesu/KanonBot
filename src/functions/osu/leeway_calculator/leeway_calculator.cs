@@ -5,10 +5,10 @@ namespace KanonBot.functions.osubot;
 
 public class Leeway_Calculator
 {
-    private const float DT = 1.5f;
+    private const double DT = 1.5f;
 
 
-    private const float HT = 0.75f;
+    private const double HT = 0.75f;
 
 
     private const int HR = 16;
@@ -25,23 +25,23 @@ public class Leeway_Calculator
 
     private const int SPINNER = 3;
 
-    public float CalcRotations(int length, float adjustTime)
+    public double CalcRotations(int length, double adjustTime)
     {
-        var rotations = 0f;
-        var maxAccel = (float)(8E-05 + Math.Max(0f, 5000f - length) / 1000.0 / 2000.0) / adjustTime;
-        var velocityCurrent = 0f;
+        var rotations = 0d;
+        var maxAccel = (double)(8E-05 + Math.Max(0f, 5000f - length) / 1000.0 / 2000.0) / adjustTime;
+        var velocityCurrent = 0d;
         var temp = (int)(length - Math.Floor(16.666666666666668 * adjustTime));
         for (var i = 0; i < temp; i++)
         {
             velocityCurrent += maxAccel;
-            rotations += (float)(Math.Min(velocityCurrent, 0.05) / 3.141592653589793);
+            rotations += (double)(Math.Min(velocityCurrent, 0.05) / 3.141592653589793);
         }
 
         return rotations;
     }
 
 
-    public double CalcLeeway(int length, float adjustTime, double od, int difficultyModifier)
+    public double CalcLeeway(int length, double adjustTime, double od, int difficultyModifier)
     {
         var rotReq = CalcRotReq(length, od, difficultyModifier);
         var thRot = CalcRotations(length, adjustTime);
@@ -78,7 +78,7 @@ public class Leeway_Calculator
         return Math.Floor(bonus / 2.0) + "k+100 (T)";
     }
 
-    public int CalcSpinBonus(int length, double od, float adjustTime, int difficultyModifier)
+    public int CalcSpinBonus(int length, double od, double adjustTime, int difficultyModifier)
     {
         var maxRot = (int)CalcRotations(length, adjustTime);
         var rotReq = CalcRotReq(length, od, difficultyModifier);
@@ -111,19 +111,19 @@ public class Leeway_Calculator
         return hitObjects;
     }
 
-    public float GetHP(string beatmap)
+    public double GetHP(string beatmap)
     {
-        return float.Parse(Regex.Match(beatmap, "HPDrainRate:(.*?)\n").Groups[1].Value, CultureInfo.InvariantCulture);
+        return double.Parse(Regex.Match(beatmap, "HPDrainRate:(.*?)\n").Groups[1].Value, CultureInfo.InvariantCulture);
     }
 
-    public float GetCS(string beatmap)
+    public double GetCS(string beatmap)
     {
-        return float.Parse(Regex.Match(beatmap, "CircleSize:(.*?)\n").Groups[1].Value, CultureInfo.InvariantCulture);
+        return double.Parse(Regex.Match(beatmap, "CircleSize:(.*?)\n").Groups[1].Value, CultureInfo.InvariantCulture);
     }
 
-    public float GetOD(string beatmap)
+    public double GetOD(string beatmap)
     {
-        return float.Parse(Regex.Match(beatmap, "OverallDifficulty:(.*?)\n").Groups[1].Value,
+        return double.Parse(Regex.Match(beatmap, "OverallDifficulty:(.*?)\n").Groups[1].Value,
             CultureInfo.InvariantCulture);
     }
 
@@ -155,7 +155,7 @@ public class Leeway_Calculator
         return Regex.Match(beatmap, "Version:(.*?)\n").Groups[1].Value.Trim();
     }
 
-    public float GetAdjustTime(string[] mods)
+    public double GetAdjustTime(string[] mods)
     {
         foreach (var mod in mods)
         {
@@ -217,15 +217,15 @@ public class Leeway_Calculator
                     switch (objType)
                     {
                         case 1:
-                        {
-                            var length = double.Parse(objData[7], CultureInfo.InvariantCulture);
-                            var slides = int.Parse(objData[6]);
-                            var beatLength = GetBeatLengthAt(int.Parse(objData[2]), timingPoints);
-                            var tics = CalculateTickCount(length, slides, sliderMult, sliderTRate, beatLength[0], beatLength[1],
-                                beatmapVersion);
-                            combo += tics + slides + 1;
-                            break;
-                        }
+                            {
+                                var length = double.Parse(objData[7], CultureInfo.InvariantCulture);
+                                var slides = int.Parse(objData[6]);
+                                var beatLength = GetBeatLengthAt(int.Parse(objData[2]), timingPoints);
+                                var tics = CalculateTickCount(length, slides, sliderMult, sliderTRate, beatLength[0], beatLength[1],
+                                    beatmapVersion);
+                                combo += tics + slides + 1;
+                                break;
+                            }
                         case 3:
                             spinners.Add(new[]
                             {
@@ -266,7 +266,7 @@ public class Leeway_Calculator
         var currentCombo = 0;
         var bonusScore = 0;
         var drainLength = CalculateDrainTime(beatmap, startTime, endTime) / 1000;
-        var difficulty = (int)Math.Round((hp + od + cs + Clamp(hitObjects.Count / (float)drainLength * 8f, 0f, 16f)) /
+        var difficulty = (int)Math.Round((hp + od + cs + Clamp(hitObjects.Count / (double)drainLength * 8f, 0f, 16f)) /
             38.0 * 5.0);
         var scoreMultipler = difficulty * CalculateModMultiplier(mods);
         foreach (var obj in hitObjects)
@@ -282,27 +282,27 @@ public class Leeway_Calculator
             switch (objType)
             {
                 case 1:
-                {
-                    var length = double.Parse(objData[7], CultureInfo.InvariantCulture);
-                    var slides = int.Parse(objData[6]);
-                    var beatLength = GetBeatLengthAt(int.Parse(objData[2]), timingPoints);
-                    var tics = CalculateTickCount(length, slides, sliderMult, sliderTRate, beatLength[0], beatLength[1],
-                        beatmapVersion);
-                    bonusScore += tics * 10 + (slides + 1) * 30;
-                    currentCombo += tics + slides + 1;
-                    currentScore += 300 + (int)(Math.Max(0, currentCombo - 1) * (12.0 * scoreMultipler));
-                    break;
-                }
+                    {
+                        var length = double.Parse(objData[7], CultureInfo.InvariantCulture);
+                        var slides = int.Parse(objData[6]);
+                        var beatLength = GetBeatLengthAt(int.Parse(objData[2]), timingPoints);
+                        var tics = CalculateTickCount(length, slides, sliderMult, sliderTRate, beatLength[0], beatLength[1],
+                            beatmapVersion);
+                        bonusScore += tics * 10 + (slides + 1) * 30;
+                        currentCombo += tics + slides + 1;
+                        currentScore += 300 + (int)(Math.Max(0, currentCombo - 1) * (12.0 * scoreMultipler));
+                        break;
+                    }
                 default:
-                {
-                    if (objType != 3) continue;
+                    {
+                        if (objType != 3) continue;
 
-                    currentScore += 300 + (int)(Math.Max(0, currentCombo - 1) * (12.0 * scoreMultipler));
-                    var length2 = int.Parse(objData[5]) - int.Parse(objData[2]);
-                    bonusScore += CalcSpinBonus(length2, od, adjustTime, difficultyModifier);
-                    currentCombo++;
-                    break;
-                }
+                        currentScore += 300 + (int)(Math.Max(0, currentCombo - 1) * (12.0 * scoreMultipler));
+                        var length2 = int.Parse(objData[5]) - int.Parse(objData[2]);
+                        bonusScore += CalcSpinBonus(length2, od, adjustTime, difficultyModifier);
+                        currentCombo++;
+                        break;
+                    }
             }
         }
 
@@ -414,11 +414,6 @@ public class Leeway_Calculator
     }
 
     public double Clamp(double value, double min, double max)
-    {
-        return value > max ? max : value < min ? min : value;
-    }
-
-    public float Clamp(float value, float min, float max)
     {
         return value > max ? max : value < min ? min : value;
     }

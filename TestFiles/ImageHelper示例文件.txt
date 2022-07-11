@@ -1,10 +1,10 @@
 ﻿Image -n baseimage -p new --size 500x500
-Image -n rawimg -p E:\.KanonBotTest\raw.png --size 100x100
+Image -n rawimg -p ./TestFiles/head.gif --size 100x100
 Draw -d baseimage -s rawimg -a 1 -p 0x0
 Round -n rawimg -s 100x100 -r 25
 Draw -d baseimage -s rawimg -a 1 -p 120x0
-DrawText -n baseimage -t "你好 世界!" -f "HarmonyOS_Sans_SC_Medium" -s 24 -c "#f47920" -a left -p 0x130
-DrawText -n baseimage -t "Hello World!" -f "HarmonyOS_Sans_SC_Medium" -s 24 -c "#f47920" -a left -p 0x154
+DrawText -n baseimage -t "你好 世界!" -f "HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.ttf" -s 24 -c "#f47920" -a left -p 0x130
+DrawText -n baseimage -t "Hello World!" -f "HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.ttf" -s 24 -c "#f47920" -a left -p 25x154
 Image -n sampletext -p new -s 500x500
-DrawText -n sampletext -t "sample" -f "Torus-SemiBold" -s 64 -c "#ffffff" -a left -p 0x154
-Draw -d baseimage -s sampletext -a 0.3 -p 0x0
+DrawText -n sampletext -t "sample" -f "Torus-SemiBold.ttf" -s 64 -c "#ffffff" -a left -p 0x200
+Draw -d baseimage -s sampletext -a 0.3 -p 50x0

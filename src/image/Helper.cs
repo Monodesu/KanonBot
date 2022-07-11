@@ -2,6 +2,7 @@
 using System.CommandLine;
 using SixLabors.ImageSharp;
 using Microsoft.CodeAnalysis;
+using Img = SixLabors.ImageSharp.Image;
 using CommandLine;
 
 namespace KanonBot.Image;
@@ -117,6 +118,12 @@ public class Helper
                     processor.Round(opts.Name!, int.Parse(temp[0]), int.Parse(temp[1]), opts.Radius!.Value);
                     return true;
                 },
+                (DrawOptions opts) =>
+                {
+                    var temp = opts.Pos!.Split('x');
+                    processor.Draw(opts.Dest_name!, opts.Source_name!, opts.Alpha!.Value, int.Parse(temp[0]), int.Parse(temp[1]));
+                    return true;
+                },
                 (DrawTextOptions opts) =>
                 {
                     var temp = opts.Pos!.Split('x');
@@ -142,5 +149,5 @@ public class Helper
             );
     }
 
-    public Processor Build() { return processor; }
+    public Img Build() { return processor.GetWorkingImage(); }
 }

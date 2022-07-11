@@ -38,13 +38,13 @@ namespace KanonBot.API
             public int spinnerCount { get; set; }
             public int maxCombo { get; set; }
 
-            public float BPM { get; set; }
-            public float circleSize { get; set; }
-            public float approachRate { get; set; }
+            public double BPM { get; set; }
+            public double circleSize { get; set; }
+            public double approachRate { get; set; }
             // Accuracy == OverallDifficulty(OD)
-            public float accuracy { get; set; }
-            public float HPDrainRate { get; set; }
-            public float difficultyRating { get; set; }
+            public double accuracy { get; set; }
+            public double HPDrainRate { get; set; }
+            public double difficultyRating { get; set; }
             public List<string> tags { get; set; }
             public bool hasVideo { get; set; }
             public bool isNSFW { get; set; }
@@ -102,7 +102,7 @@ namespace KanonBot.API
                 level,
                 levelProgress,
                 daysBefore;
-            public float pp, accuracy;
+            public double pp, accuracy;
         }
         public struct ScoreInfo
         {
@@ -111,7 +111,7 @@ namespace KanonBot.API
                 scoreId,
                 userId;
             public int great, ok, meh, katu, geki, combo, miss;
-            public float pp, acc;
+            public double pp, acc;
             public bool hasReplay, convert; //是否为转铺
             public string rank, mode, scoreType, userName, userAvatarUrl;
             public List<string> mods;
@@ -157,12 +157,12 @@ namespace KanonBot.API
             try { beatmapInfo.circleCount = (int)beatmap["count_circles"]; } catch { beatmapInfo.circleCount = 0; }
             try { beatmapInfo.sliderCount = (int)beatmap["count_sliders"]; } catch { beatmapInfo.sliderCount = 0; }
             try { beatmapInfo.spinnerCount = (int)beatmap["count_spinners"]; } catch { beatmapInfo.spinnerCount = 0; }
-            try { beatmapInfo.BPM = (float)beatmap["bpm"]; } catch { beatmapInfo.BPM = 0; }
-            try { beatmapInfo.circleSize = (float)beatmap["cs"]; } catch { beatmapInfo.circleSize = 0; }
-            try { beatmapInfo.approachRate = (float)beatmap["ar"]; } catch { beatmapInfo.approachRate = 0; }
-            try { beatmapInfo.accuracy = (float)beatmap["accuracy"]; } catch { beatmapInfo.accuracy = 0; }
-            try { beatmapInfo.HPDrainRate = (float)beatmap["drain"]; } catch { beatmapInfo.HPDrainRate = 0; }
-            try { beatmapInfo.difficultyRating = (float)beatmap["difficulty_rating"]; } catch { beatmapInfo.difficultyRating = 0; }
+            try { beatmapInfo.BPM = (double)beatmap["bpm"]; } catch { beatmapInfo.BPM = 0; }
+            try { beatmapInfo.circleSize = (double)beatmap["cs"]; } catch { beatmapInfo.circleSize = 0; }
+            try { beatmapInfo.approachRate = (double)beatmap["ar"]; } catch { beatmapInfo.approachRate = 0; }
+            try { beatmapInfo.accuracy = (double)beatmap["accuracy"]; } catch { beatmapInfo.accuracy = 0; }
+            try { beatmapInfo.HPDrainRate = (double)beatmap["drain"]; } catch { beatmapInfo.HPDrainRate = 0; }
+            try { beatmapInfo.difficultyRating = (double)beatmap["difficulty_rating"]; } catch { beatmapInfo.difficultyRating = 0; }
             try { beatmapInfo.version = beatmap["version"].ToString(); } catch { beatmapInfo.version = ""; }
             try { beatmapInfo.fileChecksum = beatmap["checksum"].ToString(); } catch { beatmapInfo.fileChecksum = ""; }
             try { beatmapInfo.favouriteCount = (int)beatmapSet["favourite_count"]; } catch { beatmapInfo.favouriteCount = 0; }
@@ -213,8 +213,8 @@ namespace KanonBot.API
                 try { scoreInfo.meh = (int)score["statistics"]["count_50"]; } catch { scoreInfo.meh = 0; }
                 try { scoreInfo.miss = (int)score["statistics"]["count_miss"]; } catch { scoreInfo.miss = 0; }
                 try { scoreInfo.combo = (int)score["max_combo"]; } catch { scoreInfo.combo = 0; }
-                try { scoreInfo.pp = (float)score["pp"]; } catch { scoreInfo.pp = 0; }
-                try { scoreInfo.acc = (float)score["accuracy"]; } catch { scoreInfo.acc = 0; }
+                try { scoreInfo.pp = (double)score["pp"]; } catch { scoreInfo.pp = 0; }
+                try { scoreInfo.acc = (double)score["accuracy"]; } catch { scoreInfo.acc = 0; }
                 try { scoreInfo.hasReplay = (bool)score["replay"]; } catch { scoreInfo.hasReplay = false; }
                 try { scoreInfo.convert = (bool)score["convert"]; } catch { scoreInfo.convert = false; }
                 scoreInfo.rank = score["rank"].ToString();
@@ -238,12 +238,12 @@ namespace KanonBot.API
                 try { scoreInfo.beatmapInfo.circleCount = (int)beatmap["count_circles"]; } catch { scoreInfo.beatmapInfo.circleCount = 0; }
                 try { scoreInfo.beatmapInfo.sliderCount = (int)beatmap["count_sliders"]; } catch { scoreInfo.beatmapInfo.sliderCount = 0; }
                 try { scoreInfo.beatmapInfo.spinnerCount = (int)beatmap["count_spinners"]; } catch { scoreInfo.beatmapInfo.spinnerCount = 0; }
-                try { scoreInfo.beatmapInfo.BPM = (float)beatmap["bpm"]; } catch { scoreInfo.beatmapInfo.BPM = 0; }
-                try { scoreInfo.beatmapInfo.circleSize = (float)beatmap["cs"]; } catch { scoreInfo.beatmapInfo.circleSize = 0; }
-                try { scoreInfo.beatmapInfo.approachRate = (float)beatmap["ar"]; } catch { scoreInfo.beatmapInfo.approachRate = 0; }
-                try { scoreInfo.beatmapInfo.accuracy = (float)beatmap["accuracy"]; } catch { scoreInfo.beatmapInfo.accuracy = 0; }
-                try { scoreInfo.beatmapInfo.HPDrainRate = (float)beatmap["drain"]; } catch { scoreInfo.beatmapInfo.HPDrainRate = 0; }
-                try { scoreInfo.beatmapInfo.difficultyRating = (float)beatmap["difficulty_rating"]; } catch { scoreInfo.beatmapInfo.difficultyRating = 0; }
+                try { scoreInfo.beatmapInfo.BPM = (double)beatmap["bpm"]; } catch { scoreInfo.beatmapInfo.BPM = 0; }
+                try { scoreInfo.beatmapInfo.circleSize = (double)beatmap["cs"]; } catch { scoreInfo.beatmapInfo.circleSize = 0; }
+                try { scoreInfo.beatmapInfo.approachRate = (double)beatmap["ar"]; } catch { scoreInfo.beatmapInfo.approachRate = 0; }
+                try { scoreInfo.beatmapInfo.accuracy = (double)beatmap["accuracy"]; } catch { scoreInfo.beatmapInfo.accuracy = 0; }
+                try { scoreInfo.beatmapInfo.HPDrainRate = (double)beatmap["drain"]; } catch { scoreInfo.beatmapInfo.HPDrainRate = 0; }
+                try { scoreInfo.beatmapInfo.difficultyRating = (double)beatmap["difficulty_rating"]; } catch { scoreInfo.beatmapInfo.difficultyRating = 0; }
                 try { scoreInfo.beatmapInfo.version = beatmap["version"].ToString(); } catch { scoreInfo.beatmapInfo.version = ""; }
                 try { scoreInfo.beatmapInfo.fileChecksum = beatmap["checksum"].ToString(); } catch { scoreInfo.beatmapInfo.fileChecksum = ""; }
                 try { scoreInfo.beatmapInfo.favouriteCount = (int)beatmapSet["favourite_count"]; } catch { scoreInfo.beatmapInfo.favouriteCount = 0; }
@@ -300,8 +300,8 @@ namespace KanonBot.API
             try { scoreInfo.meh = (int)score["statistics"]["count_50"]; } catch { scoreInfo.meh = 0; }
             try { scoreInfo.miss = (int)score["statistics"]["count_miss"]; } catch { scoreInfo.miss = 0; }
             try { scoreInfo.combo = (int)score["max_combo"]; } catch { scoreInfo.combo = 0; }
-            try { scoreInfo.pp = (float)score["pp"]; } catch { scoreInfo.pp = 0; }
-            try { scoreInfo.acc = (float)score["accuracy"]; } catch { scoreInfo.acc = 0; }
+            try { scoreInfo.pp = (double)score["pp"]; } catch { scoreInfo.pp = 0; }
+            try { scoreInfo.acc = (double)score["accuracy"]; } catch { scoreInfo.acc = 0; }
             try { scoreInfo.hasReplay = (bool)score["replay"]; } catch { scoreInfo.hasReplay = false; }
             scoreInfo.rank = score["rank"].ToString();
             scoreInfo.achievedTime = DateTimeOffset.Parse(score["created_at"].ToString());
@@ -341,7 +341,7 @@ namespace KanonBot.API
             try { userInfo.countryRank = (long)statistics["country_rank"]; } catch { userInfo.countryRank = 0; }
             try { userInfo.globalRank = (long)statistics["global_rank"]; } catch { userInfo.globalRank = 0; }
             try { userInfo.playTime = (long)statistics["play_time"]; } catch { userInfo.playTime = 0; }
-            try { userInfo.accuracy = (float)statistics["hit_accuracy"]; } catch { userInfo.accuracy = 0.00F; }
+            try { userInfo.accuracy = (double)statistics["hit_accuracy"]; } catch { userInfo.accuracy = 0.00F; }
             try { userInfo.SSH = (int)statistics["grade_counts"]["ssh"]; } catch { userInfo.SSH = 0; }
             try { userInfo.SS = (int)statistics["grade_counts"]["ss"]; } catch { userInfo.SS = 0; }
             try { userInfo.SH = (int)statistics["grade_counts"]["sh"]; } catch { userInfo.SH = 0; }
@@ -350,7 +350,7 @@ namespace KanonBot.API
             try { userInfo.level = (int)statistics["level"]["current"]; } catch { userInfo.level = 0; }
             try { userInfo.levelProgress = (int)statistics["level"]["progress"]; } catch { userInfo.levelProgress = 0; }
             userInfo.registedTimestamp = DateTimeOffset.Parse(body["join_date"].ToString());
-            try { userInfo.pp = (float)statistics["pp"]; } catch { userInfo.pp = 0; }
+            try { userInfo.pp = (double)statistics["pp"]; } catch { userInfo.pp = 0; }
             userInfo.mode = mode;
             userInfo.daysBefore = 0;
             return userInfo;
@@ -385,7 +385,7 @@ namespace KanonBot.API
             try { userInfo.countryRank = (long)statistics["country_rank"]; } catch { userInfo.countryRank = 0; }
             try { userInfo.globalRank = (long)statistics["global_rank"]; } catch { userInfo.globalRank = 0; }
             try { userInfo.playTime = (long)statistics["play_time"]; } catch { userInfo.playTime = 0; }
-            try { userInfo.accuracy = (float)statistics["hit_accuracy"]; } catch { userInfo.accuracy = 0.00F; }
+            try { userInfo.accuracy = (double)statistics["hit_accuracy"]; } catch { userInfo.accuracy = 0.00F; }
             try { userInfo.SSH = (int)statistics["grade_counts"]["ssh"]; } catch { userInfo.SSH = 0; }
             try { userInfo.SS = (int)statistics["grade_counts"]["ss"]; } catch { userInfo.SS = 0; }
             try { userInfo.SH = (int)statistics["grade_counts"]["sh"]; } catch { userInfo.SH = 0; }
@@ -394,7 +394,7 @@ namespace KanonBot.API
             try { userInfo.level = (int)statistics["level"]["current"]; } catch { userInfo.level = 0; }
             try { userInfo.levelProgress = (int)statistics["level"]["progress"]; } catch { userInfo.levelProgress = 0; }
             userInfo.registedTimestamp = DateTimeOffset.Parse(body["join_date"].ToString());
-            try { userInfo.pp = (float)statistics["pp"]; } catch { userInfo.pp = 0; }
+            try { userInfo.pp = (double)statistics["pp"]; } catch { userInfo.pp = 0; }
             userInfo.mode = mode;
             userInfo.daysBefore = 0;
             return userInfo;
