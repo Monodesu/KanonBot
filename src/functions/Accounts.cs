@@ -49,7 +49,7 @@ namespace KanonBot.functions
                         uid = g.Author.ID;
                         if (is_regd)
                             if (dbuser.qq_guild_uid == g.Author.ID) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
-                        var g1 = Database.Client.GetUsersByUID(g.Author.ID, Platform.Guild);
+                        var g1 = Database.Client.GetUsersByUID(uid, Platform.Guild);
                         if (g1 != null)
                         {
                             target.reply(new Chain()
@@ -66,7 +66,24 @@ namespace KanonBot.functions
                         uid = o.UserId.ToString();
                         if (is_regd)
                             if (dbuser.qq_id == o.UserId) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
-                        var o1 = Database.Client.GetUsersByUID(o.UserId.ToString(), Platform.OneBot);
+                        var o1 = Database.Client.GetUsersByUID(uid, Platform.OneBot);
+                        if (o1 != null)
+                        {
+                            target.reply(new Chain()
+                                .msg($"您目前的平台账户已经和邮箱为" +
+                                $"{Utils.HideMailAddr(o1.email ?? "undefined@undefined.undefined")}" +
+                                $"的用户绑定了。"));
+                            return;
+                        }
+                    }
+                    break;
+                case Platform.KOOK:
+                    if (target.raw is KaiHeiLa.WebSocket.SocketMessage k)
+                    {
+                        uid = k.Author.Id.ToString();
+                        if (is_regd)
+                            if (dbuser.khl_uid == uid) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
+                        var o1 = Database.Client.GetUsersByUID(uid, Platform.KOOK);
                         if (o1 != null)
                         {
                             target.reply(new Chain()
@@ -79,6 +96,12 @@ namespace KanonBot.functions
                     break;
                 default: break;
             }
+            var platform = target.platform! switch {
+                Platform.Guild => "qguild",
+                Platform.KOOK => "khl",
+                Platform.OneBot => "qq",
+                _ => throw new NotSupportedException()
+            };
             if (is_regd) //检查此邮箱是否已存在于数据库中
             {
                 // 如果存在，执行绑定
@@ -87,7 +110,7 @@ namespace KanonBot.functions
                 {
                     MailTo = new string[] { mailAddr },
                     Subject = "desu.life - 请验证您的邮箱",
-                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={target.platform!}&uid={uid}&op=2",
+                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=2",
                     IsBodyHtml = false
                 };
                 try
@@ -108,7 +131,7 @@ namespace KanonBot.functions
                 {
                     MailTo = new string[] { mailAddr },
                     Subject = "desu.life - 请验证您的邮箱",
-                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={target.platform!}&uid={uid}&op=1",
+                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=1",
                     IsBodyHtml = false
                 };
                 try
@@ -124,7 +147,7 @@ namespace KanonBot.functions
             }
         }
 
-        async public static void BindService(Target target, string cmd)
+        async public static Task BindService(Target target, string cmd)
         {
             string uid = "-1";
             switch (target.platform)
@@ -144,6 +167,16 @@ namespace KanonBot.functions
                     {
                         uid = o.UserId.ToString();
                         if (!Database.Client.IsRegd(uid, Platform.OneBot))
+                        {
+                            target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
+                        }
+                    }
+                    break;
+                case Platform.KOOK:
+                    if (target.raw is KaiHeiLa.WebSocket.SocketMessage k)
+                    {
+                        uid = k.Author.Id.ToString();
+                        if (!Database.Client.IsRegd(uid, Platform.KOOK))
                         {
                             target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
                         }
@@ -182,7 +215,7 @@ namespace KanonBot.functions
             }
             else
             {
-                target.reply("请按照以下格式进行绑定。\r\n !set osu 您的osu用户名"); return;
+                target.reply("请按照以下格式进行绑定。\n !set osu 您的osu用户名"); return;
             }
         }
 
@@ -219,6 +252,12 @@ namespace KanonBot.functions
                         return new AccInfo() { platform = Platform.OneBot, uid = o.UserId.ToString() };
                     }
                     break;
+                case Platform.KOOK:
+                    if (target.raw is KaiHeiLa.WebSocket.SocketMessage k)
+                    {
+                        return new AccInfo() { platform = Platform.KOOK, uid = k.Author.Id.ToString() };
+                    }
+                    break; 
             }
             return new() { platform = Platform.Unknown, uid = "" };
         }

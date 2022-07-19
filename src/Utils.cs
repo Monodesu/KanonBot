@@ -63,6 +63,21 @@ static class Utils
     public static double log1p(double x)
         => Math.Abs(x) > 1e-4 ? Math.Log(1.0 + x) : (-0.5 * x + 1.0) * x;
 
+    public static string KOOKUnEscape(string str)
+    {
+        str = str.Replace("\\\\n", "\\n");
+        str = str.Replace("\\(", "(");
+        str = str.Replace("\\)", ")");
+        return str;
+    }
+    public static string KOOKEscape(string str)
+    {
+        str = str.Replace("\\n", "\\\\n");
+        str = str.Replace("(", "\\(");
+        str = str.Replace(")", "\\)");
+        return str;
+    }
+
     public static string GuildUnEscape(string str)
     {
         str = str.Replace("&amp;", "&");

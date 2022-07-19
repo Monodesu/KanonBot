@@ -9,7 +9,7 @@ namespace KanonBot.functions.osubot
 {
     public class Leeway
     {
-        async public static void Execute(Target target, string cmd)
+        async public static Task Execute(Target target, string cmd)
         {
             OSU.Models.User? OnlineOsuInfo;
             Database.Model.Users_osu DBOsuInfo;

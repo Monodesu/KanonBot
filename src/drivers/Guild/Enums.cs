@@ -44,7 +44,7 @@ public partial class Guild
             InvalidSession = 9,
             Hello = 10,
             HeartbeatACK = 11,
-            HTTPCallbackACK = 12,
+            HttpCallbackAck = 12,
         }
 
         /// <summary>

@@ -17,11 +17,4 @@ public partial class OneBot
     public static readonly Platform platform = Platform.OneBot;
     event IDriver.MessageDelegate? msgAction;
     event IDriver.EventDelegate? eventAction;
-    public OneBot()
-    {
-        // 初始化变量
-    }
-
-
-
 }

@@ -1,4 +1,5 @@
 ﻿#pragma warning disable CS8618 // 非null 字段未初始化
+using System.Numerics;
 using KanonBot.API;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -20,7 +21,7 @@ namespace KanonBot.LegacyImage
         {
             public OSU.Models.User userInfo;
             public OSU.Models.User? prevUserInfo;
-            public OSU.Models.PPlusData.UserData pplusInfo;
+            public OSU.Models.PPlusData.UserData? pplusInfo;
             public string? customPanel;
             public int daysBefore = 0;
             public int badgeId = -1;
@@ -152,7 +153,7 @@ namespace KanonBot.LegacyImage
                 hi.nodesize = new SizeF(5f, 5f);
                 // acc ,flow, jump, pre, speed, sta
                 var ppd = new int[6];       // 这里就强制转换了
-                ppd[0] = (int)data.pplusInfo.AccuracyTotal;
+                ppd[0] = (int)data.pplusInfo!.AccuracyTotal;
                 ppd[1] = (int)data.pplusInfo.FlowAimTotal;
                 ppd[2] = (int)data.pplusInfo.JumpAimTotal;
                 ppd[3] = (int)data.pplusInfo.PrecisionTotal;
@@ -173,7 +174,7 @@ namespace KanonBot.LegacyImage
                 var color = Color.ParseHex("#FFCC33");
                 for (var i = 0; i < hi.nodeCount; i++)
                 {
-                    pppto.Origin = new PointF(x_offset[i], (i % 3 != 0) ? (i < 3 ? 642 : 831) : 736);
+                    pppto.Origin = new Vector2(x_offset[i], (i % 3 != 0) ? (i < 3 ? 642 : 831) : 736);
                     info.Mutate(x => x.DrawText(drawOptions, pppto, $"({ppd[i]})", new SolidBrush(color), null));
                 }
             }
@@ -216,7 +217,7 @@ namespace KanonBot.LegacyImage
             info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.Username, new SolidBrush(Color.White), null));
 
             var Statistics = data.userInfo.Statistics;
-            var prevStatistics = data.prevUserInfo?.Statistics ?? null; // 没有就为空
+            var prevStatistics = data.prevUserInfo?.Statistics ?? data.userInfo.Statistics; // 没有就为当前数据
 
             // country_rank
             string countryRank;
@@ -902,7 +903,7 @@ namespace KanonBot.LegacyImage
                 if (data.scoreInfo.Mode is not OSU.Enums.Mode.Mania)
                 {
                     var maxCombo = data.ppInfo.maxCombo;
-                    if (maxCombo != -1)
+                    if (maxCombo > 0)
                     {
                         textOptions.Origin = new PointF(1598, 966);
                         score.Mutate(x => x.DrawText(drawOptions, textOptions, " / ", new SolidBrush(Color.Black), null));

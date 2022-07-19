@@ -77,8 +77,23 @@ namespace KanonBot
                     else param.order_number = int.Parse(arg3[1..]);
                     if (param.osu_username == "") param.selfquery = true;
                 }
-                // 处理pr/bp/re解析
-                else if (type == Func_type.Recent || type == Func_type.PassRecent || type == Func_type.BestPerformance)
+                // bp
+                else if (type == Func_type.BestPerformance)
+                {
+                    // arg1 = username / order_number
+                    // arg2 = osu_mode
+                    // arg3 = order_number (序号)
+                    if (!int.TryParse(arg1, out param.order_number))
+                    {
+                        param.osu_username = arg1;
+                        if (arg3 == "") param.order_number = 1; //成绩必须为1
+                        else param.order_number = int.Parse(arg3[1..]);
+                        if (param.osu_username == "") param.selfquery = true;
+                    } else { param.selfquery = true; }
+                    if (arg2 != "") param.osu_mode = OSU.Enums.ParseMode(int.Parse(arg2[1..]));
+                }
+                // 处理pr/re解析
+                else if (type == Func_type.Recent || type == Func_type.PassRecent)
                 {
                     // arg1 = username
                     // arg2 = osu_mode

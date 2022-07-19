@@ -9,18 +9,18 @@ namespace KanonBot.Drivers;
 // 暂时还不知道怎么写
 public class Target
 {
-    public Msg.Chain msg = new();
+    public Msg.Chain msg { get; set; } = new();
 
     // 这里的account是一个字符串，可以是qq号，discord号，等等
     // 之后将会自动解析成猫猫独有的账户类型以统一管理
-    public Platform platform;
-    public string? account;
+    public Platform platform { get; set; }
+    public string? account { get; set; }
 
     // 原平台消息结构
-    public object? raw;
+    public object? raw { get; set; }
 
     // 原平台接口
-    public ISocket? socket;
+    public ISocket? socket { get; set; }
 
     public bool reply(string m)
     {
@@ -31,14 +31,25 @@ public class Target
     {
         switch (this.socket!)
         {
+            case KOOK s:
+                var rawMessage = (this.raw as KaiHeiLa.WebSocket.SocketMessage);
+                try
+                {
+                    s.api.SendMessage(rawMessage!.Channel, msgChain).Wait();
+                }
+                catch
+                {
+                    return false;
+                }
+                break;
             case Guild s:
                 var GuildMessageData = (this.raw as Guild.Models.MessageData)!;
                 try
                 {
-                    var res = s.api.SendMessage(GuildMessageData.ChannelID, new Guild.Models.SendMessageData() {
+                    s.api.SendMessage(GuildMessageData.ChannelID, new Guild.Models.SendMessageData() {
                         MessageId = GuildMessageData.ID,
                         MessageReference = new() { MessageId = GuildMessageData.ID }
-                    }.Build(msgChain)).Result;
+                    }.Build(msgChain)).Wait();
                 }
                 catch
                 {
@@ -49,13 +60,13 @@ public class Target
                 switch (this.raw)
                 {
                     case OneBot.Models.GroupMessage g:
-                        if (s.api.SendGroupMessage(g.GroupId, msgChain) == -1)
+                        if (s.api.SendGroupMessage(g.GroupId, msgChain).HasValue)
                         {
                             return false;
                         }
                         break;
                     case OneBot.Models.PrivateMessage p:
-                        if (s.api.SendPrivateMessage(p.UserId, msgChain) == -1)
+                        if (s.api.SendPrivateMessage(p.UserId, msgChain).HasValue)
                         {
                             return false;
                         }
@@ -68,13 +79,13 @@ public class Target
                 switch (this.raw)
                 {
                     case OneBot.Models.GroupMessage g:
-                        if (s.api.SendGroupMessage(g.GroupId, msgChain) == -1)
+                        if (s.api.SendGroupMessage(g.GroupId, msgChain).HasValue)
                         {
                             return false;
                         }
                         break;
                     case OneBot.Models.PrivateMessage p:
-                        if (s.api.SendPrivateMessage(p.UserId, msgChain) == -1)
+                        if (s.api.SendPrivateMessage(p.UserId, msgChain).HasValue)
                         {
                             return false;
                         }

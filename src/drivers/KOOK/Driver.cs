@@ -36,10 +36,18 @@ public partial class KOOK : ISocket, IDriver
         var client = new KaiHeiLaSocketClient();
         client.Log += LogAsync;
 
-        client.MessageUpdated += this.Parse;
-        client.Ready += () => 
+        // client.MessageUpdated += this.Parse;
+        client.MessageReceived += msg => Task.Run(() =>
         {
-            Console.WriteLine("Bot is connected!");
+            try
+            {
+                this.Parse(msg);
+            }
+            catch (Exception ex) { Log.Error("未捕获的异常 ↓\n{ex}", ex); }
+        });
+        client.Ready += () =>
+        {
+            // 连接成功
             return Task.CompletedTask;
         };
 
@@ -57,12 +65,27 @@ public partial class KOOK : ISocket, IDriver
             khl.LogSeverity.Debug => LogEventLevel.Debug,
             _ => LogEventLevel.Information
         };
-        Log.Write(severity, message.Exception, "[{Source}] {Message}", message.Source, message.Message);
+        Log.Write(severity, message.Exception, "[KOOK] [{Source}] {Message}", message.Source, message.Message);
         await Task.CompletedTask;
     }
 
 
-    private async Task Parse(khl.Cacheable<khl.IMessage, Guid> before, SocketMessage after, ISocketMessageChannel channel)
+    private void Parse(SocketMessage message)
+    {
+        // 过滤掉bot消息和系统消息
+        if (message.Source != khl.MessageSource.User)
+            return;
+
+        this.msgAction?.Invoke(new Target()
+        {
+            platform = Platform.KOOK,
+            account = this.selfID,
+            msg = Message.Parse(message),
+            raw = message,
+            socket = this
+        });
+    }
+    private async Task ParseUpdateMessage(khl.Cacheable<khl.IMessage, Guid> before, SocketMessage after, ISocketMessageChannel channel)
     {
         var message = await before.GetOrDownloadAsync();
         Log.Debug($"{message} -> {after}");

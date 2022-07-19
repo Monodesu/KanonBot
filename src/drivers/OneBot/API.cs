@@ -40,7 +40,7 @@ public partial class OneBot
         #endregion
 
         // 发送群消息
-        public long SendGroupMessage(long groupId, Chain msgChain)
+        public long? SendGroupMessage(long groupId, Chain msgChain)
         {
             var message = Message.Build(msgChain);
             var req = new Models.CQRequest
@@ -59,11 +59,11 @@ public partial class OneBot
             if (res.Status == "ok")
                 return (long)res.Data["message_id"]!;
             else
-                return -1;
+                return null;
         }
 
         // 发送私聊消息
-        public long SendPrivateMessage(long userId, Chain msgChain)
+        public long? SendPrivateMessage(long userId, Chain msgChain)
         {
             var message = Message.Build(msgChain);
             var req = new Models.CQRequest
@@ -82,7 +82,7 @@ public partial class OneBot
             if (res.Status == "ok")
                 return (long)res.Data["message_id"]!;
             else
-                return -1;
+                return null;
         }
 
     }

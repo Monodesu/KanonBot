@@ -6,7 +6,7 @@ namespace KanonBot.functions.osubot
 {
     public class Recent
     {
-        async public static void Execute(Target target, string cmd, bool includeFails = false)
+        async public static Task Execute(Target target, string cmd, bool includeFails = false)
         {
             var is_bounded = false;
             OSU.Models.User? OnlineOsuInfo;

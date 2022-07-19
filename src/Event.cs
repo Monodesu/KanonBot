@@ -13,7 +13,7 @@ public interface IEvent
 
 public class RawEvent : IEvent
 {
-    public object value;
+    public object value { get; set; }
     public RawEvent(object e)
     {
         this.value = e;
@@ -31,8 +31,8 @@ public class RawEvent : IEvent
 
 public class Ready : IEvent
 {
-    public string selfId;
-    public Platform platform;
+    public string selfId { get; set; }
+    public Platform platform { get; set; }
     public Ready(string selfId, Platform platform)
     {
         this.selfId = selfId;
@@ -47,7 +47,7 @@ public class Ready : IEvent
 
 public class HeartBeat : IEvent
 {
-    public DateTimeOffset value;
+    public DateTimeOffset value { get; set; }
     public HeartBeat(long timestamp)
     {
         this.value = Utils.TimeStampSecToDateTime(timestamp).ToLocalTime();

@@ -13,8 +13,8 @@ public interface IMsgSegment
 
 public class RawSegment : IMsgSegment
 {
-    public Object value;
-    public string type;
+    public Object value { get; set; }
+    public string type { get; set; }
     public RawSegment(string type, Object value)
     {
         this.type = type;
@@ -31,7 +31,7 @@ public class RawSegment : IMsgSegment
 }
 public class TextSegment : IMsgSegment
 {
-    public string value;
+    public string value { get; set; }
     public TextSegment(string msg)
     {
         this.value = msg;
@@ -44,7 +44,7 @@ public class TextSegment : IMsgSegment
 }
 public class EmojiSegment : IMsgSegment
 {
-    public string value;
+    public string value { get; set; }
     public EmojiSegment(string value)
     {
         this.value = value;
@@ -57,9 +57,9 @@ public class EmojiSegment : IMsgSegment
 }
 public class AtSegment : IMsgSegment
 {
-    public Platform platform;
+    public Platform platform { get; set; }
     // all 表示全体成员
-    public string value;
+    public string value { get; set; }
     public AtSegment(string target, Platform platform)
     {
         this.value = target;
@@ -80,8 +80,8 @@ public class ImageSegment : IMsgSegment
         Base64,
         Url
     }
-    public Type t;
-    public string value;
+    public Type t { get; set; }
+    public string value { get; set; }
     public ImageSegment(string value, Type t)
     {
         this.value = value;
@@ -106,7 +106,7 @@ public class ImageSegment : IMsgSegment
 
 public class Chain
 {
-    List<IMsgSegment> msgList;
+    List<IMsgSegment> msgList { get; set; }
     public Chain()
     {
         this.msgList = new();

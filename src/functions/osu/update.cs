@@ -6,7 +6,7 @@ namespace KanonBot.functions.osubot
 {
     public class Update
     {
-        async public static void Execute(Target target, string cmd)
+        async public static Task Execute(Target target, string cmd)
         {
             #region 验证
             OSU.UserInfo OnlineOsuInfo;

@@ -6,7 +6,7 @@ namespace KanonBot.functions.osubot
 {
     public class Score
     {
-        async public static void Execute(Target target, string cmd)
+        async public static Task Execute(Target target, string cmd)
         {
             var is_bounded = false;
             OSU.Models.User? OnlineOsuInfo;

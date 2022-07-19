@@ -6,7 +6,7 @@ namespace KanonBot.functions.osubot
 {
     public class Info
     {
-        async public static void Execute(Target target, string cmd)
+        async public static Task Execute(Target target, string cmd)
         {
             #region 验证
             LegacyImage.Draw.UserPanelData data = new();
@@ -96,11 +96,10 @@ namespace KanonBot.functions.osubot
                         break;
                     default:
                         //legacy
-                        // 取mode信息
-
 
                         // 取PP+信息
-                        // if (mode == "osu") DB.GetOsuPPlusData(out data.pplusInfo, oid);
+                        // 还没写
+                        data.pplusInfo = new();
 
                         var badgeID = DBUser!.displayed_badge_ids;
                         // legacy只取第一个badge
