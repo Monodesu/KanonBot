@@ -1,42 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>KanonBot</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="aliyun.OSS.SDK.NetCore" Version="2.13.0" />
-    <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="Fleck" Version="1.2.0" />
-    <PackageReference Include="Flurl.Http" Version="3.2.3" />
-    <PackageReference Include="KaiHeiLa.Net" Version="0.0.32-alpha" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.2.0-2.final" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
-    <PackageReference Include="MySql.Data" Version="8.0.28" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Polly" Version="7.2.3" />
-    <PackageReference Include="ppy.osu.Game" Version="2022.523.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2022.523.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2022.523.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2022.523.0" />
-    <PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2022.523.0" />
-    <PackageReference Include="Serilog" Version="2.11.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
-    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta16" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.0" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
-    <PackageReference Include="SqlSugarCore" Version="5.0.7.5" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22114.1" />
-    <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta3.22114.1" />
-    <PackageReference Include="Tomlyn" Version="0.14.2" />
-    <PackageReference Include="Websocket.Client" Version="4.4.43" />
-  </ItemGroup>
-
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<RootNamespace>KanonBot</RootNamespace>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="aliyun.OSS.SDK.NetCore" Version="2.13.0"/>
+		<PackageReference Include="CommandLineParser" Version="2.9.1"/>
+		<PackageReference Include="Fleck" Version="1.2.0"/>
+		<PackageReference Include="Flurl.Http" Version="3.2.4"/>
+		<PackageReference Include="KaiHeiLa.Net" Version="0.0.32-alpha"/>
+		<PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.2.0"/>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0"/>
+		<PackageReference Include="MSTest.TestAdapter" Version="2.2.10"/>
+		<PackageReference Include="MSTest.TestFramework" Version="2.2.10"/>
+		<PackageReference Include="MySql.Data" Version="8.0.29"/>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
+		<PackageReference Include="Polly" Version="7.2.3"/>
+		<PackageReference Include="ppy.osu.Game" Version="2022.719.0"/>
+		<PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2022.719.0"/>
+		<PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2022.719.0"/>
+		<PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2022.719.0"/>
+		<PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2022.719.0"/>
+		<PackageReference Include="Serilog" Version="2.11.0"/>
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1"/>
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0"/>
+		<PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta17"/>
+		<PackageReference Include="SixLabors.ImageSharp" Version="2.1.3"/>
+		<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14"/>
+		<PackageReference Include="SqlSugarCore" Version="5.0.9.7"/>
+		<PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1"/>
+		<PackageReference Include="Tomlyn" Version="0.15.0"/>
+		<PackageReference Include="Websocket.Client" Version="4.4.43"/>
+	</ItemGroup>
 </Project>
