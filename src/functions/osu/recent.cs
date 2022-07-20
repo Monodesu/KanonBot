@@ -27,9 +27,7 @@ namespace KanonBot.functions.osubot
                 { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 验证osu信息
-                if (command.osu_mode == null) {
-                    command.osu_mode = OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
-                }
+                command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
 
                 // 验证osu信息
                 OnlineOsuInfo = await OSU.GetUser(DBOsuInfo.osu_uid, command.osu_mode!.Value);
@@ -56,9 +54,7 @@ namespace KanonBot.functions.osubot
                 if (DBOsuInfo != null)
                 {
                     is_bounded = true;
-                    if (command.osu_mode == null) {
-                        command.osu_mode = OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
-                    }
+                    command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
                 }
             }
 

@@ -16,8 +16,9 @@ namespace KanonBot.functions.osubot
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Leeway);
-            
+
             // 解析模式
+            command.osu_mode ??= OSU.Enums.Mode.OSU;
             if (command.osu_mode is not OSU.Enums.Mode.OSU) { target.reply("Leeway仅支持osu!std模式。"); return; }
 
             // 验证账户
