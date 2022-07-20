@@ -13,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using Msg = KanonBot.Message;
 using Img = KanonBot.Image;
 using SixLabors.ImageSharp;
+using KaiHeiLa;
 
 namespace KanonBot.Tests;
 
@@ -34,6 +35,18 @@ public class Misc
             System.IO.Directory.SetCurrentDirectory("../../../");
             Config.inner = Config.load(configPath);
         }
+    }
+
+    [TestMethod]
+    public void Kaiheila()
+    {
+        var req = new KOOK.Models.MessageCreate
+        {
+            MessageType = KOOK.Enums.MessageType.Text,
+            TargetId = "123",
+            Content = "hi"
+        };
+        Log.Warning(Json.Serialize(req));
     }
 
     [TestMethod]

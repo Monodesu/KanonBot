@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Msg = KanonBot.Message;
+using Serilog;
 
 namespace KanonBot.Drivers;
 // 消息target封装
@@ -35,12 +36,9 @@ public class Target
                 var rawMessage = (this.raw as KaiHeiLa.WebSocket.SocketMessage);
                 try
                 {
-                    s.api.SendMessage(rawMessage!.Channel, msgChain).Wait();
+                    s.api.SendChannelMessage(rawMessage!.Channel.Id.ToString(), msgChain, rawMessage.Id).Wait();
                 }
-                catch
-                {
-                    return false;
-                }
+                catch (Exception ex) { Log.Warning("发送KOOK消息失败 ↓\n{ex}", ex); return false; }
                 break;
             case Guild s:
                 var GuildMessageData = (this.raw as Guild.Models.MessageData)!;
@@ -51,10 +49,7 @@ public class Target
                         MessageReference = new() { MessageId = GuildMessageData.ID }
                     }.Build(msgChain)).Wait();
                 }
-                catch
-                {
-                    return false;
-                }
+                catch (Exception ex) { Log.Warning("发送QQ频道消息失败 ↓\n{ex}", ex); return false; }
                 break;
             case OneBot.Client s:
                 switch (this.raw)
@@ -62,12 +57,14 @@ public class Target
                     case OneBot.Models.GroupMessage g:
                         if (s.api.SendGroupMessage(g.GroupId, msgChain).HasValue)
                         {
+                            Log.Warning("发送QQ消息失败");
                             return false;
                         }
                         break;
                     case OneBot.Models.PrivateMessage p:
                         if (s.api.SendPrivateMessage(p.UserId, msgChain).HasValue)
                         {
+                            Log.Warning("发送QQ消息失败");
                             return false;
                         }
                         break;

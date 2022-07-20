@@ -37,6 +37,14 @@ public partial class KOOK : ISocket, IDriver
         client.Log += LogAsync;
 
         // client.MessageUpdated += this.Parse;
+        client.DirectMessageReceived += msg => Task.Run(() =>
+        {
+            try
+            {
+                this.Parse(msg);
+            }
+            catch (Exception ex) { Log.Error("未捕获的异常 ↓\n{ex}", ex); }
+        });
         client.MessageReceived += msg => Task.Run(() =>
         {
             try
@@ -105,7 +113,7 @@ public partial class KOOK : ISocket, IDriver
 
     public void Send(string message)
     {
-        throw new KanonError("不支持");
+        throw new NotSupportedException("不支持");
     }
 
     public async Task Start()

@@ -15,16 +15,50 @@ public partial class KOOK
     static readonly string AtAdminPattern = @"\(rol\)(.*?)\(rol\)";
     public class Message
     {
-        /// <summary>
-        /// 开黑啦并不需要消息解析
-        /// 解析会在发送时自动运行
-        /// 这里只会抛出错误
-        /// </summary>
-        /// <param name="msgChain"></param>
-        /// <returns></returns>
-        public static SocketMessage Build(Chain msgChain)
+        public async static Task<List<Models.MessageCreate>> Build(API api, Chain msgChain)
         {
-            throw new KanonError("开黑啦端无消息Build");
+            var msglist = new List<Models.MessageCreate>();
+            foreach (var seg in msgChain.ToList())
+            {
+                var req = new Models.MessageCreate();
+                switch (seg)
+                {
+                    case ImageSegment s:
+                        req.MessageType = Enums.MessageType.Image;
+                        switch (s.t)
+                        {
+                            case ImageSegment.Type.Base64:
+                                var _s = Utils.Byte2Stream(Convert.FromBase64String(s.value));
+                                req.Content = await api.CreateAsset(_s);
+                                break;
+                            case ImageSegment.Type.File:
+                                var __s = Utils.LoadFile2Stream(s.value);
+                                req.Content = await api.CreateAsset(__s);
+                                break;
+                            case ImageSegment.Type.Url:
+                                req.Content = s.value;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case TextSegment s:
+                        req.MessageType = Enums.MessageType.Text;
+                        req.Content = s.value;
+                        break;
+                    case AtSegment s:
+                        req.MessageType = Enums.MessageType.KMarkdown;
+                        if (s.platform == Platform.KOOK)
+                            req.Content = $"(met){s.value}(met)";
+                        else
+                            throw new NotSupportedException("不支持的平台类型");
+                        break;
+                    default:
+                        throw new NotSupportedException("不支持的平台类型");
+                }
+                msglist.Add(req);
+            }
+            return msglist;
         }
 
         /// <summary>
