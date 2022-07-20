@@ -43,15 +43,34 @@ public partial class KOOK
                         }
                         break;
                     case TextSegment s:
+                        if (msglist.Count > 0)
+                        {
+                            if (msglist[msglist.Count - 1].MessageType == Enums.MessageType.Text)
+                            {
+                                msglist[msglist.Count - 1].Content += s.value;
+                                continue;
+                            }
+                        }
                         req.MessageType = Enums.MessageType.Text;
                         req.Content = s.value;
                         break;
                     case AtSegment s:
-                        req.MessageType = Enums.MessageType.KMarkdown;
+                        string _at;
                         if (s.platform == Platform.KOOK)
-                            req.Content = $"(met){s.value}(met)";
+                            _at = $"(met){s.value}(met)";
                         else
                             throw new NotSupportedException("不支持的平台类型");
+                        if (msglist.Count > 0)
+                        {
+                            // 将一类文字消息合并起来到 Text 中
+                            if (msglist[msglist.Count - 1].MessageType == Enums.MessageType.Text)
+                            {
+                                msglist[msglist.Count - 1].Content += _at;
+                                continue;
+                            }
+                        }
+                        req.MessageType = Enums.MessageType.Text;
+                        req.Content = _at;
                         break;
                     default:
                         throw new NotSupportedException("不支持的平台类型");

@@ -131,7 +131,6 @@ drivers.append(
 drivers.append(
     new KOOK(config.kook!.token!, config.kook!.botID!)
     .onMessage(async (target) => {
-        Log.Warning("{0}", target.msg);
         try
         {
             await Universal.Parser(target);

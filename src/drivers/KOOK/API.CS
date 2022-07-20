@@ -81,10 +81,11 @@ public partial class KOOK
         async public Task SendChannelMessage(string channelID, Chain msgChain, Guid? QuotedMessageId = null, string? TempMsgTargetId = null)
         {
             var messages = await Message.Build(this, msgChain);
+            if (messages.Count > 0)
+                messages[0].QuotedMessageId = QuotedMessageId;
             foreach (var msg in messages)
             {
                 msg.TargetId = channelID;
-                msg.QuotedMessageId = QuotedMessageId;
                 msg.EphemeralUserId = TempMsgTargetId;
                 await this.http()
                 .AppendPathSegments("message", "create")
