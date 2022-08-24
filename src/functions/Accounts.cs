@@ -96,7 +96,8 @@ namespace KanonBot.functions
                     break;
                 default: break;
             }
-            var platform = target.platform! switch {
+            var platform = target.platform! switch
+            {
                 Platform.Guild => "qguild",
                 Platform.KOOK => "khl",
                 Platform.OneBot => "qq",
@@ -191,27 +192,27 @@ namespace KanonBot.functions
 
             if (childCmd_1 == "osu")
             {
-                OSU.UserInfo online_osu_userinfo = new();
+                OSU.Models.User? online_osu_userinfo;
                 var globaluserinfo = Database.Client.GetUsersByUID(uid, target.platform);
 
                 // 检查用户是否已绑定osu账户
                 var osuuserinfo = Database.Client.GetOSUUsersByUID(globaluserinfo.uid);
-                if (osuuserinfo != null) { target.reply(new Chain().msg($"您已经与osu uid为 {osuuserinfo.osu_uid} 的用户绑定过了。")); return; }
+                if (osuuserinfo != null) { target.reply($"您已经与osu uid为 {osuuserinfo.osu_uid} 的用户绑定过了。"); return; }
 
                 // 通过osu username搜索osu用户id
-                try { online_osu_userinfo = await OSU.GetUserLegacy(childCmd_2); }
-                catch { target.reply(new Chain().msg($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。")); return; }
-
-                // 检查要绑定的osu是否没有被Kanon用户绑定过
-                var db_osu_userinfo = Database.Client.GetOSUUsers(online_osu_userinfo.userId);
-                if (db_osu_userinfo == null)
+                try
                 {
+                    online_osu_userinfo = await OSU.GetUser(childCmd_2);
+                    if (online_osu_userinfo == null) { target.reply($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。"); return; }
+                    // 检查要绑定的osu是否没有被Kanon用户绑定过
+                    var db_osu_userinfo = Database.Client.GetOSUUsers(online_osu_userinfo.Id);
+                    if (db_osu_userinfo == null) { target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果您认为他人恶意绑定了您的账户，请联系管理员。"); return; }
                     // 没被他人绑定，开始绑定流程
-                    if (Database.Client.InsertOsuUser(globaluserinfo.uid, online_osu_userinfo.userId, online_osu_userinfo.coverUrl == "" ? 0 : 2))
-                    { target.reply(new Chain().msg($"绑定成功，已将osu用户 {online_osu_userinfo.userId} 绑定至Kanon账户 {globaluserinfo.uid} 。")); }
-                    else { target.reply(new Chain().msg($"绑定失败，请稍后再试。")); }
+                    if (Database.Client.InsertOsuUser(globaluserinfo.uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2))   //?这里url真的能为空吗
+                    { target.reply($"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至Kanon账户 {globaluserinfo.uid} 。"); }
+                    else { target.reply($"绑定失败，请稍后再试。"); }
                 }
-                else { target.reply(new Chain().msg($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果您认为他人恶意绑定了您的账户，请联系管理员。")); return; }
+                catch { target.reply($"在绑定用户时出错，请联系猫妈处理.png"); return; }
             }
             else
             {
@@ -257,7 +258,7 @@ namespace KanonBot.functions
                     {
                         return new AccInfo() { platform = Platform.KOOK, uid = k.Author.Id.ToString() };
                     }
-                    break; 
+                    break;
             }
             return new() { platform = Platform.Unknown, uid = "" };
         }

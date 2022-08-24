@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Audio.Track;
@@ -13,7 +13,7 @@ using osu.Game.Rulesets.Taiko;
 using osu.Game.Skinning;
 using osu.Game.Utils;
 
-namespace KanonBot.functions.osubot.performance_calculator.API
+namespace PerformanceCalculator.API
 {
     public static class LegacyHelper
     {

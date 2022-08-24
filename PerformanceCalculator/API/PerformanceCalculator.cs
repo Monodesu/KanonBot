@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
-using System.Linq;
-using Humanizer;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using osu.Game.Rulesets.Catch.Difficulty;
 using osu.Game.Rulesets.Osu.Difficulty;
 using osu.Game.Rulesets.Taiko.Difficulty;
-using osu.Game.Scoring;
-using System.Diagnostics;
 using System.Globalization;
 
 
-namespace KanonBot.functions.osubot.performance_calculator.API
+namespace PerformanceCalculator.API
 {
     public static class PerformanceCalculator
     {

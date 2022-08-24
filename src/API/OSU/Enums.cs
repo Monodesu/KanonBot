@@ -17,7 +17,7 @@ using System.ComponentModel;
 
 namespace KanonBot.API
 {
-    static class OSUExtensions
+    public static class OSUExtensions
     {
         public static string ToScoreTypeStr(this OSU.Enums.UserScoreType type)
         {

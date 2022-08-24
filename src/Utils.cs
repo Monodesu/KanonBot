@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace KanonBot;
 
-static class Utils
+public static class Utils
 {
     public static int TryGetConsoleWidth() { try { return Console.WindowWidth; } catch { return 80; } } // 获取失败返回80
     public static string? GetObjectDescription(Object value)

@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/KanonBot.csproj",
+                "${workspaceFolder}/src/KanonBot.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -16,10 +16,10 @@
         {
             "label": "test",
             "command": "dotnet",
-            "type": "shell",
+            "type": "process",
             "args": [
                 "test",
-                "${workspaceFolder}/KanonBot.csproj",
+                "${workspaceFolder}/Tests/Tests.csproj",
                 "-l",
                 "'console;verbosity=detailed'",
                 "--interactive",
@@ -35,7 +35,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/KanonBot.csproj",
+                "${workspaceFolder}/src/KanonBot.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -49,7 +49,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/KanonBot.csproj"
+                "${workspaceFolder}/src/KanonBot.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

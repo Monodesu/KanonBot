@@ -164,7 +164,7 @@ namespace KanonBot.functions.osubot
                     scorePanelData.ppStats = new();
                     for (var i = 0; i < 6; i++)
                     {
-                        OSU.PPInfo.PPStat ppStat = new();
+                        OSU.Legacy.PPInfo.PPStat ppStat = new();
                         ppStat.total = -1;
                         scorePanelData.ppStats.Add(ppStat);
                     }

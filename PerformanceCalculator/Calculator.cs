@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using KanonBot.functions.osubot.performance_calculator.API;
+﻿namespace PerformanceCalculator;
 
-namespace KanonBot.functions.osubot
+using Newtonsoft.Json.Linq;
+using PerformanceCalculator.API;
+
+public class Calculator
 {
-    public class Performance_calculator
-    {
-        public static string Calculate(string BeatmapPath, int Mode, bool is_passed, double Accuracy, int MaxCombo, List<string> Mods, int Great = 0, int Ok = 0, int Meh = 0,
+       public static string Calculate(string BeatmapPath, int Mode, bool is_passed, double Accuracy, int MaxCombo, List<string> Mods, int Great = 0, int Ok = 0, int Meh = 0,
     int Miss = 0, int Geki = 0, int Katu = 0, bool is_more = false, string? TotalScore = null)
         {
             JObject Statistics = new();
@@ -60,5 +55,4 @@ namespace KanonBot.functions.osubot
                TotalScore, is_more);
             return Result.ToString();
         }
-    }
 }

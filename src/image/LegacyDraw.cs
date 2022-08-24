@@ -28,8 +28,8 @@ namespace KanonBot.LegacyImage
         }
         public class ScorePanelData
         {
-            public OSU.PPInfo ppInfo;
-            public List<OSU.PPInfo.PPStat>? ppStats;
+            public OSU.Legacy.PPInfo ppInfo;   // 这个需要集成到PerformaCalculator里
+            public List<OSU.Legacy.PPInfo.PPStat>? ppStats;   // 同理
             public OSU.Models.Score scoreInfo;
 
         }

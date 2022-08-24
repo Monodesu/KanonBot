@@ -1,17 +1,14 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
-using System.IO;
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics.Textures;
-using osu.Framework.IO.Network;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.IO;
 using osu.Game.Skinning;
 
-namespace KanonBot.functions.osubot.performance_calculator.API
+namespace PerformanceCalculator.API
 {
     /// <summary>
     /// A <see cref="WorkingBeatmap"/> which reads from a .osu file.
