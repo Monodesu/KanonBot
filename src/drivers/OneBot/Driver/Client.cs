@@ -78,13 +78,13 @@ public partial class OneBot
                     switch ((string?)m["post_type"])
                     {
                         case "message":
-                            dynamic? obj;
+                            dynamic obj;
                             try
                             {
                                 obj = (string?)m["message_type"] switch
                                 {
-                                    "private" => m.ToObject<Models.PrivateMessage>(),
-                                    "group" => m.ToObject<Models.GroupMessage>(),
+                                    "private" => m.ToObject<Models.PrivateMessage>()!,
+                                    "group" => m.ToObject<Models.GroupMessage>()!,
                                     _ => throw new NotSupportedException("未知的消息类型")
                                 };
                             }
@@ -96,7 +96,7 @@ public partial class OneBot
                             {
                                 platform = Platform.OneBot,
                                 account = this.selfID,
-                                msg = Message.Parse(obj!.MessageList),
+                                msg = Message.Parse(obj.MessageList),
                                 raw = obj,
                                 socket = this
                             };

@@ -77,7 +77,7 @@ public partial class OneBot
             public Guid Echo { get; } = Guid.NewGuid();
 
             [JsonProperty(PropertyName = "params")]
-            public dynamic Params { get; init; } = new { };
+            public dynamic Params { get; init; }
         }
         public class CQResponse
         {
