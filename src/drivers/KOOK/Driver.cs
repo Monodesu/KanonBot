@@ -12,20 +12,20 @@ using Serilog;
 using Serilog.Events;
 using Newtonsoft.Json.Linq;
 using System.Timers;
-using khl = KaiHeiLa;
-using KaiHeiLa.WebSocket;
+using libKook = Kook;
+using Kook.WebSocket;
 
 namespace KanonBot.Drivers;
-public partial class KOOK : ISocket, IDriver
+public partial class Kook : ISocket, IDriver
 {
     public static readonly Platform platform = Platform.Guild;
     public string? selfID { get; private set; }
-    KaiHeiLaSocketClient instance;
+    KookSocketClient instance;
     event IDriver.MessageDelegate? msgAction;
     event IDriver.EventDelegate? eventAction;
     string token;
     public API api;
-    public KOOK(string token, string botID)
+    public Kook(string token, string botID)
     {
         // 初始化变量
         this.token = token;
@@ -33,7 +33,7 @@ public partial class KOOK : ISocket, IDriver
 
         this.api = new(token);
 
-        var client = new KaiHeiLaSocketClient();
+        var client = new KookSocketClient();
         client.Log += LogAsync;
 
         // client.MessageUpdated += this.Parse;
@@ -61,16 +61,16 @@ public partial class KOOK : ISocket, IDriver
 
         this.instance = client;
     }
-    private static async Task LogAsync(khl.LogMessage message)
+    private static async Task LogAsync(libKook.LogMessage message)
     {
         var severity = message.Severity switch
         {
-            khl.LogSeverity.Critical => LogEventLevel.Fatal,
-            khl.LogSeverity.Error => LogEventLevel.Error,
-            khl.LogSeverity.Warning => LogEventLevel.Warning,
-            khl.LogSeverity.Info => LogEventLevel.Information,
-            khl.LogSeverity.Verbose => LogEventLevel.Verbose,
-            khl.LogSeverity.Debug => LogEventLevel.Debug,
+            libKook.LogSeverity.Critical => LogEventLevel.Fatal,
+            libKook.LogSeverity.Error => LogEventLevel.Error,
+            libKook.LogSeverity.Warning => LogEventLevel.Warning,
+            libKook.LogSeverity.Info => LogEventLevel.Information,
+            libKook.LogSeverity.Verbose => LogEventLevel.Verbose,
+            libKook.LogSeverity.Debug => LogEventLevel.Debug,
             _ => LogEventLevel.Information
         };
         Log.Write(severity, message.Exception, "[KOOK] [{Source}] {Message}", message.Source, message.Message);
@@ -81,7 +81,7 @@ public partial class KOOK : ISocket, IDriver
     private void Parse(SocketMessage message)
     {
         // 过滤掉bot消息和系统消息
-        if (message.Source != khl.MessageSource.User)
+        if (message.Source != libKook.MessageSource.User)
             return;
 
         this.msgAction?.Invoke(new Target()
@@ -93,7 +93,7 @@ public partial class KOOK : ISocket, IDriver
             socket = this
         });
     }
-    private async Task ParseUpdateMessage(khl.Cacheable<khl.IMessage, Guid> before, SocketMessage after, ISocketMessageChannel channel)
+    private async Task ParseUpdateMessage(libKook.Cacheable<libKook.IMessage, Guid> before, SocketMessage after, ISocketMessageChannel channel)
     {
         var message = await before.GetOrDownloadAsync();
         Log.Debug($"{message} -> {after}");
@@ -119,7 +119,7 @@ public partial class KOOK : ISocket, IDriver
     public async Task Start()
     {
         // return this.instance.Start();
-        await this.instance.LoginAsync(khl.TokenType.Bot, this.token);
+        await this.instance.LoginAsync(libKook.TokenType.Bot, this.token);
         await this.instance.StartAsync();
     }
 

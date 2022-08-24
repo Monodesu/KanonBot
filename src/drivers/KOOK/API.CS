@@ -4,16 +4,10 @@ using KanonBot.Message;
 using KanonBot.Serializer;
 using Flurl;
 using Flurl.Http;
-using khl = KaiHeiLa;
-using KaiHeiLa.WebSocket;
-using KaiHeiLa.API;
-using KaiHeiLa.API.Rest;
-
-
 using Serilog;
 
 namespace KanonBot.Drivers;
-public partial class KOOK
+public partial class Kook
 {
     // API 部分 * 包装 Driver
     public class API

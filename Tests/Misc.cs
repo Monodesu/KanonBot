@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 using Msg = KanonBot.Message;
 using Img = KanonBot.Image;
 using SixLabors.ImageSharp;
-using KaiHeiLa;
+using libkook = Kook;
 
 namespace Tests;
 
@@ -37,9 +37,9 @@ public class Misc
     [Fact]
     public void Kaiheila()
     {
-        var req = new KOOK.Models.MessageCreate
+        var req = new KanonBot.Drivers.Kook.Models.MessageCreate
         {
-            MessageType = KOOK.Enums.MessageType.Text,
+            MessageType = KanonBot.Drivers.Kook.Enums.MessageType.Text,
             TargetId = "123",
             Content = "hi"
         };

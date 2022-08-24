@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 
 namespace KanonBot.Drivers;
-public partial class KOOK
+public partial class Kook
 {
     public class Models
     {

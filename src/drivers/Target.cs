@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Msg = KanonBot.Message;
 using Serilog;
+using libKook = Kook;
 
 namespace KanonBot.Drivers;
 // 消息target封装
@@ -32,8 +33,8 @@ public class Target
     {
         switch (this.socket!)
         {
-            case KOOK s:
-                var rawMessage = (this.raw as KaiHeiLa.WebSocket.SocketMessage);
+            case Kook s:
+                var rawMessage = (this.raw as libKook.WebSocket.SocketMessage);
                 try
                 {
                     s.api.SendChannelMessage(rawMessage!.Channel.Id.ToString(), msgChain, rawMessage.Id).Wait();

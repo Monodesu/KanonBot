@@ -78,7 +78,7 @@ namespace KanonBot.functions
                     }
                     break;
                 case Platform.KOOK:
-                    if (target.raw is KaiHeiLa.WebSocket.SocketMessage k)
+                    if (target.raw is Kook.WebSocket.SocketMessage k)
                     {
                         uid = k.Author.Id.ToString();
                         if (is_regd)
@@ -174,7 +174,7 @@ namespace KanonBot.functions
                     }
                     break;
                 case Platform.KOOK:
-                    if (target.raw is KaiHeiLa.WebSocket.SocketMessage k)
+                    if (target.raw is Kook.WebSocket.SocketMessage k)
                     {
                         uid = k.Author.Id.ToString();
                         if (!Database.Client.IsRegd(uid, Platform.KOOK))
@@ -254,7 +254,7 @@ namespace KanonBot.functions
                     }
                     break;
                 case Platform.KOOK:
-                    if (target.raw is KaiHeiLa.WebSocket.SocketMessage k)
+                    if (target.raw is Kook.WebSocket.SocketMessage k)
                     {
                         return new AccInfo() { platform = Platform.KOOK, uid = k.Author.Id.ToString() };
                     }

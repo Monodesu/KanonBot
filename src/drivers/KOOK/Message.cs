@@ -5,11 +5,11 @@ using KanonBot.Message;
 using KanonBot.API;
 using KanonBot.Serializer;
 using Serilog;
-using khl = KaiHeiLa;
-using KaiHeiLa.WebSocket;
+using libKook = Kook;
+using Kook.WebSocket;
 
 namespace KanonBot.Drivers;
-public partial class KOOK
+public partial class Kook
 {
     static readonly string AtPattern = @"\(met\)(.*?)\(met\)";
     static readonly string AtAdminPattern = @"\(rol\)(.*?)\(rol\)";
@@ -105,7 +105,7 @@ public partial class KOOK
                 // 匹配一下attacment
                 if (MessageData.Attachment != null)
                 {
-                    if (MessageData.Attachment.Type == khl.AttachmentType.Image)
+                    if (MessageData.Attachment.Type == libKook.AttachmentType.Image)
                     {
                         // 添加图片，删除文本
                         chain.Add(new ImageSegment(MessageData.Attachment.Url, ImageSegment.Type.Url));

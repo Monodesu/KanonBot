@@ -129,7 +129,7 @@ drivers.append(
     })
 );
 drivers.append(
-    new KOOK(config.kook!.token!, config.kook!.botID!)
+    new KanonBot.Drivers.Kook(config.kook!.token!, config.kook!.botID!)
     .onMessage(async (target) => {
         try
         {
