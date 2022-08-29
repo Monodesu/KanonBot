@@ -3,6 +3,7 @@ using Msg = KanonBot.Message;
 using KanonBot.Drivers;
 using KanonBot.Event;
 using KanonBot;
+using KanonBot.API;
 using KanonBot.Serializer;
 using KanonBot.command_parser;
 using Newtonsoft.Json;

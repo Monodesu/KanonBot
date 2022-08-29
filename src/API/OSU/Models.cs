@@ -548,7 +548,7 @@ namespace KanonBot.API
                 public string? Twitter { get; set; }
 
                 [JsonProperty("website", NullValueHandling = NullValueHandling.Ignore)]
-                public Uri? Website { get; set; }
+                public string? Website { get; set; }
 
                 [JsonProperty("country")]
                 public Country Country { get; set; }
