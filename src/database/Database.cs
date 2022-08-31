@@ -218,7 +218,19 @@ public class Client
         return db.Queryable<Model.BadgeList>().Where(it => it.id == int.Parse(badgeid)).First();
     }
 
-
+    static public bool SetOwnedBadge(string userid, string owned_ids)
+    {
+        var db = GetInstance();
+        var data = db.Queryable<Model.Users>().First(it => it.uid == long.Parse(userid));
+        var result = db.Updateable<Model.Users>()
+            .SetColumns(it => new Model.Users()
+            {
+                owned_badge_ids = owned_ids
+            })
+            .Where(it => it.uid == long.Parse(userid))
+            .ExecuteCommandHasChange();
+        return result;
+    }
 
 
 
