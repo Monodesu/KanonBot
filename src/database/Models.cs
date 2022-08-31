@@ -26,7 +26,7 @@ public class Model
         public string? passwd { get; set; }
         public long qq_id { get; set; }
         public string? qq_guild_uid { get; set; }
-        public string? khl_uid { get; set; }
+        public string? kook_uid { get; set; }
         public string? discord_uid { get; set; }
         public string? permissions { get; set; }
         public string? last_login_ip { get; set; }

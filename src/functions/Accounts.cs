@@ -82,7 +82,7 @@ namespace KanonBot.functions
                     {
                         uid = k.Author.Id.ToString();
                         if (is_regd)
-                            if (dbuser.khl_uid == uid) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
+                            if (dbuser.kook_uid == uid) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
                         var o1 = Database.Client.GetUsersByUID(uid, Platform.KOOK);
                         if (o1 != null)
                         {

@@ -70,7 +70,7 @@ public class Client
                 if (li2.Count > 0) return true;
                 return false;
             case Platform.KOOK:
-                var li3 = db.Queryable<Model.Users>().Where(it => it.khl_uid == uid).Select(it => it.uid).ToList();
+                var li3 = db.Queryable<Model.Users>().Where(it => it.kook_uid == uid).Select(it => it.uid).ToList();
                 if (li3.Count > 0) return true;
                 return false;
             // case "discord":
@@ -102,7 +102,7 @@ public class Client
                 if (li2.Count > 0) return li2[0];
                 return null;
             case Platform.KOOK:
-                var li3 = db.Queryable<Model.Users>().Where(it => it.khl_uid == UID).ToList();
+                var li3 = db.Queryable<Model.Users>().Where(it => it.kook_uid == UID).ToList();
                 if (li3.Count > 0) return li3[0];
                 return null;
             // case "discord":  // 还没写
