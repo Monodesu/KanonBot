@@ -174,8 +174,7 @@ public class Client
                             })
                             .Where(it => it.uid == osu_uid)
                             .ExecuteCommandHasChange();
-            if (!result) { return false; }
-            return true;
+            return result;
         }
         // 数据库没有数据，新插入数据
         try
@@ -198,4 +197,36 @@ public class Client
         }
         return true;
     }
+
+    static public bool SetDisplayedBadge(string userid, string displayed_ids)
+    {
+        var db = GetInstance();
+        var data = db.Queryable<Model.Users>().First(it => it.uid == long.Parse(userid));
+        var result = db.Updateable<Model.Users>()
+            .SetColumns(it => new Model.Users()
+            {
+                displayed_badge_ids = displayed_ids
+            })
+            .Where(it => it.uid == long.Parse(userid))
+            .ExecuteCommandHasChange();
+        return result;
+    }
+
+    static public Model.BadgeList GetBadgeInfo(string badgeid) 
+    {
+        var db = GetInstance();
+        return db.Queryable<Model.BadgeList>().Where(it => it.id == int.Parse(badgeid)).First();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 }

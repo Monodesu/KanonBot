@@ -13,7 +13,7 @@ namespace KanonBot.functions.osubot
 {
     public class Get
     {
-        public static void Execute(Target target, string cmd)
+        async public static Task Execute(Target target, string cmd)
         {
             string rootCmd, childCmd = "";
             try
@@ -25,22 +25,22 @@ namespace KanonBot.functions.osubot
             switch (rootCmd)
             {
                 case "bonuspp":
-                    Bonuspp(target, childCmd);
+                    await Bonuspp(target, childCmd);
                     break;
                 case "elo":
-                    Elo(target, childCmd);
+                    await Elo(target, childCmd);
                     break;
                 case "rolecost":
-                    Rolecost(target, childCmd);
+                    await Rolecost(target, childCmd);
                     break;
                 case "bpht":
-                    Bpht(target, childCmd);
+                    await Bpht(target, childCmd);
                     break;
                 case "todaybp":
-                    TodayBP(target, childCmd);
+                    await TodayBP(target, childCmd);
                     break;
                 case "annualpass":
-                    AnnualPass(target, childCmd);
+                    await AnnualPass(target, childCmd);
                     break;
                 default:
                     return;
@@ -48,7 +48,7 @@ namespace KanonBot.functions.osubot
         }
         
 
-        async private static void Bonuspp(Target target, string cmd)
+        async private static Task Bonuspp(Target target, string cmd)
         {
             #region 验证
             bool is_bounded = false;
@@ -175,7 +175,7 @@ namespace KanonBot.functions.osubot
             target.reply(str);
         }
 
-        async private static void Elo(Target target, string cmd)
+        async private static Task Elo(Target target, string cmd)
         {
             #region 验证
             bool is_bounded = false;
@@ -261,7 +261,7 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        async private static void Rolecost(Target target, string cmd)
+        async private static Task Rolecost(Target target, string cmd)
         {
             cmd = cmd.Trim();
             Func<OSU.Models.User, OSU.Models.PPlusData.UserData, double> occost = (userInfo, pppData) =>
@@ -426,7 +426,7 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        async private static void Bpht(Target target, string cmd)
+        async private static Task Bpht(Target target, string cmd)
         {
             #region 验证
             bool is_bounded = false;
@@ -513,7 +513,7 @@ namespace KanonBot.functions.osubot
             target.reply(str);
         }
 
-        async private static void TodayBP(Target target, string cmd)
+        async private static Task TodayBP(Target target, string cmd)
         {
             #region 验证
             bool is_bounded = false;
@@ -598,7 +598,7 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        private static void AnnualPass(Target target, string cmd) //may need to change describe
+        async private static Task AnnualPass(Target target, string cmd) //may need to change describe
         {
 
         }

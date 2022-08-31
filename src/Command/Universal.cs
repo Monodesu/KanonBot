@@ -56,7 +56,7 @@ namespace KanonBot.command_parser
                     case "help": Help.Execute(target, childCmd); return;
                     case "update": await Update.Execute(target, childCmd); return;
                     case "get": // get bonuspp/elo/rolecost/bpht/todaybp/annualpass
-                        return;
+                        await Get.Execute(target, childCmd); return;
                     case "set": // set osu_mode/osu_infopanel
                         return;
                     case "badge":
