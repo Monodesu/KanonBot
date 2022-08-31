@@ -36,8 +36,7 @@ namespace KanonBot.functions
                 return;
             }
             string uid = "-1";
-            bool is_regd = false;
-            is_regd = Database.Client.IsRegd(mailAddr);
+            bool is_regd = Database.Client.IsRegd(mailAddr);
             Database.Model.Users dbuser = new();
 
             if (is_regd) dbuser = Database.Client.GetUsers(mailAddr);
@@ -61,7 +60,7 @@ namespace KanonBot.functions
                     }
                     break;
                 case Platform.OneBot:
-                    if (target.raw is OneBot.Models.Sender o)
+                    if (target.raw is OneBot.Models.CQMessageEventBase o)
                     {
                         uid = o.UserId.ToString();
                         if (is_regd)
@@ -164,7 +163,7 @@ namespace KanonBot.functions
                     }
                     break;
                 case Platform.OneBot:
-                    if (target.raw is OneBot.Models.Sender o)
+                    if (target.raw is OneBot.Models.CQMessageEventBase o)
                     {
                         uid = o.UserId.ToString();
                         if (!Database.Client.IsRegd(uid, Platform.OneBot))
@@ -187,8 +186,13 @@ namespace KanonBot.functions
             }
 
             cmd = cmd.Trim();
-            string childCmd_1 = cmd[..cmd.IndexOf(" ")];
-            string childCmd_2 = cmd[(cmd.IndexOf(" ") + 1)..];
+            string childCmd_1 = "", childCmd_2 = "";
+            try
+            {
+                childCmd_1 = cmd[..cmd.IndexOf(" ")];
+                childCmd_2 = cmd[(cmd.IndexOf(" ") + 1)..];
+            }
+            catch { }
 
             if (childCmd_1 == "osu")
             {
@@ -216,7 +220,7 @@ namespace KanonBot.functions
             }
             else
             {
-                target.reply("请按照以下格式进行绑定。\n !set osu 您的osu用户名"); return;
+                target.reply("请按照以下格式进行绑定。\n !bind osu 您的osu用户名"); return;
             }
         }
 
@@ -248,7 +252,7 @@ namespace KanonBot.functions
                     }
                     break;
                 case Platform.OneBot:
-                    if (target.raw is OneBot.Models.Sender o)
+                    if (target.raw is OneBot.Models.CQMessageEventBase o)
                     {
                         return new AccInfo() { platform = Platform.OneBot, uid = o.UserId.ToString() };
                     }

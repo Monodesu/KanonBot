@@ -826,7 +826,7 @@ namespace KanonBot.API
                 [JsonProperty("accuracy")]
                 public double Accuracy { get; set; }
 
-                [JsonProperty("best_id")]
+                [JsonProperty("best_id", NullValueHandling = NullValueHandling.Ignore)]
                 public long BestId { get; set; }
 
                 [JsonProperty("created_at")]
@@ -854,7 +854,7 @@ namespace KanonBot.API
                 [JsonProperty("perfect")]
                 public bool Perfect { get; set; }
 
-                [JsonProperty("pp")]
+                [JsonProperty("pp", NullValueHandling = NullValueHandling.Ignore)]
                 public double PP { get; set; }
 
                 [JsonProperty("rank")]

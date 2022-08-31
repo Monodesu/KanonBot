@@ -104,10 +104,18 @@ namespace KanonBot.API
                 })
                 .GetAsync();
 
+            Console.WriteLine(await res.GetStringAsync());
             if (res.StatusCode == 404)
                 return null;
             else
+                try { 
                 return await res.GetJsonAsync<Models.Score[]>();
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return null;
+                }
         }
 
         // 获取用户在特定谱面上的成绩

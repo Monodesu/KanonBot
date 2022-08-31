@@ -24,7 +24,7 @@ namespace KanonBot.functions.osubot
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
                 if (DBOsuInfo == null)
-                { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
+                { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名来绑定您的osu账户。"); return; }
 
                 // 验证osu信息
                 command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
