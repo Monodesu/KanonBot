@@ -210,7 +210,7 @@ namespace KanonBot.functions
                     if (online_osu_userinfo == null) { target.reply($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。"); return; }
                     // 检查要绑定的osu是否没有被Kanon用户绑定过
                     var db_osu_userinfo = Database.Client.GetOSUUsers(online_osu_userinfo.Id);
-                    if (db_osu_userinfo == null) { target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果您认为他人恶意绑定了您的账户，请联系管理员。"); return; }
+                    if (db_osu_userinfo != null) { target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果您认为他人恶意绑定了您的账户，请联系管理员。"); return; }
                     // 没被他人绑定，开始绑定流程
                     if (Database.Client.InsertOsuUser(globaluserinfo.uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2))   //?这里url真的能为空吗
                     { target.reply($"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至Kanon账户 {globaluserinfo.uid} 。"); }

@@ -87,9 +87,14 @@ namespace KanonBot
                     {
                         param.osu_username = arg1;
                         if (arg3 == "") param.order_number = 1; //成绩必须为1
-                        else param.order_number = int.Parse(arg3[1..]);
+                        else
+                        {
+                            var t = param.order_number = int.Parse(arg3[1..]);
+                            if (t > 100 || t < 1) param.order_number = 1;
+                        }
                         if (param.osu_username == "") param.selfquery = true;
-                    } else { param.selfquery = true; }
+                    }
+                    else { param.selfquery = true; }
                     if (arg2 != "") param.osu_mode = OSU.Enums.ParseMode(int.Parse(arg2[1..]));
                 }
                 // 处理pr/re解析
@@ -101,7 +106,11 @@ namespace KanonBot
                     param.osu_username = arg1;
                     if (arg2 != "") param.osu_mode = OSU.Enums.ParseMode(int.Parse(arg2[1..]));
                     if (arg3 == "") param.order_number = 1; //成绩必须为1
-                    else param.order_number = int.Parse(arg3[1..]);
+                    else
+                    {
+                        var t = param.order_number = int.Parse(arg3[1..]);
+                        if (t > 100 || t < 1) param.order_number = 1;
+                    }
                     if (param.osu_username == "") param.selfquery = true;
                 }
                 // 处理score解析

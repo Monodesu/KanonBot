@@ -2,6 +2,11 @@
 using KanonBot.Message;
 using KanonBot.API;
 using Polly;
+using System.Security.Cryptography;
+using K4os.Compression.LZ4.Internal;
+using static KanonBot.API.OSU.Enums;
+using KanonBot.functions.osu.rosupp;
+using RosuPP;
 
 namespace KanonBot.functions.osubot
 {
@@ -59,74 +64,66 @@ namespace KanonBot.functions.osubot
                 }
             }
 
-
-            // 判断给定的bp序号是否在合法的范围内
-            // if (command.order_number == -1) { target.reply("猫猫找不到该BP。"); return; }
-
             var scorePanelData = new LegacyImage.Draw.ScorePanelData();
             var scores = await OSU.GetUserScores(OnlineOsuInfo.Id, OSU.Enums.UserScoreType.Best, command.osu_mode ?? OSU.Enums.Mode.OSU, 1, command.order_number - 1);
             if (scores == null) { target.reply("查询成绩时出错。"); return; }
             if (scores!.Length > 0) scorePanelData.scoreInfo = scores![0];
             else { target.reply("猫猫找不到该BP。"); return; }
 
+            //检查谱面文件下载状态
+            OSU.BeatmapFileChecker(scorePanelData.scoreInfo.Beatmap!.BeatmapId);
+
             // 获取绘制数据
             try
             {
-                //var mainPP = Kanon.OsuCalcPP(
-                //    scorePanelData.scoreInfo.beatmapInfo.beatmapId,
-                //    scorePanelData.scoreInfo.beatmapInfo.beatmapStatus,
-                //    scorePanelData.scoreInfo.rank == "F" ? false : true,
-                //    scorePanelData.scoreInfo.acc,
-                //    scorePanelData.scoreInfo.combo,
-                //    scorePanelData.scoreInfo.score,
-                //    scorePanelData.scoreInfo.great,
-                //    scorePanelData.scoreInfo.ok,
-                //    scorePanelData.scoreInfo.meh,
-                //    scorePanelData.scoreInfo.geki,
-                //    scorePanelData.scoreInfo.katu,
-                //    scorePanelData.scoreInfo.miss,
-                //    scorePanelData.scoreInfo.mods,
-                //    scorePanelData.scoreInfo.mode
-                //);
-                //scorePanelData.ppInfo = mainPP;
+
+                var ppInfo = PerformanceCalculator.Calculate(
+                    $"./work/beatmap/{scorePanelData.scoreInfo.Beatmap!.BeatmapId}.osu", 
+                    (int)scorePanelData.scoreInfo.Mode, 
+                    null,//scorePanelData.scoreInfo.Accuracy, 
+                    scorePanelData.scoreInfo.Statistics.CountGreat,
+                    scorePanelData.scoreInfo.Statistics.CountOk,
+                    scorePanelData.scoreInfo.Statistics.CountMeh,
+                    scorePanelData.scoreInfo.Statistics.CountMiss,
+                    null,//scorePanelData.scoreInfo.Statistics.CountKatu,
+                    scorePanelData.scoreInfo.MaxCombo,null);
+
+                //scorePanelData.ppInfo = OSU.LegacyPPInfoParser(mainPP);
+                scorePanelData.ppInfo.accuracy = scorePanelData.scoreInfo.Accuracy;
+                scorePanelData.ppInfo.star = ppInfo.stars;
+                scorePanelData.ppInfo.approachRate = ppInfo.ar;
+                scorePanelData.ppInfo.circleSize = ppInfo.cs;
+                scorePanelData.ppInfo.HPDrainRate = ppInfo.hp;
+                scorePanelData.ppInfo.hitWindow = ppInfo.od;
+                scorePanelData.ppInfo.ppStat.acc = ppInfo.ppAcc.ToNullable().Value;
+                scorePanelData.ppInfo.ppStat.aim = ppInfo.ppAim.ToNullable().Value;
+                scorePanelData.ppInfo.ppStat.speed = ppInfo.ppSpeed.ToNullable().Value;
+                scorePanelData.ppInfo.ppStat.total = ppInfo.pp;
+
+
+
+
+
+
+                //return;
             }
-            //catch (Exception e)
-            //{
-            //var retry = KanonAPIExceptionHandel(tar, e, scorePanelData.scoreInfo.beatmapInfo.beatmapId, retrytime);
-            //if (retry == -1) return;
-            //else if (retry == 1) ScoreBest(tar, overstarban, osbanduration, retrytime + 1);
-            //scorePanelData.ppInfo.star = -1;
-            //scorePanelData.ppInfo.maxCombo = -1;
-            //scorePanelData.ppInfo.approachRate = -1;
-            //scorePanelData.ppInfo.accuracy = -1;
-            //scorePanelData.ppInfo.circleSize = -1;
-            //scorePanelData.ppInfo.HPDrainRate = -1;
-            //scorePanelData.ppInfo.ppStat.total = -1;
-            //scorePanelData.ppInfo.ppStat.acc = -1;
-            //scorePanelData.ppInfo.ppStat.aim = -1;
-            //scorePanelData.ppInfo.ppStat.speed = -1;
-            //scorePanelData.ppInfo.ppStat.flashlight = -1;
-            //scorePanelData.ppInfo.ppStat.effective_miss_count = -1;
-            //}
-            catch (AggregateException ae)
+            catch (Exception e)
             {
-                var isKnownException = false;
-                var msg = $"在从KanonAPI获取PP数据时出现错误\n铺面bid: {scorePanelData.scoreInfo.Beatmap!.BeatmapId}";
-                ae.Handle((x) =>
-                {
-                    if (x is Flurl.Http.FlurlHttpTimeoutException)
-                    {
-                        target.reply("获取pp数据时超时，等会儿再试试吧..");
-                        isKnownException = true;
-                        return true;
-                    }
-                    msg += $"\n异常类型: {x.GetType()}\n异常信息: '{x.Message}'";
-                    return true;
-                });
-                if (isKnownException) return;
-                target.reply("获取pp数据时出错，等会儿再试试吧..");
-                // TODO  ADMIN MESSAGE  SendAdminMessage(msg);
-                return;
+                //var retry = KanonAPIExceptionHandel(tar, e, scorePanelData.scoreInfo.beatmapInfo.beatmapId, retrytime);
+                //if (retry == -1) return;
+                //else if (retry == 1) ScoreBest(tar, overstarban, osbanduration, retrytime + 1);
+                scorePanelData.ppInfo.star = -1;
+                scorePanelData.ppInfo.maxCombo = -1;
+                scorePanelData.ppInfo.approachRate = -1;
+                scorePanelData.ppInfo.accuracy = -1;
+                scorePanelData.ppInfo.circleSize = -1;
+                scorePanelData.ppInfo.HPDrainRate = -1;
+                scorePanelData.ppInfo.ppStat.total = -1;
+                scorePanelData.ppInfo.ppStat.acc = -1;
+                scorePanelData.ppInfo.ppStat.aim = -1;
+                scorePanelData.ppInfo.ppStat.speed = -1;
+                scorePanelData.ppInfo.ppStat.flashlight = -1;
+                scorePanelData.ppInfo.ppStat.effective_miss_count = -1;
             }
 
             if (scorePanelData.scoreInfo.Mode is not OSU.Enums.Mode.Mania)

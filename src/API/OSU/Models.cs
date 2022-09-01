@@ -914,6 +914,57 @@ namespace KanonBot.API
                 [JsonProperty("pp")]
                 public double PP { get; set; }
             }
+
+            public class PPData
+            {
+                [JsonProperty("Mods")]
+                public List<string> Mods { get; set; }
+
+                [JsonProperty("Star")]
+                public float Star { get; set; }
+
+                [JsonProperty("CS")]
+                public float CS { get; set; }
+
+                [JsonProperty("HP")]
+                public int HP { get; set; }
+
+                [JsonProperty("Aim")]
+                public float Aim { get; set; }
+
+                [JsonProperty("Speed")]
+                public float Speed { get; set; }
+
+                [JsonProperty("MaxCombo")]
+                public int MaxCombo { get; set; }
+
+                [JsonProperty("AR")]
+                public float AR { get; set; }
+
+                [JsonProperty("OD")]
+                public float OD { get; set; }
+
+                [JsonProperty("PPInfo")]
+                public PPData_Info PPInfo { get; set; }
+            }
+
+            public class PPData_Info
+            {
+                [JsonProperty("Total")]
+                public double Total { get; set; }
+                [JsonProperty("aim")]
+                public double aim { get; set; }
+                [JsonProperty("speed")]
+                public double speed { get; set; }
+                [JsonProperty("accuracy")]
+                public double accuracy { get; set; }
+                [JsonProperty("flashlight")]
+                public double flashlight { get; set; }
+                [JsonProperty("effective_miss_count")]
+                public double effective_miss_count { get; set; }
+                [JsonProperty("pp")]
+                public double pp { get; set; }
+            }
         }
     }
 }

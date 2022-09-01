@@ -1,11 +1,8 @@
 ﻿using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
-using osu.Framework.Extensions.ObjectExtensions;
 using static KanonBot.functions.Accounts;
-using osu.Game.Users;
 using static KanonBot.API.OSU.Legacy;
-using osu.Game.Rulesets.Taiko.Difficulty.Preprocessing;
 using Flurl.Util;
 using JetBrains.Annotations;
 using System.Security.Cryptography;
@@ -120,7 +117,7 @@ namespace KanonBot.functions.osubot
             if (int.TryParse(cmd, out int badgeNum))
             {
                 var userinfo = Database.Client.GetUsersByUID(target.account!, target.platform);
-                if (userinfo!.owned_badge_ids.IsNull())
+                if (userinfo!.owned_badge_ids == null)
                 {
                     target.reply("你还没有牌子呢..."); return;
                 }
@@ -142,7 +139,7 @@ namespace KanonBot.functions.osubot
                 List<string> displayed_badges = new();
                 if (userinfo.displayed_badge_ids!.IndexOf(",") < 1)
                 {
-                    if (!userinfo.displayed_badge_ids.IsNull())
+                    if (userinfo.displayed_badge_ids != null)
                         displayed_badges.Add(userinfo.displayed_badge_ids.Trim());
                 }
                 else
@@ -200,7 +197,7 @@ namespace KanonBot.functions.osubot
             if (int.TryParse(cmd, out badgeNum))
             {
                 var userinfo = Database.Client.GetUsersByUID(target.account!, target.platform);
-                if (userinfo!.owned_badge_ids.IsNull())
+                if (userinfo!.owned_badge_ids == null)
                 {
                     target.reply("你还没有牌子呢..."); return;
                 }
@@ -240,7 +237,7 @@ namespace KanonBot.functions.osubot
         private static void List(Target target, string cmd)
         {
             var userinfo = Database.Client.GetUsersByUID(target.account!, target.platform);
-            if (userinfo!.owned_badge_ids.IsNull())
+            if (userinfo!.owned_badge_ids == null)
             {
                 target.reply("你还没有牌子呢..."); return;
             }
@@ -319,7 +316,7 @@ namespace KanonBot.functions.osubot
 
             //确认badge是否存在
             var badge = Database.Client.GetBadgeInfo(badgeid_s);
-            if (badge.IsNull()) { target.reply($"似乎没有badgeid为 {badgeid_s} 的badge呢"); return; }
+            if (badge == null) { target.reply($"似乎没有badgeid为 {badgeid_s} 的badge呢"); return; }
 
             //发送开始消息
             if (user_list.Count > 1) target.reply($"开始添加任务。");
@@ -328,12 +325,12 @@ namespace KanonBot.functions.osubot
             foreach (var x in user_list)
             {
                 var userInfo = Database.Client.GetUsersByOsuUID(long.Parse(x));
-                if (userInfo.IsNull()) { target.reply($"osu!用户 {x} 不存在，无法添加，请重新检查。"); }
+                if (userInfo == null) { target.reply($"osu!用户 {x} 不存在，无法添加，请重新检查。"); }
                 else
                 {
                     //获取已拥有的牌子
                     List<string> owned_badges = new();
-                    if (userInfo.owned_badge_ids.IsNull())
+                    if (userInfo.owned_badge_ids == null)
                     {
                         owned_badges.Add(badgeid_s);
                     }

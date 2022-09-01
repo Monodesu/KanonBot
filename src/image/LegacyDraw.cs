@@ -623,7 +623,7 @@ namespace KanonBot.LegacyImage
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, ar, new SolidBrush(Color.White), null));
                 // od
                 var od = data.scoreInfo.Beatmap.Accuracy.ToString("0.0#");
-                if (data.scoreInfo.Mode is OSU.Enums.Mode.OSU && data.ppInfo.accuracy != -1) od = data.ppInfo.accuracy.ToString("0.0#");
+                if (data.scoreInfo.Mode is OSU.Enums.Mode.OSU && data.ppInfo.hitWindow != -1) od = data.ppInfo.hitWindow.ToString("0.0#");
                 textOptions.Origin = new PointF(1741, 218);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, od, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1741, 215);

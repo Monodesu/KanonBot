@@ -6,6 +6,9 @@ using System.Net;
 using Serilog;
 using Flurl;
 using Flurl.Http;
+using System.Security.Cryptography;
+using static KanonBot.API.OSU.Models;
+using SqlSugar.Extensions;
 
 namespace KanonBot.API
 {
@@ -108,14 +111,7 @@ namespace KanonBot.API
             if (res.StatusCode == 404)
                 return null;
             else
-                try { 
                 return await res.GetJsonAsync<Models.Score[]>();
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    return null;
-                }
         }
 
         // 获取用户在特定谱面上的成绩
@@ -266,5 +262,47 @@ namespace KanonBot.API
             data.Performances = res["user_performances"]!["total"]!.ToObject<Models.PPlusData.UserPerformances[]>();
             return data;
         }
+
+        public static bool BeatmapFileChecker(long bid)
+        {
+            if (!Directory.Exists("./work/beatmap/")) Directory.CreateDirectory("./work/beatmap/");
+            if (!File.Exists($"./work/beatmap/{bid}.osu"))
+            {
+                try
+                {
+                    Http.DownloadFile($"http://osu.ppy.sh/osu/{bid}", $"./work/beatmap/{bid}.osu");
+                }
+                catch { return false; }
+            }
+            return true;
+        }
+
+
+        public static OSU.Legacy.PPInfo LegacyPPInfoParser(JObject mainpp)
+        {
+            //老式写法
+            OSU.Legacy.PPInfo p = new();
+            p.star = (double)mainpp["Star"]!;
+            p.circleSize = (double)mainpp["CS"]!;
+            p.HPDrainRate = (double)mainpp["HP"]!;
+            p.aim = (double)mainpp["Aim"]!;
+            p.speed = (double)mainpp["Speed"]!;
+            p.maxCombo = (int)mainpp["MaxCombo"]!;
+            p.approachRate = (double)mainpp["AR"]!;
+            p.hitWindow = (double)mainpp["OD"]!;
+            p.ppStat.total = (double)mainpp["PPInfo"]!["Total"]!;
+            p.ppStat.total = (double)mainpp["PPInfo"]!["Total"]!;
+            p.ppStat.aim = (double)mainpp["PPInfo"]!["aim"]!;
+            p.ppStat.speed = (double)mainpp["PPInfo"]!["speed"]!;
+            p.ppStat.acc = (double)mainpp["PPInfo"]!["accuracy"]!;
+            p.ppStat.flashlight = (int)mainpp["PPInfo"]!["flashlight"]!;
+            p.ppStat.effective_miss_count = (int)mainpp["PPInfo"]!["effective_miss_count"]!;
+            return p;
+        }
+
+
+
+
+
     }
 }
