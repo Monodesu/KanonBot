@@ -3,6 +3,7 @@ using KanonBot.Message;
 using KanonBot.API;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using KanonBot.functions.osu.rosupp;
 
 namespace KanonBot.functions.osubot
 {
@@ -65,19 +66,20 @@ namespace KanonBot.functions.osubot
 
             var scorePanelData = new LegacyImage.Draw.ScorePanelData();
             var scoreInfos = await OSU.GetUserScores(OnlineOsuInfo.Id, OSU.Enums.UserScoreType.Recent, command.osu_mode ?? OSU.Enums.Mode.OSU, 1, command.order_number - 1, includeFails);
-            if (scoreInfos == null) {target.reply("查询成绩时出错。"); return;};    // 正常是找不到玩家，但是上面有验证，这里做保险
-            if (scoreInfos!.Length > 0) { scorePanelData.scoreInfo = scoreInfos[0]; }
+            if (scoreInfos == null) { target.reply("查询成绩时出错。"); return; };    // 正常是找不到玩家，但是上面有验证，这里做保险
+            if (scoreInfos!.Length > 0)
+            {
+                var data = await PerformanceCalculator.CalculatePanelData(scoreInfos[0]);
+                // 绘制
+                var stream = new MemoryStream();
+                var img = LegacyImage.Draw.DrawScore(data);
+                await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+                stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+            }
             else { target.reply("猫猫找不到该玩家最近游玩的成绩。"); return; }
 
-            //检查谱面文件下载状态
-            OSU.BeatmapFileChecker(scorePanelData.scoreInfo.Beatmap!.BeatmapId);
 
-            // 绘制
-            var stream = new MemoryStream();
-            var img = LegacyImage.Draw.DrawScore(scorePanelData);
-            await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-            stream.TryGetBuffer(out ArraySegment<byte> buffer);
-            target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
         }
     }
 }

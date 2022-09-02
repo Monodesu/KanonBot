@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KanonBot.LegacyImage;
+using KanonBot.API;
 
 namespace KanonBot.functions.osu.rosupp
 {
@@ -69,8 +71,10 @@ namespace KanonBot.functions.osu.rosupp
             ScoreIncreaseMods = Hidden | HardRock | DoubleTime | Flashlight | FadeIn
         };
 
-        public static PPInfo Result2Info(CalculateResult result) {
-            return new PPInfo() {
+        public static PPInfo Result2Info(CalculateResult result)
+        {
+            return new PPInfo()
+            {
                 star = result.stars,
                 CS = result.cs,
                 HP = result.hp,
@@ -78,7 +82,8 @@ namespace KanonBot.functions.osu.rosupp
                 OD = result.od,
                 accuracy = result.ppAcc.ToNullable(),
                 maxCombo = result.maxCombo.ToNullable(),
-                ppStat = new PPInfo.PPStat() {
+                ppStat = new PPInfo.PPStat()
+                {
                     total = result.pp,
                     aim = result.ppAim.ToNullable(),
                     speed = result.ppSpeed.ToNullable(),
@@ -90,41 +95,98 @@ namespace KanonBot.functions.osu.rosupp
             };
         }
 
-        public static CalculateResult Calculate(string beatmapPath, int mode, string[] mods, double? accuracy,
-            int? n300, int? n100, int? n50, int? nmiss, int? nkatu, int? combo, int? score)
+        public struct Params
         {
-            var ser = Calculator.New(beatmapPath);
-            var p = ScoreParams.New();
-            switch (mode)
+            public OSU.Enums.Mode mode;
+            public string[]? mods;
+            public double? acc;
+            public uint? n300, n100, n50, nmisses, nkatu, combo, score, passedObjects, clockRate;
+            public ScoreParams build()
             {
-                case 0:
-                    p.Mode(Mode.Osu);
-                    break;
-                case 1:
-                    p.Mode(Mode.Taiko);
-                    break;
-                case 2:
-                    p.Mode(Mode.Catch);
-                    break;
-                case 3:
-                    p.Mode(Mode.Mania);
-                    break;
-                default:
-                    p.Mode(Mode.Osu);
-                    break;
+                var p = ScoreParams.New();
+                p.Mode(mode switch
+                {
+                    OSU.Enums.Mode.OSU => Mode.Osu,
+                    OSU.Enums.Mode.Taiko => Mode.Taiko,
+                    OSU.Enums.Mode.Fruits => Mode.Catch,
+                    OSU.Enums.Mode.Mania => Mode.Mania,
+                    _ => throw new ArgumentException()
+                });
+                if (acc != null) p.Acc(acc.Value);
+                if (n300 != null) p.N300(n300.Value);
+                if (n100 != null) p.N100(n100.Value);
+                if (n50 != null) p.N50(n50.Value);
+                if (nmisses != null) p.NMisses(nmisses.Value);
+                if (nkatu != null) p.NKatu(nkatu.Value);
+                if (combo != null) p.Combo(combo.Value);
+                if (score != null) p.Score(score.Value);
+                if (mods != null) p.Mods(Intmod_parser(mods));
+                return p;
             }
-            if (accuracy != null) p.Acc(accuracy.Value);
-            if (n300 != null) p.N300((uint)n300.Value);
-            if (n100 != null) p.N100((uint)n100.Value);
-            if (n50 != null) p.N50((uint)n50.Value);
-            if (nmiss != null) p.NMisses((uint)nmiss.Value);
-            if (nkatu != null) p.NKatu((uint)nkatu.Value);
-            if (combo != null) p.Combo((uint)combo.Value);
-            if (score != null) p.Score((uint)score.Value);
-            if (mods != null) p.Mods(Intmod_parser(mods));
-            return ser.Calculate(p.Context);
         }
 
+        async public static Task<Draw.ScorePanelData> CalculatePanelData(OSU.Models.Score score)
+        {
+            var data = new Draw.ScorePanelData();
+            data.scoreInfo = score;
+            var statistics = data.scoreInfo.Statistics;
+            RosuPP.Calculator calculator;
+            try
+            {
+                // 下载谱面
+                await OSU.BeatmapFileChecker(score.Beatmap!.BeatmapId);
+                // 读取铺面
+                calculator = Calculator.New($"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu");
+            }
+            catch (Exception)
+            {
+                // 加载失败，删除重新抛异常
+                File.Delete($"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu");
+                throw;
+            }
+
+            // 开始计算
+            data.ppInfo = Result2Info(calculator.Calculate(new Params
+            {
+                mode = data.scoreInfo.Mode,
+                mods = data.scoreInfo.Mods,
+                combo = data.scoreInfo.MaxCombo,
+                n300 = statistics.CountGreat,
+                n100 = statistics.CountOk,
+                n50 = statistics.CountMeh,
+                nmisses = statistics.CountMiss,
+                nkatu = statistics.CountKatu,
+                score = data.scoreInfo.ScoreScore
+            }.build().Context));
+
+            // 初始化列表
+            data.ppInfo.ppStats = new();
+
+            // todo! 在mania模式下按分数计算，而非准度
+            // 5种acc
+            double[] accs = { 100.00, 99.00, 98.00, 97.00, 95.00 };
+            foreach (var acc in accs)
+            {
+                data.ppInfo.ppStats.Add(Result2Info(calculator.Calculate(new Params
+                {
+                    mode = data.scoreInfo.Mode,
+                    mods = data.scoreInfo.Mods,
+                    acc = acc,
+                }.build().Context)).ppStat);
+            }
+
+            // 全连
+            data.ppInfo.ppStats.Add(Result2Info(calculator.Calculate(new Params
+            {
+                mode = data.scoreInfo.Mode,
+                mods = data.scoreInfo.Mods,
+                n100 = statistics.CountOk,
+                n50 = statistics.CountMeh,
+                nkatu = statistics.CountKatu
+            }.build().Context)).ppStat);
+
+            return data;
+        }
         public static uint Intmod_parser(string[] mods)
         {
             List<Mods> enabled_mods = new();

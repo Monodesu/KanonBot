@@ -4,6 +4,7 @@ using KanonBot;
 using KanonBot.API;
 using KanonBot.LegacyImage;
 using KanonBot.Serializer;
+using KanonBot.functions.osu.rosupp;
 using RosuPP;
 using SixLabors.ImageSharp.Formats.Png;
 
@@ -30,10 +31,15 @@ public class OSU
     [Fact]
     public void ScorePanelTest()
     {
-        var score = API.OSU.GetUserBeatmapScore(9037287, 3323074, new string[] { "HD" }).Result!;
-        score.Score.Beatmapset = API.OSU.GetBeatmap(3323074).Result!.Beatmapset!;
+        var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] {}, API.OSU.Enums.Mode.Mania).Result!;
+        score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
         API.OSU.BeatmapFileChecker(score.Score.Beatmap!.BeatmapId).Wait();
-        var img = Draw.DrawScore(new Draw.ScorePanelData() { scoreInfo = score.Score });
+        Output.WriteLine("pp {0}", score.Score.PP);
+        Output.WriteLine("acc {0}", score.Score.Accuracy);
+        var data = PerformanceCalculator.CalculatePanelData(score.Score).Result;
+        Output.WriteLine("cal pp {0}", data.ppInfo.ppStat.total);
+        Output.WriteLine("cal data {0}", Json.Serialize(data.ppInfo));
+        var img = Draw.DrawScore(data);
         img.Save(new FileStream("./TestFiles/scoretest.png", FileMode.Create), new PngEncoder());
     }
 

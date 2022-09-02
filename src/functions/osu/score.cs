@@ -3,6 +3,7 @@ using KanonBot.Message;
 using KanonBot.API;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using KanonBot.functions.osu.rosupp;
 
 namespace KanonBot.functions.osubot
 {
@@ -77,19 +78,15 @@ namespace KanonBot.functions.osubot
 
             // 判断是否给定了bid
             if (command.order_number == -1) { target.reply("请提供谱面bid。"); return; }
-            var scorePanelData = new LegacyImage.Draw.ScorePanelData();
 
 
             var scoreData = await OSU.GetUserBeatmapScore(OnlineOsuInfo.Id, command.order_number, mods.ToArray(), command.osu_mode ?? OSU.Enums.Mode.OSU);
             if (scoreData == null) { target.reply("猫猫没有找到你的成绩"); return; }
-            scorePanelData.scoreInfo = scoreData.Score;
 
-            //检查谱面文件下载状态
-            OSU.BeatmapFileChecker(scorePanelData.scoreInfo.Beatmap!.BeatmapId);
-
+            var data = await PerformanceCalculator.CalculatePanelData(scoreData.Score);
             // 绘制
             var stream = new MemoryStream();
-            var img = LegacyImage.Draw.DrawScore(scorePanelData);
+            var img = LegacyImage.Draw.DrawScore(data);
             await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
             stream.TryGetBuffer(out ArraySegment<byte> buffer);
             target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));

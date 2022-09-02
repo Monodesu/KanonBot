@@ -2,7 +2,6 @@
 using KanonBot.Message;
 using KanonBot.API;
 using static KanonBot.functions.Accounts;
-using static KanonBot.API.OSU.Legacy;
 using Flurl.Util;
 using JetBrains.Annotations;
 using System.Security.Cryptography;

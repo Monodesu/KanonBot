@@ -1,4 +1,5 @@
 ﻿#pragma warning disable CS8618 // 非null 字段未初始化
+using System.Data;
 using System.Numerics;
 using KanonBot.API;
 using SixLabors.ImageSharp;
@@ -32,6 +33,7 @@ namespace KanonBot.LegacyImage
         }
         public class ScorePanelData
         {
+            public PerformanceCalculator.PPInfo ppInfo;
             public OSU.Models.Score scoreInfo;
         }
         public class PPVSPanelData
@@ -381,69 +383,7 @@ namespace KanonBot.LegacyImage
         }
         public static Img DrawScore(ScorePanelData data)
         {
-
-            // 获取pp数据的绘制数据
-            //获取主pp
-            var ppInfo = PerformanceCalculator.Result2Info(PerformanceCalculator.Calculate(
-                $"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu",
-                data.scoreInfo.Mode.ToModeNum(),
-                data.scoreInfo.Mods,
-                null,//scorePanelData.scoreInfo.Accuracy, 不需要传递acc，会自动计算
-                data.scoreInfo.Statistics.CountGreat,
-                data.scoreInfo.Statistics.CountOk,
-                data.scoreInfo.Statistics.CountMeh,
-                data.scoreInfo.Statistics.CountMiss,
-                null,//scorePanelData.scoreInfo.Statistics.CountKatu,
-                data.scoreInfo.MaxCombo,
-                null
-            ));
-            // 初始化列表
-            ppInfo.ppStats = new();
-
-            //计算五个预测pp
-            for (int i = 0; i < 5; ++i)
-            {
-                ppInfo.ppStats.Add(PerformanceCalculator.Result2Info(PerformanceCalculator.Calculate(
-                    $"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu",
-                    data.scoreInfo.Mode.ToModeNum(),
-                    data.scoreInfo.Mods,
-                    i switch {
-                        0 => 100.00,
-                        1 => 99.00,
-                        2 => 98.00,
-                        3 => 97.00,
-                        4 => 95.00,
-                        _ => throw new ArgumentOutOfRangeException(),
-                    },
-                    null,//scorePanelData.scoreInfo.Statistics.CountGreat,
-                    null,//scorePanelData.scoreInfo.Statistics.CountOk,
-                    null,//scorePanelData.scoreInfo.Statistics.CountMeh,
-                    null,//scorePanelData.scoreInfo.Statistics.CountMiss,
-                    null,//scorePanelData.scoreInfo.Statistics.CountKatu,
-                    null,//scorePanelData.scoreInfo.MaxCombo,
-                    null
-                )).ppStat);
-            }
-
-            //if fc
-            ppInfo.ppStats.Add(PerformanceCalculator.Result2Info(PerformanceCalculator.Calculate(
-                $"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu",
-                (int)data.scoreInfo.Mode,
-                data.scoreInfo.Mods,
-                null,
-                data.scoreInfo.Statistics.CountGreat,
-                data.scoreInfo.Statistics.CountOk,
-                data.scoreInfo.Statistics.CountMeh,
-                null,//scorePanelData.scoreInfo.Statistics.CountMiss,
-                data.scoreInfo.Statistics.CountKatu,
-                null,//scorePanelData.scoreInfo.MaxCombo,
-                null
-            )).ppStat);
-
-
-
-
-
+            var ppInfo = data.ppInfo;
             // 先下载必要文件
             var bgPath = $"./work/background/{data.scoreInfo.Beatmap!.BeatmapId}.png";
             if (!File.Exists(bgPath))
@@ -678,13 +618,13 @@ namespace KanonBot.LegacyImage
             textOptions.Origin = new PointF(1457, 124);
             score.Mutate(x => x.DrawText(drawOptions, textOptions, bpm, new SolidBrush(color), null));
             // ar
-            var ar = data.scoreInfo.Beatmap.AR.ToString("0.0#");
+            var ar = ppInfo.AR.ToString("0.0#");
             textOptions.Origin = new PointF(1457, 218);
             score.Mutate(x => x.DrawText(drawOptions, textOptions, ar, new SolidBrush(Color.Black), null));
             textOptions.Origin = new PointF(1457, 215);
             score.Mutate(x => x.DrawText(drawOptions, textOptions, ar, new SolidBrush(color), null));
             // od
-            var od = data.scoreInfo.Beatmap.Accuracy.ToString("0.0#");
+            var od = ppInfo.OD.ToString("0.0#");
             textOptions.Origin = new PointF(1741, 218);
             score.Mutate(x => x.DrawText(drawOptions, textOptions, od, new SolidBrush(Color.Black), null));
             textOptions.Origin = new PointF(1741, 215);
@@ -774,7 +714,7 @@ namespace KanonBot.LegacyImage
             textOptions.Origin = new PointF(1812 + metric.Width, 638);
             score.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(ppTColor), null));
 
-            if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania || data.scoreInfo.Mode is OSU.Enums.Mode.Fruits)
+            if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania)
             {
                 pptext = "-";
                 metric = TextMeasurer.Measure(pptext, textOptions);
@@ -792,7 +732,7 @@ namespace KanonBot.LegacyImage
                 {
                     try
                     {
-                        pptext = ppInfo.ppStats[5 - (i + 1)].total.ToString("0");
+                        pptext = ppInfo.ppStats![5 - (i + 1)].total.ToString("0");
                     }
                     catch
                     {
@@ -807,22 +747,15 @@ namespace KanonBot.LegacyImage
             }
             // if fc
             textOptions.Font = new Font(TorusRegular, 24.5f);
-            if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania)
+            try
+            {
+                pptext = ppInfo.ppStats![5].total.ToString("0");
+            }
+            catch
             {
                 pptext = "-";
             }
-            else
-            {
-                try
-                {
-                    if (ppInfo.ppStats![5].total == -1) pptext = "-";
-                    else pptext = ppInfo.ppStats[5].total.ToString("0");
-                }
-                catch
-                {
-                    pptext = "-";
-                }
-            }
+            // }
             metric = TextMeasurer.Measure(pptext, textOptions);
             textOptions.Origin = new PointF(99, 562);
             score.Mutate(x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null));
