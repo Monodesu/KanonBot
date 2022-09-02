@@ -14,6 +14,7 @@ using Flurl;
 using Flurl.Http;
 using KanonBot.functions.osu.rosupp;
 using static KanonBot.functions.osu.rosupp.PerformanceCalculator;
+using System.Security.Claims;
 
 namespace KanonBot.LegacyImage
 {
@@ -395,17 +396,17 @@ namespace KanonBot.LegacyImage
                     data.scoreInfo.Statistics.CountMiss,
                     null,//scorePanelData.scoreInfo.Statistics.CountKatu,
                     data.scoreInfo.MaxCombo, null);
-                
+
                 data.ppInfo.accuracy = data.scoreInfo.Accuracy;
                 data.ppInfo.star = ppInfo.stars;
                 data.ppInfo.AR = ppInfo.ar;
                 data.ppInfo.CS = ppInfo.cs;
                 data.ppInfo.HP = ppInfo.hp;
                 data.ppInfo.OD = ppInfo.od;
-                data.ppInfo.maxCombo = (int)ppInfo.maxCombo.ToNullable().Value; //这里的maxcombo是combo
-                data.ppInfo.ppStat.acc = ppInfo.ppAcc.ToNullable().Value;
-                data.ppInfo.ppStat.aim = ppInfo.ppAim.ToNullable().Value;
-                data.ppInfo.ppStat.speed = ppInfo.ppSpeed.ToNullable().Value;
+                data.ppInfo.maxCombo = ppInfo.maxCombo.ToNullable().HasValue ? (int)ppInfo.maxCombo.ToNullable().Value : -1; //这里的maxcombo是combo
+                data.ppInfo.ppStat.acc = ppInfo.ppAcc.ToNullable() ?? -1;
+                data.ppInfo.ppStat.aim = ppInfo.ppAim.ToNullable() ?? -1;
+                data.ppInfo.ppStat.speed = ppInfo.ppSpeed.ToNullable() ?? -1;
                 data.ppInfo.ppStat.total = ppInfo.pp;
                 data.ppInfo.ppStats = new();
                 //计算五个预测pp
@@ -432,15 +433,27 @@ namespace KanonBot.LegacyImage
                     null,//scorePanelData.scoreInfo.Statistics.CountKatu,
                     null,//scorePanelData.scoreInfo.MaxCombo,
                     null);
-                    data.ppInfo.ppStats.Add(new()
+
+                    PPInfo.PPStat ps1 = new()
                     {
-                        total = ppInfo.pp,
-                        aim = ppInfo.ppAim.ToNullable().HasValue ? ppInfo.ppAim.ToNullable().Value : -1,
-                        speed = ppInfo.ppSpeed.ToNullable().HasValue ? ppInfo.ppSpeed.ToNullable().Value : -1,
-                        acc = ppInfo.ppAcc.ToNullable().HasValue ? ppInfo.ppAcc.ToNullable().Value : -1,
-                        strain = ppInfo.ppStrain.ToNullable().HasValue ? ppInfo.ppStrain.ToNullable().Value : -1,
-                        flashlight = ppInfo.ppStrain.ToNullable().HasValue ? (int)ppInfo.flashlightRating.ToNullable().Value : -1,
-                    });
+                        total = !double.IsNaN(ppInfo.pp) ? ppInfo.pp : -1
+                    };
+                    try { ps1.aim = ppInfo.ppAim.ToNullable() ?? -1; }
+                    catch { ps1.aim = -1; }
+
+                    try { ps1.speed = ppInfo.ppSpeed.ToNullable() ?? -1; }
+                    catch { ps1.speed = -1; }
+
+                    try { ps1.acc = ppInfo.ppAcc.ToNullable() ?? -1; }
+                    catch { ps1.acc = -1; }
+
+                    try { ps1.strain = ppInfo.ppStrain.ToNullable() ?? -1; }
+                    catch { ps1.strain = -1; }
+
+                    try { ps1.flashlight = ppInfo.ppStrain.ToNullable().HasValue ? (int)ppInfo.flashlightRating.ToNullable()!.Value : -1; }
+                    catch { ps1.flashlight = -1; }
+
+                    data.ppInfo.ppStats.Add(ps1);
                 }
                 //if fc
                 ppInfo = PerformanceCalculator.Calculate(
@@ -455,15 +468,26 @@ namespace KanonBot.LegacyImage
                     data.scoreInfo.Statistics.CountKatu,
                     null,//scorePanelData.scoreInfo.MaxCombo,
                     null);
-                data.ppInfo.ppStats.Add(new()
+                PPInfo.PPStat ps = new()
                 {
-                    total = ppInfo.pp,
-                    aim = ppInfo.ppAim.ToNullable().HasValue ? ppInfo.ppAim.ToNullable().Value : -1,
-                    speed = ppInfo.ppSpeed.ToNullable().HasValue ? ppInfo.ppSpeed.ToNullable().Value : -1,
-                    acc = ppInfo.ppAcc.ToNullable().HasValue ? ppInfo.ppAcc.ToNullable().Value : -1,
-                    strain = ppInfo.ppStrain.ToNullable().HasValue ? ppInfo.ppStrain.ToNullable().Value : -1,
-                    flashlight = ppInfo.ppStrain.ToNullable().HasValue ? (int)ppInfo.flashlightRating.ToNullable().Value : -1,
-                });
+                    total = !double.IsNaN(ppInfo.pp) ? ppInfo.pp : -1
+                };
+                try { ps.aim = ppInfo.ppAim.ToNullable() ?? -1; }
+                catch { ps.aim = -1; }
+
+                try { ps.speed = ppInfo.ppSpeed.ToNullable() ?? -1; }
+                catch { ps.speed = -1; }
+
+                try { ps.acc = ppInfo.ppAcc.ToNullable() ?? -1; }
+                catch { ps.acc = -1; }
+
+                try { ps.strain = ppInfo.ppStrain.ToNullable() ?? -1; }
+                catch { ps.strain = -1; }
+
+                try { ps.flashlight = ppInfo.ppStrain.ToNullable().HasValue ? (int)ppInfo.flashlightRating.ToNullable()!.Value : -1; }
+                catch { ps.flashlight = -1; }
+
+                data.ppInfo.ppStats.Add(ps);
             }
             catch
             {
@@ -903,7 +927,7 @@ namespace KanonBot.LegacyImage
                 textOptions.Font = new Font(TorusRegular, 40);
                 textOptions.Origin = new PointF(980, 750);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, data.scoreInfo.ScoreScore.ToString("N0"), new SolidBrush(Color.White), null));
-                if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania)
+                if (data.scoreInfo.Mode is OSU.Enums.Mode.Fruits)
                 {
                     textOptions.Font = new Font(TorusRegular, 40.00f);
                     var great = data.scoreInfo.Statistics.CountGreat.ToString();

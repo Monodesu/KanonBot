@@ -698,7 +698,7 @@ namespace KanonBot.API
                 [JsonProperty("level")]
                 public UserLevel Level { get; set; }
 
-                [JsonProperty("global_rank")]
+                [JsonProperty("global_rank", NullValueHandling = NullValueHandling.Ignore)]
                 public long GlobalRank { get; set; }
 
                 [JsonProperty("pp")]
@@ -734,7 +734,7 @@ namespace KanonBot.API
                 [JsonProperty("grade_counts")]
                 public UserGradeCounts GradeCounts { get; set; }
 
-                [JsonProperty("country_rank")]
+                [JsonProperty("country_rank", NullValueHandling = NullValueHandling.Ignore)]
                 public long CountryRank { get; set; }
 
                 [JsonProperty("rank")]
@@ -770,7 +770,7 @@ namespace KanonBot.API
 
             public class UserRank
             {
-                [JsonProperty("country")]
+                [JsonProperty("country", NullValueHandling = NullValueHandling.Ignore)]
                 public int Country { get; set; }
             }
 

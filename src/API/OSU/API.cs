@@ -157,7 +157,17 @@ namespace KanonBot.API
             if (res.StatusCode == 404)
                 return null;
             else
-                return await res.GetJsonAsync<Models.User>();
+                try
+                {
+                    return await res.GetJsonAsync<Models.User>();
+                }
+                catch (Exception ex) {
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(res.ResponseMessage.Content.ToString());
+                    Console.WriteLine(res.GetStringAsync().Result.ToString());
+                    
+                    return null;
+                }
         }
 
         // 通过osu username获取用户信息
