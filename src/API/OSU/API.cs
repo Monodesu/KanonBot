@@ -274,18 +274,13 @@ namespace KanonBot.API
             return data;
         }
 
-        public static bool BeatmapFileChecker(long bid)
+        async public static Task BeatmapFileChecker(long bid)
         {
             if (!Directory.Exists("./work/beatmap/")) Directory.CreateDirectory("./work/beatmap/");
             if (!File.Exists($"./work/beatmap/{bid}.osu"))
             {
-                try
-                {
-                    Http.DownloadFile($"http://osu.ppy.sh/osu/{bid}", $"./work/beatmap/{bid}.osu");
-                }
-                catch { return false; }
+                await Http.DownloadFile($"http://osu.ppy.sh/osu/{bid}", $"./work/beatmap/{bid}.osu");
             }
-            return true;
         }
 
 
@@ -298,7 +293,7 @@ namespace KanonBot.API
             p.HP = (double)mainpp["HP"]!;
             //p.aim = (double)mainpp["Aim"]!;
             //p.speed = (double)mainpp["Speed"]!;
-            p.maxCombo = (int)mainpp["MaxCombo"]!;
+            p.maxCombo = (uint)mainpp["MaxCombo"]!;
             p.AR = (double)mainpp["AR"]!;
             p.OD = (double)mainpp["OD"]!;
             p.ppStat.total = (double)mainpp["PPInfo"]!["Total"]!;
@@ -307,7 +302,7 @@ namespace KanonBot.API
             p.ppStat.speed = (double)mainpp["PPInfo"]!["speed"]!;
             p.ppStat.acc = (double)mainpp["PPInfo"]!["accuracy"]!;
             p.ppStat.flashlight = (int)mainpp["PPInfo"]!["flashlight"]!;
-            p.ppStat.effective_miss_count = (int)mainpp["PPInfo"]!["effective_miss_count"]!;
+            // p.ppStat.effective_miss_count = (int)mainpp["PPInfo"]!["effective_miss_count"]!;
             return p;
         }
 

@@ -2,6 +2,8 @@
 using System.Net;
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using Flurl;
+using Flurl.Http;
 
 namespace KanonBot
 {
@@ -226,12 +228,11 @@ namespace KanonBot
             result.Body = await response.Content.ReadAsByteArrayAsync();
             return result;
         }
-        public static string DownloadFile(string url, string filePath, Dictionary<string, string> header = null)
+        async public static Task<string> DownloadFile(string url, string filePath, Dictionary<string, string> header = null)
         {
-            var result = Http.GetAsyncByte(url, header).Result;
-            if (result.Status != HttpStatusCode.OK) throw new HttpRequestException("DownloadFile failed: " + result.Status);
+            var result = await url.GetBytesAsync();
             var bw = new BinaryWriter(new FileStream(filePath, FileMode.Create));
-            bw.Write(result.Body);
+            bw.Write(result);
             bw.Close();
             return filePath;
         }

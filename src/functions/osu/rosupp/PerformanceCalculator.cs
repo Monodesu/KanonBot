@@ -16,14 +16,15 @@ namespace KanonBot.functions.osu.rosupp
                                                     "K9", "KC", "K1", "K3", "K2", "S2", "MR" };
         public struct PPInfo
         {
-            public double star, CS, HP, AR, OD, accuracy;
-            public int maxCombo;
+            public double star, CS, HP, AR, OD;
+            public double? accuracy;
+            public uint? maxCombo;
             public PPStat ppStat;
-            public List<PPStat> ppStats;
+            public List<PPStat>? ppStats;
             public struct PPStat
             {
-                public double total, aim, speed, acc, strain;
-                public int flashlight, effective_miss_count;
+                public double total;
+                public double? aim, speed, acc, strain, flashlight;
             }
         }
 
@@ -68,6 +69,26 @@ namespace KanonBot.functions.osu.rosupp
             ScoreIncreaseMods = Hidden | HardRock | DoubleTime | Flashlight | FadeIn
         };
 
+        public static PPInfo Result2Info(CalculateResult result) {
+            return new PPInfo() {
+                star = result.stars,
+                CS = result.cs,
+                HP = result.hp,
+                AR = result.ar,
+                OD = result.od,
+                accuracy = result.ppAcc.ToNullable(),
+                maxCombo = result.maxCombo.ToNullable(),
+                ppStat = new PPInfo.PPStat() {
+                    total = result.pp,
+                    aim = result.ppAim.ToNullable(),
+                    speed = result.ppSpeed.ToNullable(),
+                    acc = result.ppAcc.ToNullable(),
+                    strain = result.ppStrain.ToNullable(),
+                    flashlight = result.ppFlashlight.ToNullable(),
+                },
+                ppStats = null
+            };
+        }
 
         public static CalculateResult Calculate(string beatmapPath, int mode, string[] mods, double? accuracy,
             int? n300, int? n100, int? n50, int? nmiss, int? nkatu, int? combo, int? score)
