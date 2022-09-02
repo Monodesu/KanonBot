@@ -82,6 +82,9 @@ namespace KanonBot.functions.osubot
             if (scoreData == null) { target.reply("猫猫没有找到你的成绩"); return; }
             scorePanelData.scoreInfo = scoreData.Score;
 
+            //检查谱面文件下载状态
+            OSU.BeatmapFileChecker(scorePanelData.scoreInfo.Beatmap!.BeatmapId);
+
             // 绘制
             MemoryStream img = LegacyImage.Draw.DrawScore(scorePanelData, command.res);
             img.TryGetBuffer(out ArraySegment<byte> buffer);

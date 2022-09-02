@@ -387,6 +387,7 @@ namespace KanonBot.LegacyImage
                 var ppInfo = PerformanceCalculator.Calculate(
                     $"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu",
                     (int)data.scoreInfo.Mode,
+                    data.scoreInfo.Mods,
                     null,//scorePanelData.scoreInfo.Accuracy, 不需要传递acc，会自动计算
                     data.scoreInfo.Statistics.CountGreat,
                     data.scoreInfo.Statistics.CountOk,
@@ -422,6 +423,7 @@ namespace KanonBot.LegacyImage
                     ppInfo = PerformanceCalculator.Calculate(
                     $"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu",
                     (int)data.scoreInfo.Mode,
+                    data.scoreInfo.Mods,
                     acc,
                     null,//scorePanelData.scoreInfo.Statistics.CountGreat,
                     null,//scorePanelData.scoreInfo.Statistics.CountOk,
@@ -444,6 +446,7 @@ namespace KanonBot.LegacyImage
                 ppInfo = PerformanceCalculator.Calculate(
                     $"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu",
                     (int)data.scoreInfo.Mode,
+                    data.scoreInfo.Mods,
                     null,
                     data.scoreInfo.Statistics.CountGreat,
                     data.scoreInfo.Statistics.CountOk,

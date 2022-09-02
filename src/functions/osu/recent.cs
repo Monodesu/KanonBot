@@ -62,10 +62,13 @@ namespace KanonBot.functions.osubot
             // if (command.order_number == -1) { target.reply("猫猫找不到该最近游玩的成绩。"); return; }
 
             var scorePanelData = new LegacyImage.Draw.ScorePanelData();
-            var scoreInfos = await OSU.GetUserScores(OnlineOsuInfo.Id, OSU.Enums.UserScoreType.Recent, command.osu_mode ?? OSU.Enums.Mode.OSU, 1, command.order_number - 1, true);
+            var scoreInfos = await OSU.GetUserScores(OnlineOsuInfo.Id, OSU.Enums.UserScoreType.Recent, command.osu_mode ?? OSU.Enums.Mode.OSU, 1, command.order_number - 1, includeFails);
             if (scoreInfos == null) {target.reply("查询成绩时出错。"); return;};    // 正常是找不到玩家，但是上面有验证，这里做保险
             if (scoreInfos!.Length > 0) { scorePanelData.scoreInfo = scoreInfos[0]; }
             else { target.reply("猫猫找不到该玩家最近游玩的成绩。"); return; }
+
+            //检查谱面文件下载状态
+            OSU.BeatmapFileChecker(scorePanelData.scoreInfo.Beatmap!.BeatmapId);
 
             // 绘制
             MemoryStream img = LegacyImage.Draw.DrawScore(scorePanelData, command.res);
