@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>RosuPP</RootNamespace>
+  </PropertyGroup>
+
+  <!-- <Import Project="./Rosu.targets" /> -->
+
+</Project>

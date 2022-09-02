@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KanonBot", "src\KanonBot.cs
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{A778DC7A-E645-4117-9D8D-211A483CB851}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RosuPP", "rosu-pp-ffi-master\RosuPP.csproj", "{6796BDD8-48DB-4179-B834-D03F95E29B66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RosuPP", "RosuPP\RosuPP.csproj", "{6796BDD8-48DB-4179-B834-D03F95E29B66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

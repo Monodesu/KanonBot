@@ -30,14 +30,10 @@
 		<PackageReference Include="Tomlyn" Version="0.15.0" />
 		<PackageReference Include="Websocket.Client" Version="4.4.43" />
 	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\rosu-pp-ffi-master\RosuPP.csproj" />
-	</ItemGroup>
 
-	<Target Name="Delete osuGameResources" AfterTargets="Build">
-		<Exec Command="echo ---------------------------------------------------" />
-		<Exec Command="echo 请删除 .\src\bin\Debug\net6.0\osu.Game.Resources.dll" />
-		<Exec Command="echo ---------------------------------------------------" />
-		<!-- <Exec Command="rm .\bin\Debug\net6.0\osu.Game.Resources.dll"/> -->
-	</Target>
+	<!-- RosuPP -->
+	<ItemGroup>
+	  <ProjectReference Include="../RosuPP/RosuPP.csproj" />
+	</ItemGroup>
+	<Import Project="../RosuPP/Rosu.targets" />
 </Project>

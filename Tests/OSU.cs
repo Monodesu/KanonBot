@@ -1,22 +1,17 @@
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using System.Reflection;
-using System.ComponentModel;
 using API = KanonBot.API;
 using static KanonBot.API.OSUExtensions;
 using KanonBot;
-using Serilog;
+using KanonBot.Serializer;
+using RosuPP;
 
 namespace Tests;
 
-
 public class OSU
 {
-    public OSU()
+    private readonly ITestOutputHelper Output;
+    public OSU(ITestOutputHelper Output)
     {
-        var log = new LoggerConfiguration().WriteTo.Console();
-        log = log.MinimumLevel.Warning();
-        Log.Logger = log.CreateLogger();
+        this.Output = Output;
         var configPath = "./config.toml";
         if (File.Exists(configPath))
         {
@@ -27,6 +22,21 @@ public class OSU
             System.IO.Directory.SetCurrentDirectory("../../../../");
             Config.inner = Config.load(configPath);
         }
+    }
+
+    [Fact]
+    public void PPTest()
+    {
+        var cal = Calculator.New("./TestFiles/Kakichoco - Zan'ei (Lasse) [Illusion].osu");
+        var p = ScoreParams.New();
+        p.Mode(Mode.Taiko);
+        p.NKatu(0);
+        p.NMisses(6);
+        p.N100(29);
+        p.N300(213);
+        p.N50(0);
+        var res = cal.Calculate(p.Context);
+        Output.WriteLine("{0}", Json.Serialize(res));
     }
 
     [Fact]
