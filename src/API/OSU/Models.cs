@@ -864,7 +864,7 @@ namespace KanonBot.API
                 public bool Replay { get; set; }
 
                 [JsonProperty("score")]
-                public long ScoreScore { get; set; }
+                public int Scores { get; set; }
 
                 [JsonProperty("statistics")]
                 public ScoreStatistics Statistics { get; set; }

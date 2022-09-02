@@ -73,7 +73,7 @@ namespace KanonBot.functions.osubot
             }
             else
             {
-                score = scoreData.Score.ScoreScore;
+                score = scoreData.Score.Scores;
             }
             if (scoreData.Score.Mode is not OSU.Enums.Mode.OSU) { target.reply("Leeway仅支持osu!std模式。"); return; } // 检查谱面是否是std
 

@@ -395,7 +395,8 @@ namespace KanonBot.LegacyImage
                     data.scoreInfo.Statistics.CountMeh,
                     data.scoreInfo.Statistics.CountMiss,
                     null,//scorePanelData.scoreInfo.Statistics.CountKatu,
-                    data.scoreInfo.MaxCombo, null);
+                    data.scoreInfo.MaxCombo, 
+                    data.scoreInfo.Scores);
 
                 data.ppInfo.accuracy = data.scoreInfo.Accuracy;
                 data.ppInfo.star = ppInfo.stars;
@@ -432,7 +433,7 @@ namespace KanonBot.LegacyImage
                     null,//scorePanelData.scoreInfo.Statistics.CountMiss,
                     null,//scorePanelData.scoreInfo.Statistics.CountKatu,
                     null,//scorePanelData.scoreInfo.MaxCombo,
-                    null);
+                    data.scoreInfo.Scores);
 
                     PPInfo.PPStat ps1 = new()
                     {
@@ -467,7 +468,7 @@ namespace KanonBot.LegacyImage
                     null,//scorePanelData.scoreInfo.Statistics.CountMiss,
                     data.scoreInfo.Statistics.CountKatu,
                     null,//scorePanelData.scoreInfo.MaxCombo,
-                    null);
+                    data.scoreInfo.Scores);
                 PPInfo.PPStat ps = new()
                 {
                     total = !double.IsNaN(ppInfo.pp) ? ppInfo.pp : -1
@@ -926,7 +927,7 @@ namespace KanonBot.LegacyImage
                 textOptions.HorizontalAlignment = HorizontalAlignment.Center;
                 textOptions.Font = new Font(TorusRegular, 40);
                 textOptions.Origin = new PointF(980, 750);
-                score.Mutate(x => x.DrawText(drawOptions, textOptions, data.scoreInfo.ScoreScore.ToString("N0"), new SolidBrush(Color.White), null));
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, data.scoreInfo.Scores.ToString("N0"), new SolidBrush(Color.White), null));
                 if (data.scoreInfo.Mode is OSU.Enums.Mode.Fruits)
                 {
                     textOptions.Font = new Font(TorusRegular, 40.00f);
