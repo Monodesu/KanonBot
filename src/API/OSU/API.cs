@@ -9,6 +9,7 @@ using Flurl.Http;
 using System.Security.Cryptography;
 using static KanonBot.API.OSU.Models;
 using SqlSugar.Extensions;
+using KanonBot.functions.osu.rosupp;
 
 namespace KanonBot.API
 {
@@ -278,18 +279,18 @@ namespace KanonBot.API
         }
 
 
-        public static OSU.Legacy.PPInfo LegacyPPInfoParser(JObject mainpp)
+        public static PerformanceCalculator.PPInfo LegacyPPInfoParser(JObject mainpp)
         {
             //老式写法
-            OSU.Legacy.PPInfo p = new();
+            PerformanceCalculator.PPInfo p = new();
             p.star = (double)mainpp["Star"]!;
-            p.circleSize = (double)mainpp["CS"]!;
-            p.HPDrainRate = (double)mainpp["HP"]!;
-            p.aim = (double)mainpp["Aim"]!;
-            p.speed = (double)mainpp["Speed"]!;
+            p.CS = (double)mainpp["CS"]!;
+            p.HP = (double)mainpp["HP"]!;
+            //p.aim = (double)mainpp["Aim"]!;
+            //p.speed = (double)mainpp["Speed"]!;
             p.maxCombo = (int)mainpp["MaxCombo"]!;
-            p.approachRate = (double)mainpp["AR"]!;
-            p.hitWindow = (double)mainpp["OD"]!;
+            p.AR = (double)mainpp["AR"]!;
+            p.OD = (double)mainpp["OD"]!;
             p.ppStat.total = (double)mainpp["PPInfo"]!["Total"]!;
             p.ppStat.total = (double)mainpp["PPInfo"]!["Total"]!;
             p.ppStat.aim = (double)mainpp["PPInfo"]!["aim"]!;

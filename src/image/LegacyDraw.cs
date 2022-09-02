@@ -12,6 +12,8 @@ using SixLabors.ImageSharp.ColorSpaces;
 using Serilog;
 using Flurl;
 using Flurl.Http;
+using KanonBot.functions.osu.rosupp;
+using static KanonBot.functions.osu.rosupp.PerformanceCalculator;
 
 namespace KanonBot.LegacyImage
 {
@@ -28,10 +30,8 @@ namespace KanonBot.LegacyImage
         }
         public class ScorePanelData
         {
-            public OSU.Legacy.PPInfo ppInfo;   // 这个需要集成到PerformaCalculator里
-            public List<OSU.Legacy.PPInfo.PPStat>? ppStats;   // 同理
+            public PerformanceCalculator.PPInfo ppInfo;
             public OSU.Models.Score scoreInfo;
-
         }
         public class PPVSPanelData
         {
@@ -380,6 +380,121 @@ namespace KanonBot.LegacyImage
         }
         public static MemoryStream DrawScore(ScorePanelData data, bool res)
         {
+            // 获取pp数据的绘制数据
+            try
+            {
+                //获取主pp
+                var ppInfo = PerformanceCalculator.Calculate(
+                    $"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu",
+                    (int)data.scoreInfo.Mode,
+                    null,//scorePanelData.scoreInfo.Accuracy, 不需要传递acc，会自动计算
+                    data.scoreInfo.Statistics.CountGreat,
+                    data.scoreInfo.Statistics.CountOk,
+                    data.scoreInfo.Statistics.CountMeh,
+                    data.scoreInfo.Statistics.CountMiss,
+                    null,//scorePanelData.scoreInfo.Statistics.CountKatu,
+                    data.scoreInfo.MaxCombo, null);
+                
+                data.ppInfo.accuracy = data.scoreInfo.Accuracy;
+                data.ppInfo.star = ppInfo.stars;
+                data.ppInfo.AR = ppInfo.ar;
+                data.ppInfo.CS = ppInfo.cs;
+                data.ppInfo.HP = ppInfo.hp;
+                data.ppInfo.OD = ppInfo.od;
+                data.ppInfo.maxCombo = (int)ppInfo.maxCombo.ToNullable().Value; //这里的maxcombo是combo
+                data.ppInfo.ppStat.acc = ppInfo.ppAcc.ToNullable().Value;
+                data.ppInfo.ppStat.aim = ppInfo.ppAim.ToNullable().Value;
+                data.ppInfo.ppStat.speed = ppInfo.ppSpeed.ToNullable().Value;
+                data.ppInfo.ppStat.total = ppInfo.pp;
+                data.ppInfo.ppStats = new();
+                //计算五个预测pp
+                for (int i = 0; i < 5; ++i)
+                {
+                    var acc = i switch
+                    {
+                        0 => 100.00,
+                        1 => 99.00,
+                        2 => 98.00,
+                        3 => 97.00,
+                        4 => 95.00,
+                        _ => 0.00,
+                    };
+                    ppInfo = PerformanceCalculator.Calculate(
+                    $"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu",
+                    (int)data.scoreInfo.Mode,
+                    acc,
+                    null,//scorePanelData.scoreInfo.Statistics.CountGreat,
+                    null,//scorePanelData.scoreInfo.Statistics.CountOk,
+                    null,//scorePanelData.scoreInfo.Statistics.CountMeh,
+                    null,//scorePanelData.scoreInfo.Statistics.CountMiss,
+                    null,//scorePanelData.scoreInfo.Statistics.CountKatu,
+                    null,//scorePanelData.scoreInfo.MaxCombo,
+                    null);
+                    data.ppInfo.ppStats.Add(new()
+                    {
+                        total = ppInfo.pp,
+                        aim = ppInfo.ppAim.ToNullable().HasValue ? ppInfo.ppAim.ToNullable().Value : -1,
+                        speed = ppInfo.ppSpeed.ToNullable().HasValue ? ppInfo.ppSpeed.ToNullable().Value : -1,
+                        acc = ppInfo.ppAcc.ToNullable().HasValue ? ppInfo.ppAcc.ToNullable().Value : -1,
+                        strain = ppInfo.ppStrain.ToNullable().HasValue ? ppInfo.ppStrain.ToNullable().Value : -1,
+                        flashlight = ppInfo.ppStrain.ToNullable().HasValue ? (int)ppInfo.flashlightRating.ToNullable().Value : -1,
+                    });
+                }
+                //if fc
+                ppInfo = PerformanceCalculator.Calculate(
+                    $"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu",
+                    (int)data.scoreInfo.Mode,
+                    null,
+                    data.scoreInfo.Statistics.CountGreat,
+                    data.scoreInfo.Statistics.CountOk,
+                    data.scoreInfo.Statistics.CountMeh,
+                    null,//scorePanelData.scoreInfo.Statistics.CountMiss,
+                    data.scoreInfo.Statistics.CountKatu,
+                    null,//scorePanelData.scoreInfo.MaxCombo,
+                    null);
+                data.ppInfo.ppStats.Add(new()
+                {
+                    total = ppInfo.pp,
+                    aim = ppInfo.ppAim.ToNullable().HasValue ? ppInfo.ppAim.ToNullable().Value : -1,
+                    speed = ppInfo.ppSpeed.ToNullable().HasValue ? ppInfo.ppSpeed.ToNullable().Value : -1,
+                    acc = ppInfo.ppAcc.ToNullable().HasValue ? ppInfo.ppAcc.ToNullable().Value : -1,
+                    strain = ppInfo.ppStrain.ToNullable().HasValue ? ppInfo.ppStrain.ToNullable().Value : -1,
+                    flashlight = ppInfo.ppStrain.ToNullable().HasValue ? (int)ppInfo.flashlightRating.ToNullable().Value : -1,
+                });
+            }
+            catch
+            {
+                data.ppInfo = new()
+                {
+                    star = -1,
+                    maxCombo = -1,
+                    AR = -1,
+                    accuracy = -1,
+                    CS = -1,
+                    HP = -1,
+                };
+                data.ppInfo.ppStat.total = -1;
+                data.ppInfo.ppStat.aim = -1;
+                data.ppInfo.ppStat.speed = -1;
+                data.ppInfo.ppStat.acc = -1;
+                data.ppInfo.ppStat.strain = -1;
+                data.ppInfo.ppStat.flashlight = -1;
+                data.ppInfo.ppStat.effective_miss_count = -1;
+                data.ppInfo.ppStats = new();
+                for (int i = 0; i < 6; ++i)
+                {
+                    data.ppInfo.ppStats.Add(new()
+                    {
+                        total = -1,
+                        acc = -1,
+                        aim = -1,
+                        speed = -1,
+                        flashlight = -1
+                    });
+                }
+            }
+
+
             // 先下载必要文件
             var bgPath = $"./work/background/{data.scoreInfo.Beatmap!.BeatmapId}.png";
             if (!File.Exists(bgPath))
@@ -607,47 +722,47 @@ namespace KanonBot.LegacyImage
                 textOptions.Origin = new PointF(1741, 127);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, song_time, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1741, 124);
-                score.Mutate(x => x.DrawText(drawOptions, textOptions, song_time, new SolidBrush(Color.White), null));
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, song_time, new SolidBrush(color), null));
                 // bpm
                 var bpm = data.scoreInfo.Beatmap.BPM.GetValueOrDefault().ToString("0");
                 textOptions.Origin = new PointF(1457, 127);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, bpm, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1457, 124);
-                score.Mutate(x => x.DrawText(drawOptions, textOptions, bpm, new SolidBrush(Color.White), null));
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, bpm, new SolidBrush(color), null));
                 // ar
                 var ar = data.scoreInfo.Beatmap.AR.ToString("0.0#");
-                if (data.scoreInfo.Mode is OSU.Enums.Mode.OSU && data.ppInfo.approachRate != -1) ar = data.ppInfo.approachRate.ToString("0.0#");
+                if (data.scoreInfo.Mode is OSU.Enums.Mode.OSU && data.ppInfo.AR != -1) ar = data.ppInfo.AR.ToString("0.0#");
                 textOptions.Origin = new PointF(1457, 218);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, ar, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1457, 215);
-                score.Mutate(x => x.DrawText(drawOptions, textOptions, ar, new SolidBrush(Color.White), null));
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, ar, new SolidBrush(color), null));
                 // od
                 var od = data.scoreInfo.Beatmap.Accuracy.ToString("0.0#");
-                if (data.scoreInfo.Mode is OSU.Enums.Mode.OSU && data.ppInfo.hitWindow != -1) od = data.ppInfo.hitWindow.ToString("0.0#");
+                if (data.scoreInfo.Mode is OSU.Enums.Mode.OSU && data.ppInfo.OD != -1) od = data.ppInfo.OD.ToString("0.0#");
                 textOptions.Origin = new PointF(1741, 218);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, od, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1741, 215);
-                score.Mutate(x => x.DrawText(drawOptions, textOptions, od, new SolidBrush(Color.White), null));
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, od, new SolidBrush(color), null));
                 // cs
-                var cs = data.ppInfo.circleSize.ToString("0.0#");
-                if (data.ppInfo.circleSize == -1) cs = data.scoreInfo.Beatmap.CS.ToString("0.0#");
+                var cs = data.ppInfo.CS.ToString("0.0#");
+                if (data.ppInfo.CS == -1) cs = data.scoreInfo.Beatmap.CS.ToString("0.0#");
                 textOptions.Origin = new PointF(1457, 312);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, cs, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1457, 309);
-                score.Mutate(x => x.DrawText(drawOptions, textOptions, cs, new SolidBrush(Color.White), null));
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, cs, new SolidBrush(color), null));
                 // hp
-                var hp = data.ppInfo.HPDrainRate.ToString("0.0#");
-                if (data.ppInfo.HPDrainRate == -1) cs = data.scoreInfo.Beatmap.HPDrain.ToString("0.0#");
+                var hp = data.ppInfo.HP.ToString("0.0#");
+                if (data.ppInfo.HP == -1) cs = data.scoreInfo.Beatmap.HPDrain.ToString("0.0#");
                 textOptions.Origin = new PointF(1741, 312);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, hp, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(1741, 309);
-                score.Mutate(x => x.DrawText(drawOptions, textOptions, hp, new SolidBrush(Color.White), null));
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, hp, new SolidBrush(color), null));
                 // stars, version
                 var starText = $"Stars: {star.ToString("0.##")}";
                 textOptions.Origin = new PointF(584, 292);
                 score.Mutate(x => x.DrawText(drawOptions, textOptions, starText, new SolidBrush(Color.Black), null));
                 textOptions.Origin = new PointF(584, 289);
-                score.Mutate(x => x.DrawText(drawOptions, textOptions, starText, new SolidBrush(Color.White), null));
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, starText, new SolidBrush(color), null));
                 var version = "";
                 foreach (char c in data.scoreInfo.Beatmap.Version)
                 {
@@ -733,8 +848,8 @@ namespace KanonBot.LegacyImage
                     {
                         try
                         {
-                            if (data.ppStats![i].total == -1) pptext = "-";
-                            else pptext = data.ppStats[5 - (i + 1)].total.ToString("0");
+                            if (data.ppInfo.ppStats![i].total == -1) pptext = "-";
+                            else pptext = data.ppInfo.ppStats[5 - (i + 1)].total.ToString("0");
                         }
                         catch
                         {
@@ -757,8 +872,8 @@ namespace KanonBot.LegacyImage
                 {
                     try
                     {
-                        if (data.ppStats![5].total == -1) pptext = "-";
-                        else pptext = data.ppStats[5].total.ToString("0");
+                        if (data.ppInfo.ppStats![5].total == -1) pptext = "-";
+                        else pptext = data.ppInfo.ppStats[5].total.ToString("0");
                     }
                     catch
                     {
@@ -1221,5 +1336,6 @@ namespace KanonBot.LegacyImage
             return new PathCollection(cornerTopLeft, cornerBottomLeft, cornerTopRight, cornerBottomRight);
         }
         #endregion
+
     }
 }

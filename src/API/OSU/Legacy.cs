@@ -68,23 +68,6 @@ namespace KanonBot.API
                 public DateTimeOffset rankedTime { get; set; }
             }
 
-            /// <summary>
-            /// 这个需要集成到PerformaCalculator里
-            /// </summary>
-            [Obsolete("（需要迁移）这个需要集成到PerformaCalculator里")]
-            public struct PPInfo
-            {
-                // Accuracy == OverallDifficulty(OD)
-                public double star, circleSize, HPDrainRate, approachRate, hitWindow, accuracy, aim, speed;
-                public int maxCombo;
-                public PPStat ppStat;
-                public List<PPStat> ppStats;
-                public struct PPStat
-                {
-                    public double total, aim, speed, acc, strain;
-                    public int flashlight, effective_miss_count;
-                }
-            }
             public struct UserInfo
             {
                 public long userId;
