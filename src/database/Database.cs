@@ -4,6 +4,7 @@ using SqlSugar;
 using Serilog;
 using KanonBot.Drivers;
 using static KanonBot.Database.Model;
+using static KanonBot.API.OSU.Models;
 
 namespace KanonBot.Database;
 
@@ -252,7 +253,19 @@ public class Client
         try { d2.Insertable(rec).ExecuteCommand(); } catch { }
     }
 
-
+    static public bool SetOsuUserMode(long uid, string mode)
+    {
+        var db = GetInstance();
+        var data = db.Queryable<Model.Users_osu>().First(it => it.uid == uid);
+        var result = db.Updateable<Model.Users_osu>()
+            .SetColumns(it => new Model.Users_osu()
+            {
+                osu_mode = mode,
+            })
+            .Where(it => it.uid == uid)
+            .ExecuteCommandHasChange();
+        return result;
+    }
 
 
 
