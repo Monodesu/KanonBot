@@ -101,7 +101,7 @@ namespace RosuPP
     [StructLayout(LayoutKind.Sequential)]
     public partial struct CalculateResult
     {
-        public byte mode;
+        public Mode mode;
         public double stars;
         public double pp;
         public Optionf64 ppAcc;
@@ -135,7 +135,9 @@ namespace RosuPP
         Ok = 0,
         Null = 100,
         Panic = 200,
-        Fail = 300,
+        ParseError = 300,
+        InvalidString = 400,
+        Unknown = 1000,
     }
 
     ///Option type containing boolean flag and maybe valid data.
