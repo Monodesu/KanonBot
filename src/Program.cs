@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 using Flurl;
 using Flurl.Http;
+using KanonBot.functions.osu;
 
 
 #region 初始化
@@ -35,6 +36,9 @@ if (config.debug)
     log = log.MinimumLevel.Debug();
 Log.Logger = log.CreateLogger();
 Log.Information("初始化成功 {@config}", config);
+
+Log.Information("启动用户数据更新");
+ThreadPool.QueueUserWorkItem(p => General_update.Daily_Update(false));
 #endregion
 
 

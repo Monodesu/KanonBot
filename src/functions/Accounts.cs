@@ -3,6 +3,7 @@ using System;
 using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
+using KanonBot.functions.osu;
 
 namespace KanonBot.functions
 {
@@ -212,8 +213,11 @@ namespace KanonBot.functions
                     var db_osu_userinfo = Database.Client.GetOSUUsers(online_osu_userinfo.Id);
                     if (db_osu_userinfo != null) { target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果您认为他人恶意绑定了您的账户，请联系管理员。"); return; }
                     // 没被他人绑定，开始绑定流程
-                    if (Database.Client.InsertOsuUser(globaluserinfo.uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2))   //?这里url真的能为空吗
-                    { target.reply($"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至Kanon账户 {globaluserinfo.uid} 。"); }
+                    if (Database.Client.InsertOsuUser(globaluserinfo.uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2))   //?这里url真的能为空吗  我不到啊
+                    {
+                        target.reply($"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至Kanon账户 {globaluserinfo.uid} 。");
+                        await General_update.Osu_Update(online_osu_userinfo.Id, true); //插入用户每日数据记录
+                    }
                     else { target.reply($"绑定失败，请稍后再试。"); }
                 }
                 catch { target.reply($"在绑定用户时出错，请联系猫妈处理.png"); return; }

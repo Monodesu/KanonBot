@@ -17,7 +17,6 @@ namespace KanonBot.command_parser
             {
                 cmd = msg.Build();
                 cmd = cmd.Substring(1); //删除命令唤起符
-                // cmd = cmd[0] < 0 ? cmd[3..] : cmd[1..]; // c#用utf8编码，无需处理中文
             }
 
 
@@ -58,7 +57,7 @@ namespace KanonBot.command_parser
                     case "get": await Get.Execute(target, childCmd); return;// get bonuspp/elo/rolecost/bpht/todaybp/annualpass
                     case "badge": Badge.Execute(target, childCmd); return;
                     case "leeway": await Leeway.Execute(target, childCmd); return;
-                    case "set": // set osu_mode/osu_infopanel
+                    case "set": // set osu_mode
                         return;
                     case "ppvs":
                         return;

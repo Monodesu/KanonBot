@@ -3,6 +3,7 @@
 using SqlSugar;
 using Serilog;
 using KanonBot.Drivers;
+using static KanonBot.Database.Model;
 
 namespace KanonBot.Database;
 
@@ -212,7 +213,7 @@ public class Client
         return result;
     }
 
-    static public Model.BadgeList GetBadgeInfo(string badgeid) 
+    static public Model.BadgeList GetBadgeInfo(string badgeid)
     {
         var db = GetInstance();
         return db.Queryable<Model.BadgeList>().Where(it => it.id == int.Parse(badgeid)).First();
@@ -232,8 +233,24 @@ public class Client
         return result;
     }
 
+    static public long[] GetOsuUserList()
+    {
+        List<long> list = new();
+        var db = GetInstance();
+        var user = db.Queryable<Model.Users_osu>().ToList();
+        foreach (var x in user)
+        {
+            list.Add(x.osu_uid);
+        }
+        return list.ToArray();
+    }
 
-
+    static public void InsertOsuUserData(OsuArchivedRec rec, bool is_newuser)
+    {
+        rec.lastupdate = is_newuser ? DateTime.Today.AddDays(-1) : DateTime.Today;
+        var d2 = GetInstance();
+        try { d2.Insertable(rec).ExecuteCommand(); } catch { }
+    }
 
 
 
