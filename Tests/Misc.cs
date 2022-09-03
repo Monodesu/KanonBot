@@ -6,7 +6,6 @@ using API = KanonBot.API;
 using KanonBot.Serializer;
 using KanonBot.Drivers;
 using KanonBot;
-using Serilog;
 using Newtonsoft.Json.Linq;
 using Msg = KanonBot.Message;
 using Img = KanonBot.Image;
@@ -17,11 +16,10 @@ namespace Tests;
 
 public class Misc
 {
-    public Misc()
+    private readonly ITestOutputHelper Output;
+    public Misc(ITestOutputHelper Output)
     {
-        var log = new LoggerConfiguration().WriteTo.Console();
-        log = log.MinimumLevel.Warning();
-        Log.Logger = log.CreateLogger();
+        this.Output = Output;
         var configPath = "./config.toml";
         if (File.Exists(configPath))
         {
@@ -43,7 +41,7 @@ public class Misc
             TargetId = "123",
             Content = "hi"
         };
-        Log.Warning(Json.Serialize(req));
+        Output.WriteLine(Json.Serialize(req));
     }
 
     [Fact]

@@ -11,7 +11,7 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 using Flurl;
 using Flurl.Http;
-using RosuPP;
+
 
 #region 初始化
 Console.WriteLine("---KanonBot---");
@@ -37,11 +37,12 @@ Log.Logger = log.CreateLogger();
 Log.Information("初始化成功 {@config}", config);
 #endregion
 
+
 var ExitEvent = new ManualResetEvent(false);
 var drivers = new Drivers();
 drivers.append(
     new OneBot.Server($"ws://0.0.0.0:{config.onebot?.serverPort}")
-    .onMessage( (target) =>
+    .onMessage(async (target) =>
     {
         var api = (target.socket as OneBot.Server.Socket)!.api;
         Log.Information("← 收到消息 {0}", target.msg);
@@ -61,7 +62,7 @@ drivers.append(
         //}
         //var res = api.SendGroupMessage(xxxxx, target.msg);
         //Log.Information("→ 发送消息ID {@0}", res);
-         Universal.Parser(target);
+        await Universal.Parser(target);
     })
     .onEvent((client, e) =>
     {

@@ -1,22 +1,21 @@
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using System.Reflection;
-using System.ComponentModel;
 using API = KanonBot.API;
 using static KanonBot.API.OSUExtensions;
 using KanonBot;
-using Serilog;
+using KanonBot.API;
+using KanonBot.LegacyImage;
+using KanonBot.Serializer;
+using KanonBot.functions.osu.rosupp;
+using RosuPP;
+using SixLabors.ImageSharp.Formats.Png;
 
 namespace Tests;
 
-
 public class OSU
 {
-    public OSU()
+    private readonly ITestOutputHelper Output;
+    public OSU(ITestOutputHelper Output)
     {
-        var log = new LoggerConfiguration().WriteTo.Console();
-        log = log.MinimumLevel.Warning();
-        Log.Logger = log.CreateLogger();
+        this.Output = Output;
         var configPath = "./config.toml";
         if (File.Exists(configPath))
         {
@@ -27,6 +26,36 @@ public class OSU
             System.IO.Directory.SetCurrentDirectory("../../../../");
             Config.inner = Config.load(configPath);
         }
+    }
+
+    [Fact]
+    public void ScorePanelTest()
+    {
+        var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] {}, API.OSU.Enums.Mode.Mania).Result!;
+        score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
+        API.OSU.BeatmapFileChecker(score.Score.Beatmap!.BeatmapId).Wait();
+        Output.WriteLine("pp {0}", score.Score.PP);
+        Output.WriteLine("acc {0}", score.Score.Accuracy);
+        var data = PerformanceCalculator.CalculatePanelData(score.Score).Result;
+        Output.WriteLine("cal pp {0}", data.ppInfo.ppStat.total);
+        Output.WriteLine("cal data {0}", Json.Serialize(data.ppInfo));
+        var img = Draw.DrawScore(data);
+        img.Save(new FileStream("./TestFiles/scoretest.png", FileMode.Create), new PngEncoder());
+    }
+
+    [Fact]
+    public void PPTest()
+    {
+        var cal = Calculator.New("./TestFiles/Kakichoco - Zan'ei (Lasse) [Illusion].osu");
+        var p = ScoreParams.New();
+        p.Mode(Mode.Taiko);
+        p.NKatu(0);
+        p.NMisses(6);
+        p.N100(29);
+        p.N300(213);
+        p.N50(0);
+        var res = cal.Calculate(p.Context);
+        Output.WriteLine("{0}", Json.Serialize(res));
     }
 
     [Fact]
@@ -43,16 +72,16 @@ public class OSU
     [Fact]
     public void GetBeatmapAttr()
     {
-        var res = API.OSU.GetBeatmapAttributes(3323074, new string[]{"HD", "DT"}, API.OSU.Enums.Mode.OSU).Result;
+        var res = API.OSU.GetBeatmapAttributes(3323074, new string[] { "HD", "DT" }, API.OSU.Enums.Mode.OSU).Result;
         Assert.True(res!.OverallDifficulty > 0);
-        res = API.OSU.GetBeatmapAttributes(3323074, new string[]{"HD", "DT"}, API.OSU.Enums.Mode.Taiko).Result;
+        res = API.OSU.GetBeatmapAttributes(3323074, new string[] { "HD", "DT" }, API.OSU.Enums.Mode.Taiko).Result;
         // Assert.IsTrue(res!.StaminaDifficulty > 0);   // 不知道为啥taiko这里除了great_hit_window都是0
         Assert.True(res!.GreatHitWindow > 0);
-        res = API.OSU.GetBeatmapAttributes(3323074, new string[]{"HD", "DT"}, API.OSU.Enums.Mode.Mania).Result;
+        res = API.OSU.GetBeatmapAttributes(3323074, new string[] { "HD", "DT" }, API.OSU.Enums.Mode.Mania).Result;
         Assert.True(res!.ScoreMultiplier > 0);
-        res = API.OSU.GetBeatmapAttributes(3323074, new string[]{"HD", "DT"}, API.OSU.Enums.Mode.Fruits).Result;
+        res = API.OSU.GetBeatmapAttributes(3323074, new string[] { "HD", "DT" }, API.OSU.Enums.Mode.Fruits).Result;
         Assert.True(res!.ApproachRate > 0);
-        res = API.OSU.GetBeatmapAttributes(3323074000, new string[]{"HD", "DT"}, API.OSU.Enums.Mode.Fruits).Result;
+        res = API.OSU.GetBeatmapAttributes(3323074000, new string[] { "HD", "DT" }, API.OSU.Enums.Mode.Fruits).Result;
         Assert.Null(res);
     }
 
@@ -83,9 +112,9 @@ public class OSU
     public void GetUserBeatmapScore()
     {
         // 查score
-        Assert.True(API.OSU.GetUserBeatmapScore(9037287, 3323074, new string[]{"HD"}).Result!.Score.User!.Id == 9037287);
-        Assert.Null(API.OSU.GetUserBeatmapScore(9037287000, 3323074, new string[]{"HD"}).Result);
-        Assert.Null(API.OSU.GetUserBeatmapScore(9037287, 3323074, new string[]{"HR"}).Result);
+        Assert.True(API.OSU.GetUserBeatmapScore(9037287, 3323074, new string[] { "HD" }).Result!.Score.User!.Id == 9037287);
+        Assert.Null(API.OSU.GetUserBeatmapScore(9037287000, 3323074, new string[] { "HD" }).Result);
+        Assert.Null(API.OSU.GetUserBeatmapScore(9037287, 3323074, new string[] { "HR" }).Result);
     }
 
     [Fact]

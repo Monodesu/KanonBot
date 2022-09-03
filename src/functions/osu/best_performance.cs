@@ -1,13 +1,12 @@
 ﻿using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
-using Polly;
 using System.Security.Cryptography;
-using K4os.Compression.LZ4.Internal;
 using static KanonBot.API.OSU.Enums;
 using KanonBot.functions.osu.rosupp;
 using RosuPP;
-using Org.BouncyCastle.Math.EC.Rfc7748;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace KanonBot.functions.osubot
 {
@@ -65,19 +64,21 @@ namespace KanonBot.functions.osubot
                 }
             }
 
-            var scorePanelData = new LegacyImage.Draw.ScorePanelData();
+
             var scores = await OSU.GetUserScores(OnlineOsuInfo.Id, OSU.Enums.UserScoreType.Best, command.osu_mode ?? OSU.Enums.Mode.OSU, 1, command.order_number - 1);
             if (scores == null) { target.reply("查询成绩时出错。"); return; }
-            if (scores!.Length > 0) scorePanelData.scoreInfo = scores![0];
+            if (scores!.Length > 0)
+            {
+                var data = await PerformanceCalculator.CalculatePanelData(scores![0]);
+                // 绘制
+                var stream = new MemoryStream();
+                var img = LegacyImage.Draw.DrawScore(data);
+                await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+                stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+            }
             else { target.reply("猫猫找不到该BP。"); return; }
-            
-            //检查谱面文件下载状态
-            OSU.BeatmapFileChecker(scorePanelData.scoreInfo.Beatmap!.BeatmapId);
 
-            // 绘制
-            MemoryStream img = LegacyImage.Draw.DrawScore(scorePanelData, command.res);
-            img.TryGetBuffer(out ArraySegment<byte> buffer);
-            target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)img.Length), ImageSegment.Type.Base64));
         }
     }
 }

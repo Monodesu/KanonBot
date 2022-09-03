@@ -836,7 +836,7 @@ namespace KanonBot.API
                 public long Id { get; set; }
 
                 [JsonProperty("max_combo")]
-                public int MaxCombo { get; set; }
+                public uint MaxCombo { get; set; }
 
                 [JsonProperty("mode")]
                 [JsonConverter(typeof(JsonEnumConverter))]
@@ -888,22 +888,22 @@ namespace KanonBot.API
             public class ScoreStatistics
             {
                 [JsonProperty("count_100")]
-                public int CountOk { get; set; }
+                public uint CountOk { get; set; }
 
                 [JsonProperty("count_300")]
-                public int CountGreat { get; set; }
+                public uint CountGreat { get; set; }
 
                 [JsonProperty("count_50")]
-                public int CountMeh { get; set; }
+                public uint CountMeh { get; set; }
 
                 [JsonProperty("count_geki")]
-                public int CountGeki { get; set; }
+                public uint CountGeki { get; set; }
 
                 [JsonProperty("count_katu")]
-                public int CountKatu { get; set; }
+                public uint CountKatu { get; set; }
 
                 [JsonProperty("count_miss")]
-                public int CountMiss { get; set; }
+                public uint CountMiss { get; set; }
             }
 
             public class ScoreWeight

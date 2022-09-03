@@ -20,9 +20,8 @@
             "args": [
                 "test",
                 "${workspaceFolder}/Tests/Tests.csproj",
-                "-l",
-                "'console;verbosity=detailed'",
-                "--interactive",
+                "--logger",
+                "console;verbosity=detailed",
                 "--filter",
                 "${input:testFilter}",
             ],
