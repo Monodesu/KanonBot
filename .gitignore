@@ -366,3 +366,6 @@ cqhttp/
 logs/
 config.toml
 work/
+target/
+Cargo.lock
+

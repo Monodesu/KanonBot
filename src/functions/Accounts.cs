@@ -216,7 +216,7 @@ namespace KanonBot.functions
                     if (Database.Client.InsertOsuUser(globaluserinfo.uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2))   //?这里url真的能为空吗  我不到啊
                     {
                         target.reply($"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至Kanon账户 {globaluserinfo.uid} 。");
-                        await General_update.Osu_Update(online_osu_userinfo.Id, true); //插入用户每日数据记录
+                        await GeneralUpdate.UpdateUser(online_osu_userinfo.Id, true); //插入用户每日数据记录
                     }
                     else { target.reply($"绑定失败，请稍后再试。"); }
                 }

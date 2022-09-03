@@ -236,21 +236,14 @@ public class Client
 
     static public long[] GetOsuUserList()
     {
-        List<long> list = new();
-        var db = GetInstance();
-        var user = db.Queryable<Model.Users_osu>().ToList();
-        foreach (var x in user)
-        {
-            list.Add(x.osu_uid);
-        }
-        return list.ToArray();
+        return GetInstance().Queryable<Model.Users_osu>().Select(it => it.osu_uid).ToArray();
     }
 
-    static public void InsertOsuUserData(OsuArchivedRec rec, bool is_newuser)
+    static public int InsertOsuUserData(OsuArchivedRec rec, bool is_newuser)
     {
         rec.lastupdate = is_newuser ? DateTime.Today.AddDays(-1) : DateTime.Today;
-        var d2 = GetInstance();
-        try { d2.Insertable(rec).ExecuteCommand(); } catch { }
+        var db = GetInstance();
+        return db.Insertable(rec).ExecuteReturnIdentity();
     }
 
     static public bool SetOsuUserMode(long uid, string mode)
