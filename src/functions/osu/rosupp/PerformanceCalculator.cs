@@ -156,7 +156,7 @@ namespace KanonBot.functions.osu.rosupp
                 n50 = statistics.CountMeh,
                 nmisses = statistics.CountMiss,
                 nkatu = statistics.CountKatu,
-                score = data.scoreInfo.ScoreScore
+                score = (uint?)data.scoreInfo.Scores
             }.build().Context));
 
             // 初始化列表

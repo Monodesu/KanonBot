@@ -774,7 +774,7 @@ namespace KanonBot.LegacyImage
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;
             textOptions.Font = new Font(TorusRegular, 40);
             textOptions.Origin = new PointF(980, 750);
-            score.Mutate(x => x.DrawText(drawOptions, textOptions, data.scoreInfo.ScoreScore.ToString("N0"), new SolidBrush(Color.White), null));
+            score.Mutate(x => x.DrawText(drawOptions, textOptions, data.scoreInfo.Scores.ToString("N0"), new SolidBrush(Color.White), null));
             if (data.scoreInfo.Mode is OSU.Enums.Mode.Fruits)
             {
                 textOptions.Font = new Font(TorusRegular, 40.00f);
