@@ -76,137 +76,140 @@ namespace KanonBot
                     // arg2 = osu_mode
                     // arg3 = osu_days_before_to_query
                     param.osu_username = arg1;
-                    if (arg2 != "") try
+                    if (arg2 != "")
+                        try
                         {
                             param.osu_mode = OSU.Enums.ParseMode(int.Parse(arg2[1..]));
-                            if (arg3 == "") param.order_number = 0;
-                            else try { param.order_number = int.Parse(arg3[1..]); } catch { param.order_number = 0; }
-                            if (param.osu_username == "") param.selfquery = true;
                         }
+                        catch { param.osu_mode = null; }
+                    if (arg3 == "") param.order_number = 0;
+                    else try { param.order_number = int.Parse(arg3[1..]); } catch { param.order_number = 0; }
+                    if (param.osu_username == "") param.selfquery = true;
+                }
                 // bp
                 else if (type == Func_type.BestPerformance)
+                {
+                    // arg1 = username / order_number
+                    // arg2 = osu_mode
+                    // arg3 = order_number (序号)
+                    if (!int.TryParse(arg1, out param.order_number))
                     {
-                        // arg1 = username / order_number
-                        // arg2 = osu_mode
-                        // arg3 = order_number (序号)
-                        if (!int.TryParse(arg1, out param.order_number))
-                        {
-                            param.osu_username = arg1;
-                            if (arg3 == "") param.order_number = 1; //成绩必须为1
-                            else
-                            {
-                                try
-                                {
-                                    var t = param.order_number = int.Parse(arg3[1..]);
-                                    if (t > 100 || t < 1) param.order_number = 1;
-                                }
-                                catch { param.order_number = 0; }
-                            }
-                            if (param.osu_username == "") param.selfquery = true;
-                        }
-                        else { param.selfquery = true; }
-                        if (arg2 != "") try
-                            {
-                                param.osu_mode = OSU.Enums.ParseMode(
-                            int.Parse(arg2[1..]));
-                            }
-                            catch { param.osu_mode = null; }
-                    }
-                    // 处理pr/re解析
-                    else if (type == Func_type.Recent || type == Func_type.PassRecent)
-                    {
-                        // arg1 = username
-                        // arg2 = osu_mode
-                        // arg3 = order_number (序号)
                         param.osu_username = arg1;
-                        if (arg2 != "") try
-                            {
-                                param.osu_mode = OSU.Enums.ParseMode(
-                            int.Parse(arg2[1..]));
-                            }
-                            catch { param.osu_mode = null; }
                         if (arg3 == "") param.order_number = 1; //成绩必须为1
                         else
                         {
                             try
                             {
-                                var t = param.order_number =
-                                    int.Parse(arg3[1..]);
+                                var t = param.order_number = int.Parse(arg3[1..]);
                                 if (t > 100 || t < 1) param.order_number = 1;
                             }
                             catch { param.order_number = 0; }
                         }
                         if (param.osu_username == "") param.selfquery = true;
                     }
-                    // 处理score解析
-                    else if (type == Func_type.Score)
-                    {
-                        // arg1 = bid
-                        // arg2 = osu_mode
-                        // arg3 = username
-                        // arg4 = mods
-                        param.osu_username = arg3;
-                        if (arg2 != "") try
-                            {
-                                param.osu_mode = OSU.Enums.ParseMode(
-                            int.Parse(arg2[1..]));
-                            }
-                            catch { param.osu_mode = null; }
-                        param.osu_mods = arg4 != "" ? arg4[1..] : "";
-                        if (arg1 == "") param.order_number = -1; //bid必须有效，否则返回 -1
-                        else
+                    else { param.selfquery = true; }
+                    if (arg2 != "") try
                         {
-                            try
-                            {
-                                var index = int.Parse(arg1);
-                                param.order_number = index < 1 ? -1 : index;
-                            }
-                            catch
-                            {
-                                param.order_number = -1;
-                            }
+                            param.osu_mode = OSU.Enums.ParseMode(
+                        int.Parse(arg2[1..]));
                         }
-                        if (param.osu_username == "") param.selfquery = true;
-                    }
-                    else if (type == Func_type.Leeway)
-                    {
-                        // arg1 = bid
-                        // arg2 = osu_mode
-                        // arg3 = 
-                        // arg4 = mods
-                        if (arg1 == "") param.order_number = 0; // 若bid为空，返回0
-                        else
-                        {
-                            try { var index = int.Parse(arg1); param.order_number = index < 1 ? -1 : index; }
-                            catch { param.order_number = 0; }
-                        }
-                        if (arg2 != "") try
-                            {
-                                param.osu_mode = OSU.Enums.ParseMode(
-                            int.Parse(arg2[1..]));
-                            }
-                            catch { param.osu_mode = null; }
-                        param.osu_mods = arg4 != "" ? arg4[1..] : "";
-                        param.selfquery = true; // 只查自己
-                    }
+                        catch { param.osu_mode = null; }
                 }
-                else
+                // 处理pr/re解析
+                else if (type == Func_type.Recent || type == Func_type.PassRecent)
                 {
-                    param.selfquery = true;
-                    if (type == Func_type.Info)
+                    // arg1 = username
+                    // arg2 = osu_mode
+                    // arg3 = order_number (序号)
+                    param.osu_username = arg1;
+                    if (arg2 != "") try
+                        {
+                            param.osu_mode = OSU.Enums.ParseMode(
+                        int.Parse(arg2[1..]));
+                        }
+                        catch { param.osu_mode = null; }
+                    if (arg3 == "") param.order_number = 1; //成绩必须为1
+                    else
                     {
-                        param.order_number = 0; //由于cmd为空，所以默认查询当日信息
+                        try
+                        {
+                            var t = param.order_number =
+                                int.Parse(arg3[1..]);
+                            if (t > 100 || t < 1) param.order_number = 1;
+                        }
+                        catch { param.order_number = 0; }
                     }
-                    else if (type == Func_type.Score)
-                    {
-                        param.order_number = -1; //由于cmd为空，所以没有bid等关键信息，返回错误
-                    }
-                    else if (type == Func_type.Recent || type == Func_type.PassRecent || type == Func_type.BestPerformance)
-                    {
-                        param.order_number = 1; //由于cmd为空，所以默认返回第一张谱面成绩
-                    }
+                    if (param.osu_username == "") param.selfquery = true;
                 }
-                return param;
+                // 处理score解析
+                else if (type == Func_type.Score)
+                {
+                    // arg1 = bid
+                    // arg2 = osu_mode
+                    // arg3 = username
+                    // arg4 = mods
+                    param.osu_username = arg3;
+                    if (arg2 != "") try
+                        {
+                            param.osu_mode = OSU.Enums.ParseMode(
+                        int.Parse(arg2[1..]));
+                        }
+                        catch { param.osu_mode = null; }
+                    param.osu_mods = arg4 != "" ? arg4[1..] : "";
+                    if (arg1 == "") param.order_number = -1; //bid必须有效，否则返回 -1
+                    else
+                    {
+                        try
+                        {
+                            var index = int.Parse(arg1);
+                            param.order_number = index < 1 ? -1 : index;
+                        }
+                        catch
+                        {
+                            param.order_number = -1;
+                        }
+                    }
+                    if (param.osu_username == "") param.selfquery = true;
+                }
+                else if (type == Func_type.Leeway)
+                {
+                    // arg1 = bid
+                    // arg2 = osu_mode
+                    // arg3 = 
+                    // arg4 = mods
+                    if (arg1 == "") param.order_number = 0; // 若bid为空，返回0
+                    else
+                    {
+                        try { var index = int.Parse(arg1); param.order_number = index < 1 ? -1 : index; }
+                        catch { param.order_number = 0; }
+                    }
+                    if (arg2 != "") try
+                        {
+                            param.osu_mode = OSU.Enums.ParseMode(
+                        int.Parse(arg2[1..]));
+                        }
+                        catch { param.osu_mode = null; }
+                    param.osu_mods = arg4 != "" ? arg4[1..] : "";
+                    param.selfquery = true; // 只查自己
+                }
             }
+            else
+            {
+                param.selfquery = true;
+                if (type == Func_type.Info)
+                {
+                    param.order_number = 0; //由于cmd为空，所以默认查询当日信息
+                }
+                else if (type == Func_type.Score)
+                {
+                    param.order_number = -1; //由于cmd为空，所以没有bid等关键信息，返回错误
+                }
+                else if (type == Func_type.Recent || type == Func_type.PassRecent || type == Func_type.BestPerformance)
+                {
+                    param.order_number = 1; //由于cmd为空，所以默认返回第一张谱面成绩
+                }
+            }
+            return param;
         }
     }
+}
