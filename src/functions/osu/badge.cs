@@ -15,9 +15,10 @@ namespace KanonBot.functions.osubot
         {
             // 验证账户
             var AccInfo = GetAccInfo(target);
-            if (AccInfo.uid == null)
+            Database.Model.Users? DBUser;
+            DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+            if (DBUser == null)
             { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
-
             string rootCmd, childCmd = "";
             try
             {
@@ -65,16 +66,16 @@ namespace KanonBot.functions.osubot
                         permissions_flag = -1;
                         break;
                     case "user":
-                        permissions_flag = 1;
+                        if (permissions_flag < 1) permissions_flag = 1;
                         break;
                     case "mod":
-                        if (permissions_flag > 2) permissions_flag = 2;
+                        if (permissions_flag < 2) permissions_flag = 2;
                         break;
                     case "admin":
-                        if (permissions_flag > 3) permissions_flag = 3;
+                        if (permissions_flag < 3) permissions_flag = 3;
                         break;
                     case "system":
-                        if (permissions_flag > 4) permissions_flag = -2;
+                        permissions_flag = -2;
                         break;
                     default:
                         permissions_flag = -1;
@@ -83,7 +84,7 @@ namespace KanonBot.functions.osubot
 
             }
 
-
+            if (permissions_flag < 2) return; //权限不够不处理
 
 
             //execute

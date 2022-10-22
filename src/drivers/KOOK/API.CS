@@ -13,7 +13,7 @@ public partial class Kook
     public class API
     {
         string AuthToken;
-        public static readonly string EndPoint = "https://www.kaiheila.cn/api/v3";
+        public static readonly string EndPoint = "https://www.kookapp.cn/api/v3";
         public API(string authToken)
         {
             this.AuthToken = $"Bot {authToken}";
@@ -33,7 +33,7 @@ public partial class Kook
 
             if (((int)res["code"]!) != 0)
             {
-                throw new Exception($"无法获取开黑啦WebSocket地址，Code：{res["code"]}，Message：{res["message"]}");
+                throw new Exception($"无法获取KOOK WebSocket地址，Code：{res["code"]}，Message：{res["message"]}");
             }
 
             return res["data"]!["url"]!.ToString();

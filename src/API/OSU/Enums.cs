@@ -30,7 +30,8 @@ namespace KanonBot.API
 
         public static int ToModeNum(this OSU.Enums.Mode mode)
         {
-            return mode switch {
+            return mode switch
+            {
                 OSU.Enums.Mode.OSU => 0,
                 OSU.Enums.Mode.Taiko => 1,
                 OSU.Enums.Mode.Fruits => 2,
@@ -45,11 +46,23 @@ namespace KanonBot.API
         public class Enums
         {
             // 方法部分
+            public static string? ParseMode(Mode? mode)
+            {
+                return mode switch
+                {
+                    Mode.OSU => "osu",
+                    Mode.Taiko => "taiko",
+                    Mode.Fruits => "fruits",
+                    Mode.Mania => "mania",
+                    _ => null,
+                };
+            }
 
             public static Mode? ParseMode(string? value)
             {
                 value = value?.ToLower();    // 大写字符转小写
-                return value switch {
+                return value switch
+                {
                     "osu" => OSU.Enums.Mode.OSU,
                     "taiko" => OSU.Enums.Mode.Taiko,
                     "fruits" => OSU.Enums.Mode.Fruits,
@@ -60,7 +73,8 @@ namespace KanonBot.API
 
             public static Mode? ParseMode(int value)
             {
-                return value switch {
+                return value switch
+                {
                     0 => OSU.Enums.Mode.OSU,
                     1 => OSU.Enums.Mode.Taiko,
                     2 => OSU.Enums.Mode.Fruits,
@@ -82,11 +96,11 @@ namespace KanonBot.API
                 [Description("mania")]
                 Mania,
             }
-            
+
             // 成绩类型，用作API查询
             // 共可以是 best, firsts, recent
             // 默认为best（bp查询）
-            [DefaultValue(Best)] 
+            [DefaultValue(Best)]
             public enum UserScoreType
             {
                 [Description("best")]

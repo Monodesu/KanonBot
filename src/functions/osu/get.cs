@@ -66,8 +66,6 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (AccInfo.uid == null)
-                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
@@ -195,9 +193,6 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (AccInfo.uid == null)
-                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
-
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
@@ -343,8 +338,6 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (AccInfo.uid == null)
-                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
@@ -459,8 +452,6 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (AccInfo.uid == null)
-                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
@@ -548,8 +539,6 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (AccInfo.uid == null)
-                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }

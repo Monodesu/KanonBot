@@ -98,21 +98,21 @@ public class Client
             case Platform.OneBot:
                 var li1 = db.Queryable<Model.Users>().Where(it => it.qq_id == long.Parse(UID)).ToList();
                 if (li1.Count > 0) return li1[0];
-                return new Users();
+                return null;
             case Platform.Guild:
                 var li2 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == UID).ToList();
                 if (li2.Count > 0) return li2[0];
-                return new Users();
+                return null;
             case Platform.KOOK:
                 var li3 = db.Queryable<Model.Users>().Where(it => it.kook_uid == UID).ToList();
                 if (li3.Count > 0) return li3[0];
-                return new Users();
+                return null;
             // case "discord":  // 还没写
             //     var li4 = db.Queryable<Model.Users>().Where(it => it.discord_uid == UID).ToList();
             //     if (li4.Count > 0) return li4[0];
             //     return null;
             default:
-                return new Users();
+                return null;
         }
     }
     static public Model.Users? GetUsersByOsuUID(long osu_uid)
@@ -260,8 +260,51 @@ public class Client
         return result;
     }
 
-
-
+    //返回值为天数（几天前）
+    public static int GetOsuUserData(out API.OSU.Models.User ui, long oid, API.OSU.Enums.Mode mode, int days = 0)
+    {
+        OsuArchivedRec data;
+        var db = GetInstance();
+        ui = new();
+        if (days <= 0)
+        {
+            data = db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate, OrderByType.Desc).First(it => it.uid == oid && it.gamemode == API.OSU.Enums.ParseMode(mode));
+            if (data == null) return -1;
+        }
+        else
+        {
+            var date = DateTime.Today;
+            date = date.AddDays(-days);
+            data = db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate, OrderByType.Desc).First(it => it.uid == oid && it.gamemode == API.OSU.Enums.ParseMode(mode) && it.lastupdate <= date);
+            if (data == null)
+            {
+                data = db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate).First(it => it.uid == oid && it.gamemode == API.OSU.Enums.ParseMode(mode));
+                if (data == null) return -1;
+            }
+        }
+        ui.Statistics = new();
+        ui.Statistics.GradeCounts = new();
+        ui.Statistics.Level = new();
+        ui.Id = oid;
+        ui.Statistics.TotalScore = data.total_score;
+        ui.Statistics.TotalHits = data.total_hit;
+        ui.Statistics.PlayCount = data.play_count;
+        ui.Statistics.RankedScore = data.ranked_score;
+        ui.Statistics.CountryRank = data.country_rank;
+        ui.Statistics.GlobalRank = data.global_rank;
+        ui.Statistics.HitAccuracy = data.accuracy;
+        ui.Statistics.GradeCounts.SSH = data.count_SSH;
+        ui.Statistics.GradeCounts.SS= data.count_SS;
+        ui.Statistics.GradeCounts.SH = data.count_SH;
+        ui.Statistics.GradeCounts.S = data.count_S;
+        ui.Statistics.GradeCounts.A = data.count_A;
+        ui.Statistics.Level.Current = data.level;
+        ui.Statistics.Level.Progress = data.level_percent;
+        ui.Statistics.PP = data.performance_point;
+        ui.PlayMode = mode;
+        //ui.daysBefore = (t - data.lastupdate).Days;
+        return (DateTime.Today - data.lastupdate).Days;
+    }
 
 
 }

@@ -201,7 +201,7 @@ namespace KanonBot.LegacyImage
                 HorizontalAlignment = HorizontalAlignment.Left
             };
             textOptions.Origin = new PointF(15, 25);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, $"update: {(DateTime.Now).ToString().Replace("/", " / ")}", new SolidBrush(Color.White), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, $"update: {(DateTime.Now).ToString()}", new SolidBrush(Color.White), null));
             if (data.daysBefore > 1)
             {
                 textOptions = new TextOptions(new Font(HarmonySans, 20))

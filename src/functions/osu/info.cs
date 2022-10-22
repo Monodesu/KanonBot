@@ -24,9 +24,9 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (AccInfo.uid == null)
-                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+                if (DBUser == null)
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid);
                 if (DBOsuInfo == null)
@@ -67,19 +67,24 @@ namespace KanonBot.functions.osubot
             #endregion
 
             #region 获取信息
-
             data.userInfo = OnlineOsuInfo!;
-
+            //playmode
+            if (command.osu_mode != null)
+            {
+                data.userInfo.PlayMode = (OSU.Enums.Mode)command.osu_mode;
+            }
             // 查询
             if (command.order_number > 0 && is_bounded)
             {
                 // 从数据库取指定天数前的记录
-                // DB.GetOsuUserData(out data.prevUserInfo, oid, mode, days))
+                data.daysBefore = Database.Client.GetOsuUserData(out data.prevUserInfo, DBOsuInfo!.osu_uid, data.userInfo.PlayMode, command.order_number);
+                if (data.daysBefore > 0) ++data.daysBefore;
             }
             else
             {
                 // 从数据库取最近的一次记录
-                // DB.GetOsuUserData(out data.prevUserInfo, oid, mode, days))
+                data.daysBefore = Database.Client.GetOsuUserData(out data.prevUserInfo, DBOsuInfo!.osu_uid, data.userInfo.PlayMode, 0);
+                if (data.daysBefore > 0) ++data.daysBefore;
             }
 
             if (is_bounded)
@@ -105,9 +110,6 @@ namespace KanonBot.functions.osubot
                         catch { data.badgeId = -1; }
                         bannerStatus = DBOsuInfo.customBannerStatus;// 取bannerStatus
 
-
-                        //data.prevUserInfo = xxx; //取之前数据
-                        data.daysBefore = 0;
                         break;
                 }
             }

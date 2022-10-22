@@ -1,5 +1,6 @@
 ﻿using KanonBot.Drivers;
 using KanonBot.functions;
+using KanonBot.functions.osu;
 using KanonBot.functions.osubot;
 
 namespace KanonBot.command_parser
@@ -67,6 +68,7 @@ namespace KanonBot.command_parser
                     case "sudo": //管理员
                         return;
                     case "su": //超级管理员
+                        await Su.Execute(target, childCmd);
                         return;
                     case "dailyupdate":
                         return;

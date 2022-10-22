@@ -21,7 +21,9 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (AccInfo.uid == null)
+                Database.Model.Users? DBUser;
+                DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+                if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
