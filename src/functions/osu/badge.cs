@@ -15,7 +15,7 @@ namespace KanonBot.functions.osubot
         {
             // 验证账户
             var AccInfo = GetAccInfo(target);
-            if (GetAccount(AccInfo.uid, AccInfo.platform)!.uid == -1)
+            if (AccInfo.uid == null)
             { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
             string rootCmd, childCmd = "";

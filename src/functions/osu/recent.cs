@@ -21,8 +21,10 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (Accounts.GetAccount(AccInfo.uid, AccInfo.platform)!.uid == -1)
+                if (AccInfo.uid == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
+                //else if (Accounts.GetAccount(AccInfo.uid, AccInfo.platform)!.uid == -1)
+                //{ target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
@@ -56,7 +58,7 @@ namespace KanonBot.functions.osubot
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
                 if (DBOsuInfo != null)
                 {
-                    is_bounded = true;
+                    //is_bounded = true;
                     command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
                 }
             }
@@ -64,18 +66,25 @@ namespace KanonBot.functions.osubot
             // 判断给定的序号是否在合法的范围内
             // if (command.order_number == -1) { target.reply("猫猫找不到该最近游玩的成绩。"); return; }
 
-            var scorePanelData = new LegacyImage.Draw.ScorePanelData();
+            //var scorePanelData = new LegacyImage.Draw.ScorePanelData();
             var scoreInfos = await OSU.GetUserScores(OnlineOsuInfo.Id, OSU.Enums.UserScoreType.Recent, command.osu_mode ?? OSU.Enums.Mode.OSU, 1, command.order_number - 1, includeFails);
             if (scoreInfos == null) { target.reply("查询成绩时出错。"); return; };    // 正常是找不到玩家，但是上面有验证，这里做保险
             if (scoreInfos!.Length > 0)
             {
-                var data = await PerformanceCalculator.CalculatePanelData(scoreInfos[0]);
-                // 绘制
-                var stream = new MemoryStream();
-                var img = LegacyImage.Draw.DrawScore(data);
-                await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-                stream.TryGetBuffer(out ArraySegment<byte> buffer);
-                target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+                try
+                {
+                    var data = await PerformanceCalculator.CalculatePanelData(scoreInfos[0]);
+                    // 绘制
+                    var stream = new MemoryStream();
+                    var img = LegacyImage.Draw.DrawScore(data);
+                    await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+                    stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                    target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+                }
+                catch
+                {
+                    target.reply("发生了错误。"); return;
+                }  
             }
             else { target.reply("猫猫找不到该玩家最近游玩的成绩。"); return; }
 

@@ -65,6 +65,10 @@ namespace KanonBot
                             break;
                     }
                 }
+                arg1 = arg1.Trim();
+                arg2 = arg2.Trim();
+                arg3 = arg3.Trim();
+                arg4 = arg4.Trim();
                 // 处理info解析
                 if (type == Func_type.Info)
                 {
@@ -124,7 +128,17 @@ namespace KanonBot
                     if (arg2 != "") param.osu_mode = OSU.Enums.ParseMode(int.Parse(arg2[1..]));
                     param.osu_mods = arg4 != "" ? arg4[1..] : "";
                     if (arg1 == "") param.order_number = -1; //bid必须有效，否则返回 -1
-                    else { var index = int.Parse(arg1); param.order_number = index < 1 ? -1 : index; }
+                    else
+                    {
+                        try
+                        {
+                            var index = int.Parse(arg1); param.order_number = index < 1 ? -1 : index;
+                        }
+                        catch
+                        {
+                            param.order_number = -1;
+                        }
+                    }
                     if (param.osu_username == "") param.selfquery = true;
                 }
                 else if (type == Func_type.Leeway)

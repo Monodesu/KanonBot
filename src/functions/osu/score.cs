@@ -21,7 +21,7 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (Accounts.GetAccount(AccInfo.uid, AccInfo.platform)!.uid == -1)
+                if (AccInfo.uid == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
@@ -81,15 +81,26 @@ namespace KanonBot.functions.osubot
 
 
             var scoreData = await OSU.GetUserBeatmapScore(OnlineOsuInfo.Id, command.order_number, mods.ToArray(), command.osu_mode ?? OSU.Enums.Mode.OSU);
-            if (scoreData == null) { target.reply("猫猫没有找到你的成绩"); return; }
 
-            var data = await PerformanceCalculator.CalculatePanelData(scoreData.Score);
-            // 绘制
-            var stream = new MemoryStream();
-            var img = LegacyImage.Draw.DrawScore(data);
-            await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-            stream.TryGetBuffer(out ArraySegment<byte> buffer);
-            target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+            if (scoreData == null) { target.reply("猫猫没有找到你的成绩"); return; }
+            //ppy的getscore api不会返回beatmapsets信息，需要手动获取
+            var beatmapSetInfo = await OSU.GetBeatmap(scoreData!.Score.Beatmap!.BeatmapId);
+            scoreData.Score.Beatmapset = beatmapSetInfo!.Beatmapset;
+
+            try
+            {
+                var data = await PerformanceCalculator.CalculatePanelData(scoreData.Score);
+                // 绘制
+                var stream = new MemoryStream();
+                var img = LegacyImage.Draw.DrawScore(data);
+                await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+                stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+            }
+            catch
+            {
+                target.reply("发生了错误。"); return;
+            }
         }
     }
 

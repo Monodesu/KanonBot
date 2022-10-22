@@ -156,12 +156,19 @@ namespace KanonBot.LegacyImage
                 hi.nodesize = new SizeF(5f, 5f);
                 // acc ,flow, jump, pre, speed, sta
                 var ppd = new int[6];       // 这里就强制转换了
-                ppd[0] = (int)data.pplusInfo!.AccuracyTotal;
-                ppd[1] = (int)data.pplusInfo.FlowAimTotal;
-                ppd[2] = (int)data.pplusInfo.JumpAimTotal;
-                ppd[3] = (int)data.pplusInfo.PrecisionTotal;
-                ppd[4] = (int)data.pplusInfo.SpeedTotal;
-                ppd[5] = (int)data.pplusInfo.StaminaTotal;
+                try
+                {
+                    ppd[0] = (int)data.pplusInfo!.AccuracyTotal;
+                    ppd[1] = (int)data.pplusInfo.FlowAimTotal;
+                    ppd[2] = (int)data.pplusInfo.JumpAimTotal;
+                    ppd[3] = (int)data.pplusInfo.PrecisionTotal;
+                    ppd[4] = (int)data.pplusInfo.SpeedTotal;
+                    ppd[5] = (int)data.pplusInfo.StaminaTotal;
+                }
+                catch
+                {
+                    for (int i = 0; i < 6; i++) ppd[i] = 0;
+                }
                 // x_offset  pp+数据的坐标偏移量
                 var x_offset = new int[6] { 372, 330, 122, 52, 128, 317 };   // pp+数据的x轴坐标
                 var multi = new double[6] { 14.1, 69.7, 1.92, 19.8, 0.588, 3.06 };

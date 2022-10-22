@@ -4,6 +4,7 @@ using KanonBot.API;
 using System.Net;
 using Flurl;
 using Flurl.Http;
+using RosuPP;
 
 namespace KanonBot.functions.osubot
 {
@@ -23,7 +24,7 @@ namespace KanonBot.functions.osubot
 
             // 验证账户
             var AccInfo = Accounts.GetAccInfo(target);
-            if (Accounts.GetAccount(AccInfo.uid, AccInfo.platform)!.uid == -1)
+            if (AccInfo.uid == null)
             { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
             // 验证osu信息
@@ -81,16 +82,17 @@ namespace KanonBot.functions.osubot
             // LeewayCalculator
             string beatmap;
 
-            // 下载谱面还没有写，之后整合
             try
             {
-                var beatmapPath = $"https://old.ppy.sh/osu/{bid}".DownloadFileAsync("./work/beatmaps/", $"{bid}.osu").Result;
-                beatmap = File.ReadAllText(beatmapPath);
+                // 下载谱面
+                await OSU.BeatmapFileChecker(bid);
+                beatmap = File.ReadAllText($"./work/beatmap/{bid}.osu");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message);
-                target.reply("读取谱面文件失败，请稍后再试"); return;
+                // 加载失败
+                File.Delete($"./work/beatmap/{bid}.osu");
+                target.reply("发生了错误。"); return;
             }
 
             Leeway_Calculator lc = new(); // 实例化

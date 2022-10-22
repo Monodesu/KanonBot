@@ -38,7 +38,7 @@ Log.Logger = log.CreateLogger();
 Log.Information("初始化成功 {@config}", config);
 
 Log.Information("启动用户数据更新");
-ThreadPool.QueueUserWorkItem(p => GeneralUpdate.Daily_Update(false));
+ThreadPool.QueueUserWorkItem(p => GeneralUpdate.DailyUpdate());
 #endregion
 
 

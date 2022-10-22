@@ -24,7 +24,7 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                if (Accounts.GetAccount(AccInfo.uid, AccInfo.platform) == null)
+                if (AccInfo.uid == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 验证osu信息
@@ -59,7 +59,7 @@ namespace KanonBot.functions.osubot
                 DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
                 if (DBOsuInfo != null)
                 {
-                    is_bounded = true;
+                    //is_bounded = true;
                     command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
                 }
             }
@@ -69,13 +69,20 @@ namespace KanonBot.functions.osubot
             if (scores == null) { target.reply("查询成绩时出错。"); return; }
             if (scores!.Length > 0)
             {
-                var data = await PerformanceCalculator.CalculatePanelData(scores![0]);
-                // 绘制
-                var stream = new MemoryStream();
-                var img = LegacyImage.Draw.DrawScore(data);
-                await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-                stream.TryGetBuffer(out ArraySegment<byte> buffer);
-                target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+                try
+                {
+                    var data = await PerformanceCalculator.CalculatePanelData(scores![0]);
+                    // 绘制
+                    var stream = new MemoryStream();
+                    var img = LegacyImage.Draw.DrawScore(data);
+                    await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+                    stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                    target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+                }
+                catch
+                {
+                    target.reply("发生了错误。"); return;
+                }
             }
             else { target.reply("猫猫找不到该BP。"); return; }
 

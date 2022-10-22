@@ -24,10 +24,9 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
-                if (DBUser == null)
+                if (AccInfo.uid == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
-
+                DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 // 验证osu信息
                 DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid);
                 if (DBOsuInfo == null)
@@ -123,7 +122,8 @@ namespace KanonBot.functions.osubot
             if (data.daysBefore > 0) isDataOfDayAvaiavle = true;
             MemoryStream img = LegacyImage.Draw.DrawInfo(data, bannerStatus, is_bounded, isDataOfDayAvaiavle);
             img.TryGetBuffer(out ArraySegment<byte> buffer);
-            target.reply(new Chain().msg("test").image(Convert.ToBase64String(buffer.Array!, 0, (int)img.Length), ImageSegment.Type.Base64));
+            //target.reply(new Chain().msg("test").image(Convert.ToBase64String(buffer.Array!, 0, (int)img.Length), ImageSegment.Type.Base64));
+            target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)img.Length), ImageSegment.Type.Base64));
             //AnnualPass(data.userInfo.userId, data.userInfo.mode, data.userInfo.totalHits); //季票内容
         }
     }

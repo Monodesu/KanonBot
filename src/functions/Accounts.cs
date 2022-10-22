@@ -38,6 +38,7 @@ namespace KanonBot.functions
             }
             string uid = "-1";
             bool is_regd = Database.Client.IsRegd(mailAddr);
+            bool is_append = false;
             Database.Model.Users dbuser = new();
 
             if (is_regd) dbuser = Database.Client.GetUsers(mailAddr);
@@ -52,11 +53,18 @@ namespace KanonBot.functions
                         var g1 = Database.Client.GetUsersByUID(uid, Platform.Guild);
                         if (g1 != null)
                         {
-                            target.reply(new Chain()
-                                .msg($"您目前的平台账户已经和邮箱为" +
-                                $"{Utils.HideMailAddr(g1.email ?? "undefined@undefined.undefined")}" +
-                                $"的用户绑定了。"));
-                            return;
+                            if (g1.email != null)
+                            {
+                                is_append = true;
+                            }
+                            else
+                            {
+                                target.reply(new Chain()
+                                    .msg($"您目前的平台账户已经和邮箱为" +
+                                    $"{Utils.HideMailAddr(g1.email ?? "undefined@undefined.undefined")}" +
+                                    $"的用户绑定了。"));
+                                return;
+                            }
                         }
                     }
                     break;
@@ -69,11 +77,18 @@ namespace KanonBot.functions
                         var o1 = Database.Client.GetUsersByUID(uid, Platform.OneBot);
                         if (o1 != null)
                         {
-                            target.reply(new Chain()
-                                .msg($"您目前的平台账户已经和邮箱为" +
-                                $"{Utils.HideMailAddr(o1.email ?? "undefined@undefined.undefined")}" +
-                                $"的用户绑定了。"));
-                            return;
+                            if (o1.email != null)
+                            {
+                                is_append = true;
+                            }
+                            else
+                            {
+                                target.reply(new Chain()
+                                    .msg($"您目前的平台账户已经和邮箱为" +
+                                    $"{Utils.HideMailAddr(o1.email ?? "undefined@undefined.undefined")}" +
+                                    $"的用户绑定了。"));
+                                return;
+                            }
                         }
                     }
                     break;
@@ -83,14 +98,21 @@ namespace KanonBot.functions
                         uid = k.Author.Id.ToString();
                         if (is_regd)
                             if (dbuser.kook_uid == uid) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
-                        var o1 = Database.Client.GetUsersByUID(uid, Platform.KOOK);
-                        if (o1 != null)
+                        var k1 = Database.Client.GetUsersByUID(uid, Platform.KOOK);
+                        if (k1 != null)
                         {
-                            target.reply(new Chain()
-                                .msg($"您目前的平台账户已经和邮箱为" +
-                                $"{Utils.HideMailAddr(o1.email ?? "undefined@undefined.undefined")}" +
-                                $"的用户绑定了。"));
-                            return;
+                            if (k1.email != null)
+                            {
+                                is_append = true;
+                            }
+                            else
+                            {
+                                target.reply(new Chain()
+                                    .msg($"您目前的平台账户已经和邮箱为" +
+                                    $"{Utils.HideMailAddr(k1.email ?? "undefined@undefined.undefined")}" +
+                                    $"的用户绑定了。"));
+                                return;
+                            }
                         }
                     }
                     break;
@@ -103,6 +125,10 @@ namespace KanonBot.functions
                 Platform.OneBot => "qq",
                 _ => throw new NotSupportedException()
             };
+
+
+
+
             if (is_regd) //检查此邮箱是否已存在于数据库中
             {
                 // 如果存在，执行绑定
@@ -125,7 +151,7 @@ namespace KanonBot.functions
                     target.reply("发送验证邮件失败，请联系管理员。");
                 }
             }
-            else
+            else if (!is_append)
             {
                 //如果不存在，新建
                 Mail.MailStruct ms = new()
@@ -139,6 +165,27 @@ namespace KanonBot.functions
                 {
                     Mail.Send(ms);
                     target.reply("注册验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。");
+                    Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
+                }
+                catch
+                {
+                    target.reply("发送验证邮件失败，请联系管理员。");
+                }
+            }
+            else
+            {
+                //追加邮箱信息
+                Mail.MailStruct ms = new()
+                {
+                    MailTo = new string[] { mailAddr },
+                    Subject = "desu.life - 请验证您的邮箱",
+                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=3",
+                    IsBodyHtml = false
+                };
+                try
+                {
+                    Mail.Send(ms);
+                    target.reply("电子邮箱追加验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。");
                     Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
                 }
                 catch
