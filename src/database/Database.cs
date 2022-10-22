@@ -98,21 +98,21 @@ public class Client
             case Platform.OneBot:
                 var li1 = db.Queryable<Model.Users>().Where(it => it.qq_id == long.Parse(UID)).ToList();
                 if (li1.Count > 0) return li1[0];
-                return null;
+                return new Users();
             case Platform.Guild:
                 var li2 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == UID).ToList();
                 if (li2.Count > 0) return li2[0];
-                return null;
+                return new Users();
             case Platform.KOOK:
                 var li3 = db.Queryable<Model.Users>().Where(it => it.kook_uid == UID).ToList();
                 if (li3.Count > 0) return li3[0];
-                return null;
+                return new Users();
             // case "discord":  // 还没写
             //     var li4 = db.Queryable<Model.Users>().Where(it => it.discord_uid == UID).ToList();
             //     if (li4.Count > 0) return li4[0];
             //     return null;
             default:
-                return null;
+                return new Users();
         }
     }
     static public Model.Users? GetUsersByOsuUID(long osu_uid)
@@ -120,14 +120,14 @@ public class Client
         var db = GetInstance();
         var li1 = db.Queryable<Model.Users>().Where(it => it.uid == GetOsuUsersByOsuUID(osu_uid).uid).ToList();
         if (li1.Count > 0) return li1[0];
-        return null;
+        return new Users();
     }
     static public Model.Users_osu? GetOsuUsersByOsuUID(long osu_uid)
     {
         var db = GetInstance();
         var li1 = db.Queryable<Model.Users_osu>().Where(it => it.osu_uid == osu_uid).ToList();
         if (li1.Count > 0) return li1[0];
-        return null;
+        return new Users_osu();
     }
 
     static public Model.Users_osu GetOSUUsers(long osu_uid)

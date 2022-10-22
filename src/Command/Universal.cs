@@ -41,6 +41,8 @@ namespace KanonBot.command_parser
                     childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
                 }
                 catch { rootCmd = cmd; }
+
+                Console.WriteLine(target.account + target.platform);
                 switch (rootCmd)
                 {
                     case "test": Test.run(target, childCmd); return;

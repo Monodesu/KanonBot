@@ -8,6 +8,8 @@ using KanonBot.Message;
 using KanonBot.API;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Linq.Expressions;
+using static KanonBot.API.OSU.Models;
 
 namespace KanonBot.functions.osubot
 {
@@ -46,7 +48,7 @@ namespace KanonBot.functions.osubot
                     return;
             }
         }
-        
+
 
         async private static Task Bonuspp(Target target, string cmd)
         {
@@ -64,6 +66,8 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
+                if (AccInfo.uid == null)
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
@@ -191,6 +195,9 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
+                if (AccInfo.uid == null)
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
+
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
@@ -336,6 +343,8 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
+                if (AccInfo.uid == null)
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
@@ -369,8 +378,12 @@ namespace KanonBot.functions.osubot
             switch (cmd)
             {
                 case "occ":
-                    var pppData = await OSU.GetUserPlusData(OnlineOsuInfo.Id);
-                    target.reply($"在猫猫杯S1中，{OnlineOsuInfo.Username} 的cost为：{occost(OnlineOsuInfo, pppData.User)}");
+                    try
+                    {
+                        var pppData = await OSU.GetUserPlusData(OnlineOsuInfo.Id);
+                        target.reply($"在猫猫杯S1中，{OnlineOsuInfo.Username} 的cost为：{occost(OnlineOsuInfo, pppData.User)}");
+                    }
+                    catch { target.reply($"获取pp+失败"); return; }
                     break;
                 case "onc":
                     var onc = oncost(OnlineOsuInfo);
@@ -380,45 +393,49 @@ namespace KanonBot.functions.osubot
                         target.reply($"在ONC中，{OnlineOsuInfo.Username} 的cost为：{onc}");
                     break;
                 case "ost":
-                    var eloInfo = await OSU.GetUserEloInfo(OnlineOsuInfo.Id);
-                    int elo = 0;
-                    foreach (var key in eloInfo!)
+                    try
                     {
-                        switch (key.Key)
+                        var eloInfo = await OSU.GetUserEloInfo(OnlineOsuInfo.Id);
+                        int elo = 0;
+                        foreach (var key in eloInfo!)
                         {
-                            case "code":
-                                switch ((int)eloInfo["code"]!)
-                                {
-                                    case 40009:
-                                        target.reply(eloInfo["message"]!.ToString());
-                                        break;
-                                    case 40004:
-                                        elo = 0;
-                                        break;
-                                }
+                            switch (key.Key)
+                            {
+                                case "code":
+                                    switch ((int)eloInfo["code"]!)
+                                    {
+                                        case 40009:
+                                            target.reply(eloInfo["message"]!.ToString());
+                                            break;
+                                        case 40004:
+                                            elo = 0;
+                                            break;
+                                    }
+                                    break;
+                                case "elo":
+                                    elo = int.Parse(eloInfo["elo"]!.ToString());
+                                    break;
+                            }
+                        }
+                        if (elo != 0)
+                        {
+                            var matchId = await OSU.GetUserEloRecentPlay(OnlineOsuInfo.Id);
+                            var body = (await OSU.GetMatchInfo(matchId.Value))!["result"]!.ToObject<JObject>();
+                            TimeSpan ts = new();
+                            foreach (var item in body!)
+                            {
+                                var dt = DateTimeOffset.Parse(item.Value!["start_time"]!.ToString());
+                                ts = DateTime.Now - dt;
                                 break;
-                            case "elo":
-                                elo = int.Parse(eloInfo["elo"]!.ToString());
-                                break;
+                            }
+                            if (ts.Days > 365)
+                            {
+                                elo = 0;
+                            }
                         }
+                        target.reply($"在OST中，{OnlineOsuInfo.Username} 的cost为：{ostcost(OnlineOsuInfo.Statistics.GlobalRank, elo)}");
                     }
-                    if (elo != 0)
-                    {
-                        var matchId = await OSU.GetUserEloRecentPlay(OnlineOsuInfo.Id);
-                        var body = (await OSU.GetMatchInfo(matchId.Value))!["result"]!.ToObject<JObject>();
-                        TimeSpan ts = new();
-                        foreach (var item in body!)
-                        {
-                            var dt = DateTimeOffset.Parse(item.Value!["start_time"]!.ToString());
-                            ts = DateTime.Now - dt;
-                            break;
-                        }
-                        if (ts.Days > 365)
-                        {
-                            elo = 0;
-                        }
-                    }
-                    target.reply($"在OST中，{OnlineOsuInfo.Username} 的cost为：{ostcost(OnlineOsuInfo.Statistics.GlobalRank, elo)}");
+                    catch { target.reply($"获取elo失败"); return; }
                     break;
                 default:
                     target.reply($"请输入要查询cost的比赛名称的缩写。");
@@ -442,6 +459,8 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
+                if (AccInfo.uid == null)
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
@@ -451,7 +470,7 @@ namespace KanonBot.functions.osubot
                 if (DBOsuInfo == null)
                 { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
-                
+
                 command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
                 // 验证osu信息
                 OnlineOsuInfo = await OSU.GetUser(DBOsuInfo.osu_uid, command.osu_mode!.Value);
@@ -486,7 +505,7 @@ namespace KanonBot.functions.osubot
             #endregion
 
             var allBP = await OSU.GetUserScores(OnlineOsuInfo!.Id, OSU.Enums.UserScoreType.Best, command.osu_mode ?? OSU.Enums.Mode.OSU, 100, 0);
-            if (allBP == null) { target.reply("查询成绩时出错。"); return;}
+            if (allBP == null) { target.reply("查询成绩时出错。"); return; }
             double totalPP = 0;
             // 如果bp数量小于10则取消
             if (allBP!.Length < 10)
@@ -529,6 +548,8 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
+                if (AccInfo.uid == null)
+                { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
@@ -572,7 +593,7 @@ namespace KanonBot.functions.osubot
             #endregion
 
             var allBP = await OSU.GetUserScores(OnlineOsuInfo!.Id, OSU.Enums.UserScoreType.Best, command.osu_mode ?? OSU.Enums.Mode.OSU, 100, 0);
-            if (allBP == null) { target.reply("查询成绩时出错。"); return;}
+            if (allBP == null) { target.reply("查询成绩时出错。"); return; }
             var str = $"";
             var t = DateTime.Now.Hour < 4 ? DateTime.Now.Date.AddDays(-1).AddHours(4) : DateTime.Now.Date.AddHours(4);
             for (int i = 0; i < allBP.Length; i++)

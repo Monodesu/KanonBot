@@ -28,20 +28,20 @@ namespace KanonBot.functions.osubot
             switch (rootCmd)
             {
                 case "sudo":
-                    SudoExecute(target, childCmd); return;
+                    SudoExecute(target, childCmd, AccInfo); return;
                 case "set":
-                    Set(target, childCmd); return;
+                    Set(target, childCmd, AccInfo); return;
                 case "info":
-                    Info(target, childCmd); return;
+                    Info(target, childCmd, AccInfo); return;
                 case "list":
-                    List(target, childCmd); return;
+                    List(target, AccInfo); return;
                 default:
                     return;
             }
         }
-        private static void SudoExecute(Target target, string cmd)
+        private static void SudoExecute(Target target, string cmd, AccInfo accinfo)
         {
-            var userinfo = Database.Client.GetUsersByUID(target.account!, target.platform);
+            var userinfo = Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
             List<string> permissions = new();
             if (userinfo!.permissions!.IndexOf(";") < 1) //一般不会出错，默认就是user
             {
@@ -104,18 +104,18 @@ namespace KanonBot.functions.osubot
                 case "getuser":
                     SudoGetUser(target, childCmd); return;
                 case "list":
-                    List(target, childCmd); return;
+                    List(target, accinfo); return;
                 default:
                     return;
             }
 
         }
         //注：没有完全适配多徽章安装，需要等新面板后再做适配
-        private static void Set(Target target, string cmd)
+        private static void Set(Target target, string cmd, AccInfo accinfo)
         {
             if (int.TryParse(cmd, out int badgeNum))
             {
-                var userinfo = Database.Client.GetUsersByUID(target.account!, target.platform);
+                var userinfo = Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
                 if (userinfo!.owned_badge_ids == null)
                 {
                     target.reply("你还没有牌子呢..."); return;
@@ -190,12 +190,12 @@ namespace KanonBot.functions.osubot
                 target.reply("你提供的badge id不正确，请重新检查。");
             }
         }
-        private static void Info(Target target, string cmd)
+        private static void Info(Target target, string cmd, AccInfo accinfo)
         {
             int badgeNum = -1;
             if (int.TryParse(cmd, out badgeNum))
             {
-                var userinfo = Database.Client.GetUsersByUID(target.account!, target.platform);
+                var userinfo = Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
                 if (userinfo!.owned_badge_ids == null)
                 {
                     target.reply("你还没有牌子呢..."); return;
@@ -233,9 +233,9 @@ namespace KanonBot.functions.osubot
                 target.reply("你提供的badge id不正确，请重新检查。");
             }
         }
-        private static void List(Target target, string cmd)
+        private static void List(Target target, AccInfo accinfo)
         {
-            var userinfo = Database.Client.GetUsersByUID(target.account!, target.platform);
+            var userinfo = Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
             if (userinfo!.owned_badge_ids == null)
             {
                 target.reply("你还没有牌子呢..."); return;
