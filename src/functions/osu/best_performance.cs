@@ -73,17 +73,29 @@ namespace KanonBot.functions.osubot
             {
                 try
                 {
-                    //rosupp
-                    //var data = await PerformanceCalculator.CalculatePanelData(scores![0]);
-                    //osu-tools
-                    var data = await KanonBot.osutools.Calculator.CalculateAsync(scores![0]);
-
-                    // 绘制
-                    var stream = new MemoryStream();
-                    var img = LegacyImage.Draw.DrawScore(Utils.PackScorePanelData(data, scores![0]));
-                    await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-                    stream.TryGetBuffer(out ArraySegment<byte> buffer);
-                    target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+                    if (scores![0].Mode == 0)
+                    {
+                        //osu-tools
+                        var data = await KanonBot.osutools.Calculator.CalculateAsync(scores![0]);
+                        // 绘制
+                        var stream = new MemoryStream();
+                        var img = LegacyImage.Draw.DrawScore(Utils.PackScorePanelData(data, scores![0]));
+                        await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+                        stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                        target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+                    }
+                    else
+                    {
+                        //rosupp
+                        var data = await PerformanceCalculator.CalculatePanelData(scores![0]);
+                        // 绘制
+                        var stream = new MemoryStream();
+                        var img = LegacyImage.Draw.DrawScore(data);
+                        await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+                        stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                        target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+                    }
+                    
                 }
                 catch(Exception ex)
                 {

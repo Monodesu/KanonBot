@@ -85,6 +85,7 @@ namespace KanonBot.command_parser
                 {
                     target.reply("网络出现错误！错误内容已自动上报。");
                     var rtmp =
+                        $"Target Message: {target.msg}\r\n"+
                         $"Message: {ex.Message}\r\n" +
                         $"Source: {ex.Source}\r\n" +
                         $"StackTrace: {ex.StackTrace}";
@@ -95,6 +96,7 @@ namespace KanonBot.command_parser
                 {
                     target.reply("出现了未知错误，错误内容已自动上报。");
                     var rtmp =
+                        $"Target Message: {target.msg}\r\n" +
                         $"Message: {ex.Message}\r\n" +
                         $"Source: {ex.Source}\r\n" +
                         $"StackTrace: {ex.StackTrace}";

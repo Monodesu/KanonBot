@@ -36,10 +36,11 @@ namespace KanonBot.osutools
             osu.Game.Rulesets.Difficulty.DifficultyAttributes difficultyAttributes;
             osu.Game.Scoring.Score score = new();
 
-            score.ScoreInfo.Ruleset =
-                workingBeatmap.BeatmapInfo.Ruleset.OnlineID != 0 ?
-                LegacyHelper.GetRulesetFromLegacyID(Mode).RulesetInfo :
-                workingBeatmap.BeatmapInfo.Ruleset;
+            //score.ScoreInfo.Ruleset =
+            //    workingBeatmap.BeatmapInfo.Ruleset.OnlineID != 0 ?
+            //    LegacyHelper.GetRulesetFromLegacyID(Mode).RulesetInfo :
+            //    workingBeatmap.BeatmapInfo.Ruleset;
+            score.ScoreInfo.Ruleset = LegacyHelper.GetRulesetFromLegacyID(Mode).RulesetInfo;
             score.ScoreInfo.Ruleset.CreateInstance();
 
             score.ScoreInfo.Accuracy = double.Parse(Accuracy);
@@ -79,6 +80,8 @@ namespace KanonBot.osutools
                 });
 
             score.ScoreInfo.ModsJson = ModsList.ToString();
+
+            Console.WriteLine(score.ScoreInfo.ModsJson);
 
             performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator();
 
@@ -168,8 +171,10 @@ namespace KanonBot.osutools
             Json.Add("CurrentPPInfo", CurrentPPInfo);
 
             //预测成绩
-            JObject PredictivePPInfo = new();
-            Dictionary<string, double> PPList = new()
+            if (Mode != 3)
+            {
+                JObject PredictivePPInfo = new();
+                Dictionary<string, double> PPList = new()
                 {
                     { "100", 1.00 },
                     { "99", 0.99 },
@@ -177,42 +182,42 @@ namespace KanonBot.osutools
                     { "97", 0.97 },
                     { "95", 0.95 },
                 };
-            JObject Statistics_more = new();
-            foreach (KeyValuePair<string, double> PPName in PPList)
-            {
-                score = new();
-                score.ScoreInfo.MaxCombo = int.Parse(Json["MaxCombo"]!.ToString());
-                score.ScoreInfo.Ruleset =
-                    workingBeatmap.BeatmapInfo.Ruleset.OnlineID != 0 ?
-                    LegacyHelper.GetRulesetFromLegacyID(Mode).RulesetInfo :
-                    workingBeatmap.BeatmapInfo.Ruleset;
-                score.ScoreInfo.Ruleset.CreateInstance();
-                score.ScoreInfo.Accuracy = PPName.Value;
-                score.ScoreInfo.ModsJson = ModsList.ToString();
-
-                switch (Mode)
+                JObject Statistics_more = new();
+                foreach (KeyValuePair<string, double> PPName in PPList)
                 {
-                    case 0:
-                        n100 = (int)(1.50 * (1.00 - score.ScoreInfo.Accuracy) * (double)workingBeatmap.Beatmap.HitObjects.Count);
-                        n300 = workingBeatmap.Beatmap.HitObjects.Count - n100;
-                        Statistics_more = new()
+                    score = new();
+                    score.ScoreInfo.MaxCombo = int.Parse(Json["MaxCombo"]!.ToString());
+                    score.ScoreInfo.Ruleset =
+                        workingBeatmap.BeatmapInfo.Ruleset.OnlineID != 0 ?
+                        LegacyHelper.GetRulesetFromLegacyID(Mode).RulesetInfo :
+                        workingBeatmap.BeatmapInfo.Ruleset;
+                    score.ScoreInfo.Ruleset.CreateInstance();
+                    score.ScoreInfo.Accuracy = PPName.Value;
+                    score.ScoreInfo.ModsJson = ModsList.ToString();
+
+                    switch (Mode)
+                    {
+                        case 0:
+                            n100 = (int)(1.50 * (1.00 - score.ScoreInfo.Accuracy) * (double)workingBeatmap.Beatmap.HitObjects.Count);
+                            n300 = workingBeatmap.Beatmap.HitObjects.Count - n100;
+                            Statistics_more = new()
                             {
                                 { "Great", n300 },
                                 { "Ok", n100 },
                                 { "Meh", 0 },
                                 { "Miss", 0 },
                             };
-                        break;
-                    case 1:
-                        Statistics_more = new()
+                            break;
+                        case 1:
+                            Statistics_more = new()
                             {
                                 { "Great", int.Parse(StatisticsJson["Great"]!.ToString()) + int.Parse(StatisticsJson["Miss"]!.ToString()) },
                                 { "Ok", int.Parse(StatisticsJson["Ok"]!.ToString()) },
                                 { "Miss", 0 },
                             };
-                        break;
-                    case 2:
-                        Statistics_more = new()
+                            break;
+                        case 2:
+                            Statistics_more = new()
                             {
                                 { "Great", int.Parse(StatisticsJson["Great"]!.ToString()) + int.Parse(StatisticsJson["Miss"]!.ToString()) },
                                 { "LargeTickHit", int.Parse(StatisticsJson["Ok"]!.ToString()) },
@@ -220,69 +225,69 @@ namespace KanonBot.osutools
                                 { "SmallTickMiss", 0 },
                                 { "Miss", 0 }
                             };
-                        break;
-                    case 3:
-                        //do nothing
-                        break;
-                }
-                //score.ScoreInfo.Statistics.Clear();
-                //score.ScoreInfo.HitEvents.Clear();
-                score.ScoreInfo.StatisticsJson = Statistics_more.ToString();
+                            break;
+                        case 3:
+                            //do nothing
+                            break;
+                    }
+                    //score.ScoreInfo.Statistics.Clear();
+                    //score.ScoreInfo.HitEvents.Clear();
+                    score.ScoreInfo.StatisticsJson = Statistics_more.ToString();
 
-                performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator();
+                    performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator();
 
-                ppAttributes = performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes)!;
-                ppAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(ppAttributes)) ?? new Dictionary<string, object>();
+                    ppAttributes = performanceCalculator?.Calculate(score.ScoreInfo, difficultyAttributes)!;
+                    ppAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(ppAttributes)) ?? new Dictionary<string, object>();
 
-                JObject Temp = new()
+                    JObject Temp = new()
                     {
                         { "Total", ppAttributes.Total.ToString(CultureInfo.InvariantCulture) }
                     };
 
-                foreach (var kvp in ppAttributeValues)
-                {
-                    Temp.Add(kvp.Key, kvp.Value.ToString());
+                    foreach (var kvp in ppAttributeValues)
+                    {
+                        Temp.Add(kvp.Key, kvp.Value.ToString());
+                    }
+
+                    Temp.Remove("OD");
+                    Temp.Remove("AR");
+                    Temp.Remove("Max Combo");
+                    PredictivePPInfo.Add(PPName.Key, Temp);
                 }
 
-                Temp.Remove("OD");
-                Temp.Remove("AR");
-                Temp.Remove("Max Combo");
-                PredictivePPInfo.Add(PPName.Key, Temp);
-            }
-
-            // FullCombo
-            score = new();
-            score.ScoreInfo.MaxCombo = int.Parse(Json["MaxCombo"]!.ToString());
-            score.ScoreInfo.Ruleset =
-                workingBeatmap.BeatmapInfo.Ruleset.OnlineID != 0 ?
-                LegacyHelper.GetRulesetFromLegacyID(Mode).RulesetInfo :
-                workingBeatmap.BeatmapInfo.Ruleset;
-            score.ScoreInfo.Ruleset.CreateInstance();
-            score.ScoreInfo.ModsJson = ModsList.ToString();
-            score.ScoreInfo.Accuracy = double.Parse(Accuracy);
-            switch (Mode)
-            {
-                case 0:
-                    n100 = (int)(1.50 * (1.00 - score.ScoreInfo.Accuracy) * (double)workingBeatmap.Beatmap.HitObjects.Count);
-                    n300 = workingBeatmap.Beatmap.HitObjects.Count - n100;
-                    Statistics_more = new()
+                // FullCombo
+                score = new();
+                score.ScoreInfo.MaxCombo = int.Parse(Json["MaxCombo"]!.ToString());
+                score.ScoreInfo.Ruleset =
+                    workingBeatmap.BeatmapInfo.Ruleset.OnlineID != 0 ?
+                    LegacyHelper.GetRulesetFromLegacyID(Mode).RulesetInfo :
+                    workingBeatmap.BeatmapInfo.Ruleset;
+                score.ScoreInfo.Ruleset.CreateInstance();
+                score.ScoreInfo.ModsJson = ModsList.ToString();
+                score.ScoreInfo.Accuracy = double.Parse(Accuracy);
+                switch (Mode)
+                {
+                    case 0:
+                        n100 = (int)(1.50 * (1.00 - score.ScoreInfo.Accuracy) * (double)workingBeatmap.Beatmap.HitObjects.Count);
+                        n300 = workingBeatmap.Beatmap.HitObjects.Count - n100;
+                        Statistics_more = new()
                         {
                             { "Great", n300 },
                             { "Ok", n100 },
                             { "Meh", 0 },
                             { "Miss", 0 },
                         };
-                    break;
-                case 1:
-                    Statistics_more = new()
+                        break;
+                    case 1:
+                        Statistics_more = new()
                         {
                             { "Great", int.Parse(StatisticsJson["Great"]!.ToString()) + int.Parse(StatisticsJson["Miss"]!.ToString()) },
                             { "Ok", int.Parse(StatisticsJson["Ok"]!.ToString()) },
                             { "Miss", 0 },
                         };
-                    break;
-                case 2:
-                    Statistics_more = new()
+                        break;
+                    case 2:
+                        Statistics_more = new()
                         {
                             { "Great", int.Parse(StatisticsJson["Great"]!.ToString()) + int.Parse(StatisticsJson["Miss"]!.ToString()) },
                             { "LargeTickHit", int.Parse(StatisticsJson["Ok"]!.ToString()) },
@@ -290,30 +295,30 @@ namespace KanonBot.osutools
                             { "SmallTickMiss", 0 },
                             { "Miss", 0 }
                         };
-                    break;
-                case 3:
-                    //do nothing
-                    break;
-            }
-            score.ScoreInfo.StatisticsJson = Statistics_more.ToString();
+                        break;
+                    case 3:
+                        //do nothing
+                        break;
+                }
+                score.ScoreInfo.StatisticsJson = Statistics_more.ToString();
 
-            performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator();
+                performanceCalculator = score.ScoreInfo.Ruleset.CreateInstance().CreatePerformanceCalculator();
 
-            ppAttributes = performanceCalculator?.Calculate(score.ScoreInfo, workingBeatmap)!;
-            ppAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(ppAttributes)) ?? new Dictionary<string, object>();
-            JObject Temp1 = new()
+                ppAttributes = performanceCalculator?.Calculate(score.ScoreInfo, workingBeatmap)!;
+                ppAttributeValues = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(ppAttributes)) ?? new Dictionary<string, object>();
+                JObject Temp1 = new()
                 {
                     { "Total", ppAttributes.Total.ToString(CultureInfo.InvariantCulture) }
                 };
 
-            foreach (var kvp in ppAttributeValues)
-                Temp1.Add(kvp.Key, kvp.Value.ToString());
-            Temp1.Remove("OD");
-            Temp1.Remove("AR");
-            Temp1.Remove("Max Combo");
-            PredictivePPInfo.Add("FullCombo", Temp1);
-            Json.Add("PredictivePPInfo", PredictivePPInfo);
-
+                foreach (var kvp in ppAttributeValues)
+                    Temp1.Add(kvp.Key, kvp.Value.ToString());
+                Temp1.Remove("OD");
+                Temp1.Remove("AR");
+                Temp1.Remove("Max Combo");
+                PredictivePPInfo.Add("FullCombo", Temp1);
+                Json.Add("PredictivePPInfo", PredictivePPInfo);
+            }
             //Console.WriteLine("\r\n\r\n\r\n\r\n\r\n" + Json.ToString());
             return Task.FromResult(Json);
         }

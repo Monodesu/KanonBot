@@ -311,42 +311,51 @@ public static class Utils
     {
         var sp = new ScorePanelData();
         sp.scoreInfo = score;
-        sp.ppInfo = new()
-        {
-            star = double.Parse(json["Star"]!.ToString()),
-            accuracy = sp.scoreInfo.Accuracy,
-            CS = double.Parse(json["CS"]!.ToString()),
-            AR = double.Parse(json["AR"]!.ToString()),
-            OD = double.Parse(json["OD"]!.ToString()),
-            HP = double.Parse(json["HP"]!.ToString()),
-            maxCombo = uint.Parse(json["MaxCombo"]!.ToString()),
-            //主pp
-            ppStat = new(),
-            ppStats = new()
-        };
+
+        sp.ppInfo = new();
+
+
+        try { sp.ppInfo.star = double.Parse(json["Star"]!.ToString()); }
+        catch { sp.ppInfo.star = -1; }
+        try { sp.ppInfo.accuracy = sp.scoreInfo.Accuracy; }
+        catch { sp.ppInfo.accuracy = null; }
+        try { sp.ppInfo.CS = double.Parse(json["CS"]!.ToString()); }
+        catch { sp.ppInfo.CS = -1; }
+        try { sp.ppInfo.AR = double.Parse(json["AR"]!.ToString()); }
+        catch { sp.ppInfo.AR = -1; }
+        try { sp.ppInfo.OD = double.Parse(json["OD"]!.ToString()); }
+        catch { sp.ppInfo.OD = -1; }
+        try { sp.ppInfo.HP = double.Parse(json["HP"]!.ToString()); }
+        catch { sp.ppInfo.HP = -1; }
+        try { sp.ppInfo.maxCombo = uint.Parse(json["MaxCombo"]!.ToString()); }
+        catch { sp.ppInfo.maxCombo = 0; }
+        //主pp
+        sp.ppInfo.ppStat = new();
+        sp.ppInfo.ppStats = new();
+
 
         try { sp.ppInfo.ppStat.total = double.Parse(json["CurrentPPInfo"]!["Total"]!.ToString()); }
         catch { sp.ppInfo.ppStat.total = -1; }
 
         try { sp.ppInfo.ppStat.acc = double.Parse(json["CurrentPPInfo"]!["accuracy"]!.ToString()); }
-        catch { sp.ppInfo.ppStat.acc = -1; }
+        catch { sp.ppInfo.ppStat.acc = null; }
 
         try { sp.ppInfo.ppStat.aim = double.Parse(json["CurrentPPInfo"]!["aim"]!.ToString()); }
-        catch { sp.ppInfo.ppStat.aim = -1; }
+        catch { sp.ppInfo.ppStat.aim = null; }
 
         try { sp.ppInfo.ppStat.speed = double.Parse(json["CurrentPPInfo"]!["speed"]!.ToString()); }
-        catch { sp.ppInfo.ppStat.speed = -1; }
+        catch { sp.ppInfo.ppStat.speed = null; }
 
         try { sp.ppInfo.ppStat.flashlight = double.Parse(json["CurrentPPInfo"]!["flashlight"]!.ToString()); }
-        catch { sp.ppInfo.ppStat.flashlight = -1; }
+        catch { sp.ppInfo.ppStat.flashlight = null; }
 
         try { sp.ppInfo.ppStat.strain = double.Parse(json["CurrentPPInfo"]!["strain"]!.ToString()); }
-        catch { sp.ppInfo.ppStat.strain = -1; }
+        catch { sp.ppInfo.ppStat.strain = null; }
 
-        //五个预测pp
+        //五个预测pp+一个FC
         List<string> PPList = new()
         {
-            "100","99","98","97","95"
+            "100","99","98","97","95","FullCombo"
         };
 
         foreach (string PP in PPList)
@@ -356,23 +365,26 @@ public static class Utils
             catch { ps.total = -1; }
 
             try { ps.acc = double.Parse(json["PredictivePPInfo"]![PP]!["accuracy"]!.ToString()); }
-            catch { ps.acc = -1; }
+            catch { ps.acc = null; }
 
             try { ps.aim = double.Parse(json["PredictivePPInfo"]![PP]!["aim"]!.ToString()); }
-            catch { ps.aim = -1; }
+            catch { ps.aim = null; }
 
             try { ps.speed = double.Parse(json["PredictivePPInfo"]![PP]!["speed"]!.ToString()); }
-            catch { ps.speed = -1; }
+            catch { ps.speed = null; }
 
             try { ps.flashlight = double.Parse(json["PredictivePPInfo"]![PP]!["flashlight"]!.ToString()); }
-            catch { ps.flashlight = -1; }
+            catch { ps.flashlight = null; }
 
             try { ps.strain = double.Parse(json["PredictivePPInfo"]![PP]!["strain"]!.ToString()); }
-            catch { ps.strain = -1; }
+            catch { ps.strain = null; }
 
             sp.ppInfo.ppStats!.Add(ps);
         }
         return sp;
+
+        //fc
+
     }
 
     public static void SendDebugMail(string mailto, string body)
