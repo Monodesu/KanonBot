@@ -15,7 +15,6 @@ namespace KanonBot.functions.osu
     public static class GeneralUpdate
     {
         private static readonly CronDaemon daemon = new CronDaemon();
-        private static bool is_updated = false;
         public static void DailyUpdate()
         {
             daemon.Add(new CronJob(async () =>
@@ -24,7 +23,6 @@ namespace KanonBot.functions.osu
                 Log.Information("更新完毕，总花费时间 {0}s", span.TotalSeconds);
             }, "DailyUpdate", "0 18 4 1/1 * ? *"));   // 每天早上4点运行的意思，可以在这里生成 http://www.cronmaker.com/
             daemon.Start(CancellationToken.None);
-            while (true) ;//卡住更新线程
         }
 
 
