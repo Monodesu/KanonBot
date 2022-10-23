@@ -537,7 +537,7 @@ namespace KanonBot.LegacyImage
                 modp += 1;
             }
             // rankings
-            var ranking = data.scoreInfo.Rank;
+            var ranking = data.scoreInfo.Passed ? data.scoreInfo.Rank : "F";
             var rankPic = Img.Load($"./work/ranking/ranking-{ranking}.png");
             score.Mutate(x => x.DrawImage(rankPic, new Point(913, 874), 1));
             // text part (文字部分)

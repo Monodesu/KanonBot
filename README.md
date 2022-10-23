@@ -2,9 +2,6 @@
 rewrite for obsolete projects.
 
 对于旧版本kanonbot的重构。
-为兼容qq频道、开黑啦、discord，启用新的指令系统
-
-开发记录、待办清单请移步<https://info.desu.life/>查看
 
 有任何问题、建议请提交issue。
 
@@ -12,3 +9,4 @@ rewrite for obsolete projects.
 
 The following repositories were used
 https://github.com/RoanH/osu-BonusPP
+https://github.com/MaxOhn/rosu-pp

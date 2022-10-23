@@ -1,6 +1,11 @@
 ﻿using System.Text.RegularExpressions;
 using System.Reflection;
 using System.ComponentModel;
+using Newtonsoft.Json.Linq;
+using static KanonBot.LegacyImage.Draw;
+using KanonBot.API;
+using Org.BouncyCastle.Asn1.Crmf;
+using osu.Game.Rulesets.Difficulty;
 
 namespace KanonBot;
 
@@ -301,5 +306,90 @@ public static class Utils
         }
         catch { return mailAddr; }
     }
+
+    public static LegacyImage.Draw.ScorePanelData PackScorePanelData(JObject json, OSU.Models.Score score)
+    {
+        var sp = new ScorePanelData();
+        sp.scoreInfo = score;
+        sp.ppInfo = new()
+        {
+            star = double.Parse(json["Star"]!.ToString()),
+            accuracy = sp.scoreInfo.Accuracy,
+            CS = double.Parse(json["CS"]!.ToString()),
+            AR = double.Parse(json["AR"]!.ToString()),
+            OD = double.Parse(json["OD"]!.ToString()),
+            HP = double.Parse(json["HP"]!.ToString()),
+            maxCombo = uint.Parse(json["MaxCombo"]!.ToString()),
+            //主pp
+            ppStat = new(),
+            ppStats = new()
+        };
+
+        try { sp.ppInfo.ppStat.total = double.Parse(json["CurrentPPInfo"]!["Total"]!.ToString()); }
+        catch { sp.ppInfo.ppStat.total = -1; }
+
+        try { sp.ppInfo.ppStat.acc = double.Parse(json["CurrentPPInfo"]!["accuracy"]!.ToString()); }
+        catch { sp.ppInfo.ppStat.acc = -1; }
+
+        try { sp.ppInfo.ppStat.aim = double.Parse(json["CurrentPPInfo"]!["aim"]!.ToString()); }
+        catch { sp.ppInfo.ppStat.aim = -1; }
+
+        try { sp.ppInfo.ppStat.speed = double.Parse(json["CurrentPPInfo"]!["speed"]!.ToString()); }
+        catch { sp.ppInfo.ppStat.speed = -1; }
+
+        try { sp.ppInfo.ppStat.flashlight = double.Parse(json["CurrentPPInfo"]!["flashlight"]!.ToString()); }
+        catch { sp.ppInfo.ppStat.flashlight = -1; }
+
+        try { sp.ppInfo.ppStat.strain = double.Parse(json["CurrentPPInfo"]!["strain"]!.ToString()); }
+        catch { sp.ppInfo.ppStat.strain = -1; }
+
+        //五个预测pp
+        List<string> PPList = new()
+        {
+            "100","99","98","97","95"
+        };
+
+        foreach (string PP in PPList)
+        {
+            functions.osu.rosupp.PerformanceCalculator.PPInfo.PPStat ps = new();
+            try { ps.total = double.Parse(json["PredictivePPInfo"]![PP]!["Total"]!.ToString()); }
+            catch { ps.total = -1; }
+
+            try { ps.acc = double.Parse(json["PredictivePPInfo"]![PP]!["accuracy"]!.ToString()); }
+            catch { ps.acc = -1; }
+
+            try { ps.aim = double.Parse(json["PredictivePPInfo"]![PP]!["aim"]!.ToString()); }
+            catch { ps.aim = -1; }
+
+            try { ps.speed = double.Parse(json["PredictivePPInfo"]![PP]!["speed"]!.ToString()); }
+            catch { ps.speed = -1; }
+
+            try { ps.flashlight = double.Parse(json["PredictivePPInfo"]![PP]!["flashlight"]!.ToString()); }
+            catch { ps.flashlight = -1; }
+
+            try { ps.strain = double.Parse(json["PredictivePPInfo"]![PP]!["strain"]!.ToString()); }
+            catch { ps.strain = -1; }
+
+            sp.ppInfo.ppStats!.Add(ps);
+        }
+        return sp;
+    }
+
+    public static void SendDebugMail(string mailto, string body)
+    {
+        Mail.MailStruct ms = new()
+        {
+            MailTo = new string[] { mailto },
+            Subject = $"KanonBot 错误自动上报 - 发生于 {DateTime.Now}",
+            Body = body,
+            IsBodyHtml = false
+        };
+        try
+        {
+            Mail.Send(ms);
+        }
+        catch { }
+    }
+
 }
 
