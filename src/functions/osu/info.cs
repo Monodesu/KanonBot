@@ -84,8 +84,10 @@ namespace KanonBot.functions.osubot
             else
             {
                 // 从数据库取最近的一次记录
-                (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(DBOsuInfo!.osu_uid, data.userInfo.PlayMode, 0);
+                try { (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(DBOsuInfo!.osu_uid, data.userInfo.PlayMode, 0);
                 if (data.daysBefore > 0) ++data.daysBefore;
+                }
+                catch { data.daysBefore = 0; }
             }
 
             if (is_bounded)
