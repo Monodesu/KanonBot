@@ -47,7 +47,7 @@ namespace KanonBot.command_parser
                 switch (rootCmd)
                 {
                     case "test": Test.run(target, childCmd); return;
-                    case "reg": Accounts.RegAccount(target, childCmd); return;
+                    case "reg": await Accounts.RegAccount(target, childCmd); return;
                     case "bind": await Accounts.BindService(target, childCmd); return;
                     case "info": await Info.Execute(target, childCmd); return;
                     case "recent": await Recent.Execute(target, childCmd, true); return;
@@ -58,7 +58,7 @@ namespace KanonBot.command_parser
                     case "help": Help.Execute(target, childCmd); return;
                     case "update": await Update.Execute(target, childCmd); return;
                     case "get": await Get.Execute(target, childCmd); return;// get bonuspp/elo/rolecost/bpht/todaybp/annualpass
-                    case "badge": Badge.Execute(target, childCmd); return;
+                    case "badge": await Badge.Execute(target, childCmd); return;
                     case "leeway": await Leeway.Execute(target, childCmd); return;
                     case "set": await Set.Execute(target, childCmd); return;
                     case "ppvs":

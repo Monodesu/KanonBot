@@ -17,7 +17,7 @@ public class Model
     }
 
     [SugarTable("users")]
-    public class Users
+    public class User
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
         public long uid { get; set; }
@@ -37,7 +37,7 @@ public class Model
     }
 
     [SugarTable("users_osu")]
-    public class Users_osu
+    public class UserOSU
     {
         [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
         public long uid { get; set; }

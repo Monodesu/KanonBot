@@ -16,7 +16,7 @@ namespace KanonBot.functions.osubot
         {
             var is_bounded = false;
             OSU.Models.User? OnlineOsuInfo;
-            Database.Model.Users_osu DBOsuInfo;
+            Database.Model.UserOSU DBOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.BestPerformance);
@@ -24,12 +24,13 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                Database.Model.Users? DBUser;
-                DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+                Database.Model.User? DBUser;
+                DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 // 验证osu信息
-                DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
+                var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
+                DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
                 { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名来绑定您的osu账户。"); return; }
 
@@ -56,8 +57,8 @@ namespace KanonBot.functions.osubot
 
             if (!is_bounded) // 未绑定用户回数据库查询找模式
             {
-                var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.Id);
-                DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
+                var temp_uid = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
+                DBOsuInfo = (await Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid))!;
                 if (DBOsuInfo != null)
                 {
                     //is_bounded = true;

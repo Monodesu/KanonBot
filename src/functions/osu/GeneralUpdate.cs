@@ -17,20 +17,37 @@ namespace KanonBot.functions.osu
         private static readonly CronDaemon daemon = new CronDaemon();
         public static void DailyUpdate()
         {
+            // *    *    *    *    *  
+            // ┬    ┬    ┬    ┬    ┬
+            // │    │    │    │    │
+            // │    │    │    │    │
+            // │    │    │    │    └───── day of week (0 - 6) (Sunday=0 )
+            // │    │    │    └────────── month (1 - 12)
+            // │    │    └─────────────── day of month (1 - 31)
+            // │    └──────────────────── hour (0 - 23)
+            // └───────────────────────── min (0 - 59)
+            // `* * * * *`        Every minute.
+            // `0 * * * *`        Top of every hour.
+            // `0,1,2 * * * *`    Every hour at minutes 0, 1, and 2.
+            // `*/2 * * * *`      Every two minutes.
+            // `1-55 * * * *`     Every minute through the 55th minute.
+            // `* 1,10,20 * * *`  Every 1st, 10th, and 20th hours.
+
             daemon.Add(new CronJob(async () =>
             {
-                var span = await UpdateUsers();
+                Log.Information("开始每日用户数据更新");
+                var (count, span) = await UpdateUsers();
                 Log.Information("更新完毕，总花费时间 {0}s", span.TotalSeconds);
-            }, "DailyUpdate", "0 18 4 1/1 * ? *"));   // 每天早上4点运行的意思，可以在这里生成 http://www.cronmaker.com/
+            }, "DailyUpdate", "0 4 * * *"));   // 每天早上4点运行的意思，具体参考https://crontab.cronhub.io/
             daemon.Start(CancellationToken.None);
         }
 
 
 
-        async public static Task<TimeSpan> UpdateUsers()
+        async public static Task<(long, TimeSpan)> UpdateUsers()
         {
             var stopwatch = Stopwatch.StartNew();
-            var userList = Database.Client.GetOsuUserList();
+            var userList = await Database.Client.GetOsuUserList();
             ParallelOptions options = new ParallelOptions { MaxDegreeOfParallelism = 4 };
             await Parallel.ForEachAsync(userList, options, async (userID, _) => {
                 try
@@ -43,7 +60,7 @@ namespace KanonBot.functions.osu
                 }
             });
             stopwatch.Stop();
-            return stopwatch.Elapsed;
+            return (userList.Count, stopwatch.Elapsed);
         }
 
         async public static Task UpdateUser(long userID, bool is_newuser)
@@ -74,7 +91,7 @@ namespace KanonBot.functions.osu
                     global_rank = (int)userInfo.Statistics.GlobalRank,
                     gamemode = mode.ToModeStr()
                 };
-                Database.Client.InsertOsuUserData(rec, false);
+                await Database.Client.InsertOsuUserData(rec, false);
             }
         }
     }

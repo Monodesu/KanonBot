@@ -10,7 +10,7 @@ namespace KanonBot.functions.osu
             try
             {
                 var AccInfo = GetAccInfo(target);
-                var userinfo = Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
+                var userinfo = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
                 if (userinfo == null)
                 {
                     return;//直接忽略
@@ -85,19 +85,15 @@ namespace KanonBot.functions.osu
 
         public static async Task SuDailyUpdateAsync(Target target)
         {
-            DateTime d1 = DateTime.Now;
             target.reply("已手动开始数据更新，稍后会发送结果。");
-            await GeneralUpdate.UpdateUsers();
-            DateTime d2 = DateTime.Now;
-            TimeSpan span = d2.Subtract(d1);
+            var (count, span) = await GeneralUpdate.UpdateUsers();
             var Text = "共用时";
             if (span.Hours > 0) Text += $" {span.Hours} 小时";
             if (span.Minutes > 0) Text += $" {span.Minutes} 分钟";
             Text += $" {span.Seconds} 秒";
             try
             {
-                var userList = Database.Client.GetOsuUserList();
-                target.reply($"数据更新完成，一共更新了 {userList.Length} 个用户\n{Text}");
+                target.reply($"数据更新完成，一共更新了 {count} 个用户\n{Text}");
             }
             catch
             {

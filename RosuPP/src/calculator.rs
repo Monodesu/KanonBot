@@ -29,12 +29,11 @@ impl Calculator {
         let mods = score_params.mods;
         let clock_rate = score_params.clockRate;
         let calculator = score_params.apply(AnyPP::new(&self.inner));
-        let result = CalculateResult::new(
+        CalculateResult::new(
             calculator.calculate(),
             &self.inner,
             mods,
             clock_rate.into_option(),
-        );
-        result
+        )
     }
 }

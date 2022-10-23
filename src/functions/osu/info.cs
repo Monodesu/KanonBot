@@ -12,8 +12,8 @@ namespace KanonBot.functions.osubot
             LegacyImage.Draw.UserPanelData data = new();
             int bannerStatus = 0;
             bool is_bounded = false;
-            Database.Model.Users? DBUser = null;
-            Database.Model.Users_osu? DBOsuInfo = null;
+            Database.Model.User? DBUser = null;
+            Database.Model.UserOSU? DBOsuInfo = null;
             OSU.Models.User? OnlineOsuInfo;
 
             // 解析指令
@@ -24,11 +24,12 @@ namespace KanonBot.functions.osubot
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+                DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
                 // 验证osu信息
-                DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid);
+                var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
+                DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
                 { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名来绑定您的osu账户。"); return; }
 
@@ -54,12 +55,12 @@ namespace KanonBot.functions.osubot
 
             if (!is_bounded) // 未绑定用户回数据库查询找模式
             {
-                var temp_uid = Database.Client.GetOSUUsers(OnlineOsuInfo.Id);
-                DBOsuInfo = Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
+                var temp_uid = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
+                DBOsuInfo = await Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
                 if (DBOsuInfo != null)
                 {
                     is_bounded = true;
-                    DBUser = Accounts.GetAccount(OnlineOsuInfo.Id);
+                    DBUser = await Accounts.GetAccount(OnlineOsuInfo.Id);
                     command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
                     OnlineOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU)!;   // 这里正常是能查询到的，所以用非空处理(!)
                 }
@@ -77,13 +78,13 @@ namespace KanonBot.functions.osubot
             if (command.order_number > 0 && is_bounded)
             {
                 // 从数据库取指定天数前的记录
-                data.daysBefore = Database.Client.GetOsuUserData(out data.prevUserInfo, DBOsuInfo!.osu_uid, data.userInfo.PlayMode, command.order_number);
+                (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(DBOsuInfo!.osu_uid, data.userInfo.PlayMode, command.order_number);
                 if (data.daysBefore > 0) ++data.daysBefore;
             }
             else
             {
                 // 从数据库取最近的一次记录
-                data.daysBefore = Database.Client.GetOsuUserData(out data.prevUserInfo, DBOsuInfo!.osu_uid, data.userInfo.PlayMode, 0);
+                (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(DBOsuInfo!.osu_uid, data.userInfo.PlayMode, 0);
                 if (data.daysBefore > 0) ++data.daysBefore;
             }
 

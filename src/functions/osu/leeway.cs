@@ -13,7 +13,7 @@ namespace KanonBot.functions.osubot
         async public static Task Execute(Target target, string cmd)
         {
             OSU.Models.User? OnlineOsuInfo;
-            Database.Model.Users_osu DBOsuInfo;
+            Database.Model.UserOSU DBOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Leeway);
@@ -24,13 +24,14 @@ namespace KanonBot.functions.osubot
 
             // 验证账户
             var AccInfo = Accounts.GetAccInfo(target);
-            Database.Model.Users? DBUser;
-            DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+            Database.Model.User? DBUser;
+            DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
             if (DBUser == null)
             { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
             // 验证osu信息
-            DBOsuInfo = Accounts.CheckOsuAccount(Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform)!.uid)!;
+            var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
+            DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
             if (DBOsuInfo == null)
             { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名来绑定您的osu账户。"); return; }
 

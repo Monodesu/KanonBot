@@ -14,7 +14,7 @@ namespace KanonBot.functions
             public Platform platform;
             public string uid;
         }
-        public static void RegAccount(Target target, string cmd)
+        public static async Task RegAccount(Target target, string cmd)
         {
             //var is_private_msg = target.raw switch
             //{
@@ -37,11 +37,11 @@ namespace KanonBot.functions
                 return;
             }
             string uid = "-1";
-            bool is_regd = Database.Client.IsRegd(mailAddr);
+            bool is_regd = await Database.Client.IsRegd(mailAddr);
             bool is_append = false;
-            Database.Model.Users dbuser = new();
+            Database.Model.User dbuser = new();
 
-            if (is_regd) dbuser = Database.Client.GetUsers(mailAddr);
+            if (is_regd) dbuser = await Database.Client.GetUsers(mailAddr);
             switch (target.platform) //获取用户ID及平台信息 平台： qq qguild khl discord 四个
             {
                 case Platform.Guild:
@@ -50,7 +50,7 @@ namespace KanonBot.functions
                         uid = g.Author.ID;
                         if (is_regd)
                             if (dbuser.qq_guild_uid == g.Author.ID) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
-                        var g1 = Database.Client.GetUsersByUID(uid, Platform.Guild);
+                        var g1 = await Database.Client.GetUsersByUID(uid, Platform.Guild);
                         if (g1 != null)
                         {
                             if (g1.email != null)
@@ -74,7 +74,7 @@ namespace KanonBot.functions
                         uid = o.UserId.ToString();
                         if (is_regd)
                             if (dbuser.qq_id == o.UserId) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
-                        var o1 = Database.Client.GetUsersByUID(uid, Platform.OneBot);
+                        var o1 = await Database.Client.GetUsersByUID(uid, Platform.OneBot);
                         if (o1 != null)
                         {
                             if (o1.email != null)
@@ -98,7 +98,7 @@ namespace KanonBot.functions
                         uid = k.Author.Id.ToString();
                         if (is_regd)
                             if (dbuser.kook_uid == uid) { target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
-                        var k1 = Database.Client.GetUsersByUID(uid, Platform.KOOK);
+                        var k1 = await Database.Client.GetUsersByUID(uid, Platform.KOOK);
                         if (k1 != null)
                         {
                             if (k1.email != null)
@@ -144,7 +144,7 @@ namespace KanonBot.functions
                 {
                     Mail.Send(ms);
                     target.reply("绑定验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。");
-                    Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
+                    await Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
                 }
                 catch
                 {
@@ -165,7 +165,7 @@ namespace KanonBot.functions
                 {
                     Mail.Send(ms);
                     target.reply("注册验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。");
-                    Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
+                    await Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
                 }
                 catch
                 {
@@ -186,7 +186,7 @@ namespace KanonBot.functions
                 {
                     Mail.Send(ms);
                     target.reply("电子邮箱追加验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。");
-                    Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
+                    await Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
                 }
                 catch
                 {
@@ -204,7 +204,7 @@ namespace KanonBot.functions
                     if (target.raw is Guild.Models.MessageData g)
                     {
                         uid = g.Author.ID;
-                        if (!Database.Client.IsRegd(uid, Platform.Guild))
+                        if (!await Database.Client.IsRegd(uid, Platform.Guild))
                         {
                             target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
                         }
@@ -214,7 +214,7 @@ namespace KanonBot.functions
                     if (target.raw is OneBot.Models.CQMessageEventBase o)
                     {
                         uid = o.UserId.ToString();
-                        if (!Database.Client.IsRegd(uid, Platform.OneBot))
+                        if (!await Database.Client.IsRegd(uid, Platform.OneBot))
                         {
                             target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
                         }
@@ -224,7 +224,7 @@ namespace KanonBot.functions
                     if (target.raw is Kook.WebSocket.SocketMessage k)
                     {
                         uid = k.Author.Id.ToString();
-                        if (!Database.Client.IsRegd(uid, Platform.KOOK))
+                        if (!await Database.Client.IsRegd(uid, Platform.KOOK))
                         {
                             target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
                         }
@@ -245,10 +245,10 @@ namespace KanonBot.functions
             if (childCmd_1 == "osu")
             {
                 OSU.Models.User? online_osu_userinfo;
-                var globaluserinfo = Database.Client.GetUsersByUID(uid, target.platform);
+                var globaluserinfo = await Database.Client.GetUsersByUID(uid, target.platform);
 
                 // 检查用户是否已绑定osu账户
-                var osuuserinfo = Database.Client.GetOSUUsersByUID(globaluserinfo.uid);
+                var osuuserinfo = await Database.Client.GetOsuUserByUID(globaluserinfo.uid);
                 if (osuuserinfo != null) { target.reply($"您已经与osu uid为 {osuuserinfo.osu_uid} 的用户绑定过了。"); return; }
 
                 // 通过osu username搜索osu用户id
@@ -257,10 +257,10 @@ namespace KanonBot.functions
                     online_osu_userinfo = await OSU.GetUser(childCmd_2);
                     if (online_osu_userinfo == null) { target.reply($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。"); return; }
                     // 检查要绑定的osu是否没有被Kanon用户绑定过
-                    var db_osu_userinfo = Database.Client.GetOSUUsers(online_osu_userinfo.Id);
+                    var db_osu_userinfo = await Database.Client.GetOsuUser(online_osu_userinfo.Id);
                     if (db_osu_userinfo != null) { target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果您认为他人恶意绑定了您的账户，请联系管理员。"); return; }
                     // 没被他人绑定，开始绑定流程
-                    if (Database.Client.InsertOsuUser(globaluserinfo.uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2))   //?这里url真的能为空吗  我不到啊
+                    if (await Database.Client.InsertOsuUser(globaluserinfo.uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2))   //?这里url真的能为空吗  我不到啊
                     {
                         target.reply($"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至Kanon账户 {globaluserinfo.uid} 。");
                         await GeneralUpdate.UpdateUser(online_osu_userinfo.Id, true); //插入用户每日数据记录
@@ -275,21 +275,17 @@ namespace KanonBot.functions
             }
         }
 
-        public static Database.Model.Users? GetAccount(string uid, Platform platform)
+        public static async Task<Database.Model.User?> GetAccount(string uid, Platform platform)
         {
-            var globaluserinfo = Database.Client.GetUsersByUID(uid, platform);
-            return globaluserinfo;
+            return await Database.Client.GetUsersByUID(uid, platform);
         }
-        public static Database.Model.Users? GetAccount(long osu_uid)
+        public static async Task<Database.Model.User?> GetAccount(long osu_uid)
         {
-            var globaluserinfo = Database.Client.GetUsersByOsuUID(osu_uid);
-            return globaluserinfo;
+            return await Database.Client.GetUserByOsuUID(osu_uid);
         }
-        public static Database.Model.Users_osu? CheckOsuAccount(long uid)
+        public static async Task<Database.Model.UserOSU?> CheckOsuAccount(long uid)
         {
-            var db_osu_userinfo = Database.Client.GetOSUUsersByUID(uid);
-            if (db_osu_userinfo == null) return null;
-            return db_osu_userinfo;
+            return await Database.Client.GetOsuUserByUID(uid);
         }
 
         public static AccInfo GetAccInfo(Target target)

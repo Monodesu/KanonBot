@@ -37,7 +37,7 @@ if (config.debug)
 Log.Logger = log.CreateLogger();
 Log.Information("初始化成功 {@config}", config);
 
-Log.Information("启动用户数据更新");
+Log.Information("注册用户数据更新事件");
 GeneralUpdate.DailyUpdate();
 #endregion
 

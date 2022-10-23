@@ -11,12 +11,12 @@ namespace KanonBot.functions.osubot
 {
     public class Badge
     {
-        public static void Execute(Target target, string cmd)
+        public static async Task Execute(Target target, string cmd)
         {
             // 验证账户
             var AccInfo = GetAccInfo(target);
-            Database.Model.Users? DBUser;
-            DBUser = Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+            Database.Model.User? DBUser;
+            DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
             if (DBUser == null)
             { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
             string rootCmd, childCmd = "";
@@ -29,20 +29,20 @@ namespace KanonBot.functions.osubot
             switch (rootCmd)
             {
                 case "sudo":
-                    SudoExecute(target, childCmd, AccInfo); return;
+                    await SudoExecute(target, childCmd, AccInfo); return;
                 case "set":
-                    Set(target, childCmd, AccInfo); return;
+                    await Set(target, childCmd, AccInfo); return;
                 case "info":
-                    Info(target, childCmd, AccInfo); return;
+                    await Info(target, childCmd, AccInfo); return;
                 case "list":
-                    List(target, AccInfo); return;
+                    await List(target, AccInfo); return;
                 default:
                     return;
             }
         }
-        private static void SudoExecute(Target target, string cmd, AccInfo accinfo)
+        private static async Task SudoExecute(Target target, string cmd, AccInfo accinfo)
         {
-            var userinfo = Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
+            var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
             List<string> permissions = new();
             if (userinfo!.permissions!.IndexOf(";") < 1) //一般不会出错，默认就是user
             {
@@ -105,18 +105,18 @@ namespace KanonBot.functions.osubot
                 case "getuser":
                     SudoGetUser(target, childCmd); return;
                 case "list":
-                    List(target, accinfo); return;
+                    await List(target, accinfo); return;
                 default:
                     return;
             }
 
         }
         //注：没有完全适配多徽章安装，需要等新面板后再做适配
-        private static void Set(Target target, string cmd, AccInfo accinfo)
+        private static async Task Set(Target target, string cmd, AccInfo accinfo)
         {
             if (int.TryParse(cmd, out int badgeNum))
             {
-                var userinfo = Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
+                var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
                 if (userinfo!.owned_badge_ids == null)
                 {
                     target.reply("你还没有牌子呢..."); return;
@@ -167,7 +167,7 @@ namespace KanonBot.functions.osubot
                 //设置badge
                 if (displayed_badges.Count == 0)
                 {
-                    if (Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), owned_badges[badgeNum - 1]))
+                    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), owned_badges[badgeNum - 1]))
                         target.reply($"设置成功");
                     else
                         target.reply($"因数据库原因设置失败，请稍后再试。");
@@ -179,7 +179,7 @@ namespace KanonBot.functions.osubot
                     foreach (var x in displayed_badges)
                         settemp1 += x + ",";
                     settemp1 += owned_badges[badgeNum - 1];
-                    if (Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), settemp1))
+                    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), settemp1))
                         target.reply($"设置成功");
                     else
                         target.reply($"因数据库原因设置失败，请稍后再试。");
@@ -191,12 +191,12 @@ namespace KanonBot.functions.osubot
                 target.reply("你提供的badge id不正确，请重新检查。");
             }
         }
-        private static void Info(Target target, string cmd, AccInfo accinfo)
+        private static async Task Info(Target target, string cmd, AccInfo accinfo)
         {
             int badgeNum = -1;
             if (int.TryParse(cmd, out badgeNum))
             {
-                var userinfo = Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
+                var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
                 if (userinfo!.owned_badge_ids == null)
                 {
                     target.reply("你还没有牌子呢..."); return;
@@ -223,9 +223,9 @@ namespace KanonBot.functions.osubot
 
 
                 //获取badge信息
-                var badgeinfo = Database.Client.GetBadgeInfo(owned_badges[badgeNum - 1]);
+                var badgeinfo = await Database.Client.GetBadgeInfo(owned_badges[badgeNum - 1]);
                 target.reply($"badge信息:\n" +
-                    $"名称: {badgeinfo.name}({badgeinfo.id})\n" +
+                    $"名称: {badgeinfo!.name}({badgeinfo.id})\n" +
                     $"中文名称: {badgeinfo.name_chinese}\n" +
                     $"描述: {badgeinfo.description}");
             }
@@ -234,9 +234,9 @@ namespace KanonBot.functions.osubot
                 target.reply("你提供的badge id不正确，请重新检查。");
             }
         }
-        private static void List(Target target, AccInfo accinfo)
+        private static async Task List(Target target, AccInfo accinfo)
         {
-            var userinfo = Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
+            var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
             if (userinfo!.owned_badge_ids == null)
             {
                 target.reply("你还没有牌子呢..."); return;
@@ -259,8 +259,8 @@ namespace KanonBot.functions.osubot
             var msg = $"以下是你拥有的badge列表:";
             for (int i = 0; i < owned_badges.Count; i++)
             {
-                var badgeinfo = Database.Client.GetBadgeInfo(owned_badges[i]);
-                msg += $"\n{i + 1}:{badgeinfo.name_chinese} ({badgeinfo.name})";
+                var badgeinfo = await Database.Client.GetBadgeInfo(owned_badges[i]);
+                msg += $"\n{i + 1}:{badgeinfo!.name_chinese} ({badgeinfo.name})";
             }
             target.reply(msg);
         }
@@ -291,7 +291,7 @@ namespace KanonBot.functions.osubot
         {
 
         }
-        private static void SudoAdd(Target target, string cmd)
+        private static async Task SudoAdd(Target target, string cmd)
         {
             var args = cmd.Split("#");
             var badgeid_s = args[2].Trim();
@@ -324,7 +324,7 @@ namespace KanonBot.functions.osubot
             //添加badge
             foreach (var x in user_list)
             {
-                var userInfo = Database.Client.GetUsersByOsuUID(long.Parse(x));
+                var userInfo = await Database.Client.GetUserByOsuUID(long.Parse(x));
                 if (userInfo == null) { target.reply($"osu!用户 {x} 不存在，无法添加，请重新检查。"); }
                 else
                 {
@@ -353,7 +353,7 @@ namespace KanonBot.functions.osubot
                     string t = "";
                     foreach (var xx in owned_badges)
                         t += xx + ",";
-                    if (!Database.Client.SetOwnedBadge(x, t[..^1]))
+                    if (!await Database.Client.SetOwnedBadge(x, t[..^1]))
                         target.reply($"数据库错误，无法为osu!用户 {x} 添加。");
                 }
             }
