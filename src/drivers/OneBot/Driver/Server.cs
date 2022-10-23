@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Net.WebSockets;
 using Fleck;
 using KanonBot.Message;
@@ -15,25 +16,52 @@ using KanonBot;
 namespace KanonBot.Drivers;
 public partial class OneBot
 {
+
     public class Server : OneBot, IDriver
     {
         public class Socket : ISocket
         {
             public API api;
-            IWebSocketConnection socket;
+            IWebSocketConnection inner;
             public string? selfID { get; private set; }
             public Socket(IWebSocketConnection socket)
             {
                 this.api = new(this);
-                this.socket = socket;
+                this.inner = socket;
                 this.selfID = socket.ConnectionInfo.Headers["X-Self-ID"];
             }
             public void Send(string message)
             {
-                this.socket.Send(message);
+                this.inner.Send(message);
+            }
+            public void Close()
+            {
+                this.inner.Close();
             }
         }
-        Dictionary<Guid, Socket> clients;
+        class Clients
+        {
+            private Dictionary<Guid, Socket> inner = new();
+            private Mutex mut = new();
+
+            public Socket? Get(Guid k) {
+                return this.inner.GetValueOrDefault(k);
+            }
+            public void Set(Guid k, Socket v) {
+                mut.WaitOne();
+                this.inner.Add(k, v);
+                mut.ReleaseMutex();
+            }
+            public Socket? Remove(Guid k) {
+                Socket? s;
+                mut.WaitOne();
+                this.inner.Remove(k, out s);
+                mut.ReleaseMutex();
+                return s;
+            }
+
+        }
+        Clients clients = new();
         WebSocketServer instance;
         public Server(string url)
         {
@@ -59,7 +87,6 @@ public partial class OneBot
                 }
             };
             this.instance = server;
-            this.clients = new();
         }
 
         void SocketAction(IWebSocketConnection socket)
@@ -69,42 +96,46 @@ public partial class OneBot
 
             if (!socket.ConnectionInfo.Headers.TryGetValue("X-Client-Role", out string? role))
             {
-                this.Disconnect(socket);
+                socket.Close();
                 return;
             }
 
             if (role != "Universal")
             {
-                this.Disconnect(socket);
+                socket.Close();
                 return;
             }
 
 
             socket.OnError = (e) =>
             {
-                this.Disconnect(socket);
+                this.Disconnect(socket.ConnectionInfo.Id);
                 Log.Error($"[{OneBot.platform} Core] {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 连接异常断开");
             };
             socket.OnOpen = () =>
             {
-                this.clients.Add(socket.ConnectionInfo.Id, new Socket(socket));
+                this.clients.Set(socket.ConnectionInfo.Id, new Socket(socket));
                 Log.Information($"[{OneBot.platform} Core] 收到来自 {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 的连接");
             };
             socket.OnClose = () =>
             {
-                this.Disconnect(socket);
+                this.Disconnect(socket.ConnectionInfo.Id);
                 Log.Information($"[{OneBot.platform} Core] {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 连接断开");
             };
             socket.OnMessage = message => Task.Run(() =>
             {
                 try
                 {
-                    this.Parse(message, this.clients[socket.ConnectionInfo.Id]);
+                    var s = this.clients.Get(socket.ConnectionInfo.Id);
+                    if (s != null)
+                        this.Parse(message, s);
+                    else
+                        socket.Close();
                 }
                 catch (Exception ex)
                 {
                     Log.Error("未捕获的异常 ↓\n{ex}", ex);
-                    this.Disconnect(socket);
+                    this.Disconnect(socket.ConnectionInfo.Id);
                 }
             });
         }
@@ -173,10 +204,10 @@ public partial class OneBot
             }
         }
 
-        void Disconnect(IWebSocketConnection socket)
+        void Disconnect(Guid id)
         {
-            socket.Close();
-            this.clients.Remove(socket.ConnectionInfo.Id);
+            var s = this.clients.Remove(id);
+            s?.Close();
         }
 
 

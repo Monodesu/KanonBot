@@ -274,6 +274,35 @@ namespace KanonBot.API
             return data;
         }
 
+        async public static Task<Models.PPlusData> GetUserPlusData(string username)
+        {
+            var res = await $"https://syrin.me/pp+/api/user/{username}/".GetJsonAsync<JObject>();
+            var data = new Models.PPlusData();
+            data.User = res["user_data"]!.ToObject<Models.PPlusData.UserData>()!;
+            data.Performances = res["user_performances"]!["total"]!.ToObject<Models.PPlusData.UserPerformances[]>();
+            return data;
+        }
+        
+        async public static Task<Models.PPlusData?> TryGetUserPlusData(OSU.Models.User user)
+        {
+            try
+            {
+                return await GetUserPlusData(user.Id);
+            }
+            catch
+            {
+                try
+                {
+                    return await GetUserPlusData(user.Username);
+                }
+                catch (System.Exception)
+                {
+                    
+                    return null;
+                }
+            }
+        }
+
         async public static Task BeatmapFileChecker(long bid)
         {
             if (!Directory.Exists("./work/beatmap/")) Directory.CreateDirectory("./work/beatmap/");
@@ -282,33 +311,5 @@ namespace KanonBot.API
                 await Http.DownloadFile($"http://osu.ppy.sh/osu/{bid}", $"./work/beatmap/{bid}.osu");
             }
         }
-
-
-        public static PerformanceCalculator.PPInfo LegacyPPInfoParser(JObject mainpp)
-        {
-            //老式写法
-            PerformanceCalculator.PPInfo p = new();
-            p.star = (double)mainpp["Star"]!;
-            p.CS = (double)mainpp["CS"]!;
-            p.HP = (double)mainpp["HP"]!;
-            //p.aim = (double)mainpp["Aim"]!;
-            //p.speed = (double)mainpp["Speed"]!;
-            p.maxCombo = (uint)mainpp["MaxCombo"]!;
-            p.AR = (double)mainpp["AR"]!;
-            p.OD = (double)mainpp["OD"]!;
-            p.ppStat.total = (double)mainpp["PPInfo"]!["Total"]!;
-            p.ppStat.total = (double)mainpp["PPInfo"]!["Total"]!;
-            p.ppStat.aim = (double)mainpp["PPInfo"]!["aim"]!;
-            p.ppStat.speed = (double)mainpp["PPInfo"]!["speed"]!;
-            p.ppStat.acc = (double)mainpp["PPInfo"]!["accuracy"]!;
-            p.ppStat.flashlight = (int)mainpp["PPInfo"]!["flashlight"]!;
-            // p.ppStat.effective_miss_count = (int)mainpp["PPInfo"]!["effective_miss_count"]!;
-            return p;
-        }
-
-
-
-
-
     }
 }
