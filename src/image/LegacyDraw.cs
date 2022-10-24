@@ -55,7 +55,7 @@ namespace KanonBot.LegacyImage
             // custom panel
             var panelPath = "./work/legacy/default-info-v1.png";
             if (File.Exists($"./work/legacy/v1_infopanel/{data.userInfo.Id}.png")) panelPath = $"./work/legacy/v1_infopanel/{data.userInfo.Id}.png";
-            Img panel = Img.Load(panelPath);
+            Img panel = Img.Load(Utils.LoadFile2Stream(panelPath));
 
             var coverPath = $"./work/legacy/v1_cover/{data.userInfo.Id}.png";
             if (customBannerStatus == 1)
@@ -142,7 +142,7 @@ namespace KanonBot.LegacyImage
             // pp+
             if (data.userInfo.PlayMode is OSU.Enums.Mode.OSU)
             {
-                Img ppdataPanel = Img.Load("./work/legacy/pp+-v1.png");
+                Img ppdataPanel = Img.Load(Utils.LoadFile2Stream("./work/legacy/pp+-v1.png"));
                 info.Mutate(x => x.DrawImage(ppdataPanel, new Point(0, 0), 1));
                 Hexagram.HexagramInfo hi = new();
                 hi.abilityFillColor = Color.FromRgba(253, 148, 62, 128);
@@ -190,7 +190,7 @@ namespace KanonBot.LegacyImage
             }
             else
             {
-                Img ppdataPanel = Img.Load("./work/legacy/nopp+info-v1.png");
+                Img ppdataPanel = Img.Load(Utils.LoadFile2Stream("./work/legacy/nopp+info-v1.png"));
                 info.Mutate(x => x.DrawImage(ppdataPanel, new Point(0, 0), 1));
             }
 
@@ -427,20 +427,20 @@ namespace KanonBot.LegacyImage
                 avatar = Img.Load(avatarPath).CloneAs<Rgba32>();    // 下载后再读取
             }
 
-            var score = Img.Load("work/legacy/v2_scorepanel/default-score-v2.png");
+            var score = Img.Load(Utils.LoadFile2Stream("work/legacy/v2_scorepanel/default-score-v2.png"));
             var fonts = new FontCollection();
             var TorusRegular = fonts.Add("./work/fonts/Torus-Regular.ttf");
             var TorusSemiBold = fonts.Add("./work/fonts/Torus-SemiBold.ttf");
             var HarmonySans = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
 
             Img panel;
-            if (data.scoreInfo.Mode is OSU.Enums.Mode.Fruits) panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2-fruits.png");
-            else if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania) panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2-mania.png");
-            else panel = Img.Load("work/legacy/v2_scorepanel/default-score-v2.png");
+            if (data.scoreInfo.Mode is OSU.Enums.Mode.Fruits) panel = Img.Load(Utils.LoadFile2Stream("work/legacy/v2_scorepanel/default-score-v2-fruits.png"));
+            else if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania) panel = Img.Load(Utils.LoadFile2Stream("work/legacy/v2_scorepanel/default-score-v2-mania.png"));
+            else panel = Img.Load(Utils.LoadFile2Stream("work/legacy/v2_scorepanel/default-score-v2.png"));
             // bg
             Img bg;
             try { bg = Img.Load(bgPath).CloneAs<Rgba32>(); }
-            catch { bg = Img.Load("./work/legacy/load-failed-img.png"); }
+            catch { bg = Img.Load(Utils.LoadFile2Stream("./work/legacy/load-failed-img.png")); }
             var smallBg = bg.Clone(x => x.RoundCorner(new Size(433, 296), 20));
             Img backBlack = new Image<Rgba32>(1950 - 2, 1088);
             backBlack.Mutate(x => x.BackgroundColor(Color.Black).RoundCorner(new Size(1950 - 2, 1088), 20));
@@ -520,11 +520,11 @@ namespace KanonBot.LegacyImage
             score.Mutate(x => x.DrawImage(diffCircle, new Point(512, 257), 1));
             // beatmap_status
             if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.ranked)
-                score.Mutate(x => x.DrawImage(Img.Load("./work/icons/ranked.png"), new Point(415, 16), 1));
+                score.Mutate(x => x.DrawImage(Img.Load(Utils.LoadFile2Stream("./work/icons/ranked.png")), new Point(415, 16), 1));
             if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.approved)
-                score.Mutate(x => x.DrawImage(Img.Load("./work/icons/approved.png"), new Point(415, 16), 1));
+                score.Mutate(x => x.DrawImage(Img.Load(Utils.LoadFile2Stream("./work/icons/approved.png")), new Point(415, 16), 1));
             if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.loved)
-                score.Mutate(x => x.DrawImage(Img.Load("./work/icons/loved.png"), new Point(415, 16), 1));
+                score.Mutate(x => x.DrawImage(Img.Load(Utils.LoadFile2Stream("./work/icons/loved.png")), new Point(415, 16), 1));
             // mods
             var mods = data.scoreInfo.Mods;
             var modp = 0;
@@ -941,7 +941,7 @@ namespace KanonBot.LegacyImage
         }
         public static MemoryStream DrawPPVS(PPVSPanelData data)
         {
-            using (var ppvsImg = Img.Load("work/legacy/ppvs.png"))
+            using (var ppvsImg = Img.Load(Utils.LoadFile2Stream("work/legacy/ppvs.png")))
             {
                 Hexagram.HexagramInfo hi = new();
                 // hi.abilityLineColor = Color.ParseHex("#FF7BAC");

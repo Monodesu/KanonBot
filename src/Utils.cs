@@ -35,7 +35,6 @@ public static class Utils
         FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
         return fs;
     }
-
     public static Stream Byte2Stream(byte[] buffer)
     {
         Stream stream = new MemoryStream(buffer);
