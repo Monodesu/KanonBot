@@ -79,11 +79,11 @@ namespace KanonBot.command_parser
                 }
                 catch (Flurl.Http.FlurlHttpTimeoutException)
                 {
-                    target.reply("API访问超时，请稍后重试。");
+                    target.reply("API访问超时，请稍后重试吧");
                 }
                 catch (Flurl.Http.FlurlHttpException ex)
                 {
-                    target.reply("网络出现错误！错误内容已自动上报。");
+                    target.reply("网络出现错误！错误已上报");
                     var rtmp =
                         $"Target Message: {target.msg}\r\n"+
                         $"Message: {ex.Message}\r\n" +
@@ -94,7 +94,7 @@ namespace KanonBot.command_parser
                 }
                 catch (Exception ex)
                 {
-                    target.reply("出现了未知错误，错误内容已自动上报。");
+                    target.reply("出现了未知错误，错误内容已自动上报");
                     var rtmp =
                         $"Target Message: {target.msg}\r\n" +
                         $"Message: {ex.Message}\r\n" +

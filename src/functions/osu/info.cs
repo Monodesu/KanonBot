@@ -75,23 +75,24 @@ namespace KanonBot.functions.osubot
                 data.userInfo.PlayMode = (OSU.Enums.Mode)command.osu_mode;
             }
             // 查询
-            if (command.order_number > 0 && is_bounded)
-            {
-                // 从数据库取指定天数前的记录
-                (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(DBOsuInfo!.osu_uid, data.userInfo.PlayMode, command.order_number);
-                if (data.daysBefore > 0) ++data.daysBefore;
-            }
-            else
-            {
-                // 从数据库取最近的一次记录
-                try { (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(DBOsuInfo!.osu_uid, data.userInfo.PlayMode, 0);
-                if (data.daysBefore > 0) ++data.daysBefore;
-                }
-                catch { data.daysBefore = 0; }
-            }
 
             if (is_bounded)
             {
+                if (command.order_number > 0)
+                {
+                    // 从数据库取指定天数前的记录
+                    (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(DBOsuInfo!.osu_uid, data.userInfo.PlayMode, command.order_number);
+                    if (data.daysBefore > 0) ++data.daysBefore;
+                }
+                else
+                {
+                    // 从数据库取最近的一次记录
+                    try { (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(DBOsuInfo!.osu_uid, data.userInfo.PlayMode, 0);
+                    if (data.daysBefore > 0) ++data.daysBefore;
+                    }
+                    catch { data.daysBefore = 0; }
+                }
+
                 switch (DBOsuInfo!.customInfoEngineVer)
                 {
                     case 1:
@@ -103,6 +104,20 @@ namespace KanonBot.functions.osubot
                         // 取PP+信息
                         // 还没写
                         data.pplusInfo = new();
+                        var d = await Database.Client.GetOsuPPlusData(DBOsuInfo!.osu_uid);
+                        if (d != null)
+                        {
+                            data.pplusInfo = d;
+                        }
+                        else
+                        {
+                            // 异步获取osupp数据，下次请求的时候就有了
+                            await Task.Run(async () =>
+                            {
+                                try { await Database.Client.UpdateOsuPPlusData((await API.OSU.TryGetUserPlusData(OnlineOsuInfo!))!.User, OnlineOsuInfo!.Id); }
+                                catch { }//更新pp+失败，不返回信息
+                            }).ConfigureAwait(false);
+                        }
 
                         var badgeID = DBUser!.displayed_badge_ids;
                         // legacy只取第一个badge

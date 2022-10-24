@@ -45,6 +45,7 @@ namespace KanonBot.functions.osubot
                     // await AnnualPass(target, childCmd);
                     break;
                 default:
+                    target.reply("!get bonuspp/elo/rolecost/bpht/todaybp");
                     return;
             }
         }

@@ -150,6 +150,25 @@ public class Client
 
     }
 
+    static public async Task<API.OSU.Models.PPlusData.UserData?> GetOsuPPlusData(long osu_uid)
+    {
+        var data = await GetInstance().Queryable<Model.OsuPPlus>().FirstAsync(it => it.uid == osu_uid && it.pp != 0);
+        if (data == null) {
+            var realData = new API.OSU.Models.PPlusData.UserData();
+            realData.UserId = osu_uid;
+            realData.PerformanceTotal = data.pp;
+            realData.AccuracyTotal = data.acc;
+            realData.FlowAimTotal = data.flow;
+            realData.JumpAimTotal = data.jump;
+            realData.PrecisionTotal = data.pre;
+            realData.SpeedTotal = data.spd;
+            realData.StaminaTotal = data.sta;
+            return realData;
+        } else {
+            return null;
+        }
+    }
+
     static public async Task<bool> UpdateOsuPPlusData(API.OSU.Models.PPlusData.UserData ppdata, long osu_uid)
     {
         var db = GetInstance();

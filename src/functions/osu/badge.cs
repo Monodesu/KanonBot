@@ -37,6 +37,7 @@ namespace KanonBot.functions.osubot
                 case "list":
                     await List(target, AccInfo); return;
                 default:
+                    target.reply("!badge set/info/list");
                     return;
             }
         }

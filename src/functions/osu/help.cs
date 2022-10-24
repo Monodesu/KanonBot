@@ -8,7 +8,7 @@ namespace KanonBot.functions.osubot
     {
         public static void Execute(Target target, string cmd)
         {
-            target.reply("请移步 https://info.desu.life/?p=383 查阅");
+            target.reply("用户查询：\n!info/recent/bp/get\n绑定/用户设置：\n!reg/set\n更多细节请移步 https://info.desu.life/?p=383 查阅");
         }
     }
 }

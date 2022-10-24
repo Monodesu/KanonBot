@@ -17,10 +17,11 @@ namespace KanonBot.functions.osubot
             catch { rootCmd = cmd; }
             switch (rootCmd)
             {
-                case "osu_mode":
+                case "osumode":
                     await Osu_mode(target, childCmd);
                     break;
                 default:
+                    target.reply("!set osumode");
                     return;
             }
         }
