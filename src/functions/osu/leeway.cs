@@ -119,7 +119,8 @@ namespace KanonBot.functions.osubot
 
             if (scoreData != null)
             {
-                str += string.Format("\n你的成绩：{0:n0} (+{1})", (int)score, lc.GetModsString(scoreData.Score.Mods));
+                string scoreModsString = lc.GetModsString(scoreData.Score.Mods);
+                str += string.Format("\n你的成绩：{0:n0} ({1})", (int)score, scoreModsString != "" ? $"+{scoreModsString}" : "None");
             }
             else
             {
