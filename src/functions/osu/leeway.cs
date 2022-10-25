@@ -120,7 +120,8 @@ namespace KanonBot.functions.osubot
             if (scoreData != null)
             {
                 string scoreModsString = lc.GetModsString(scoreData.Score.Mods);
-                str += string.Format("\n你的成绩：{0:n0} ({1})", (int)score, scoreModsString != "" ? $"+{scoreModsString}" : "None");
+                int scoreAdvantage = (int)score - maxScore;
+                str += string.Format("\n你的成绩：{0:n0} ({1}) {2}", (int)score, scoreModsString != "" ? $"+{scoreModsString}" : "None", scoreAdvantage < 0 ? scoreAdvantage : $"+{scoreAdvantage}");
             }
             else
             {
