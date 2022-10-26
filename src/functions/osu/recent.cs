@@ -74,13 +74,13 @@ namespace KanonBot.functions.osubot
             {
                 try
                 {
-                    if (scoreInfos[0].Mode == 0)
+                    if (scoreInfos[0].Mode == OSU.Enums.Mode.OSU)
                     {
                         //osu-tools
-                        var data = await KanonBot.osutools.Calculator.CalculateAsync(scoreInfos[0]);
+                        var data = await PerformanceCalculator.CalculatePanelData(scoreInfos[0]);
                         // 绘制
                         var stream = new MemoryStream();
-                        var img = LegacyImage.Draw.DrawScore(Utils.PackScorePanelData(data, scoreInfos[0]));
+                        var img = LegacyImage.Draw.DrawScore(data);
                         await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
                         stream.TryGetBuffer(out ArraySegment<byte> buffer);
                         target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));

@@ -256,14 +256,14 @@ public class Client
         return await GetInstance().Insertable(rec).ExecuteReturnIdentityAsync();
     }
 
-    static public async Task<bool> SetOsuUserMode(long uid, string mode)
+    static public async Task<bool> SetOsuUserMode(long uid, API.OSU.Enums.Mode mode)
     {
         var db = GetInstance();
         var data = await db.Queryable<Model.UserOSU>().FirstAsync(it => it.uid == uid);
         var result = await db.Updateable<Model.UserOSU>()
             .SetColumns(it => new Model.UserOSU()
             {
-                osu_mode = mode,
+                osu_mode = API.OSU.Enums.ParseMode(mode),
             })
             .Where(it => it.uid == uid)
             .ExecuteCommandHasChangeAsync();

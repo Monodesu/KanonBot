@@ -100,7 +100,7 @@ namespace KanonBot.functions.osu.rosupp
             public OSU.Enums.Mode mode;
             public string[]? mods;
             public double? acc;
-            public uint? n300, n100, n50, nmisses, nkatu, combo, score, passedObjects, clockRate;
+            public uint? n300, n100, n50, nmisses, nkatu, combo, passedObjects, clockRate;
             public ScoreParams build()
             {
                 var p = ScoreParams.New();
@@ -119,7 +119,6 @@ namespace KanonBot.functions.osu.rosupp
                 if (nmisses != null) p.NMisses(nmisses.Value);
                 if (nkatu != null) p.NKatu(nkatu.Value);
                 if (combo != null) p.Combo(combo.Value);
-                if (score != null) p.Score(score.Value);
                 if (mods != null) p.Mods(Intmod_parser(mods));
                 return p;
             }
@@ -156,13 +155,11 @@ namespace KanonBot.functions.osu.rosupp
                 n50 = statistics.CountMeh,
                 nmisses = statistics.CountMiss,
                 nkatu = statistics.CountKatu,
-                score = (uint?)data.scoreInfo.Scores
             }.build().Context));
 
             // 初始化列表
             data.ppInfo.ppStats = new();
 
-            // todo! 在mania模式下按分数计算，而非准度
             // 5种acc
             double[] accs = { 100.00, 99.00, 98.00, 97.00, 95.00 };
             foreach (var acc in accs)

@@ -19,6 +19,7 @@ pub struct CalculateResult {
     pub ppFlashlight: FFIOption<f64>,
     pub ppSpeed: FFIOption<f64>,
     pub ppStrain: FFIOption<f64>,
+    pub ppDifficulty: FFIOption<f64>,
     pub nFruits: FFIOption<u32>,
     pub nDroplets: FFIOption<u32>,
     pub nTinyDroplets: FFIOption<u32>,
@@ -39,6 +40,7 @@ pub struct CalculateResult {
     pub nSliders: FFIOption<u32>,
     pub nSpinners: FFIOption<u32>,
     pub maxCombo: FFIOption<u32>,
+    pub EffectiveMissCount: FFIOption<f64>,
 }
 
 impl CalculateResult {
@@ -94,14 +96,12 @@ impl CalculateResult {
             },
             PerformanceAttributes::Mania(ManiaPerformanceAttributes {
                 pp,
-                pp_acc,
-                pp_strain,
+                pp_difficulty,
                 difficulty,
             }) => Self {
                 mode: Mode::Mania,
                 pp,
-                ppAcc: Some(pp_acc).into(),
-                ppStrain: Some(pp_strain).into(),
+                ppDifficulty: Some(pp_difficulty).into(),
                 stars: difficulty.stars,
                 nCircles: Some(map.n_circles).into(),
                 nSliders: Some(map.n_sliders).into(),
@@ -121,6 +121,7 @@ impl CalculateResult {
                 pp_flashlight,
                 pp_speed,
                 difficulty,
+                effective_miss_count
             }) => Self {
                 mode: Mode::Osu,
                 pp,
@@ -130,9 +131,9 @@ impl CalculateResult {
                 ppSpeed: Some(pp_speed).into(),
                 stars: difficulty.stars,
                 maxCombo: Some(difficulty.max_combo as u32).into(),
-                aimStrain: Some(difficulty.aim_strain).into(),
-                speedStrain: Some(difficulty.speed_strain).into(),
-                flashlightRating: Some(difficulty.flashlight_rating).into(),
+                aimStrain: Some(difficulty.aim).into(),
+                speedStrain: Some(difficulty.speed).into(),
+                flashlightRating: Some(difficulty.flashlight).into(),
                 sliderFactor: Some(difficulty.slider_factor).into(),
                 nCircles: Some(difficulty.n_circles as u32).into(),
                 nSliders: Some(difficulty.n_sliders as u32).into(),
@@ -145,18 +146,20 @@ impl CalculateResult {
                 clockRate: clock_rate,
                 timePreempt: Some(hit_windows.ar).into(),
                 greatHitWindow: Some(hit_windows.od).into(),
+                EffectiveMissCount: Some(effective_miss_count).into(),
                 ..Default::default()
             },
             PerformanceAttributes::Taiko(TaikoPerformanceAttributes {
                 pp,
                 pp_acc,
-                pp_strain,
+                pp_difficulty,
                 difficulty,
+                effective_miss_count
             }) => Self {
                 mode: Mode::Taiko,
                 pp,
                 ppAcc: Some(pp_acc).into(),
-                ppStrain: Some(pp_strain).into(),
+                ppDifficulty: Some(pp_difficulty).into(),
                 stars: difficulty.stars,
                 maxCombo: Some(difficulty.max_combo as u32).into(),
                 nCircles: Some(map.n_circles).into(),
@@ -169,6 +172,7 @@ impl CalculateResult {
                 bpm,
                 clockRate: clock_rate,
                 greatHitWindow: Some(hit_windows.od).into(),
+                EffectiveMissCount: Some(effective_miss_count).into(),
                 ..Default::default()
             },
         }

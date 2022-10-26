@@ -18,7 +18,6 @@ pub struct ScoreParams {
     pub nMisses: FFIOption<u32>,
     pub nKatu: FFIOption<u32>,
     pub combo: FFIOption<u32>,
-    pub score: FFIOption<u32>,
     pub passedObjects: FFIOption<u32>,
     pub clockRate: FFIOption<f64>,
 }
@@ -61,10 +60,6 @@ impl ScoreParams {
     pub fn combo(&mut self, combo: u32) {
         self.combo = Some(combo).into();
     }
-    #[ffi_service_method(on_panic = "undefined_behavior")]
-    pub fn score(&mut self, score: u32) {
-        self.score = Some(score).into();
-    }
 
     #[ffi_service_method(on_panic = "undefined_behavior")]
     pub fn n_misses(&mut self, n_misses: u32) {
@@ -99,7 +94,6 @@ impl ScoreParams {
             nKatu,
             acc,
             combo,
-            score,
             passedObjects,
             clockRate,
         } = self;
@@ -128,7 +122,7 @@ impl ScoreParams {
         }
 
         if let Some(n_misses) = nMisses.into_option() {
-            calculator = calculator.misses(n_misses as usize);
+            calculator = calculator.n_misses(n_misses as usize);
         }
 
         if let Some(n_katu) = nKatu.into_option() {
@@ -153,10 +147,6 @@ impl ScoreParams {
             calculator = calculator.accuracy(acc);
         }
 
-        if let Some(score) = score.into_option() {
-            calculator = calculator.score(score);
-        }
-
         calculator
     }
 }
@@ -176,7 +166,6 @@ impl std::fmt::Debug for ScoreParams {
             nKatu: {}, \
             acc: {}, \
             combo: {}, \
-            score: {}, \
             passedObjects: {}, \
             clockRate: {} \
         }}",
@@ -211,10 +200,6 @@ impl std::fmt::Debug for ScoreParams {
             },
             match self.combo.into_option() {
                 Some(ref combo) => combo as &dyn Display,
-                None => &"None" as &dyn Display,
-            },
-            match self.score.into_option() {
-                Some(ref score) => score as &dyn Display,
                 None => &"None" as &dyn Display,
             },
             match self.passedObjects.into_option() {

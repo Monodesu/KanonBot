@@ -68,9 +68,6 @@ namespace RosuPP
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "score_params_combo")]
         public static extern void score_params_combo(IntPtr context, uint combo);
 
-        [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "score_params_score")]
-        public static extern void score_params_score(IntPtr context, uint score);
-
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "score_params_n_misses")]
         public static extern void score_params_n_misses(IntPtr context, uint n_misses);
 
@@ -109,6 +106,7 @@ namespace RosuPP
         public Optionf64 ppFlashlight;
         public Optionf64 ppSpeed;
         public Optionf64 ppStrain;
+        public Optionf64 ppDifficulty;
         public Optionu32 nFruits;
         public Optionu32 nDroplets;
         public Optionu32 nTinyDroplets;
@@ -128,6 +126,7 @@ namespace RosuPP
         public Optionu32 nSliders;
         public Optionu32 nSpinners;
         public Optionu32 maxCombo;
+        public Optionf64 EffectiveMissCount;
     }
 
     public enum FFIError
@@ -300,11 +299,6 @@ namespace RosuPP
         public void Combo(uint combo)
         {
             Rosu.score_params_combo(_context, combo);
-        }
-
-        public void Score(uint score)
-        {
-            Rosu.score_params_score(_context, score);
         }
 
         public void NMisses(uint n_misses)
