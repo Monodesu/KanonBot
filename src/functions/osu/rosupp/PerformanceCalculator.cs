@@ -162,7 +162,6 @@ namespace KanonBot.functions.osu.rosupp
             // 初始化列表
             data.ppInfo.ppStats = new();
 
-            // todo! 在mania模式下按分数计算，而非准度
             // 5种acc
             double[] accs = { 100.00, 99.00, 98.00, 97.00, 95.00 };
             foreach (var acc in accs)

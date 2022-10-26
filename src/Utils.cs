@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 using static KanonBot.LegacyImage.Draw;
 using KanonBot.API;
 using Org.BouncyCastle.Asn1.Crmf;
-using osu.Game.Rulesets.Difficulty;
 
 namespace KanonBot;
 
