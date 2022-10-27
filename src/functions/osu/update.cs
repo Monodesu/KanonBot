@@ -59,7 +59,7 @@ namespace KanonBot.functions.osubot
                 if (DBOsuInfo != null)
                 {
                     is_bounded = true;
-                    DBUser = await Accounts.GetAccount(OnlineOsuInfo.Id);
+                    DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
                     command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
                     OnlineOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU)!;   // 这里正常是能查询到的，所以用非空处理(!)
                 }

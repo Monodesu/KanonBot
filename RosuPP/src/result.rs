@@ -121,7 +121,7 @@ impl CalculateResult {
                 pp_flashlight,
                 pp_speed,
                 difficulty,
-                effective_miss_count
+                effective_miss_count,
             }) => Self {
                 mode: Mode::Osu,
                 pp,
@@ -154,7 +154,7 @@ impl CalculateResult {
                 pp_acc,
                 pp_difficulty,
                 difficulty,
-                effective_miss_count
+                effective_miss_count,
             }) => Self {
                 mode: Mode::Taiko,
                 pp,
@@ -268,4 +268,10 @@ impl std::fmt::Debug for CalculateResult {
 
         s.finish()
     }
+}
+
+#[ffi_function]
+#[no_mangle]
+pub extern "C" fn debug_result(res: &CalculateResult) {
+    println!("{res:?}");
 }

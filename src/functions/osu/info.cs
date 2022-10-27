@@ -11,13 +11,14 @@ namespace KanonBot.functions.osubot
             #region 验证
             LegacyImage.Draw.UserPanelData data = new();
             int bannerStatus = 0;
-            bool is_bounded = false;
+            long? osuID = null;
+            OSU.Enums.Mode? mode;
             Database.Model.User? DBUser = null;
             Database.Model.UserOSU? DBOsuInfo = null;
-            OSU.Models.User? OnlineOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
+            mode = command.osu_mode;
 
             // 解析指令
             if (command.self_query)
@@ -27,52 +28,57 @@ namespace KanonBot.functions.osubot
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
-                // 验证osu信息
+                // 验证账号信息
                 var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
                 DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
                 { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名来绑定您的osu账户。"); return; }
 
-                command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
-
-                // 验证osu信息
-                OnlineOsuInfo = await OSU.GetUser(DBOsuInfo.osu_uid, command.osu_mode!.Value);
-                is_bounded = true;
+                mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
             }
             else
             {
-                // 验证osu信息
-                OnlineOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU);
-                is_bounded = false;
+                // 查询用户是否绑定
+                var OnlineOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU);
+                if (OnlineOsuInfo != null)
+                {
+                    DBOsuInfo = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
+                    if (DBOsuInfo != null)
+                    {
+                        DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
+                        mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;
+                    }
+                    mode ??= OnlineOsuInfo.PlayMode;
+                    osuID = OnlineOsuInfo.Id;
+                }
+                else
+                {
+                    // 直接取消查询，简化流程
+                    target.reply("猫猫没有找到此用户。");
+                    return;
+                }
             }
 
             // 验证osu信息
-            if (OnlineOsuInfo == null)
+            var tempOsuInfo = await OSU.GetUser(osuID!.Value, mode ?? OSU.Enums.Mode.OSU);
+            if (tempOsuInfo == null)
             {
-                if (is_bounded) { target.reply("被办了。"); return; }
-                target.reply("猫猫没有找到此用户。"); return;
+                if (DBOsuInfo != null)
+                    target.reply("被办了。");
+                else
+                    target.reply("猫猫没有找到此用户。");
+                // 中断查询
+                return;
             }
 
-            if (!is_bounded) // 未绑定用户回数据库查询找模式
-            {
-                var temp_uid = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
-                DBOsuInfo = await Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
-                if (DBOsuInfo != null)
-                {
-                    is_bounded = true;
-                    DBUser = await Accounts.GetAccount(OnlineOsuInfo.Id);
-                    command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
-                    OnlineOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU)!;   // 这里正常是能查询到的，所以用非空处理(!)
-                }
-            }
             #endregion
 
             #region 获取信息
-            data.userInfo = OnlineOsuInfo!;
+            data.userInfo = tempOsuInfo!;
             data.userInfo.PlayMode = command.osu_mode!.Value;
             // 查询
 
-            if (is_bounded)
+            if (DBOsuInfo != null)
             {
                 if (command.order_number > 0)
                 {
@@ -83,8 +89,10 @@ namespace KanonBot.functions.osubot
                 else
                 {
                     // 从数据库取最近的一次记录
-                    try { (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(DBOsuInfo!.osu_uid, data.userInfo.PlayMode, 0);
-                    if (data.daysBefore > 0) ++data.daysBefore;
+                    try
+                    {
+                        (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(DBOsuInfo!.osu_uid, data.userInfo.PlayMode, 0);
+                        if (data.daysBefore > 0) ++data.daysBefore;
                     }
                     catch { data.daysBefore = 0; }
                 }
@@ -109,7 +117,7 @@ namespace KanonBot.functions.osubot
                             // 异步获取osupp数据，下次请求的时候就有了
                             await Task.Run(async () =>
                             {
-                                try { await Database.Client.UpdateOsuPPlusData((await API.OSU.TryGetUserPlusData(OnlineOsuInfo!))!.User, OnlineOsuInfo!.Id); }
+                                try { await Database.Client.UpdateOsuPPlusData((await API.OSU.TryGetUserPlusData(tempOsuInfo!))!.User, tempOsuInfo!.Id); }
                                 catch { }//更新pp+失败，不返回信息
                             }).ConfigureAwait(false);
                         }
@@ -135,7 +143,7 @@ namespace KanonBot.functions.osubot
 
             var isDataOfDayAvaiavle = false;
             if (data.daysBefore > 0) isDataOfDayAvaiavle = true;
-            MemoryStream img = LegacyImage.Draw.DrawInfo(data, bannerStatus, is_bounded, isDataOfDayAvaiavle);
+            MemoryStream img = LegacyImage.Draw.DrawInfo(data, bannerStatus, DBOsuInfo != null, isDataOfDayAvaiavle);
             img.TryGetBuffer(out ArraySegment<byte> buffer);
             //target.reply(new Chain().msg("test").image(Convert.ToBase64String(buffer.Array!, 0, (int)img.Length), ImageSegment.Type.Base64));
             target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)img.Length), ImageSegment.Type.Base64));

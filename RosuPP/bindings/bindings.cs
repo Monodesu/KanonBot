@@ -80,6 +80,9 @@ namespace RosuPP
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "score_params_clock_rate")]
         public static extern void score_params_clock_rate(IntPtr context, double clock_rate);
 
+        [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "debug_result")]
+        public static extern void debug_result(ref CalculateResult res);
+
     }
 
     public enum Mode

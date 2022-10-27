@@ -32,7 +32,7 @@ public class OSU
     [Fact]
     public void ScorePanelTest()
     {
-        var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] {}, API.OSU.Enums.Mode.Mania).Result!;
+        var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] { }, API.OSU.Enums.Mode.Mania).Result!;
         score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
         API.OSU.BeatmapFileChecker(score.Score.Beatmap!.BeatmapId).Wait();
         Output.WriteLine("pp {0}", score.Score.PP);
@@ -52,13 +52,14 @@ public class OSU
         var cal = Calculator.New(new Sliceu8(beatmapData, (ulong)f.Length));
         beatmapData.Free();
         var p = ScoreParams.New();
-        p.Mode(Mode.Taiko);
+        p.Mode(Mode.Osu);
         p.NKatu(0);
         p.NMisses(6);
         p.N100(29);
         p.N300(213);
         p.N50(0);
         var res = cal.Calculate(p.Context);
+        // Rosu.debug_result(ref res);
         Output.WriteLine("{0}", Json.Serialize(res));
     }
 

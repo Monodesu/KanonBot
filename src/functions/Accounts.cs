@@ -279,7 +279,7 @@ namespace KanonBot.functions
         {
             return await Database.Client.GetUsersByUID(uid, platform);
         }
-        public static async Task<Database.Model.User?> GetAccount(long osu_uid)
+        public static async Task<Database.Model.User?> GetAccountByOsuUid(long osu_uid)
         {
             return await Database.Client.GetUserByOsuUID(osu_uid);
         }

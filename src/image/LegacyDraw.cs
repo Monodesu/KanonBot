@@ -721,37 +721,39 @@ namespace KanonBot.LegacyImage
             textOptions.Origin = new PointF(1812 + metric.Width, 638);
             score.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(ppTColor), null));
 
-            if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania)
+            // if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania)
+            // {
+            //     pptext = "-";
+            //     metric = TextMeasurer.Measure(pptext, textOptions);
+            //     for (var i = 0; i < 5; i++)
+            //     {
+            //         textOptions.Origin = new PointF(50 + 139 * i, 638);
+            //         score.Mutate(x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null));
+            //         textOptions.Origin = new PointF(50 + 139 * i + metric.Width, 638);
+            //         score.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(ppTColor), null));
+            //     }
+            // }
+            // else
+            // {
+            // }
+            // 这边不再需要匹配mania模式
+            for (var i = 0; i < 5; i++)
             {
-                pptext = "-";
+                try
+                {
+                    pptext = ppInfo.ppStats![5 - (i + 1)].total.ToString("0");
+                }
+                catch
+                {
+                    pptext = "-";
+                }
                 metric = TextMeasurer.Measure(pptext, textOptions);
-                for (var i = 0; i < 5; i++)
-                {
-                    textOptions.Origin = new PointF(50 + 139 * i, 638);
-                    score.Mutate(x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null));
-                    textOptions.Origin = new PointF(50 + 139 * i + metric.Width, 638);
-                    score.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(ppTColor), null));
-                }
+                textOptions.Origin = new PointF(50 + 139 * i, 638);
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null));
+                textOptions.Origin = new PointF(50 + 139 * i + metric.Width, 638);
+                score.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(ppTColor), null));
             }
-            else
-            {
-                for (var i = 0; i < 5; i++)
-                {
-                    try
-                    {
-                        pptext = ppInfo.ppStats![5 - (i + 1)].total.ToString("0");
-                    }
-                    catch
-                    {
-                        pptext = "-";
-                    }
-                    metric = TextMeasurer.Measure(pptext, textOptions);
-                    textOptions.Origin = new PointF(50 + 139 * i, 638);
-                    score.Mutate(x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null));
-                    textOptions.Origin = new PointF(50 + 139 * i + metric.Width, 638);
-                    score.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(ppTColor), null));
-                }
-            }
+
             // if fc
             textOptions.Font = new Font(TorusRegular, 24.5f);
             try
@@ -762,12 +764,12 @@ namespace KanonBot.LegacyImage
             {
                 pptext = "-";
             }
-            // }
             metric = TextMeasurer.Measure(pptext, textOptions);
             textOptions.Origin = new PointF(99, 562);
             score.Mutate(x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null));
             textOptions.Origin = new PointF(99 + metric.Width, 562);
             score.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(ppTColor), null));
+
             // total pp
             textOptions.Font = new Font(TorusRegular, 61f);
             pptext = Math.Round(ppInfo.ppStat.total).ToString("0");

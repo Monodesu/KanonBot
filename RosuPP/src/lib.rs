@@ -1,4 +1,4 @@
-use interoptopus::{extra_type, ffi_type, pattern, Inventory, InventoryBuilder};
+use interoptopus::{extra_type, ffi_type, pattern, Inventory, InventoryBuilder, ffi_function, function};
 
 mod calculator;
 mod error;
@@ -7,7 +7,7 @@ mod result;
 use calculator::Calculator;
 use error::{FFIError, Error};
 use params::ScoreParams;
-use result::CalculateResult;
+use result::{CalculateResult, debug_result};
 
 #[ffi_type]
 #[repr(C)]
@@ -35,6 +35,7 @@ impl std::fmt::Display for Mode {
     }
 }
 
+
 // This will create a function `my_inventory` which can produce
 // an abstract FFI representation (called `Library`) for this crate.
 pub fn my_inventory() -> Inventory {
@@ -43,5 +44,6 @@ pub fn my_inventory() -> Inventory {
         .register(extra_type!(CalculateResult))
         .register(extra_type!(Mode))
         .register(pattern!(ScoreParams))
+        .register(function!(debug_result))
         .inventory()
 }
