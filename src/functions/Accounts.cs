@@ -197,42 +197,6 @@ namespace KanonBot.functions
 
         async public static Task BindService(Target target, string cmd)
         {
-            string uid = "-1";
-            switch (target.platform)
-            {
-                case Platform.Guild:
-                    if (target.raw is Guild.Models.MessageData g)
-                    {
-                        uid = g.Author.ID;
-                        if (!await Database.Client.IsRegd(uid, Platform.Guild))
-                        {
-                            target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
-                        }
-                    }
-                    break;
-                case Platform.OneBot:
-                    if (target.raw is OneBot.Models.CQMessageEventBase o)
-                    {
-                        uid = o.UserId.ToString();
-                        if (!await Database.Client.IsRegd(uid, Platform.OneBot))
-                        {
-                            target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
-                        }
-                    }
-                    break;
-                case Platform.KOOK:
-                    if (target.raw is Kook.WebSocket.SocketMessage k)
-                    {
-                        uid = k.Author.Id.ToString();
-                        if (!await Database.Client.IsRegd(uid, Platform.KOOK))
-                        {
-                            target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return;
-                        }
-                    }
-                    break;
-                default: return;
-            }
-
             cmd = cmd.Trim();
             string childCmd_1 = "", childCmd_2 = "";
             try
@@ -241,28 +205,37 @@ namespace KanonBot.functions
                 childCmd_2 = cmd[(cmd.IndexOf(" ") + 1)..];
             }
             catch { }
+            
+            var AccInfo = Accounts.GetAccInfo(target);
+            var DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+            //这里dbuser可空，后面一定要检测
+
 
             if (childCmd_1 == "osu")
             {
+                // 先检查查询的用户是否有效
                 OSU.Models.User? online_osu_userinfo;
-                var globaluserinfo = await Database.Client.GetUsersByUID(uid, target.platform);
+                online_osu_userinfo = await OSU.GetUser(childCmd_2);
+                if (online_osu_userinfo == null) { target.reply($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。"); return; }
+
+                // 检查要绑定的osu是否没有被Kanon用户绑定过
+                var db_osu_userinfo = await Database.Client.GetOsuUser(online_osu_userinfo.Id);
+                if (db_osu_userinfo != null) { target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果这是你的账户，请联系管理员更新账户信息。"); return; }
+                
+                // 查询当前kanon账户是否有效
+                if (DBUser == null) { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
                 // 检查用户是否已绑定osu账户
-                var osuuserinfo = await Database.Client.GetOsuUserByUID(globaluserinfo.uid);
+                var osuuserinfo = await Database.Client.GetOsuUserByUID(DBUser.uid);
                 if (osuuserinfo != null) { target.reply($"您已经与osu uid为 {osuuserinfo.osu_uid} 的用户绑定过了。"); return; }
 
                 // 通过osu username搜索osu用户id
                 try
                 {
-                    online_osu_userinfo = await OSU.GetUser(childCmd_2);
-                    if (online_osu_userinfo == null) { target.reply($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。"); return; }
-                    // 检查要绑定的osu是否没有被Kanon用户绑定过
-                    var db_osu_userinfo = await Database.Client.GetOsuUser(online_osu_userinfo.Id);
-                    if (db_osu_userinfo != null) { target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果您认为他人恶意绑定了您的账户，请联系管理员。"); return; }
                     // 没被他人绑定，开始绑定流程
-                    if (await Database.Client.InsertOsuUser(globaluserinfo.uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2))   //?这里url真的能为空吗  我不到啊
+                    if (await Database.Client.InsertOsuUser(DBUser.uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2))   //?这里url真的能为空吗  我不到啊
                     {
-                        target.reply($"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至Kanon账户 {globaluserinfo.uid} 。");
+                        target.reply($"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至Kanon账户 {DBUser.uid} 。");
                         await GeneralUpdate.UpdateUser(online_osu_userinfo.Id, true); //插入用户每日数据记录
                     }
                     else { target.reply($"绑定失败，请稍后再试。"); }
@@ -271,7 +244,7 @@ namespace KanonBot.functions
             }
             else
             {
-                target.reply("请按照以下格式进行绑定。\n !bind osu 您的osu用户名"); return;
+                target.reply("请按照以下格式进行绑定。\n !bind osu 您的osu用户名 "); return;
             }
         }
 

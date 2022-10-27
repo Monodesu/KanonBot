@@ -153,7 +153,7 @@ public class Client
     static public async Task<API.OSU.Models.PPlusData.UserData?> GetOsuPPlusData(long osu_uid)
     {
         var data = await GetInstance().Queryable<Model.OsuPPlus>().FirstAsync(it => it.uid == osu_uid && it.pp != 0);
-        if (data == null) {
+        if (data != null) {
             var realData = new API.OSU.Models.PPlusData.UserData();
             realData.UserId = osu_uid;
             realData.PerformanceTotal = data.pp;
@@ -256,16 +256,15 @@ public class Client
         return await GetInstance().Insertable(rec).ExecuteReturnIdentityAsync();
     }
 
-    static public async Task<bool> SetOsuUserMode(long uid, API.OSU.Enums.Mode mode)
+    static public async Task<bool> SetOsuUserMode(long osu_uid, API.OSU.Enums.Mode mode)
     {
         var db = GetInstance();
-        var data = await db.Queryable<Model.UserOSU>().FirstAsync(it => it.uid == uid);
         var result = await db.Updateable<Model.UserOSU>()
             .SetColumns(it => new Model.UserOSU()
             {
                 osu_mode = API.OSU.Enums.ParseMode(mode),
             })
-            .Where(it => it.uid == uid)
+            .Where(it => it.osu_uid == osu_uid)
             .ExecuteCommandHasChangeAsync();
         return result;
     }
