@@ -9,7 +9,6 @@ namespace KanonBot.functions.osubot
         async public static Task Execute(Target target, string cmd)
         {
             #region 验证
-            LegacyImage.Draw.UserPanelData data = new();
             int bannerStatus = 0;
             long? osuID = null;
             OSU.Enums.Mode? mode;
@@ -76,7 +75,9 @@ namespace KanonBot.functions.osubot
             #endregion
 
             #region 获取信息
+            LegacyImage.Draw.UserPanelData data = new();
             data.userInfo = tempOsuInfo!;
+            // 覆写
             data.userInfo.PlayMode = mode!.Value;
             // 查询
 

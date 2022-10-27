@@ -162,9 +162,9 @@ namespace KanonBot.API
                     return await res.GetJsonAsync<Models.User>();
                 }
                 catch (Exception ex) {
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine(res.ResponseMessage.Content.ToString());
-                    Console.WriteLine(res.GetStringAsync().Result.ToString());
+                    Log.Debug(ex.Message);
+                    Log.Debug(res.ResponseMessage.Content.ToString() ?? "");
+                    Log.Debug(res.GetStringAsync().Result.ToString());
                     
                     return null;
                 }

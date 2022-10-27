@@ -525,6 +525,10 @@ namespace KanonBot.API
                 [JsonProperty("occupation", NullValueHandling = NullValueHandling.Ignore)]
                 public string? Occupation { get; set; }
 
+                /// <summary>
+                /// 这个是指的官网用户的默认游玩模式，并非查询的成绩模式！！！
+                /// 使用时请把此值强制赋值成查询的模式
+                /// </summary>
                 [JsonProperty("playmode")]
                 [JsonConverter(typeof(JsonEnumConverter))]
                 public Enums.Mode PlayMode { get; set; }

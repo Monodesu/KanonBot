@@ -115,6 +115,7 @@ namespace KanonBot.functions.osubot
                 // 中断查询
                 return;
             }
+            OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
             // 计算bonuspp
@@ -250,6 +251,7 @@ namespace KanonBot.functions.osubot
                 // 中断查询
                 return;
             }
+            OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
             try
@@ -405,6 +407,7 @@ namespace KanonBot.functions.osubot
                 // 中断查询
                 return;
             }
+            OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
             switch (cmd)
@@ -539,6 +542,7 @@ namespace KanonBot.functions.osubot
                 // 中断查询
                 return;
             }
+            OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
             var allBP = await OSU.GetUserScores(OnlineOsuInfo!.Id, OSU.Enums.UserScoreType.Best, command.osu_mode ?? OSU.Enums.Mode.OSU, 100, 0);
@@ -633,6 +637,7 @@ namespace KanonBot.functions.osubot
                 // 中断查询
                 return;
             }
+            OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
             var allBP = await OSU.GetUserScores(OnlineOsuInfo!.Id, OSU.Enums.UserScoreType.Best, command.osu_mode ?? OSU.Enums.Mode.OSU, 100, 0);

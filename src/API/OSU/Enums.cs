@@ -46,7 +46,7 @@ namespace KanonBot.API
         public class Enums
         {
             // 方法部分
-            public static string? ParseMode(Mode? mode)
+            public static string ParseMode(Mode mode)
             {
                 return mode switch
                 {
@@ -54,7 +54,7 @@ namespace KanonBot.API
                     Mode.Taiko => "taiko",
                     Mode.Fruits => "fruits",
                     Mode.Mania => "mania",
-                    _ => null,
+                    _ => throw new NotSupportedException("未知的模式"),
                 };
             }
 
@@ -84,9 +84,14 @@ namespace KanonBot.API
             }
 
             // 枚举部分
-            [DefaultValue(OSU)] // 解析失败就osu
+            [DefaultValue(Unknown)] // 解析失败就unknown
             public enum Mode
             {
+                /// <summary>
+                /// 未知，在转换错误时为此值
+                /// </summary>
+                [Description("")]
+                Unknown,
                 [Description("osu")]
                 OSU,
                 [Description("taiko")]

@@ -70,6 +70,7 @@ namespace KanonBot.functions.osubot
                 // 中断查询
                 return;
             }
+            OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
             target.reply("少女祈祷中...");
