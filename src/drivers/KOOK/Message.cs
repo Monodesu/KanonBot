@@ -103,13 +103,13 @@ public partial class Kook
             {
                 var x = text.Trim();
                 // 匹配一下attacment
-                if (MessageData.Attachment != null)
+                foreach (var Attachment in MessageData.Attachments)
                 {
-                    if (MessageData.Attachment.Type == libKook.AttachmentType.Image)
+                    if (Attachment.Type == libKook.AttachmentType.Image)
                     {
                         // 添加图片，删除文本
-                        chain.Add(new ImageSegment(MessageData.Attachment.Url, ImageSegment.Type.Url));
-                        x = x.Replace(MessageData.Attachment.Url, "");
+                        chain.Add(new ImageSegment(Attachment.Url, ImageSegment.Type.Url));
+                        x = x.Replace(Attachment.Url, "");
                     }
                 }
                 if (x.Length != 0)
