@@ -66,7 +66,9 @@ namespace KanonBot.command_parser
                         case "update": await Update.Execute(target, childCmd); return;
                         case "get": await Get.Execute(target, childCmd); return;// get bonuspp/elo/rolecost/bpht/todaybp/annualpass
                         case "badge": await Badge.Execute(target, childCmd); return;
-                        case "leeway": await Leeway.Execute(target, childCmd); return;
+                        case "leeway":
+                        case "lc":
+                            await Leeway.Execute(target, childCmd); return;
                         case "set": await Set.Execute(target, childCmd); return;
                         case "ppvs":
                             return;

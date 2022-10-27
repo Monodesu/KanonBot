@@ -70,7 +70,7 @@ namespace KanonBot.functions.osubot
             // 尝试寻找玩家在该谱面的最高成绩
             long score;
             var empty_mods = new string[]{}; // 要的是最高分，直接给传一个空集合得了
-            var scoreData = await OSU.GetUserBeatmapScore(OnlineOsuInfo.Id, command.order_number, empty_mods, command.osu_mode ?? OSU.Enums.Mode.OSU);
+            var scoreData = await OSU.GetUserBeatmapScore(OnlineOsuInfo.Id, bid, empty_mods, command.osu_mode ?? OSU.Enums.Mode.OSU);
             if (scoreData == null)
             {
                 target.reply("猫猫找不到你的成绩。"); return;
@@ -119,7 +119,9 @@ namespace KanonBot.functions.osubot
 
             if (scoreData != null)
             {
-                str += string.Format("\n你的成绩：{0:n0} (+{1})", (int)score, lc.GetModsString(scoreData.Score.Mods));
+                string scoreModsString = lc.GetModsString(scoreData.Score.Mods);
+                int scoreAdvantage = (int)score - maxScore;
+                str += string.Format("\n你的成绩：{0:n0} ({1}) {2}", (int)score, scoreModsString != "" ? $"+{scoreModsString}" : "None", scoreAdvantage < 0 ? scoreAdvantage : $"+{scoreAdvantage}");
             }
             else
             {
