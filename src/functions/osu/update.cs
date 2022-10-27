@@ -9,13 +9,14 @@ namespace KanonBot.functions.osubot
         async public static Task Execute(Target target, string cmd)
         {
             #region 验证
-            bool is_bounded = false;
+            long? osuID = null;
+            OSU.Enums.Mode? mode;
             Database.Model.User? DBUser = null;
             Database.Model.UserOSU? DBOsuInfo = null;
-            OSU.Models.User? OnlineOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
+            mode = command.osu_mode;
 
             // 解析指令
             if (command.self_query)
@@ -26,44 +27,48 @@ namespace KanonBot.functions.osubot
                 if (DBUser == null)
                 // { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
                 { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
-
-                // 验证osu信息
+                // 验证账号信息
                 var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
-                DBOsuInfo = await Accounts.CheckOsuAccount(_u!.uid);
+                DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
-                { target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
+                { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
-                command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
-
-                // 验证osu信息
-                OnlineOsuInfo = await OSU.GetUser(DBOsuInfo.osu_uid, command.osu_mode!.Value);
-                is_bounded = true;
+                mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                osuID = DBOsuInfo.osu_uid;
             }
             else
             {
-                // 验证osu信息
-                OnlineOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU);
-                is_bounded = false;
+                // 查询用户是否绑定
+                var tempOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU);
+                if (tempOsuInfo != null)
+                {
+                    DBOsuInfo = await Database.Client.GetOsuUser(tempOsuInfo.Id);
+                    if (DBOsuInfo != null)
+                    {
+                        DBUser = await Accounts.GetAccountByOsuUid(tempOsuInfo.Id);
+                        mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;
+                    }
+                    mode ??= tempOsuInfo.PlayMode;
+                    osuID = tempOsuInfo.Id;
+                }
+                else
+                {
+                    // 直接取消查询，简化流程
+                    target.reply("猫猫没有找到此用户。");
+                    return;
+                }
             }
 
             // 验证osu信息
+            var OnlineOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
             if (OnlineOsuInfo == null)
             {
-                if (is_bounded) { target.reply("被办了。"); return; }
-                target.reply("猫猫没有找到此用户。"); return;
-            }
-
-            if (!is_bounded) // 未绑定用户回数据库查询找模式
-            {
-                var temp_uid = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
-                DBOsuInfo = await Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid)!;
                 if (DBOsuInfo != null)
-                {
-                    is_bounded = true;
-                    DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
-                    command.osu_mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode);
-                    OnlineOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU)!;   // 这里正常是能查询到的，所以用非空处理(!)
-                }
+                    target.reply("被办了。");
+                else
+                    target.reply("猫猫没有找到此用户。");
+                // 中断查询
+                return;
             }
             #endregion
 

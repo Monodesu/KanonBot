@@ -62,7 +62,7 @@ namespace KanonBot.functions.osubot
             }
 
             // 验证osu信息
-            var tempOsuInfo = await OSU.GetUser(osuID!.Value, mode ?? OSU.Enums.Mode.OSU);
+            var tempOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
             if (tempOsuInfo == null)
             {
                 if (DBOsuInfo != null)
