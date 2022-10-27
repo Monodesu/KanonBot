@@ -205,7 +205,7 @@ namespace KanonBot.functions
                 childCmd_2 = cmd[(cmd.IndexOf(" ") + 1)..];
             }
             catch { }
-            
+
             var AccInfo = Accounts.GetAccInfo(target);
             var DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
             //这里dbuser可空，后面一定要检测
@@ -220,8 +220,14 @@ namespace KanonBot.functions
 
                 // 检查要绑定的osu是否没有被Kanon用户绑定过
                 var db_osu_userinfo = await Database.Client.GetOsuUser(online_osu_userinfo.Id);
-                if (db_osu_userinfo != null) { target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果这是你的账户，请联系管理员更新账户信息。"); return; }
-                
+                if (db_osu_userinfo != null)
+                {
+                    if (DBUser != null && DBUser.uid == db_osu_userinfo.uid) {
+                        target.reply($"你已绑定该账户。"); return;
+                    }
+                    target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果这是你的账户，请联系管理员更新账户信息。"); return;
+                }
+
                 // 查询当前kanon账户是否有效
                 if (DBUser == null) { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
 
