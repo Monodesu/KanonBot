@@ -44,14 +44,18 @@ namespace KanonBot.LegacyImage
             public OSU.Models.PPlusData.UserData u2;
         }
 
+        static FontCollection fonts = new();
+        static FontFamily Exo2SemiBold = fonts.Add("./work/fonts/Exo2/Exo2-SemiBold.ttf");
+        static FontFamily Exo2Regular = fonts.Add("./work/fonts/Exo2/Exo2-Regular.ttf");
+        static FontFamily HarmonySans = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
+        static FontFamily TorusRegular = fonts.Add("./work/fonts/Torus-Regular.ttf");
+        static FontFamily TorusSemiBold = fonts.Add("./work/fonts/Torus-SemiBold.ttf");
+        static FontFamily avenirLTStdMedium = fonts.Add("./work/fonts/AvenirLTStd-Medium.ttf");
+
         //customBannerStatus 0=没有自定义banner 1=在猫猫上设置了自定义banner 
-        public static MemoryStream DrawInfo(UserPanelData data, int customBannerStatus, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
+        public static Img DrawInfo(UserPanelData data, int customBannerStatus, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
         {
-            using var info = new Image<Rgba32>(1200, 857);
-            var fonts = new FontCollection();
-            var Exo2SemiBold = fonts.Add("./work/fonts/Exo2/Exo2-SemiBold.ttf");
-            var Exo2Regular = fonts.Add("./work/fonts/Exo2/Exo2-Regular.ttf");
-            var HarmonySans = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
+            var info = new Image<Rgba32>(1200, 857);
             // custom panel
             var panelPath = "./work/legacy/default-info-v1.png";
             if (File.Exists($"./work/legacy/v1_infopanel/{data.userInfo.Id}.png")) panelPath = $"./work/legacy/v1_infopanel/{data.userInfo.Id}.png";
@@ -74,7 +78,7 @@ namespace KanonBot.LegacyImage
                     coverPath = $"./work/legacy/v1_cover/default/default_{n}.png";
                 }
             }
-            Img cover = Img.Load(coverPath);
+            Img cover = Img.Load(Utils.LoadFile2Stream(coverPath));
             var resizeOptions = new ResizeOptions
             {
                 Size = new Size(1200, 350),
@@ -93,7 +97,7 @@ namespace KanonBot.LegacyImage
             Img avatar;
             try
             {
-                avatar = Img.Load(avatarPath).CloneAs<Rgba32>();    // 读取
+                avatar = Img.Load(Utils.LoadFile2Stream(avatarPath)).CloneAs<Rgba32>();    // 读取
             }
             catch
             {
@@ -107,7 +111,7 @@ namespace KanonBot.LegacyImage
                     Log.Error(msg);
                     throw;  // 下载失败直接抛出error
                 }
-                avatar = Img.Load(avatarPath).CloneAs<Rgba32>();    // 下载后再读取
+                avatar = Img.Load(Utils.LoadFile2Stream(avatarPath)).CloneAs<Rgba32>();    // 下载后再读取
             }
             avatar.Mutate(x => x.Resize(190, 190).RoundCorner(new Size(190, 190), 40));
             info.Mutate(x => x.DrawImage(avatar, new Point(39, 55), 1));
@@ -117,7 +121,7 @@ namespace KanonBot.LegacyImage
             {
                 try
                 {
-                    Img badge = Img.Load($"./work/badges/{data.badgeId}.png");
+                    Img badge = Img.Load(Utils.LoadFile2Stream($"./work/badges/{data.badgeId}.png"));
                     badge.Mutate(x => x.Resize(86, 40).RoundCorner(new Size(86, 40), 5));
                     info.Mutate(x => x.DrawImage(badge, new Point(272, 152), 1));
                 }
@@ -133,9 +137,9 @@ namespace KanonBot.LegacyImage
                 }
             };
 
-            Img flags = Img.Load($"./work/flags/{data.userInfo.Country.Code}.png");
+            Img flags = Img.Load(Utils.LoadFile2Stream($"./work/flags/{data.userInfo.Country.Code}.png"));
             info.Mutate(x => x.DrawImage(flags, new Point(272, 212), 1));
-            Img modeicon = Img.Load($"./work/legacy/mode_icon/{data.userInfo.PlayMode.ToModeStr()}.png");
+            Img modeicon = Img.Load(Utils.LoadFile2Stream($"./work/legacy/mode_icon/{data.userInfo.PlayMode.ToModeStr()}.png"));
             modeicon.Mutate(x => x.Resize(64, 64));
             info.Mutate(x => x.DrawImage(modeicon, new Point(1125, 10), 1));
 
@@ -383,10 +387,7 @@ namespace KanonBot.LegacyImage
             textOptions.Origin = new PointF(1180, 825);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, Utils.Duration2String(Statistics.PlayTime), new SolidBrush(Color.White), null));
             info.Mutate(x => x.RoundCorner(new Size(1200, 857), 24));
-            var stream = new MemoryStream();
-
-            info.SaveAsPng(stream);
-            return stream;
+            return info;
         }
         public static Img DrawScore(ScorePanelData data)
         {
@@ -410,7 +411,7 @@ namespace KanonBot.LegacyImage
             Img avatar;
             try
             {
-                avatar = Img.Load(avatarPath).CloneAs<Rgba32>();    // 读取
+                avatar = Img.Load(Utils.LoadFile2Stream(avatarPath)).CloneAs<Rgba32>();    // 读取
             }
             catch
             {
@@ -424,14 +425,10 @@ namespace KanonBot.LegacyImage
                     Log.Error(msg);
                     throw;
                 }
-                avatar = Img.Load(avatarPath).CloneAs<Rgba32>();    // 下载后再读取
+                avatar = Img.Load(Utils.LoadFile2Stream(avatarPath)).CloneAs<Rgba32>();    // 下载后再读取
             }
 
             var score = Img.Load(Utils.LoadFile2Stream("work/legacy/v2_scorepanel/default-score-v2.png"));
-            var fonts = new FontCollection();
-            var TorusRegular = fonts.Add("./work/fonts/Torus-Regular.ttf");
-            var TorusSemiBold = fonts.Add("./work/fonts/Torus-SemiBold.ttf");
-            var HarmonySans = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
 
             Img panel;
             if (data.scoreInfo.Mode is OSU.Enums.Mode.Fruits) panel = Img.Load(Utils.LoadFile2Stream("work/legacy/v2_scorepanel/default-score-v2-fruits.png"));
@@ -515,7 +512,7 @@ namespace KanonBot.LegacyImage
             {
                 temp = ringFile[5];
             }
-            var diffCircle = Img.Load("./work/icons/" + temp);
+            var diffCircle = Img.Load(Utils.LoadFile2Stream("./work/icons/" + temp));
             diffCircle.Mutate(x => x.Resize(65, 65));
             score.Mutate(x => x.DrawImage(diffCircle, new Point(512, 257), 1));
             // beatmap_status
@@ -531,14 +528,14 @@ namespace KanonBot.LegacyImage
             foreach (var mod in mods)
             {
                 Img modPic;
-                try { modPic = Img.Load($"./work/mods/{mod}.png"); } catch { continue; }
+                try { modPic = Img.Load(Utils.LoadFile2Stream($"./work/mods/{mod}.png")); } catch { continue; }
                 modPic.Mutate(x => x.Resize(200, 61));
                 score.Mutate(x => x.DrawImage(modPic, new Point((modp * 160) + 440, 440), 1));
                 modp += 1;
             }
             // rankings
             var ranking = data.scoreInfo.Passed ? data.scoreInfo.Rank : "F";
-            var rankPic = Img.Load($"./work/ranking/ranking-{ranking}.png");
+            var rankPic = Img.Load(Utils.LoadFile2Stream($"./work/ranking/ranking-{ranking}.png"));
             score.Mutate(x => x.DrawImage(rankPic, new Point(913, 874), 1));
             // text part (文字部分)
             var font = new Font(TorusRegular, 60);
@@ -941,136 +938,128 @@ namespace KanonBot.LegacyImage
             }
             return score;
         }
-        public static MemoryStream DrawPPVS(PPVSPanelData data)
+        public static Img DrawPPVS(PPVSPanelData data)
         {
-            using (var ppvsImg = Img.Load(Utils.LoadFile2Stream("work/legacy/ppvs.png")))
+            var ppvsImg = Img.Load(Utils.LoadFile2Stream("work/legacy/ppvs.png"));
+            Hexagram.HexagramInfo hi = new();
+            // hi.abilityLineColor = Color.ParseHex("#FF7BAC");
+            hi.nodeCount = 6;
+            hi.nodeMaxValue = 12000;
+            hi.size = 1134;
+            hi.sideLength = 791;
+            hi.mode = 2;
+            hi.strokeWidth = 6f;
+            hi.nodesize = new SizeF(15f, 15f);
+            var multi = new double[6] { 14.1, 69.7, 1.92, 19.8, 0.588, 3.06 };
+            var exp = new double[6] { 0.769, 0.596, 0.953, 0.8, 1.175, 0.993 };
+            var u1d = new int[6];
+            u1d[0] = (int)data.u1.AccuracyTotal;
+            u1d[1] = (int)data.u1.FlowAimTotal;
+            u1d[2] = (int)data.u1.JumpAimTotal;
+            u1d[3] = (int)data.u1.PrecisionTotal;
+            u1d[4] = (int)data.u1.SpeedTotal;
+            u1d[5] = (int)data.u1.StaminaTotal;
+            var u2d = new int[6];
+            u2d[0] = (int)data.u2.AccuracyTotal;
+            u2d[1] = (int)data.u2.FlowAimTotal;
+            u2d[2] = (int)data.u2.JumpAimTotal;
+            u2d[3] = (int)data.u2.PrecisionTotal;
+            u2d[4] = (int)data.u2.SpeedTotal;
+            u2d[5] = (int)data.u2.StaminaTotal;
+            // acc ,flow, jump, pre, speed, sta
+
+            if (data.u1.PerformanceTotal < data.u2.PerformanceTotal)
             {
-                Hexagram.HexagramInfo hi = new();
-                // hi.abilityLineColor = Color.ParseHex("#FF7BAC");
-                hi.nodeCount = 6;
-                hi.nodeMaxValue = 12000;
-                hi.size = 1134;
-                hi.sideLength = 791;
-                hi.mode = 2;
-                hi.strokeWidth = 6f;
-                hi.nodesize = new SizeF(15f, 15f);
-                var multi = new double[6] { 14.1, 69.7, 1.92, 19.8, 0.588, 3.06 };
-                var exp = new double[6] { 0.769, 0.596, 0.953, 0.8, 1.175, 0.993 };
-                var u1d = new int[6];
-                u1d[0] = (int)data.u1.AccuracyTotal;
-                u1d[1] = (int)data.u1.FlowAimTotal;
-                u1d[2] = (int)data.u1.JumpAimTotal;
-                u1d[3] = (int)data.u1.PrecisionTotal;
-                u1d[4] = (int)data.u1.SpeedTotal;
-                u1d[5] = (int)data.u1.StaminaTotal;
-                var u2d = new int[6];
-                u2d[0] = (int)data.u2.AccuracyTotal;
-                u2d[1] = (int)data.u2.FlowAimTotal;
-                u2d[2] = (int)data.u2.JumpAimTotal;
-                u2d[3] = (int)data.u2.PrecisionTotal;
-                u2d[4] = (int)data.u2.SpeedTotal;
-                u2d[5] = (int)data.u2.StaminaTotal;
-                // acc ,flow, jump, pre, speed, sta
-
-                if (data.u1.PerformanceTotal < data.u2.PerformanceTotal)
-                {
-                    hi.abilityFillColor = Color.FromRgba(255, 123, 172, 50);
-                    hi.abilityLineColor = Color.FromRgba(255, 123, 172, 255);
-                    ppvsImg.Mutate(x => x.DrawImage(Hexagram.Draw(u1d, multi, exp, hi), new Point(0, -120), 1));
-                    hi.abilityFillColor = Color.FromRgba(41, 171, 226, 50);
-                    hi.abilityLineColor = Color.FromRgba(41, 171, 226, 255);
-                    ppvsImg.Mutate(x => x.DrawImage(Hexagram.Draw(u2d, multi, exp, hi), new Point(0, -120), 1));
-                }
-                else
-                {
-                    hi.abilityFillColor = Color.FromRgba(41, 171, 226, 50);
-                    hi.abilityLineColor = Color.FromRgba(41, 171, 226, 255);
-                    ppvsImg.Mutate(x => x.DrawImage(Hexagram.Draw(u2d, multi, exp, hi), new Point(0, -120), 1));
-                    hi.abilityFillColor = Color.FromRgba(255, 123, 172, 50);
-                    hi.abilityLineColor = Color.FromRgba(255, 123, 172, 255);
-                    ppvsImg.Mutate(x => x.DrawImage(Hexagram.Draw(u1d, multi, exp, hi), new Point(0, -120), 1));
-                }
-
-                // text
-                var fonts = new FontCollection();
-                var avenirLTStdMedium = fonts.Add("./work/fonts/AvenirLTStd-Medium.ttf");
-                var drawOptions = new DrawingOptions
-                {
-                    GraphicsOptions = new GraphicsOptions
-                    {
-                        Antialias = true
-                    }
-                };
-
-
-
-                // 打印用户名
-                var font = new Font(avenirLTStdMedium, 36);
-                var textOptions = new TextOptions(font)
-                {
-                    VerticalAlignment = VerticalAlignment.Bottom,
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    Origin = new PointF(808, 882)
-                };
-                var color = Color.ParseHex("#999999");
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u1Name, new SolidBrush(color), null));
-                textOptions.Origin = new PointF(264, 882);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u2Name, new SolidBrush(color), null));
-
-
-                // 打印每个用户数据
-                var y_offset = new int[6] { 1471, 1136, 1052, 1220, 1304, 1389 };   // pp+数据的y轴坐标
-                font = new Font(avenirLTStdMedium, 32);
-                textOptions = new TextOptions(font)
-                {
-                    VerticalAlignment = VerticalAlignment.Bottom,
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                };
-                for (var i = 0; i < u1d.Length; i++)
-                {
-                    textOptions.Origin = new PointF(664, y_offset[i] + 8);
-                    ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, u1d[i].ToString(), new SolidBrush(color), null));
-                }
-                textOptions.Origin = new PointF(664, 974);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u1.PerformanceTotal.ToString(), new SolidBrush(color), null));
-                for (var i = 0; i < u2d.Length; i++)
-                {
-                    textOptions.Origin = new PointF(424, y_offset[i] + 8);
-                    ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, u2d[i].ToString(), new SolidBrush(color), null));
-                }
-                textOptions.Origin = new PointF(424, 974);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u2.PerformanceTotal.ToString(), new SolidBrush(color), null));
-
-                // 打印数据差异
-                var diffPoint = 960;
-                color = Color.ParseHex("#ffcd22");
-                textOptions.Origin = new PointF(diffPoint, 974);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0}", (data.u2.PerformanceTotal - data.u1.PerformanceTotal)), new SolidBrush(color), null));
-                textOptions.Origin = new PointF(diffPoint, 1060);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[2] - u1d[2]).ToString(), new SolidBrush(color), null));
-                textOptions.Origin = new PointF(diffPoint, 1144);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[1] - u1d[1]).ToString(), new SolidBrush(color), null));
-                textOptions.Origin = new PointF(diffPoint, 1228);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[3] - u1d[3]).ToString(), new SolidBrush(color), null));
-                textOptions.Origin = new PointF(diffPoint, 1312);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[4] - u1d[4]).ToString(), new SolidBrush(color), null));
-                textOptions.Origin = new PointF(diffPoint, 1397);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[5] - u1d[5]).ToString(), new SolidBrush(color), null));
-                textOptions.Origin = new PointF(diffPoint, 1479);
-                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[0] - u1d[0]).ToString(), new SolidBrush(color), null));
-
-                Img title = Img.Load($"work/legacy/ppvs_title.png");
-                ppvsImg.Mutate(x => x.DrawImage(title, new Point(0, 0), 1));
-
-                var stream = new MemoryStream();
-                ppvsImg.SaveAsPng(stream);
-                return stream;
+                hi.abilityFillColor = Color.FromRgba(255, 123, 172, 50);
+                hi.abilityLineColor = Color.FromRgba(255, 123, 172, 255);
+                ppvsImg.Mutate(x => x.DrawImage(Hexagram.Draw(u1d, multi, exp, hi), new Point(0, -120), 1));
+                hi.abilityFillColor = Color.FromRgba(41, 171, 226, 50);
+                hi.abilityLineColor = Color.FromRgba(41, 171, 226, 255);
+                ppvsImg.Mutate(x => x.DrawImage(Hexagram.Draw(u2d, multi, exp, hi), new Point(0, -120), 1));
             }
+            else
+            {
+                hi.abilityFillColor = Color.FromRgba(41, 171, 226, 50);
+                hi.abilityLineColor = Color.FromRgba(41, 171, 226, 255);
+                ppvsImg.Mutate(x => x.DrawImage(Hexagram.Draw(u2d, multi, exp, hi), new Point(0, -120), 1));
+                hi.abilityFillColor = Color.FromRgba(255, 123, 172, 50);
+                hi.abilityLineColor = Color.FromRgba(255, 123, 172, 255);
+                ppvsImg.Mutate(x => x.DrawImage(Hexagram.Draw(u1d, multi, exp, hi), new Point(0, -120), 1));
+            }
+
+            // text
+            var drawOptions = new DrawingOptions
+            {
+                GraphicsOptions = new GraphicsOptions
+                {
+                    Antialias = true
+                }
+            };
+
+
+
+            // 打印用户名
+            var font = new Font(avenirLTStdMedium, 36);
+            var textOptions = new TextOptions(font)
+            {
+                VerticalAlignment = VerticalAlignment.Bottom,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Origin = new PointF(808, 882)
+            };
+            var color = Color.ParseHex("#999999");
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u1Name, new SolidBrush(color), null));
+            textOptions.Origin = new PointF(264, 882);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u2Name, new SolidBrush(color), null));
+
+
+            // 打印每个用户数据
+            var y_offset = new int[6] { 1471, 1136, 1052, 1220, 1304, 1389 };   // pp+数据的y轴坐标
+            font = new Font(avenirLTStdMedium, 32);
+            textOptions = new TextOptions(font)
+            {
+                VerticalAlignment = VerticalAlignment.Bottom,
+                HorizontalAlignment = HorizontalAlignment.Left,
+            };
+            for (var i = 0; i < u1d.Length; i++)
+            {
+                textOptions.Origin = new PointF(664, y_offset[i] + 8);
+                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, u1d[i].ToString(), new SolidBrush(color), null));
+            }
+            textOptions.Origin = new PointF(664, 974);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u1.PerformanceTotal.ToString(), new SolidBrush(color), null));
+            for (var i = 0; i < u2d.Length; i++)
+            {
+                textOptions.Origin = new PointF(424, y_offset[i] + 8);
+                ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, u2d[i].ToString(), new SolidBrush(color), null));
+            }
+            textOptions.Origin = new PointF(424, 974);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u2.PerformanceTotal.ToString(), new SolidBrush(color), null));
+
+            // 打印数据差异
+            var diffPoint = 960;
+            color = Color.ParseHex("#ffcd22");
+            textOptions.Origin = new PointF(diffPoint, 974);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0}", (data.u2.PerformanceTotal - data.u1.PerformanceTotal)), new SolidBrush(color), null));
+            textOptions.Origin = new PointF(diffPoint, 1060);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[2] - u1d[2]).ToString(), new SolidBrush(color), null));
+            textOptions.Origin = new PointF(diffPoint, 1144);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[1] - u1d[1]).ToString(), new SolidBrush(color), null));
+            textOptions.Origin = new PointF(diffPoint, 1228);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[3] - u1d[3]).ToString(), new SolidBrush(color), null));
+            textOptions.Origin = new PointF(diffPoint, 1312);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[4] - u1d[4]).ToString(), new SolidBrush(color), null));
+            textOptions.Origin = new PointF(diffPoint, 1397);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[5] - u1d[5]).ToString(), new SolidBrush(color), null));
+            textOptions.Origin = new PointF(diffPoint, 1479);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[0] - u1d[0]).ToString(), new SolidBrush(color), null));
+
+            Img title = Img.Load(Utils.LoadFile2Stream($"work/legacy/ppvs_title.png"));
+            ppvsImg.Mutate(x => x.DrawImage(title, new Point(0, 0), 1));
+
+            return ppvsImg;
         }
-        public static MemoryStream DrawString(string str, float fontSize)
+        public static Img DrawString(string str, float fontSize)
         {
-            var fonts = new FontCollection();
-            var HarmonySans = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
             var font = new Font(HarmonySans, fontSize);
             var textOptions = new TextOptions(new Font(HarmonySans, fontSize))
             {
@@ -1091,9 +1080,7 @@ namespace KanonBot.LegacyImage
                     }
                 };
                 img.Mutate(x => x.DrawText(drawOptions, textOptions, str, new SolidBrush(Color.Black), null));
-                var stream = new MemoryStream();
-                img.SaveAsJpeg(stream);
-                return stream;
+                return img;
             }
         }
 

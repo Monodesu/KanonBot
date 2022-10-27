@@ -1,6 +1,8 @@
 ﻿using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace KanonBot.functions.osubot
 {
@@ -147,9 +149,11 @@ namespace KanonBot.functions.osubot
 
             var isDataOfDayAvaiavle = false;
             if (data.daysBefore > 0) isDataOfDayAvaiavle = true;
-            MemoryStream img = LegacyImage.Draw.DrawInfo(data, bannerStatus, DBOsuInfo != null, isDataOfDayAvaiavle);
-            img.TryGetBuffer(out ArraySegment<byte> buffer);
-            target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)img.Length), ImageSegment.Type.Base64));
+            var stream = new MemoryStream();
+            var img = LegacyImage.Draw.DrawInfo(data, bannerStatus, DBOsuInfo != null, isDataOfDayAvaiavle);
+            await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+            stream.TryGetBuffer(out ArraySegment<byte> buffer);
+            target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
             //AnnualPass(data.userInfo.userId, data.userInfo.mode, data.userInfo.totalHits); //季票内容
         }
     }
