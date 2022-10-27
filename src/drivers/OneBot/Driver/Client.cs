@@ -59,7 +59,8 @@ public partial class OneBot
                 {
                     this.Parse(msgAction);
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Log.Error("未捕获的异常 ↓\n{ex}", ex);
                     this.Dispose();
                 }
@@ -81,12 +82,19 @@ public partial class OneBot
                             dynamic obj;
                             try
                             {
-                                obj = (string?)m["message_type"] switch
+                                var msgType = (string?)m["message_type"];
+                                switch (msgType)
                                 {
-                                    "private" => m.ToObject<Models.PrivateMessage>()!,
-                                    "group" => m.ToObject<Models.GroupMessage>()!,
-                                    _ => throw new NotSupportedException("未知的消息类型")
-                                };
+                                    case "private":
+                                        obj = m.ToObject<Models.PrivateMessage>()!;
+                                        break;
+                                    case "group":
+                                        obj = m.ToObject<Models.GroupMessage>()!;
+                                        break;
+                                    default:
+                                        Log.Error("未知消息格式, {0}", msgType);
+                                        return;
+                                }
                             }
                             catch (JsonSerializationException)
                             {
