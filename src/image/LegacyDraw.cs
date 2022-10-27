@@ -1004,16 +1004,16 @@ namespace KanonBot.LegacyImage
             {
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = HorizontalAlignment.Left,
-                Origin = new PointF(808, 882)
+                Origin = new PointF(808, 888)
             };
             var color = Color.ParseHex("#999999");
             ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u1Name, new SolidBrush(color), null));
-            textOptions.Origin = new PointF(264, 882);
+            textOptions.Origin = new PointF(264, 888);
             ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u2Name, new SolidBrush(color), null));
 
 
             // 打印每个用户数据
-            var y_offset = new int[6] { 1471, 1136, 1052, 1220, 1304, 1389 };   // pp+数据的y轴坐标
+            var y_offset = new int[6] { 1485, 1150, 1066, 1234, 1318, 1403 };   // pp+数据的y轴坐标
             font = new Font(avenirLTStdMedium, 32);
             textOptions = new TextOptions(font)
             {
@@ -1022,35 +1022,35 @@ namespace KanonBot.LegacyImage
             };
             for (var i = 0; i < u1d.Length; i++)
             {
-                textOptions.Origin = new PointF(664, y_offset[i] + 8);
+                textOptions.Origin = new PointF(664, y_offset[i]);
                 ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, u1d[i].ToString(), new SolidBrush(color), null));
             }
-            textOptions.Origin = new PointF(664, 974);
-            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u1.PerformanceTotal.ToString(), new SolidBrush(color), null));
+            textOptions.Origin = new PointF(664, 980);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u1.PerformanceTotal.ToString("0.##"), new SolidBrush(color), null));
             for (var i = 0; i < u2d.Length; i++)
             {
-                textOptions.Origin = new PointF(424, y_offset[i] + 8);
+                textOptions.Origin = new PointF(424, y_offset[i]);
                 ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, u2d[i].ToString(), new SolidBrush(color), null));
             }
-            textOptions.Origin = new PointF(424, 974);
-            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u2.PerformanceTotal.ToString(), new SolidBrush(color), null));
+            textOptions.Origin = new PointF(424, 980);
+            ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, data.u2.PerformanceTotal.ToString("0.##"), new SolidBrush(color), null));
 
             // 打印数据差异
             var diffPoint = 960;
             color = Color.ParseHex("#ffcd22");
-            textOptions.Origin = new PointF(diffPoint, 974);
+            textOptions.Origin = new PointF(diffPoint, 980);
             ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0}", (data.u2.PerformanceTotal - data.u1.PerformanceTotal)), new SolidBrush(color), null));
-            textOptions.Origin = new PointF(diffPoint, 1060);
+            textOptions.Origin = new PointF(diffPoint, 1066);
             ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[2] - u1d[2]).ToString(), new SolidBrush(color), null));
-            textOptions.Origin = new PointF(diffPoint, 1144);
+            textOptions.Origin = new PointF(diffPoint, 1150);
             ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[1] - u1d[1]).ToString(), new SolidBrush(color), null));
-            textOptions.Origin = new PointF(diffPoint, 1228);
+            textOptions.Origin = new PointF(diffPoint, 1234);
             ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[3] - u1d[3]).ToString(), new SolidBrush(color), null));
-            textOptions.Origin = new PointF(diffPoint, 1312);
+            textOptions.Origin = new PointF(diffPoint, 1318);
             ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[4] - u1d[4]).ToString(), new SolidBrush(color), null));
-            textOptions.Origin = new PointF(diffPoint, 1397);
+            textOptions.Origin = new PointF(diffPoint, 1403);
             ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[5] - u1d[5]).ToString(), new SolidBrush(color), null));
-            textOptions.Origin = new PointF(diffPoint, 1479);
+            textOptions.Origin = new PointF(diffPoint, 1485);
             ppvsImg.Mutate(x => x.DrawText(drawOptions, textOptions, (u2d[0] - u1d[0]).ToString(), new SolidBrush(color), null));
 
             Img title = Img.Load(Utils.LoadFile2Stream($"work/legacy/ppvs_title.png"));

@@ -72,6 +72,7 @@ namespace KanonBot.command_parser
                             await Leeway.Execute(target, childCmd); return;
                         case "set": await Set.Execute(target, childCmd); return;
                         case "ppvs":
+                            await PPvs.Execute(target, childCmd);
                             return;
 
                         // Admin
