@@ -11,8 +11,13 @@ namespace KanonBot.command_parser
         {
             string? cmd = null;
             var msg = target.msg;
+            var isAtSelf = false;
             if (msg.StartsWith(new Message.AtSegment(target.account!, target.platform)))
+            {
+                isAtSelf = true;
                 msg = Message.Chain.FromList(msg.ToList().Slice(1, msg.Length()));
+            }
+                
 
             if (msg.StartsWith("!") || msg.StartsWith("/") || msg.StartsWith("！"))
             {
@@ -38,6 +43,7 @@ namespace KanonBot.command_parser
                 string rootCmd, childCmd = "";
                 try
                 {
+                    cmd.Split(' ', 1);
                     rootCmd = cmd[..cmd.IndexOf(" ")].Trim();
                     childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
                 }
@@ -48,7 +54,6 @@ namespace KanonBot.command_parser
                 {
                     switch (rootCmd)
                     {
-                        //case "test": Test.run(target, childCmd); return;
                         case "reg": await Accounts.RegAccount(target, childCmd); return;
                         case "bind": await Accounts.BindService(target, childCmd); return;
                         case "info": await Info.Execute(target, childCmd); return;

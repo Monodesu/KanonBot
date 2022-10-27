@@ -16,8 +16,8 @@ namespace KanonBot.functions.osubot
             Database.Model.UserOSU DBOsuInfo;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Recent);
-            if (command.selfquery)
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Recent);
+            if (command.self_query)
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);

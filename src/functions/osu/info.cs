@@ -17,10 +17,10 @@ namespace KanonBot.functions.osubot
             OSU.Models.User? OnlineOsuInfo;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
 
             // 解析指令
-            if (command.selfquery)
+            if (command.self_query)
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
@@ -69,11 +69,7 @@ namespace KanonBot.functions.osubot
 
             #region 获取信息
             data.userInfo = OnlineOsuInfo!;
-            //playmode
-            if (command.osu_mode != null)
-            {
-                data.userInfo.PlayMode = (OSU.Enums.Mode)command.osu_mode;
-            }
+            data.userInfo.PlayMode = command.osu_mode!.Value;
             // 查询
 
             if (is_bounded)
@@ -102,7 +98,6 @@ namespace KanonBot.functions.osubot
                         //legacy
 
                         // 取PP+信息
-                        // 还没写
                         data.pplusInfo = new();
                         var d = await Database.Client.GetOsuPPlusData(DBOsuInfo!.osu_uid);
                         if (d != null)

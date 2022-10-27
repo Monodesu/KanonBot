@@ -60,10 +60,10 @@ namespace KanonBot.functions.osubot
             OSU.Models.User? OnlineOsuInfo;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
 
             // 解析指令
-            if (command.selfquery)
+            if (command.self_query)
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
@@ -188,10 +188,10 @@ namespace KanonBot.functions.osubot
             OSU.Models.User? OnlineOsuInfo;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
 
             // 解析指令
-            if (command.selfquery)
+            if (command.self_query)
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
@@ -334,10 +334,10 @@ namespace KanonBot.functions.osubot
             OSU.Models.User? OnlineOsuInfo;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
 
             // 解析指令
-            if (command.selfquery)
+            if (command.self_query)
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
@@ -449,10 +449,10 @@ namespace KanonBot.functions.osubot
             OSU.Models.User? OnlineOsuInfo;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
 
             // 解析指令
-            if (command.selfquery)
+            if (command.self_query)
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
@@ -537,10 +537,10 @@ namespace KanonBot.functions.osubot
             OSU.Models.User? OnlineOsuInfo;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Info);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
 
             // 解析指令
-            if (command.selfquery)
+            if (command.self_query)
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);

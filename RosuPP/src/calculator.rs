@@ -1,6 +1,6 @@
 use crate::*;
 use interoptopus::{
-    ffi_service, ffi_service_ctor, ffi_service_method, ffi_type, patterns::string::AsciiPointer,
+    ffi_service, ffi_service_ctor, ffi_service_method, ffi_type, patterns::slice::FFISlice
 };
 use rosu_pp::{AnyPP, Beatmap};
 
@@ -14,13 +14,9 @@ pub struct Calculator {
 #[ffi_service(error = "FFIError", prefix = "calculator_")]
 impl Calculator {
     #[ffi_service_ctor]
-    pub fn new(beatmap_path: AsciiPointer) -> Result<Self, Error> {
-        let path = match beatmap_path.as_c_str() {
-            Some(s) => s.to_str()?,
-            None => return Err(Error::InvalidString(None)),
-        };
+    pub fn new(beatmap_data: FFISlice<u8>) -> Result<Self, Error> {
         Ok(Self {
-            inner: Beatmap::from_path(path)?,
+            inner: Beatmap::from_bytes(beatmap_data.as_slice())?,
         })
     }
 

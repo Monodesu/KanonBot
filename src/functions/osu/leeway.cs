@@ -16,7 +16,7 @@ namespace KanonBot.functions.osubot
             Database.Model.UserOSU DBOsuInfo;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.Func_type.Leeway);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Leeway);
 
             // 解析模式
             command.osu_mode ??= OSU.Enums.Mode.OSU;

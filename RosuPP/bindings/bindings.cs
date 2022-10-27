@@ -29,7 +29,7 @@ namespace RosuPP
         public static extern FFIError calculator_destroy(ref IntPtr context);
 
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "calculator_new")]
-        public static extern FFIError calculator_new(ref IntPtr context, string beatmap_path);
+        public static extern FFIError calculator_new(ref IntPtr context, Sliceu8 beatmap_data);
 
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "calculator_calculate")]
         public static extern CalculateResult calculator_calculate(IntPtr context, IntPtr score_params);
@@ -139,6 +139,65 @@ namespace RosuPP
         Unknown = 1000,
     }
 
+    ///A pointer to an array of data someone else owns which may not be modified.
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    public partial struct Sliceu8
+    {
+        ///Pointer to start of immutable data.
+        IntPtr data;
+        ///Number of elements.
+        ulong len;
+    }
+
+    public partial struct Sliceu8 : IEnumerable<byte>
+    {
+        public Sliceu8(GCHandle handle, ulong count)
+        {
+            this.data = handle.AddrOfPinnedObject();
+            this.len = count;
+        }
+        public Sliceu8(IntPtr handle, ulong count)
+        {
+            this.data = handle;
+            this.len = count;
+        }
+        public byte this[int i]
+        {
+            get
+            {
+                if (i >= Count) throw new IndexOutOfRangeException();
+                var size = Marshal.SizeOf(typeof(byte));
+                var ptr = new IntPtr(data.ToInt64() + i * size);
+                return Marshal.PtrToStructure<byte>(ptr);
+            }
+        }
+        public byte[] Copied
+        {
+            get
+            {
+                var rval = new byte[len];
+                for (var i = 0; i < (int) len; i++) {
+                    rval[i] = this[i];
+                }
+                return rval;
+            }
+        }
+        public int Count => (int) len;
+        public IEnumerator<byte> GetEnumerator()
+        {
+            for (var i = 0; i < (int)len; ++i)
+            {
+                yield return this[i];
+            }
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    }
+
+
     ///Option type containing boolean flag and maybe valid data.
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
@@ -210,10 +269,10 @@ namespace RosuPP
 
         private Calculator() {}
 
-        public static Calculator New(string beatmap_path)
+        public static Calculator New(Sliceu8 beatmap_data)
         {
             var self = new Calculator();
-            var rval = Rosu.calculator_new(ref self._context, beatmap_path);
+            var rval = Rosu.calculator_new(ref self._context, beatmap_data);
             if (rval != FFIError.Ok)
             {
                 throw new InteropException<FFIError>(rval);

@@ -7,11 +7,28 @@ using System.Text;
 using System.Threading.Tasks;
 using KanonBot.LegacyImage;
 using KanonBot.API;
+using System.Runtime.InteropServices;
 
 namespace KanonBot.functions.osu.rosupp
 {
+
     public static class PerformanceCalculator
     {
+        class Beatmap
+        {
+            Calculator calculator;
+            public Beatmap(byte[] beatmapData)
+            {
+                // 手动处理内存
+                var data = GCHandle.Alloc(beatmapData, GCHandleType.Pinned);
+                this.calculator = Calculator.New(new Sliceu8(data, (ulong)beatmapData.Length));
+                data.Free();
+            }
+
+            public ref Calculator GetRef() {
+                return ref this.calculator;
+            }
+        }
         public static List<string> mods_str = new(){ "NF", "EZ", "TD", "HD", "HR", "SD", "DT", "RX",
                                                     "HT", "NC", "FL", "AU", "SO", "AP", "PF", "K4",
                                                     "K5", "K6", "K7", "K8", "FI", "RD", "CN", "TG",
@@ -129,13 +146,13 @@ namespace KanonBot.functions.osu.rosupp
             var data = new Draw.ScorePanelData();
             data.scoreInfo = score;
             var statistics = data.scoreInfo.Statistics;
-            RosuPP.Calculator calculator;
+            Beatmap beatmap;
             try
             {
                 // 下载谱面
                 await OSU.BeatmapFileChecker(score.Beatmap!.BeatmapId);
                 // 读取铺面
-                calculator = Calculator.New($"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu");
+                beatmap = new Beatmap(await File.ReadAllBytesAsync($"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu"));
             }
             catch (Exception)
             {
@@ -145,7 +162,7 @@ namespace KanonBot.functions.osu.rosupp
             }
 
             // 开始计算
-            data.ppInfo = Result2Info(calculator.Calculate(new Params
+            data.ppInfo = Result2Info(beatmap.GetRef().Calculate(new Params
             {
                 mode = data.scoreInfo.Mode,
                 mods = data.scoreInfo.Mods,
@@ -164,7 +181,7 @@ namespace KanonBot.functions.osu.rosupp
             double[] accs = { 100.00, 99.00, 98.00, 97.00, 95.00 };
             foreach (var acc in accs)
             {
-                data.ppInfo.ppStats.Add(Result2Info(calculator.Calculate(new Params
+                data.ppInfo.ppStats.Add(Result2Info(beatmap.GetRef().Calculate(new Params
                 {
                     mode = data.scoreInfo.Mode,
                     mods = data.scoreInfo.Mods,
@@ -173,7 +190,7 @@ namespace KanonBot.functions.osu.rosupp
             }
 
             // 全连
-            data.ppInfo.ppStats.Add(Result2Info(calculator.Calculate(new Params
+            data.ppInfo.ppStats.Add(Result2Info(beatmap.GetRef().Calculate(new Params
             {
                 mode = data.scoreInfo.Mode,
                 mods = data.scoreInfo.Mods,

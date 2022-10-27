@@ -7,6 +7,7 @@ using KanonBot.Serializer;
 using KanonBot.functions.osu.rosupp;
 using RosuPP;
 using SixLabors.ImageSharp.Formats.Png;
+using System.Runtime.InteropServices;
 
 namespace Tests;
 
@@ -46,7 +47,10 @@ public class OSU
     [Fact]
     public void PPTest()
     {
-        var cal = Calculator.New("./TestFiles/Kakichoco - Zan'ei (Lasse) [Illusion].osu");
+        var f = File.ReadAllBytes("./TestFiles/Kakichoco - Zan'ei (Lasse) [Illusion].osu");
+        var beatmapData = GCHandle.Alloc(f, GCHandleType.Pinned);
+        var cal = Calculator.New(new Sliceu8(beatmapData, (ulong)f.Length));
+        beatmapData.Free();
         var p = ScoreParams.New();
         p.Mode(Mode.Taiko);
         p.NKatu(0);

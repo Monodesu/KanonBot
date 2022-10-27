@@ -9,7 +9,7 @@ namespace KanonBot
 {
     public static class BotCmdHelper
     {
-        public struct Bot_Parameter
+        public struct BotParameter
         {
             public OSU.Enums.Mode? osu_mode;
             public string osu_username, osu_mods;           //用于获取具体要查询的模式，未提供返回osu
@@ -18,10 +18,10 @@ namespace KanonBot
                 bid;
             public int order_number;//用于info的查询n天之前、pr，bp的序号，score的bid，如未提供则返回0
             public bool res; //是否输出高精度图片
-            public bool selfquery;
+            public bool self_query;
         }
 
-        public enum Func_type
+        public enum FuncType
         {
             Info,
             BestPerformance,
@@ -31,10 +31,10 @@ namespace KanonBot
             Leeway
         }
 
-        public static Bot_Parameter CmdParser(string cmd, Func_type type)
+        public static BotParameter CmdParser(string cmd, FuncType type)
         {
             cmd = cmd.Trim().ToLower();
-            Bot_Parameter param = new() { res = false, selfquery = false };
+            BotParameter param = new() { res = false, self_query = false };
             if (cmd != null)
             {
                 string arg1 = "", arg2 = "", arg3 = "", arg4 = "";
@@ -70,7 +70,7 @@ namespace KanonBot
                 arg3 = arg3.Trim();
                 arg4 = arg4.Trim();
                 // 处理info解析
-                if (type == Func_type.Info)
+                if (type == FuncType.Info)
                 {
                     // arg1 = username
                     // arg2 = osu_mode
@@ -84,10 +84,10 @@ namespace KanonBot
                         catch { param.osu_mode = null; }
                     if (arg3 == "") param.order_number = 0;
                     else try { param.order_number = int.Parse(arg3[1..]); } catch { param.order_number = 0; }
-                    if (param.osu_username == "") param.selfquery = true;
+                    if (param.osu_username == "") param.self_query = true;
                 }
                 // bp
-                else if (type == Func_type.BestPerformance)
+                else if (type == FuncType.BestPerformance)
                 {
                     // arg1 = username / order_number
                     // arg2 = osu_mode
@@ -105,9 +105,9 @@ namespace KanonBot
                             }
                             catch { param.order_number = 0; }
                         }
-                        if (param.osu_username == "") param.selfquery = true;
+                        if (param.osu_username == "") param.self_query = true;
                     }
-                    else { param.selfquery = true; }
+                    else { param.self_query = true; }
                     if (arg2 != "") try
                         {
                             param.osu_mode = OSU.Enums.ParseMode(
@@ -116,7 +116,7 @@ namespace KanonBot
                         catch { param.osu_mode = null; }
                 }
                 // 处理pr/re解析
-                else if (type == Func_type.Recent || type == Func_type.PassRecent)
+                else if (type == FuncType.Recent || type == FuncType.PassRecent)
                 {
                     // arg1 = username
                     // arg2 = osu_mode
@@ -139,10 +139,10 @@ namespace KanonBot
                         }
                         catch { param.order_number = 0; }
                     }
-                    if (param.osu_username == "") param.selfquery = true;
+                    if (param.osu_username == "") param.self_query = true;
                 }
                 // 处理score解析
-                else if (type == Func_type.Score)
+                else if (type == FuncType.Score)
                 {
                     // arg1 = bid
                     // arg2 = osu_mode
@@ -169,9 +169,9 @@ namespace KanonBot
                             param.order_number = -1;
                         }
                     }
-                    if (param.osu_username == "") param.selfquery = true;
+                    if (param.osu_username == "") param.self_query = true;
                 }
-                else if (type == Func_type.Leeway)
+                else if (type == FuncType.Leeway)
                 {
                     // arg1 = bid
                     // arg2 = osu_mode
@@ -190,21 +190,21 @@ namespace KanonBot
                         }
                         catch { param.osu_mode = null; }
                     param.osu_mods = arg4 != "" ? arg4[1..] : "";
-                    param.selfquery = true; // 只查自己
+                    param.self_query = true; // 只查自己
                 }
             }
             else
             {
-                param.selfquery = true;
-                if (type == Func_type.Info)
+                param.self_query = true;
+                if (type == FuncType.Info)
                 {
                     param.order_number = 0; //由于cmd为空，所以默认查询当日信息
                 }
-                else if (type == Func_type.Score)
+                else if (type == FuncType.Score)
                 {
                     param.order_number = -1; //由于cmd为空，所以没有bid等关键信息，返回错误
                 }
-                else if (type == Func_type.Recent || type == Func_type.PassRecent || type == Func_type.BestPerformance)
+                else if (type == FuncType.Recent || type == FuncType.PassRecent || type == FuncType.BestPerformance)
                 {
                     param.order_number = 1; //由于cmd为空，所以默认返回第一张谱面成绩
                 }

@@ -82,16 +82,24 @@ public partial class Kook : ISocket, IDriver
     {
         // 过滤掉bot消息和系统消息
         if (message.Source != libKook.MessageSource.User)
-            return;
-
-        this.msgAction?.Invoke(new Target()
         {
-            platform = Platform.KOOK,
-            account = this.selfID,
-            msg = Message.Parse(message),
-            raw = message,
-            socket = this
-        });
+            this.eventAction?.Invoke(
+                this,
+                new RawEvent(message)
+            );
+        }
+        else
+        {
+            this.msgAction?.Invoke(new Target()
+            {
+                platform = Platform.KOOK,
+                account = this.selfID,
+                msg = Message.Parse(message),
+                raw = message,
+                socket = this
+            });
+        }
+
     }
     private async Task ParseUpdateMessage(libKook.Cacheable<libKook.IMessage, Guid> before, SocketMessage after, ISocketMessageChannel channel)
     {
