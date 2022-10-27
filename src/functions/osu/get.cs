@@ -114,7 +114,7 @@ namespace KanonBot.functions.osubot
             // 计算bonuspp
             if (OnlineOsuInfo!.Statistics.PP == 0)
             {
-                target.reply($"你最近还没有玩过{OnlineOsuInfo.PlayMode}模式呢。。");
+                target.reply($"你最近还没有玩过{OnlineOsuInfo.PlayMode.ToModeStr()}模式呢。。");
                 return;
             }
             // 因为上面确定过模式，这里就直接用userdata里的mode了
@@ -172,7 +172,7 @@ namespace KanonBot.functions.osubot
                 bounsPP = 0.0;
                 rankedScores = 0;
             }
-            var str = $"{OnlineOsuInfo.Username} ({OnlineOsuInfo.PlayMode})\n" +
+            var str = $"{OnlineOsuInfo.Username} ({OnlineOsuInfo.PlayMode.ToModeStr()})\n" +
                 $"总PP：{OnlineOsuInfo.Statistics.PP.ToString("0.##")}pp\n" +
                 $"原始PP：{scorePP.ToString("0.##")}pp\n" +
                 $"Bonus PP：{bounsPP.ToString("0.##")}pp\n" +
@@ -521,7 +521,7 @@ namespace KanonBot.functions.osubot
                 totalPP += item.PP;
             }
             var last = allBP.Length;
-            var str = $"{OnlineOsuInfo.Username} 在 {OnlineOsuInfo.PlayMode} 模式中:"
+            var str = $"{OnlineOsuInfo.Username} 在 {OnlineOsuInfo.PlayMode.ToModeStr()} 模式中:"
             + $"\n你的 bp1 有 {allBP[0].PP:0.##}pp"
             + $"\n你的 bp2 有 {allBP[1].PP:0.##}pp"
             + $"\n..."
@@ -609,13 +609,13 @@ namespace KanonBot.functions.osubot
             if (str == "")
             {
                 if (cmd == "")
-                    target.reply($"你今天在 {OnlineOsuInfo.PlayMode} 模式上还没有新bp呢。。");
+                    target.reply($"你今天在 {OnlineOsuInfo.PlayMode.ToModeStr()} 模式上还没有新bp呢。。");
                 else
-                    target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode} 模式上还没有新bp呢。。");
+                    target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToModeStr()} 模式上还没有新bp呢。。");
             }
             else
             {
-                target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode} 模式上新增的BP:" + str);
+                target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToModeStr()} 模式上新增的BP:" + str);
             }
         }
 

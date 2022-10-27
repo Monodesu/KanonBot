@@ -244,7 +244,7 @@ namespace KanonBot.functions
             }
             else
             {
-                target.reply("请按照以下格式进行绑定。\n !bind osu 您的osu用户名 "); return;
+                target.reply("请按照以下格式进行绑定。\n!bind osu 您的osu用户名 "); return;
             }
         }
 
