@@ -35,6 +35,8 @@
             "args": [
                 "publish",
                 "${workspaceFolder}/src/KanonBot.csproj",
+                "--configuration",
+                "Release",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
