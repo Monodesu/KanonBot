@@ -50,8 +50,8 @@ drivers.append(
     {
         var api = (target.socket as OneBot.Server.Socket)!.api;
         Log.Information("← 收到消息 {0}", target.msg);
-        Log.Information("↑ 详情 {@0}", target.raw!);
-        Log.Information("↑ 详情 {0}", Json.Serialize((target.raw! as OneBot.Models.CQMessageEventBase)!.MessageList));
+        Log.Debug("↑ 详情 {@0}", target.raw!);
+        // Log.Debug("↑ 详情 {0}", Json.Serialize((target.raw! as OneBot.Models.CQMessageEventBase)!.MessageList));
         //switch (target.raw)
         //{
         //    case OneBot.Models.GroupMessage g:
@@ -76,10 +76,10 @@ drivers.append(
                 Log.Debug("收到心跳包 {h}", h);
                 break;
             case Ready l:
-                Log.Information("收到生命周期事件 {h}", l);
+                Log.Debug("收到生命周期事件 {h}", l);
                 break;
             case RawEvent r:
-                Log.Information("收到事件 {r}", r);
+                Log.Debug("收到事件 {r}", r);
                 break;
             default:
                 break;
@@ -96,8 +96,8 @@ drivers.append(
         var api = (target.socket as Guild)!.api;
         var messageData = (target.raw as Guild.Models.MessageData)!;
         Log.Information("← 收到消息 {0}", target.msg);
-        Log.Information("↑ 详情 {@0}", messageData);
-        Log.Information("↑ 附件 {@0}", Json.Serialize(messageData.Attachments));
+        Log.Debug("↑ 详情 {@0}", messageData);
+        Log.Debug("↑ 附件 {@0}", Json.Serialize(messageData.Attachments));
         // var res = api.SendMessage(messageData.ChannelID, new Guild.Models.SendMessageData() {
         //     MessageId = messageData.ID,
         //     MessageReference = new() { MessageId = messageData.ID }
@@ -125,10 +125,10 @@ drivers.append(
         {
             case RawEvent r:
                 var data = (r.value as Guild.Models.PayloadBase<JToken>)!;
-                Log.Information("收到事件: {@0} 数据: {1}", data, data.Data?.ToString(Formatting.None) ?? null);
+                Log.Debug("收到事件: {@0} 数据: {1}", data, data.Data?.ToString(Formatting.None) ?? null);
                 break;
             case Ready l:
-                Log.Information("收到生命周期事件 {h}", l);
+                Log.Debug("收到生命周期事件 {h}", l);
                 break;
             default:
                 break;
@@ -139,20 +139,7 @@ drivers.append(
     new KanonBot.Drivers.Kook(config.kook!.token!, config.kook!.botID!)
     .onMessage(async (target) =>
     {
-        try
-        {
-            await Universal.Parser(target);
-        }
-        catch (Flurl.Http.FlurlHttpException ex)
-        {
-            Log.Error("请求 API 时发生异常，{0}", ex);
-            target.reply("请求 API 时发生异常");
-        }
-        catch (Exception ex)
-        {
-            Log.Error("发生未知错误，{0}", ex);
-            target.reply("发生未知错误");
-        }
+        await Universal.Parser(target);
     })
 );
 drivers.StartAll();

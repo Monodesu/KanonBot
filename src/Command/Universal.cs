@@ -2,6 +2,7 @@
 using KanonBot.functions;
 using KanonBot.functions.osu;
 using KanonBot.functions.osubot;
+using Serilog;
 
 namespace KanonBot.command_parser
 {
@@ -98,6 +99,7 @@ namespace KanonBot.command_parser
                         $"StackTrace: {ex.StackTrace}";
                     Utils.SendDebugMail("mono@desu.life", rtmp);
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
+                    Log.Error("网络异常 ↓\n{ex}", ex);
                 }
                 catch (Exception ex)
                 {
@@ -109,8 +111,8 @@ namespace KanonBot.command_parser
                         $"StackTrace: {ex.StackTrace}";
                     Utils.SendDebugMail("mono@desu.life", rtmp);
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
+                    Log.Error("执行指令异常 ↓\n{ex}", ex);
                 }
-
             }
             else { return; }
         }
