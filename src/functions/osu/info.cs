@@ -109,25 +109,6 @@ namespace KanonBot.functions.osubot
                         break;
                     default:
                         //legacy
-
-                        // 取PP+信息
-                        var d = await Database.Client.GetOsuPPlusData(osuID!.Value);
-                        if (d != null)
-                        {
-                            data.pplusInfo = d;
-                        }
-                        else
-                        {
-                            // 设置空数据
-                            data.pplusInfo = new();
-                            // 异步获取osupp数据，下次请求的时候就有了
-                            new Task(async () =>
-                            {
-                                try { await Database.Client.UpdateOsuPPlusData((await API.OSU.TryGetUserPlusData(tempOsuInfo!))!.User, tempOsuInfo!.Id); }
-                                catch { }//更新pp+失败，不返回信息
-                            }).Start();
-                        }
-
                         var badgeID = DBUser!.displayed_badge_ids;
                         // legacy只取第一个badge
                         if (badgeID != null)
@@ -143,7 +124,33 @@ namespace KanonBot.functions.osubot
             else
             {
                 // 未绑定用户默认用新面板
+            }
 
+            switch (DBOsuInfo!.customInfoEngineVer)
+            {
+                case 1:
+                    // new
+                    break;
+                default:
+                    // legacy
+                    // 取PP+信息
+                    var d = await Database.Client.GetOsuPPlusData(osuID!.Value);
+                    if (d != null)
+                    {
+                        data.pplusInfo = d;
+                    }
+                    else
+                    {
+                        // 设置空数据
+                        data.pplusInfo = new();
+                        // 异步获取osupp数据，下次请求的时候就有了
+                        new Task(async () =>
+                        {
+                            try { await Database.Client.UpdateOsuPPlusData((await API.OSU.TryGetUserPlusData(tempOsuInfo!))!.User, tempOsuInfo!.Id); }
+                            catch { }//更新pp+失败，不返回信息
+                        }).Start();
+                    }
+                    break;
             }
             #endregion
 
