@@ -34,6 +34,10 @@ public partial class OneBot
             {
                 this.inner.Send(message);
             }
+            public IWebSocketConnectionInfo ConnectionInfo()
+            {
+                return this.inner.ConnectionInfo;
+            }
             public void Close()
             {
                 this.inner.Close();
@@ -162,7 +166,10 @@ public partial class OneBot
                             }
                             catch (JsonSerializationException)
                             {
-                                throw new NotSupportedException($"不支持的消息格式，请使用数组消息格式");
+                                // throw new NotSupportedException($"不支持的消息格式，请使用数组消息格式");
+                                Log.Error("不支持的消息格式，请使用数组消息格式");
+                                this.Disconnect(socket.ConnectionInfo().Id);
+                                return;
                             }
                             var target = new Target
                             {
