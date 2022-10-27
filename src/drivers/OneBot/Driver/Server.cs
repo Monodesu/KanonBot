@@ -174,7 +174,7 @@ public partial class OneBot
                             catch (JsonSerializationException)
                             {
                                 // throw new NotSupportedException($"不支持的消息格式，请使用数组消息格式");
-                                Log.Error("不支持的消息格式，请使用数组消息格式");
+                                Log.Error("不支持的消息格式，请使用数组消息格式，断开来自{0}的连接", socket.ConnectionInfo().ClientIpAddress);
                                 this.Disconnect(socket.ConnectionInfo().Id);
                                 return;
                             }

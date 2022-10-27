@@ -98,7 +98,7 @@ public partial class OneBot
                             }
                             catch (JsonSerializationException)
                             {
-                                Log.Error("不支持的消息格式，请使用数组消息格式");
+                                Log.Error("不支持的消息格式，请使用数组消息格式，连接断开");
                                 this.Dispose();
                                 return;
                             }
