@@ -40,7 +40,7 @@ public class OSU
         var data = PerformanceCalculator.CalculatePanelData(score.Score).Result;
         Output.WriteLine("cal pp {0}", data.ppInfo.ppStat.total);
         Output.WriteLine("cal data {0}", Json.Serialize(data.ppInfo));
-        var img = Draw.DrawScore(data);
+        var img = Draw.DrawScore(data).Result;
         img.Save(new FileStream("./TestFiles/scoretest.png", FileMode.Create), new PngEncoder());
     }
 

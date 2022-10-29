@@ -165,7 +165,7 @@ namespace KanonBot.functions.osubot
             var isDataOfDayAvaiavle = false;
             if (data.daysBefore > 0) isDataOfDayAvaiavle = true;
             var stream = new MemoryStream();
-            var img = LegacyImage.Draw.DrawInfo(data, bannerStatus, DBOsuInfo != null, isDataOfDayAvaiavle);
+            var img = await LegacyImage.Draw.DrawInfo(data, bannerStatus, DBOsuInfo != null, isDataOfDayAvaiavle);
             await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
             stream.TryGetBuffer(out ArraySegment<byte> buffer);
             target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));

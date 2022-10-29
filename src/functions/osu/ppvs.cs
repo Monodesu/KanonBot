@@ -80,7 +80,7 @@ namespace KanonBot.functions.osubot
                 data.u1 = d2;
 
                 var stream = new MemoryStream();
-                var img = LegacyImage.Draw.DrawPPVS(data);
+                var img = await LegacyImage.Draw.DrawPPVS(data);
                 await img.SaveAsync(stream, new JpegEncoder());
                 stream.TryGetBuffer(out ArraySegment<byte> buffer);
                 target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
@@ -142,7 +142,7 @@ namespace KanonBot.functions.osubot
 
 
                 var stream = new MemoryStream();
-                var img = LegacyImage.Draw.DrawPPVS(data);
+                var img = await LegacyImage.Draw.DrawPPVS(data);
                 await img.SaveAsync(stream, new JpegEncoder());
                 stream.TryGetBuffer(out ArraySegment<byte> buffer);
                 target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
