@@ -30,8 +30,8 @@ else
 var config = Config.inner!;
 
 var log = new LoggerConfiguration()
-                .WriteTo.Console()
-                .WriteTo.File("logs/log-.log", rollingInterval: RollingInterval.Day);
+                .WriteTo.Async(a => a.Console())
+                .WriteTo.Async(a => a.File("logs/log-.log", rollingInterval: RollingInterval.Day));
 if (config.debug)
     log = log.MinimumLevel.Debug();
 Log.Logger = log.CreateLogger();

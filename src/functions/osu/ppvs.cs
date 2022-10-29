@@ -52,7 +52,13 @@ namespace KanonBot.functions.osubot
                 var d1 = await Database.Client.GetOsuPPlusData(userSelf.Id);
                 if (d1 == null)
                 {
-                    d1 = (await API.OSU.TryGetUserPlusData(userSelf))!.User;
+                    var d1temp = await API.OSU.TryGetUserPlusData(userSelf);
+                    if (d1temp == null)
+                    {
+                        target.reply("获取pp+数据时出错，等会儿再试试吧");
+                        return;
+                    }
+                    d1 = d1temp.User;
                     await Database.Client.UpdateOsuPPlusData(d1, userSelf.Id);
                 }
                 data.u2Name = userSelf.Username;
@@ -61,7 +67,13 @@ namespace KanonBot.functions.osubot
                 var d2 = await Database.Client.GetOsuPPlusData(user2.Id);
                 if (d2 == null)
                 {
-                    d2 = (await API.OSU.TryGetUserPlusData(user2))!.User;
+                    var d2temp = await API.OSU.TryGetUserPlusData(user2);
+                    if (d2temp == null)
+                    {
+                        target.reply("获取pp+数据时出错，等会儿再试试吧");
+                        return;
+                    }
+                    d2 = d2temp.User;
                     await Database.Client.UpdateOsuPPlusData(d2, user2.Id);
                 }
                 data.u1Name = user2.Username;
@@ -101,7 +113,13 @@ namespace KanonBot.functions.osubot
                 var d1 = await Database.Client.GetOsuPPlusData(user1.Id);
                 if (d1 == null)
                 {
-                    d1 = (await API.OSU.TryGetUserPlusData(user1))!.User;
+                    var d1temp = await API.OSU.TryGetUserPlusData(user1);
+                    if (d1temp == null)
+                    {
+                        target.reply("获取pp+数据时出错，等会儿再试试吧");
+                        return;
+                    }
+                    d1 = d1temp.User;
                     await Database.Client.UpdateOsuPPlusData(d1, user1.Id);
                 }
                 data.u2Name = user1.Username;
@@ -110,11 +128,18 @@ namespace KanonBot.functions.osubot
                 var d2 = await Database.Client.GetOsuPPlusData(user2.Id);
                 if (d2 == null)
                 {
-                    d2 = (await API.OSU.TryGetUserPlusData(user2))!.User;
+                    var d2temp = await API.OSU.TryGetUserPlusData(user2);
+                    if (d2temp == null)
+                    {
+                        target.reply("获取pp+数据时出错，等会儿再试试吧");
+                        return;
+                    }
+                    d2 = d2temp.User;
                     await Database.Client.UpdateOsuPPlusData(d2, user2.Id);
                 }
                 data.u1Name = user2.Username;
                 data.u1 = d2;
+
 
                 var stream = new MemoryStream();
                 var img = LegacyImage.Draw.DrawPPVS(data);
