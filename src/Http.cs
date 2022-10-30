@@ -228,12 +228,13 @@ namespace KanonBot
             result.Body = await response.Content.ReadAsByteArrayAsync();
             return result;
         }
-        async public static Task<string> DownloadFile(string url, string filePath, Dictionary<string, string> header = null)
+        async public static Task<string> DownloadFile(string url, string filePath)
         {
             var result = await url.GetBytesAsync();
-            var bw = new BinaryWriter(new FileStream(filePath, FileMode.Create));
-            bw.Write(result);
-            bw.Close();
+            using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) {
+                await fs.WriteAsync(result!);
+                fs.Close();
+            }
             return filePath;
         }
     }

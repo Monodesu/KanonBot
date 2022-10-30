@@ -25,7 +25,7 @@ public partial class OneBot
                             rawData = image.t switch {
                                 ImageSegment.Type.Base64 => new JObject { { "file", $"base64://{image.value}" } },
                                 ImageSegment.Type.Url => new JObject { { "file", image.value } },
-                                ImageSegment.Type.File => new JObject { { "file", Ali.PutFile(Utils.LoadFile2Stream(image.value), "jpg") } }, // 这里还有缺陷，如果图片上传失败的话，还是会尝试发送
+                                ImageSegment.Type.File => new JObject { { "file", Ali.PutFile(Utils.LoadFile2ReadStream(image.value), "jpg") } }, // 这里还有缺陷，如果图片上传失败的话，还是会尝试发送
                                 _ => throw new ArgumentException("不支持的图片类型")
                             }
                         },

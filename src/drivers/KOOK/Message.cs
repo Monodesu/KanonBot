@@ -32,7 +32,7 @@ public partial class Kook
                                 req.Content = await api.CreateAsset(_s);
                                 break;
                             case ImageSegment.Type.File:
-                                var __s = Utils.LoadFile2Stream(s.value);
+                                var __s = Utils.LoadFile2ReadStream(s.value);
                                 req.Content = await api.CreateAsset(__s);
                                 break;
                             case ImageSegment.Type.Url:

@@ -39,7 +39,7 @@ public partial class Guild
                     data.ImageUrl = image.t switch {
                         ImageSegment.Type.Base64 => Ali.PutFile(Utils.Byte2Stream(Convert.FromBase64String(image.value)), "jpg", true),
                         ImageSegment.Type.Url => image.value,
-                        ImageSegment.Type.File => Ali.PutFile(Utils.LoadFile2Stream(image.value), "jpg", true),
+                        ImageSegment.Type.File => Ali.PutFile(Utils.LoadFile2ReadStream(image.value), "jpg", true),
                         _ => throw new ArgumentException("不支持的图片类型")
                     };
                 }

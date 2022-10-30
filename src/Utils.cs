@@ -29,21 +29,29 @@ public static class Utils
     {
         return myList.Skip(startIndex).Take(endIndex - startIndex + 1).ToList();
     }
-    public static Stream LoadFile2Stream(string filePath)
-    {
-        FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        return fs;
-    }
-    public static async Task<byte[]> LoadFile2Byte(string filePath)
-    {
-        return await File.ReadAllBytesAsync(filePath);
-    }
+
     public static Stream Byte2Stream(byte[] buffer)
     {
         Stream stream = new MemoryStream(buffer);
         //设置 stream 的 position 为流的开始
         stream.Seek(0, SeekOrigin.Begin);
         return stream;
+    }
+
+    public static Stream LoadFile2ReadStream(string filePath)
+    {
+        FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        return fs;
+    }
+
+    public static async Task<byte[]> LoadFile2Byte(string filePath)
+    {
+        using (var fs = LoadFile2ReadStream(filePath)) {
+            byte[] bt = new byte[fs.Length];
+            await fs.ReadAsync(bt, 0, bt.Length);
+            fs.Close();
+            return bt;
+        }
     }
 
     public static string GetDesc(object? value)

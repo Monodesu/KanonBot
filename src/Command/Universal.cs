@@ -94,10 +94,10 @@ namespace KanonBot.command_parser
                     target.reply("网络出现错误！错误已上报");
                     var rtmp =
                         $"Target Message: {target.msg}\r\n"+
-                        $"Exception: {ex.ToString()}\r\n" +
-                        $"Message: {ex.Message}\r\n" +
-                        $"Source: {ex.Source}\r\n" +
-                        $"StackTrace: {ex.StackTrace}";
+                        $"Exception: {ex.ToString()}\r\n";
+                        // $"Message: {ex.Message}\r\n" +
+                        // $"Source: {ex.Source}\r\n" +
+                        // $"StackTrace: {ex.StackTrace}";
                     Utils.SendDebugMail("mono@desu.life", rtmp);
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
                     Log.Error("网络异常 ↓\n{ex}", ex);
@@ -107,10 +107,10 @@ namespace KanonBot.command_parser
                     target.reply("出现了未知错误，错误内容已自动上报");
                     var rtmp =
                         $"Target Message: {target.msg}\r\n" +
-                        $"Exception: {ex.ToString()}\r\n" +
-                        $"Message: {ex.Message}\r\n" +
-                        $"Source: {ex.Source}\r\n" +
-                        $"StackTrace: {ex.StackTrace}";
+                        $"Exception: {ex.ToString()}\r\n";
+                        // $"Message: {ex.Message}\r\n" +
+                        // $"Source: {ex.Source}\r\n" +
+                        // $"StackTrace: {ex.StackTrace}";
                     Utils.SendDebugMail("mono@desu.life", rtmp);
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
                     Log.Error("执行指令异常 ↓\n{ex}", ex);
