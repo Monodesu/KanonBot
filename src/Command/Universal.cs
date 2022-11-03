@@ -102,6 +102,13 @@ namespace KanonBot.command_parser
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
                     Log.Error("网络异常 ↓\n{ex}", ex);
                 }
+                catch (System.IO.IOException ex)
+                {
+                    // 文件竞争问题, 懒得处理了直接摆烂
+                    Log.Error("出现文件竞争问题 ↓\n{ex}", ex);
+                    if (ex.Message.Contains("being used by another process"))
+                        return;
+                }
                 catch (Exception ex)
                 {
                     target.reply("出现了未知错误，错误内容已自动上报");

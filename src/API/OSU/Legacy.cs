@@ -26,11 +26,13 @@ namespace KanonBot.API
             {
                 public string mode { get; set; }
                 public string beatmapStatus { get; set; }
-
                 public long beatmapId { get; set; }
                 public long beatmapsetId { get; set; }
                 public long creatorId { get; set; }
-                public long hitLength { get; set; }     // 第一个note到最后一个note的时长
+                /// <summary>
+                /// 第一个note到最后一个note的时长
+                /// </summary>
+                public long hitLength { get; set; }
                 public long totalLength { get; set; }
                 public long totalPlaycount { get; set; }
                 public long playCount { get; set; }
@@ -44,7 +46,9 @@ namespace KanonBot.API
                 public double BPM { get; set; }
                 public double circleSize { get; set; }
                 public double approachRate { get; set; }
-                // Accuracy == OverallDifficulty(OD)
+                /// <summary>
+                /// Accuracy == OverallDifficulty(OD)
+                /// </summary>
                 public double accuracy { get; set; }
                 public double HPDrainRate { get; set; }
                 public double difficultyRating { get; set; }
