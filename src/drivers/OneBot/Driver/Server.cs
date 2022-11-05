@@ -23,7 +23,7 @@ public partial class OneBot
         {
             public API api;
             IWebSocketConnection inner;
-            public string? selfID { get; private set; }
+            public string selfID { get; private set; }
             public Socket(IWebSocketConnection socket)
             {
                 this.api = new(this);
@@ -48,22 +48,28 @@ public partial class OneBot
             private Dictionary<Guid, Socket> inner = new();
             private Mutex mut = new();
 
-            public Socket? Get(Guid k) {
+            public Socket? Get(Guid k)
+            {
                 return this.inner.GetValueOrDefault(k);
             }
-            public void Set(Guid k, Socket v) {
+            public void Set(Guid k, Socket v)
+            {
                 mut.WaitOne();
                 this.inner.Add(k, v);
                 mut.ReleaseMutex();
             }
-            public Socket? Remove(Guid k) {
+            public Socket? Remove(Guid k)
+            {
                 Socket? s;
                 mut.WaitOne();
                 this.inner.Remove(k, out s);
                 mut.ReleaseMutex();
                 return s;
             }
-
+            public IEnumerable<KeyValuePair<Guid, Socket>> Iter()
+            {
+                return this.inner;
+            }
         }
         Clients clients = new();
         WebSocketServer instance;
@@ -157,6 +163,12 @@ public partial class OneBot
                             dynamic obj;
                             try
                             {
+                                // 匹配是否是bot发出，防止进入死循环
+                                var user_id = (string?)m["user_id"];
+                                if (this.clients.Iter().Where(s => s.Value.selfID == user_id).Any())
+                                {
+                                    return;
+                                }
                                 var msgType = (string?)m["message_type"];
                                 switch (msgType)
                                 {

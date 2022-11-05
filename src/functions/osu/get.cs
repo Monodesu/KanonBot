@@ -650,7 +650,7 @@ namespace KanonBot.functions.osubot
                 var ts = (item.CreatedAt - t).Days;
                 if (0 <= ts && ts < 1)
                 {
-                    str += $"\n#{i + 1} {item.Rank} {item.Accuracy * 100:0.##}% {item.PP.ToString("0.##")}pp";
+                    str += $"\n#{i + 1} {item.Rank} {item.Accuracy * 100:0.##}% {item.PP:0.##}pp";
                     if (item.Mods.Length > 0) str += $" +{string.Join(',', item.Mods)}";
                 }
             }
