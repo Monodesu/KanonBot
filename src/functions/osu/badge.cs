@@ -161,32 +161,33 @@ namespace KanonBot.functions.osubot
                 }
 
                 //检查用户是否拥有此badge
-                if (owned_badges.Count <= badgeNum)
+                if (owned_badges.Count < badgeNum)
                 {
                     target.reply($"你好像没有编号为 {badgeNum} 的badge呢..."); return;
                 }
 
                 //设置badge
-                if (displayed_badges.Count == 0)
-                {
-                    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), owned_badges[badgeNum - 1]))
-                        target.reply($"设置成功");
-                    else
-                        target.reply($"因数据库原因设置失败，请稍后再试。");
-                    return;
-                }
+                //没有完全适配多徽章安装，需要等新面板后再取消注释
+                //if (displayed_badges.Count == 0)
+                //{
+                if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), owned_badges[badgeNum - 1]))
+                    target.reply($"设置成功");
                 else
-                {
-                    string settemp1 = "";
-                    foreach (var x in displayed_badges)
-                        settemp1 += x + ",";
-                    settemp1 += owned_badges[badgeNum - 1];
-                    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), settemp1))
-                        target.reply($"设置成功");
-                    else
-                        target.reply($"因数据库原因设置失败，请稍后再试。");
-                    return;
-                }
+                    target.reply($"因数据库原因设置失败，请稍后再试。");
+                return;
+                //}
+                //else
+                //{
+                //    string settemp1 = "";
+                //    foreach (var x in displayed_badges)
+                //        settemp1 += x + ",";
+                //    settemp1 += owned_badges[badgeNum - 1];
+                //    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), settemp1))
+                //        target.reply($"设置成功");
+                //    else
+                //        target.reply($"因数据库原因设置失败，请稍后再试。");
+                //    return;
+                //}
             }
             else
             {
