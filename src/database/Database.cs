@@ -1,10 +1,10 @@
 #pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable IDE0044 // 添加只读修饰符
-using SqlSugar;
-using Serilog;
 using KanonBot.Drivers;
-using static KanonBot.Database.Model;
+using Serilog;
+using SqlSugar;
 using static KanonBot.API.OSU.Models;
+using static KanonBot.Database.Model;
 
 namespace KanonBot.Database;
 
@@ -153,7 +153,8 @@ public class Client
     static public async Task<API.OSU.Models.PPlusData.UserData?> GetOsuPPlusData(long osu_uid)
     {
         var data = await GetInstance().Queryable<Model.OsuPPlus>().FirstAsync(it => it.uid == osu_uid && it.pp != 0);
-        if (data != null) {
+        if (data != null)
+        {
             var realData = new API.OSU.Models.PPlusData.UserData();
             realData.UserId = osu_uid;
             realData.PerformanceTotal = data.pp;
@@ -164,7 +165,9 @@ public class Client
             realData.SpeedTotal = data.spd;
             realData.StaminaTotal = data.sta;
             return realData;
-        } else {
+        }
+        else
+        {
             return null;
         }
     }
@@ -282,7 +285,11 @@ public class Client
         else
         {
             var date = DateTime.Today;
-            date = date.AddDays(-days);
+            try {
+                date = date.AddDays(-days);
+            } catch (ArgumentOutOfRangeException) {
+                return (-1, null);
+            }
             data = await db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate, OrderByType.Desc).FirstAsync(it => it.uid == oid && it.gamemode == API.OSU.Enums.ParseMode(mode) && it.lastupdate <= date);
             if (data == null)
             {

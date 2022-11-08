@@ -1,8 +1,8 @@
-﻿using KanonBot.Drivers;
+﻿using KanonBot.API;
+using KanonBot.Drivers;
 using KanonBot.Message;
-using KanonBot.API;
-using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Png;
 
 namespace KanonBot.functions.osubot
 {
