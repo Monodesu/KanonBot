@@ -96,7 +96,7 @@ namespace KanonBot.functions.osubot
             {
                 // 加载失败
                 File.Delete($"./work/beatmap/{bid}.osu");
-                target.reply("发生了错误。"); return;
+                target.reply("无法获取铺面信息。"); return;
             }
 
             Leeway_Calculator lc = new(); // 实例化

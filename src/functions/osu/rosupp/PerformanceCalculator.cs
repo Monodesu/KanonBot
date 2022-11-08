@@ -1,13 +1,14 @@
-﻿using RosuPP;
-using SixLabors.ImageSharp.Diagnostics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using KanonBot.LegacyImage;
 using KanonBot.API;
-using System.Runtime.InteropServices;
+using KanonBot.LegacyImage;
+using RosuPP;
+using Serilog;
+using SixLabors.ImageSharp.Diagnostics;
 
 namespace KanonBot.functions.osu.rosupp
 {
@@ -25,7 +26,8 @@ namespace KanonBot.functions.osu.rosupp
                 data.Free();
             }
 
-            public ref Calculator GetRef() {
+            public ref Calculator GetRef()
+            {
                 return ref this.calculator;
             }
         }
@@ -175,15 +177,19 @@ namespace KanonBot.functions.osu.rosupp
             }.build().Context));
 
             // 5种acc + 全连
-            double[] accs = { 100.00, 99.00, 98.00, 97.00, 95.00, data.scoreInfo.Accuracy };
-            data.ppInfo.ppStats = accs.Select(acc => {
-                return Result2Info(beatmap.GetRef().Calculate(new Params
-                {
-                    mode = data.scoreInfo.Mode,
-                    mods = data.scoreInfo.Mods,
-                    acc = acc,
-                }.build().Context)).ppStat;
-            }).ToList();
+            double[] accs = { 100.00, 99.00, 98.00, 97.00, 95.00, data.scoreInfo.Accuracy * 100.00 };
+            data.ppInfo.ppStats = accs.Select(
+                acc => Result2Info(
+                    beatmap.GetRef().Calculate(
+                        new Params
+                        {
+                            mode = data.scoreInfo.Mode,
+                            mods = data.scoreInfo.Mods,
+                            acc = acc,
+                        }.build().Context
+                    )
+                ).ppStat
+            ).ToList();
 
             return data;
         }

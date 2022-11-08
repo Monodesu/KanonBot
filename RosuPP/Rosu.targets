@@ -61,7 +61,6 @@
     <ItemGroup>
         <CargoChannelArg Condition=" '$(CargoChannel)' != '' " Include="+$(CargoChannel)" />
         <CargoBuildArg Include="--target $(CargoTarget)" />
-        <CargoBuildArg Include="--release" />
         <!-- 不管了，一直release就完了 -->
         <CargoBuildArg Condition=" '$(CargoConfiguration)' == 'release' " Include="--release" />
     </ItemGroup>

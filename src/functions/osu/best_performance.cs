@@ -98,10 +98,9 @@ namespace KanonBot.functions.osubot
                     }
                     
                 }
-                catch(Exception ex)
+                catch
                 {
-                    target.reply("发生了错误。");
-                    Console.WriteLine(ex.Message + ex.StackTrace);
+                    target.reply("计算成绩时出错。");
                     return;
                 }
             }

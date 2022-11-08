@@ -100,7 +100,7 @@ namespace KanonBot.functions.osubot
                 }
                 catch
                 {
-                    target.reply("发生了错误。"); return;
+                    target.reply("计算成绩时出错。"); return;
                 }
             }
             else { target.reply("猫猫找不到该玩家最近游玩的成绩。"); return; }
