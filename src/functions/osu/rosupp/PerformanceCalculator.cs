@@ -174,30 +174,16 @@ namespace KanonBot.functions.osu.rosupp
                 nkatu = statistics.CountKatu,
             }.build().Context));
 
-            // 初始化列表
-            data.ppInfo.ppStats = new();
-
-            // 5种acc
-            double[] accs = { 100.00, 99.00, 98.00, 97.00, 95.00 };
-            foreach (var acc in accs)
-            {
-                data.ppInfo.ppStats.Add(Result2Info(beatmap.GetRef().Calculate(new Params
+            // 5种acc + 全连
+            double[] accs = { 100.00, 99.00, 98.00, 97.00, 95.00, data.scoreInfo.Accuracy };
+            data.ppInfo.ppStats = accs.Select(acc => {
+                return Result2Info(beatmap.GetRef().Calculate(new Params
                 {
                     mode = data.scoreInfo.Mode,
                     mods = data.scoreInfo.Mods,
                     acc = acc,
-                }.build().Context)).ppStat);
-            }
-
-            // 全连
-            data.ppInfo.ppStats.Add(Result2Info(beatmap.GetRef().Calculate(new Params
-            {
-                mode = data.scoreInfo.Mode,
-                mods = data.scoreInfo.Mods,
-                n100 = statistics.CountOk,
-                n50 = statistics.CountMeh,
-                nkatu = statistics.CountKatu
-            }.build().Context)).ppStat);
+                }.build().Context)).ppStat;
+            }).ToList();
 
             return data;
         }

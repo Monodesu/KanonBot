@@ -118,6 +118,10 @@ namespace KanonBot.functions.osubot
         {
             if (int.TryParse(cmd, out int badgeNum))
             {
+                if (badgeNum < 1) {
+                    target.reply("你提供的badge id不正确，请重新检查。");
+                }
+
                 var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
                 if (userinfo!.owned_badge_ids == null)
                 {
@@ -196,9 +200,12 @@ namespace KanonBot.functions.osubot
         }
         private static async Task Info(Target target, string cmd, AccInfo accinfo)
         {
-            int badgeNum = -1;
-            if (int.TryParse(cmd, out badgeNum))
+            if (int.TryParse(cmd, out int badgeNum))
             {
+                if (badgeNum < 1) {
+                    target.reply("你提供的badge id不正确，请重新检查。");
+                }
+
                 var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
                 if (userinfo!.owned_badge_ids == null)
                 {
@@ -219,7 +226,7 @@ namespace KanonBot.functions.osubot
                 }
 
                 //检查用户是否拥有此badge
-                if (owned_badges.Count <= badgeNum)
+                if (owned_badges.Count < badgeNum)
                 {
                     target.reply($"你好像没有编号为 {badgeNum} 的badge呢..."); return;
                 }
