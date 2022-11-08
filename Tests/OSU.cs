@@ -120,6 +120,8 @@ public class OSU
         Assert.True(API.OSU.GetUserBeatmapScore(9037287, 3323074, new string[] { "HD" }).Result!.Score.User!.Id == 9037287);
         Assert.Null(API.OSU.GetUserBeatmapScore(9037287000, 3323074, new string[] { "HD" }).Result);
         Assert.Null(API.OSU.GetUserBeatmapScore(9037287, 3323074, new string[] { "HR" }).Result);
+        Assert.Null(API.OSU.GetUserBeatmapScore(9037287, 850263, new string[] { "HD", "FL" }).Result);
+        Assert.NotNull(API.OSU.GetUserBeatmapScore(9037287, 850263, new string[] { "HD", "DT" }).Result);
     }
 
     [Fact]

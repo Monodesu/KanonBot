@@ -122,8 +122,7 @@ namespace KanonBot.API
                 .AppendPathSegments(new object[] { "beatmaps", bid, "scores", "users", UserId })
                 .SetQueryParam("mode", mode.ToModeStr());
 
-            foreach (var mod in mods) { req.SetQueryParam("mods[]", mod); }
-
+            req.SetQueryParam("mods[]", mods);
             var res = await req.GetAsync();
             if (res.StatusCode == 404)
                 return null;
