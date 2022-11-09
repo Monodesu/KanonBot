@@ -34,6 +34,8 @@ public class OSU
     {
         var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] { }, API.OSU.Enums.Mode.Mania).Result!;
         score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
+        var attr = API.OSU.GetBeatmapAttributes(score.Score.Beatmap!.BeatmapId, new string[] { }, API.OSU.Enums.Mode.Mania).Result;
+        Output.WriteLine("beatmap attr {0}", Json.Serialize(attr));
         API.OSU.BeatmapFileChecker(score.Score.Beatmap!.BeatmapId).Wait();
         Output.WriteLine("pp {0}", score.Score.PP);
         Output.WriteLine("acc {0}", score.Score.Accuracy);
