@@ -10,7 +10,6 @@ using Newtonsoft.Json.Linq;
 using Msg = KanonBot.Message;
 using Img = KanonBot.Image;
 using SixLabors.ImageSharp;
-using libkook = Kook;
 
 namespace Tests;
 

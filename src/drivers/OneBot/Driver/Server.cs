@@ -160,7 +160,7 @@ public partial class OneBot
                     switch ((string?)m["post_type"])
                     {
                         case "message":
-                            dynamic obj;
+                            Models.CQMessageEventBase obj;
                             try
                             {
                                 // 匹配是否是bot发出，防止进入死循环

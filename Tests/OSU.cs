@@ -52,7 +52,7 @@ public class OSU
         var cal = Calculator.New(new Sliceu8(beatmapData, (ulong)f.Length));
         beatmapData.Free();
         var p = ScoreParams.New();
-        p.Mode(Mode.Osu);
+        p.Mode(Mode.Mania);
         p.NKatu(0);
         p.NMisses(6);
         p.N100(29);
@@ -83,7 +83,7 @@ public class OSU
         // Assert.IsTrue(res!.StaminaDifficulty > 0);   // 不知道为啥taiko这里除了great_hit_window都是0
         Assert.True(res!.GreatHitWindow > 0);
         res = API.OSU.GetBeatmapAttributes(3323074, new string[] { "HD", "DT" }, API.OSU.Enums.Mode.Mania).Result;
-        Assert.True(res!.ScoreMultiplier > 0);
+        Assert.True(res!.MaxCombo > 0);
         res = API.OSU.GetBeatmapAttributes(3323074, new string[] { "HD", "DT" }, API.OSU.Enums.Mode.Fruits).Result;
         Assert.True(res!.ApproachRate > 0);
         res = API.OSU.GetBeatmapAttributes(3323074000, new string[] { "HD", "DT" }, API.OSU.Enums.Mode.Fruits).Result;

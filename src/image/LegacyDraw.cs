@@ -896,9 +896,9 @@ namespace KanonBot.LegacyImage
             score.Mutate(x => x.DrawImage(acchue, 1));
             // combo
             var combo = data.scoreInfo.MaxCombo;
-            if (data.scoreInfo.Mode is not OSU.Enums.Mode.Mania)
+            if (ppInfo.maxCombo != null)
             {
-                var maxCombo = ppInfo.maxCombo;
+                var maxCombo = ppInfo.maxCombo.Value;
                 if (maxCombo > 0)
                 {
                     textOptions.Origin = new PointF(1598, 966);

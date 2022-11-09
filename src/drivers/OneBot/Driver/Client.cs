@@ -79,7 +79,7 @@ public partial class OneBot
                     switch ((string?)m["post_type"])
                     {
                         case "message":
-                            dynamic obj;
+                            Models.CQMessageEventBase obj;
                             try
                             {
                                 var msgType = (string?)m["message_type"];
