@@ -12,7 +12,7 @@ namespace KanonBot.Image;
 public class Processor
 {
 
-    
+
     #region 变量
     // workingFileName 永远使用第一条调用Image命令行导入图像时所使用的图像名称
     private string workingFileName = "";
@@ -210,6 +210,74 @@ public class Processor
 
 static class BuildCornersClass
 {
+    //分别设置四个角的圆角程度
+    #region buildCorners_Part
+
+    public static IImageProcessingContext ApplyRoundedCorners_Part(this IImageProcessingContext ctx,
+        float cornerRadiusLT, float cornerRadiusRT, float cornerRadiusLB, float cornerRadiusRB)
+    {
+        Size size = ctx.GetCurrentSize();
+        IPathCollection corners = BuildCorners_Part(size.Width, size.Height, cornerRadiusLT, cornerRadiusRT, cornerRadiusLB, cornerRadiusRB);
+
+        ctx.SetGraphicsOptions(new GraphicsOptions()
+        {
+            Antialias = true,
+            AlphaCompositionMode = PixelAlphaCompositionMode.DestOut // enforces that any part of this shape that has color is punched out of the background
+        });
+
+        // mutating in here as we already have a cloned original
+        // use any color (not Transparent), so the corners will be clipped
+        foreach (var c in corners)
+        {
+            ctx = ctx.Fill(Color.Red, c);
+        }
+        return ctx;
+    }
+
+    public static IImageProcessingContext RoundCorner_Parts(this IImageProcessingContext processingContext, Size size,
+        float cornerRadiusLT, float cornerRadiusRT, float cornerRadiusLB, float cornerRadiusRB)
+    {
+        return processingContext.Resize(new SixLabors.ImageSharp.Processing.ResizeOptions
+        {
+            Size = size,
+            Mode = ResizeMode.Crop
+        }).ApplyRoundedCorners_Part(cornerRadiusLT, cornerRadiusRT, cornerRadiusLB, cornerRadiusRB);
+    }
+
+
+    public static IPathCollection BuildCorners_Part(int imageWidth, int imageHeight,
+         float cornerRadiusLT, float cornerRadiusRT, float cornerRadiusLB, float cornerRadiusRB)
+    {
+        //CREARE SQUARE
+        var rectLT = new RectangularPolygon(-0.5f, -0.5f, cornerRadiusLT, cornerRadiusLT);
+        var rectRT = new RectangularPolygon(-0.5f, -0.5f, cornerRadiusRT, cornerRadiusRT);
+        var rectLB = new RectangularPolygon(-0.5f, -0.5f, cornerRadiusLB, cornerRadiusLB);
+        var rectRB = new RectangularPolygon(-0.5f, -0.5f, cornerRadiusRB, cornerRadiusRB);
+
+        float rightPos, bottomPos;
+        //TOP LEFT
+        IPath cornerTopLeft = rectLT.Clip(new EllipsePolygon(cornerRadiusLT - 0.5f, cornerRadiusLT - 0.5f, cornerRadiusLT));
+
+        //TOP RIGHT
+        IPath cornerTopRight = rectRT.Clip(new EllipsePolygon(cornerRadiusRT - 0.5f, cornerRadiusRT - 0.5f, cornerRadiusRT));
+        rightPos = imageWidth - cornerTopRight.Bounds.Width + 1;
+        cornerTopRight = cornerTopRight.RotateDegree(90).Translate(rightPos, 0);
+
+        //BOTTOM LEFT
+        IPath cornerBottomLeft = rectLB.Clip(new EllipsePolygon(cornerRadiusLB - 0.5f, cornerRadiusLB - 0.5f, cornerRadiusLB));
+        bottomPos = imageHeight - cornerBottomLeft.Bounds.Height + 1;
+        cornerBottomLeft = cornerBottomLeft.RotateDegree(-90).Translate(0, bottomPos);
+
+        //BOTTOM RIGHT
+        IPath cornerBottomRight = rectRB.Clip(new EllipsePolygon(cornerRadiusRB - 0.5f, cornerRadiusRB - 0.5f, cornerRadiusRB));
+        rightPos = imageWidth - cornerBottomRight.Bounds.Width + 1;
+        bottomPos = imageHeight - cornerBottomRight.Bounds.Height + 1;
+        cornerBottomRight = cornerBottomRight.RotateDegree(180).Translate(rightPos, bottomPos);
+
+        return new PathCollection(cornerTopLeft, cornerBottomLeft, cornerTopRight, cornerBottomRight);
+    }
+    #endregion
+
     #region BuildCorners
     // This method can be seen as an inline implementation of an `IImageProcessor`:
     // (The combination of `IImageOperations.Apply()` + this could be replaced with an `IImageProcessor`)
@@ -232,6 +300,9 @@ static class BuildCornersClass
         }
         return ctx;
     }
+
+
+
     public static IImageProcessingContext RoundCorner(this IImageProcessingContext processingContext, Size size, float cornerRadius)
     {
         return processingContext.Resize(new SixLabors.ImageSharp.Processing.ResizeOptions

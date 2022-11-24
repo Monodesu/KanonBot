@@ -165,8 +165,16 @@ namespace KanonBot.functions.osubot
             var isDataOfDayAvaiavle = false;
             if (data.daysBefore > 0) isDataOfDayAvaiavle = true;
             var stream = new MemoryStream();
-            var img = await LegacyImage.Draw.DrawInfo(data, bannerStatus, DBOsuInfo != null, isDataOfDayAvaiavle);
-            await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+
+
+            //var img = await LegacyImage.Draw.DrawInfo(data, bannerStatus, DBOsuInfo != null, isDataOfDayAvaiavle);
+            var img = await image.OsuInfoPanelV2.Draw(data, bannerStatus, DBOsuInfo != null, isDataOfDayAvaiavle);
+
+
+            //await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+            await img.SaveAsync(stream, new PngEncoder());
+
+
             stream.TryGetBuffer(out ArraySegment<byte> buffer);
             target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
             //AnnualPass(data.userInfo.userId, data.userInfo.mode, data.userInfo.totalHits); //季票内容

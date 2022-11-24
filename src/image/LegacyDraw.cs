@@ -30,6 +30,7 @@ namespace KanonBot.LegacyImage
             public string? customPanel;
             public int daysBefore = 0;
             public int badgeId = -1;
+            public int InfoPanelV2_Mode = 0; //0=light 1=dark
         }
         public class ScorePanelData
         {
@@ -44,13 +45,13 @@ namespace KanonBot.LegacyImage
             public OSU.Models.PPlusData.UserData u2;
         }
 
-        static FontCollection fonts = new();
-        static FontFamily Exo2SemiBold = fonts.Add("./work/fonts/Exo2/Exo2-SemiBold.ttf");
-        static FontFamily Exo2Regular = fonts.Add("./work/fonts/Exo2/Exo2-Regular.ttf");
-        static FontFamily HarmonySans = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
-        static FontFamily TorusRegular = fonts.Add("./work/fonts/Torus-Regular.ttf");
-        static FontFamily TorusSemiBold = fonts.Add("./work/fonts/Torus-SemiBold.ttf");
-        static FontFamily avenirLTStdMedium = fonts.Add("./work/fonts/AvenirLTStd-Medium.ttf");
+        public static FontCollection fonts = new();
+        public static FontFamily Exo2SemiBold = fonts.Add("./work/fonts/Exo2/Exo2-SemiBold.ttf");
+        public static FontFamily Exo2Regular = fonts.Add("./work/fonts/Exo2/Exo2-Regular.ttf");
+        public static FontFamily HarmonySans = fonts.Add("./work/fonts/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Regular.ttf");
+        public static FontFamily TorusRegular = fonts.Add("./work/fonts/Torus-Regular.ttf");
+        public static FontFamily TorusSemiBold = fonts.Add("./work/fonts/Torus-SemiBold.ttf");
+        public static FontFamily avenirLTStdMedium = fonts.Add("./work/fonts/AvenirLTStd-Medium.ttf");
 
         //customBannerStatus 0=没有自定义banner 1=在猫猫上设置了自定义banner 
         public static async Task<Img> DrawInfo(UserPanelData data, int customBannerStatus, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
@@ -1147,7 +1148,7 @@ namespace KanonBot.LegacyImage
         #endregion
 
         #region RoundedCorners
-        public static IImageProcessingContext ApplyRoundedCorners(this IImageProcessingContext ctx, float cornerRadius)
+        private static IImageProcessingContext ApplyRoundedCorners(this IImageProcessingContext ctx, float cornerRadius)
         {
             Size size = ctx.GetCurrentSize();
             IPathCollection corners = BuildCorners(size.Width, size.Height, cornerRadius);
@@ -1166,7 +1167,7 @@ namespace KanonBot.LegacyImage
             }
             return ctx;
         }
-        public static IImageProcessingContext RoundCorner(this IImageProcessingContext processingContext, Size size, float cornerRadius)
+        private static IImageProcessingContext RoundCorner(this IImageProcessingContext processingContext, Size size, float cornerRadius)
         {
             return processingContext.Resize(new ResizeOptions
             {
@@ -1174,7 +1175,7 @@ namespace KanonBot.LegacyImage
                 Mode = ResizeMode.Crop
             }).ApplyRoundedCorners(cornerRadius);
         }
-        public static IPathCollection BuildCorners(int imageWidth, int imageHeight, float cornerRadius)
+        private static IPathCollection BuildCorners(int imageWidth, int imageHeight, float cornerRadius)
         {
             // first create a square
             var rect = new RectangularPolygon(-0.5f, -0.5f, cornerRadius, cornerRadius);

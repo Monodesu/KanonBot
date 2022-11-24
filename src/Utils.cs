@@ -151,7 +151,17 @@ public static class Utils
         second = duration % 60;
         return $"{day}d {hour}h {minute}m {second}s";
     }
-
+    public static string Duration2StringWithoutSec(long duration)
+    {
+        long day, hour, minute, second;
+        day = duration / 86400;
+        duration %= 86400;
+        hour = duration / 3600;
+        duration %= 3600;
+        minute = duration / 60;
+        second = duration % 60;
+        return $"{day}d {hour}h {minute}m";
+    }
     public static string Duration2TimeString(long duration)
     {
         long hour, minute, second;

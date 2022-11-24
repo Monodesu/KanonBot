@@ -31,6 +31,7 @@ public class Config
     {
         public int clientId { get; set; }
         public string? clientSecret { get; set; }
+        public string? v1key { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
     }
     public class OSS : ITomlMetadataProvider

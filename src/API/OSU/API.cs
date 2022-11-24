@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using static KanonBot.API.OSU.Models;
 using SqlSugar.Extensions;
 using KanonBot.functions.osu.rosupp;
+using KanonBot.Serializer;
 
 namespace KanonBot.API
 {
@@ -146,6 +147,22 @@ namespace KanonBot.API
                 return (await res.GetJsonAsync<JObject>())["scores"]!.ToObject<Models.Score[]>();
         }
 
+        // 通过osuv1 api osu uid获取用户信息
+        async public static Task<List<Models.UserV1>?> GetUserWithV1API(long userId, Enums.Mode mode = Enums.Mode.OSU)
+        {
+            var url = $"{EndPointV1}get_user?k={config.osu!.v1key}&u={userId}&m={mode.ToModeNum()}";
+            try
+            {
+                var str = await url.GetStringAsync();
+                //Console.WriteLine(str);
+                return Json.Deserialize<List<Models.UserV1>>(str);
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex.Message);
+                return null;
+            }
+        }
         // 通过osu uid获取用户信息
         async public static Task<Models.User?> GetUser(long userId, Enums.Mode mode = Enums.Mode.OSU)
         {
