@@ -29,6 +29,64 @@ namespace KanonBot.image
     {
         public static async Task<Img> Draw(UserPanelData data, int customBannerStatus, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
         {
+            //var ColorMode = data.InfoPanelV2_Mode;
+            var ColorMode = 1;
+            Color mainColor = new(),
+                ppMainColor = new(),
+                accMainColor = new(),
+                rankMainColor = new(),
+                gradeCountsColor = new(),
+                usernameColor = new(),
+                detailsColor = new(),
+                ppBackgroundColor = new(),
+                ppFrontColor = new(),
+                accBackgroundColor = new(),
+                accFrontColor = new(),
+                ppSubColor = new(),
+                accSubColor = new(),
+                scoreppTopColor = new(),
+                scoreppColor = new(),
+                highlightColor = new();
+            //配色方案 0=模板light 1=模板dark 2...3...4...
+            switch (ColorMode)
+            {
+                case 0:
+                    mainColor = Color.ParseHex("#656b6d");
+                    usernameColor = Color.ParseHex("#4d4d4d");
+                    ppMainColor = Color.ParseHex("#e36a79");
+                    accMainColor = Color.ParseHex("#6cac9c");
+                    rankMainColor = Color.ParseHex("#5872df");
+                    gradeCountsColor = Color.ParseHex("#3a4d78");
+                    detailsColor = Color.ParseHex("#7f7f7f");
+                    ppBackgroundColor = Color.ParseHex("#fddcd7");
+                    ppFrontColor = Color.ParseHex("#f7bebe");
+                    accBackgroundColor = Color.ParseHex("#c3e7cb");
+                    accFrontColor = Color.ParseHex("#a4d8b1");
+                    ppSubColor = Color.ParseHex("#d84356");
+                    accSubColor = Color.ParseHex("#006837");
+                    scoreppTopColor = Color.ParseHex("#364a75");
+                    scoreppColor = Color.ParseHex("#ff7bac");
+                    highlightColor = Color.ParseHex("#ffcd22");
+                    break;
+                case 1:
+                    mainColor = Color.ParseHex("#e6e6e6");
+                    usernameColor = Color.ParseHex("#e6e6e6");
+                    ppMainColor = Color.ParseHex("#e36a79");
+                    accMainColor = Color.ParseHex("#6cac9c");
+                    rankMainColor = Color.ParseHex("#5872DF");
+                    gradeCountsColor = Color.ParseHex("#6C91E0");
+                    detailsColor = Color.ParseHex("#e6e6e6");
+                    ppBackgroundColor = Color.ParseHex("#44312F");
+                    ppFrontColor = Color.ParseHex("#5D3B3A");
+                    accBackgroundColor = Color.ParseHex("#243829");
+                    accFrontColor = Color.ParseHex("#294B32");
+                    ppSubColor = Color.ParseHex("#FF7BAC");
+                    accSubColor = Color.ParseHex("#00DE75");
+                    scoreppTopColor = Color.ParseHex("#5979bd");
+                    scoreppColor = Color.ParseHex("#E36A79");
+                    highlightColor = Color.ParseHex("#ffcd22");
+                    break;
+            }
             var info = new Image<Rgba32>(4000, 2640);
             //获取全部bp
             var allBP = await OSU.GetUserScores(data.userInfo.Id, OSU.Enums.UserScoreType.Best, data.userInfo.PlayMode, 100, 0);
@@ -52,7 +110,7 @@ namespace KanonBot.image
             Img sidePic;
             if (File.Exists($"./work/panelv2/user_infopanel_sidepic/{data.userInfo.Id}.png"))
                 sidePicPath = $"./work/panelv2/user_infopanel_sidepic/{data.userInfo.Id}.png";
-            else sidePicPath = data.InfoPanelV2_Mode switch
+            else sidePicPath = ColorMode switch
             {
                 0 => "./work/panelv2/infov2-light-customimg.png",
                 1 => "./work/panelv2/infov2-dark-customimg.png",
@@ -64,7 +122,7 @@ namespace KanonBot.image
             //进度条 - 先绘制进度条，再覆盖面板
             //pp
             Img pp_background = new Image<Rgba32>(1443, 68);
-            pp_background.Mutate(x => x.Fill(Color.ParseHex("#fddcd7")));
+            pp_background.Mutate(x => x.Fill(ppBackgroundColor));
             pp_background.Mutate(x => x.RoundCorner_Parts(new Size(1443, 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(pp_background, new Point(2358, 410), 1));
             //获取bnspp
@@ -132,19 +190,19 @@ namespace KanonBot.image
             //绘制mainpp
             int pp_front_length = 1443 - (int)(1443.0 * (bounsPP / scorePP));
             Img pp_front = new Image<Rgba32>(pp_front_length, 68);
-            pp_front.Mutate(x => x.Fill(Color.ParseHex("#f7bebe")));
+            pp_front.Mutate(x => x.Fill(ppFrontColor));
             pp_front.Mutate(x => x.RoundCorner_Parts(new Size(pp_front_length, 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(pp_front, new Point(2358, 410), 1));
 
             //50&100
             Img acc_background = new Image<Rgba32>(1443, 68);
-            acc_background.Mutate(x => x.Fill(Color.ParseHex("#c3e7cb")));
+            acc_background.Mutate(x => x.Fill(accBackgroundColor));
             acc_background.Mutate(x => x.RoundCorner_Parts(new Size(1443, 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(acc_background, new Point(2358, 611), 1));
 
             //300
             Img acc_300 = new Image<Rgba32>((int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0)), 68);
-            acc_300.Mutate(x => x.Fill(Color.ParseHex("#a4d8b1")));
+            acc_300.Mutate(x => x.Fill(accFrontColor));
             acc_300.Mutate(x => x.RoundCorner_Parts(new Size((int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0)), 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(acc_300, new Point(2358, 611), 1));
 
@@ -205,7 +263,7 @@ namespace KanonBot.image
             string panelPath;
             Img panel;
             if (File.Exists($"./work/panelv2/user_infopanel/{data.userInfo.Id}.png")) panelPath = $"./work/panelv2/user_infopanel/{data.userInfo.Id}.png";
-            else panelPath = data.InfoPanelV2_Mode switch
+            else panelPath = ColorMode switch
             {
                 0 => "./work/panelv2/infov2-light.png",
                 1 => "./work/panelv2/infov2-dark.png",
@@ -241,13 +299,13 @@ namespace KanonBot.image
 
             //username
             textOptions.Origin = new PointF(1780, 230);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.Username, new SolidBrush(Color.ParseHex("#4d4d4d")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.Username, new SolidBrush(usernameColor), null));
 
             //rank
             textOptions.Font = new Font(TorusRegular, 60);
             textOptions.Origin = new PointF(1972, 481);
             textOptions.VerticalAlignment = VerticalAlignment.Center;
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("#{0:N0}", data.userInfo.Statistics.GlobalRank), new SolidBrush(Color.ParseHex("#5872df")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("#{0:N0}", data.userInfo.Statistics.GlobalRank), new SolidBrush(rankMainColor), null));
 
             //country_flag
             Img flags = Img.Load(await Utils.LoadFile2Byte($"./work/flags/{data.userInfo.Country.Code}.png"));
@@ -256,60 +314,60 @@ namespace KanonBot.image
 
             //country_rank
             textOptions.Origin = new PointF(1687, 629);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("#{0:N0}", data.userInfo.Statistics.CountryRank), new SolidBrush(Color.ParseHex("#5872df")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("#{0:N0}", data.userInfo.Statistics.CountryRank), new SolidBrush(rankMainColor), null));
 
             //pp
             textOptions.Origin = new PointF(3120, 350);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.PP), new SolidBrush(Color.ParseHex("#e36a79")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.PP), new SolidBrush(ppMainColor), null));
 
             //acc
             textOptions.Origin = new PointF(3120, 551);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0.##}%", data.userInfo.Statistics.HitAccuracy), new SolidBrush(Color.ParseHex("#6cac9c")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0.##}%", data.userInfo.Statistics.HitAccuracy), new SolidBrush(accMainColor), null));
 
             //ppsub
             textOptions.HorizontalAlignment = HorizontalAlignment.Right;
             textOptions.Font = new Font(TorusRegular, 40);
             var ppsub_point = 2374 + pp_front_length - 40;
             textOptions.Origin = new PointF(ppsub_point, 440);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", scorePP), new SolidBrush(Color.ParseHex("#d84356")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", scorePP), new SolidBrush(ppSubColor), null));
 
             //acc sub
             var accsub_point = (2374 + (int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0))) - 40;
             textOptions.Origin = new PointF(accsub_point, 641);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, "300", new SolidBrush(Color.ParseHex("#006837")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, "300", new SolidBrush(accSubColor), null));
 
             //grades
             textOptions.Font = new Font(TorusRegular, 38);
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;
             textOptions.Origin = new PointF(2646, 988);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SSH), new SolidBrush(Color.ParseHex("#3a4d78")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SSH), new SolidBrush(gradeCountsColor), null));
             textOptions.Origin = new PointF(2646 + 218, 988);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SS), new SolidBrush(Color.ParseHex("#3a4d78")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SS), new SolidBrush(gradeCountsColor), null));
             textOptions.Origin = new PointF(2646 + 218 * 2, 988);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SH), new SolidBrush(Color.ParseHex("#3a4d78")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SH), new SolidBrush(gradeCountsColor), null));
             textOptions.Origin = new PointF(2646 + 218 * 3, 988);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.S), new SolidBrush(Color.ParseHex("#3a4d78")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.S), new SolidBrush(gradeCountsColor), null));
             textOptions.Origin = new PointF(2646 + 218 * 4, 988);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.A), new SolidBrush(Color.ParseHex("#3a4d78")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.A), new SolidBrush(gradeCountsColor), null));
 
             //details
             textOptions.Font = new Font(TorusRegular, 50);
             textOptions.HorizontalAlignment = HorizontalAlignment.Left;
             //play time
             textOptions.Origin = new PointF(1705, 1217);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, Utils.Duration2StringWithoutSec(data.userInfo.Statistics.PlayTime), new SolidBrush(Color.ParseHex("#8d8f8f")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, Utils.Duration2StringWithoutSec(data.userInfo.Statistics.PlayTime), new SolidBrush(detailsColor), null));
             //total hits
             textOptions.Origin = new PointF(2285, 1217);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.TotalHits), new SolidBrush(Color.ParseHex("#8d8f8f")), null));
-            //accuracy_details
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.TotalHits), new SolidBrush(detailsColor), null));
+            //play count
             textOptions.Origin = new PointF(2853, 1217);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0.##}%", data.userInfo.Statistics.HitAccuracy), new SolidBrush(Color.ParseHex("#8d8f8f")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.PlayCount), new SolidBrush(detailsColor), null));
             //ranked scores
             textOptions.Origin = new PointF(3420, 1217);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.RankedScore), new SolidBrush(Color.ParseHex("#8d8f8f")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.RankedScore), new SolidBrush(detailsColor), null));
 
             //top performance
-            //title
+            //title  +mods
             textOptions.Font = new Font(TorusRegular, 90);
             textOptions.Origin = new PointF(1945, 1590);
             var title = "";
@@ -323,7 +381,20 @@ namespace KanonBot.image
                     break;
                 }
             }
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(Color.ParseHex("#656b6d")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(mainColor), null));
+            //mods
+            //testcodes
+            string[] testmods = { "HR", "DT", "NF", "SD" };
+            allBP![0].Mods = testmods;
+            if (allBP![0].Mods.Length > 0)
+            {
+                textOptions.Origin = new PointF(1945 + TextMeasurer.Measure(title, textOptions).Width + 25, 1611);
+                textOptions.Font = new Font(TorusRegular, 40);
+                var mainscoremods = "+";
+                foreach (var x in allBP![0].Mods)
+                    mainscoremods += $"{x}, ";
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, mainscoremods[..mainscoremods.LastIndexOf(",")], new SolidBrush(mainColor), null));
+            }
 
             //artist
             textOptions.Font = new Font(TorusRegular, 42);
@@ -339,7 +410,7 @@ namespace KanonBot.image
                     break;
                 }
             }
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, artist, new SolidBrush(Color.ParseHex("#656b6d")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, artist, new SolidBrush(mainColor), null));
 
             //creator
             textOptions.Origin = new PointF(2231, 1668);
@@ -354,16 +425,24 @@ namespace KanonBot.image
                     break;
                 }
             }
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, creator, new SolidBrush(Color.ParseHex("#656b6d")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, creator, new SolidBrush(mainColor), null));
 
             //bid
             textOptions.Origin = new PointF(2447, 1668);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Beatmap!.BeatmapId.ToString(), new SolidBrush(Color.ParseHex("#656b6d")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Beatmap!.BeatmapId.ToString(), new SolidBrush(mainColor), null));
 
             //get stars from rosupp
             var ppinfo = await PerformanceCalculator.CalculatePanelData(allBP[0]);
-            textOptions.Origin = new PointF(2643, 1668);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo.ppInfo.star.ToString("0.##*"), new SolidBrush(Color.ParseHex("#656b6d")), null));
+            textOptions.Origin = new PointF(2657, 1668);
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo.ppInfo.star.ToString("0.##*"), new SolidBrush(mainColor), null));
+
+            //acc
+            textOptions.Origin = new PointF(2813, 1668);
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Accuracy.ToString("0.##%"), new SolidBrush(mainColor), null));
+
+            //rank
+            textOptions.Origin = new PointF(2988, 1668);
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Rank, new SolidBrush(mainColor), null));
 
             //2nd~5th bp
             textOptions.HorizontalAlignment = HorizontalAlignment.Left;
@@ -385,11 +464,14 @@ namespace KanonBot.image
                     }
                 }
                 textOptions.Origin = new PointF(MainTitleAndDifficultyTitlePos_X, 1868 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(Color.ParseHex("#656b6d")), null));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(mainColor), null));
             }
 
             //2nd~5th version and acc and bid and star
             textOptions.Font = new Font(TorusRegular, 40);
+
+
+
             for (int i = 1; i < 5; ++i)
             {
                 title = "";
@@ -404,20 +486,27 @@ namespace KanonBot.image
                     }
                 }
                 textOptions.Origin = new PointF(MainTitleAndDifficultyTitlePos_X, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, title + " | ", new SolidBrush(Color.ParseHex("#656b6d")), null));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, title + " | ", new SolidBrush(mainColor), null));
                 var textMeasurePos = MainTitleAndDifficultyTitlePos_X + TextMeasurer.Measure(title + " | ", textOptions).Width + 5;
                 //bid
                 textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Beatmap!.BeatmapId.ToString() + " | ", new SolidBrush(Color.ParseHex("#656b6d")), null));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Beatmap!.BeatmapId.ToString() + " | ", new SolidBrush(mainColor), null));
                 textMeasurePos = textMeasurePos + TextMeasurer.Measure(allBP![i].Beatmap!.BeatmapId.ToString() + " | ", textOptions).Width + 5;
                 //star
                 var ppinfo1 = await PerformanceCalculator.CalculatePanelData(allBP[i]);
                 textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo1.ppInfo.star.ToString("0.##*") + " | ", new SolidBrush(Color.ParseHex("#656b6d")), null));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo1.ppInfo.star.ToString("0.##*") + " | ", new SolidBrush(mainColor), null));
                 textMeasurePos = textMeasurePos + TextMeasurer.Measure(ppinfo1.ppInfo.star.ToString("0.##*") + " | ", textOptions).Width + 5;
                 //acc
                 textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Accuracy.ToString("0.##%"), new SolidBrush(Color.ParseHex("#ffcd22")), null));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Accuracy.ToString("0.##%"), new SolidBrush(highlightColor), null));
+                textMeasurePos = textMeasurePos + TextMeasurer.Measure(allBP![i].Accuracy.ToString("0.##%"), textOptions).Width + 5;
+                //ranking
+                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(mainColor), null));
+                textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Rank, new SolidBrush(mainColor), null));
             }
 
 
@@ -426,24 +515,24 @@ namespace KanonBot.image
             textOptions.Font = new Font(TorusRegular, 90);
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;
             textOptions.Origin = new PointF(3642, 1670);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N1}", allBP![0].PP), new SolidBrush(Color.ParseHex("#364a75")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N1}", allBP![0].PP), new SolidBrush(scoreppTopColor), null));
             var bp1pptextMeasure = TextMeasurer.Measure(string.Format("{0:N1}", allBP![0].PP), textOptions);
             int bp1pptextpos = 3642 - (int)bp1pptextMeasure.Width / 2;
             textOptions.Font = new Font(TorusRegular, 40);
             textOptions.Origin = new PointF(bp1pptextpos, 1610);
             textOptions.HorizontalAlignment = HorizontalAlignment.Left;
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(Color.ParseHex("#656b6d")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(mainColor), null));
 
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;
             textOptions.Font = new Font(TorusRegular, 70);
             textOptions.Origin = new PointF(3642, 1895);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![1].PP), new SolidBrush(Color.ParseHex("#ff7bac")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![1].PP), new SolidBrush(scoreppColor), null));
             textOptions.Origin = new PointF(3642, 2081);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![2].PP), new SolidBrush(Color.ParseHex("#ff7bac")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![2].PP), new SolidBrush(scoreppColor), null));
             textOptions.Origin = new PointF(3642, 2266);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![3].PP), new SolidBrush(Color.ParseHex("#ff7bac")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![3].PP), new SolidBrush(scoreppColor), null));
             textOptions.Origin = new PointF(3642, 2450);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![4].PP), new SolidBrush(Color.ParseHex("#ff7bac")), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![4].PP), new SolidBrush(scoreppColor), null));
 
 
 
