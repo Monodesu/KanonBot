@@ -46,7 +46,9 @@ namespace KanonBot.image
                 accSubColor = new(),
                 scoreppTopColor = new(),
                 scoreppColor = new(),
-                highlightColor = new();
+                highlightColor = new(),
+                levelprogressBackgroundColor = new(),
+                levelprogressFrontColor = new();
             //配色方案 0=模板light 1=模板dark 2...3...4...
             switch (ColorMode)
             {
@@ -67,6 +69,8 @@ namespace KanonBot.image
                     scoreppTopColor = Color.ParseHex("#364a75");
                     scoreppColor = Color.ParseHex("#ff7bac");
                     highlightColor = Color.ParseHex("#ffcd22");
+                    levelprogressBackgroundColor = Color.ParseHex("#E6E6E6");
+                    levelprogressFrontColor = Color.ParseHex("#F3B6CD");
                     break;
                 case 1:
                     mainColor = Color.ParseHex("#e6e6e6");
@@ -85,6 +89,8 @@ namespace KanonBot.image
                     scoreppTopColor = Color.ParseHex("#5979bd");
                     scoreppColor = Color.ParseHex("#E36A79");
                     highlightColor = Color.ParseHex("#ffcd22");
+                    levelprogressBackgroundColor = Color.ParseHex("#000000");
+                    levelprogressFrontColor = Color.ParseHex("#85485F");
                     break;
             }
             var info = new Image<Rgba32>(4000, 2640);
@@ -259,6 +265,18 @@ namespace KanonBot.image
             bp1bg.Mutate(x => x.Resize(355, 200));
             info.Mutate(x => x.DrawImage(bp1bg, new Point(1566, 1550), 1));
 
+            //level progress
+            Img levelprogress_background = new Image<Rgba32>(2312, 12);
+            levelprogress_background.Mutate(x => x.Fill(levelprogressBackgroundColor));
+            //levelprogress_background.Mutate(x => x.RoundCorner(new Size(2312, 6), 4.5f));
+            int levelprogressFrontPos = (int)((double)2312 * (double)data.userInfo.Statistics.Level.Progress / 100.0);
+            Img levelprogress_front = new Image<Rgba32>(levelprogressFrontPos, 6);
+            levelprogress_front.Mutate(x => x.Fill(levelprogressFrontColor));
+            levelprogress_front.Mutate(x => x.RoundCorner(new Size(levelprogressFrontPos, 12), 8));
+            levelprogress_background.Mutate(x => x.DrawImage(levelprogress_front, new Point(0, 0), 1).Rotate(-90));
+            info.Mutate(x => x.DrawImage(levelprogress_background, new Point(3900, 72), 1));
+
+
             //用户面板/自定义面板
             string panelPath;
             Img panel;
@@ -350,6 +368,11 @@ namespace KanonBot.image
             textOptions.Origin = new PointF(2646 + 218 * 4, 988);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.A), new SolidBrush(gradeCountsColor), null));
 
+            //level main
+            textOptions.Origin = new PointF(3906, 2470);
+            textOptions.Font = new Font(TorusRegular, 48);
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.Statistics.Level.Current.ToString(), new SolidBrush(mainColor), null));
+
             //details
             textOptions.Font = new Font(TorusRegular, 50);
             textOptions.HorizontalAlignment = HorizontalAlignment.Left;
@@ -383,9 +406,6 @@ namespace KanonBot.image
             }
             info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(mainColor), null));
             //mods
-            //testcodes
-            string[] testmods = { "HR", "DT", "NF", "SD" };
-            allBP![0].Mods = testmods;
             if (allBP![0].Mods.Length > 0)
             {
                 textOptions.Origin = new PointF(1945 + TextMeasurer.Measure(title, textOptions).Width + 25, 1611);
@@ -467,11 +487,9 @@ namespace KanonBot.image
                 info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(mainColor), null));
             }
 
-            //2nd~5th version and acc and bid and star
+            //2nd~5th version and acc and bid and shdklahdksadkjkcna5hoacsporjasldjlksakdlsa
             textOptions.Font = new Font(TorusRegular, 40);
-
-
-
+            var otherbp_mods_pos_y = 1853;
             for (int i = 1; i < 5; ++i)
             {
                 title = "";
@@ -507,6 +525,20 @@ namespace KanonBot.image
                 textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
                 textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
                 info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Rank, new SolidBrush(mainColor), null));
+                //shdklahdksadkjkcna5hoacsporjasldjlksakdlsa
+                if (allBP![i].Mods.Length > 0)
+                {
+                    var otherbp_mods_pos_x = 2580;
+                    foreach (var x in allBP![i].Mods)
+                    {
+                        Img modicon = Img.Load(await Utils.LoadFile2Byte($"./work/mods_v2/2x/{x}.png"));
+                        modicon.Mutate(x => x.Resize(90, 90));
+                        info.Mutate(x => x.DrawImage(modicon, new Point(otherbp_mods_pos_x, otherbp_mods_pos_y), 1));
+                        otherbp_mods_pos_x += 105;
+                    }
+                    otherbp_mods_pos_y += 186;
+                }
+
             }
 
 
