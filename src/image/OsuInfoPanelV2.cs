@@ -29,8 +29,7 @@ namespace KanonBot.image
     {
         public static async Task<Img> Draw(UserPanelData data, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
         {
-            //var ColorMode = data.InfoPanelV2_Mode;
-            var ColorMode = 1;
+            var ColorMode = data.InfoPanelV2_Mode;
             Color mainColor = new(),
                 ppMainColor = new(),
                 accMainColor = new(),
@@ -575,6 +574,34 @@ namespace KanonBot.image
             textOptions.Origin = new PointF(3642, 2450);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![4].PP), new SolidBrush(scoreppColor), null));
 
+            //badges
+            if (data.badgeId != -1)
+            {
+                Img badge;
+                switch (ColorMode)
+                {
+                    case 0:
+                        //light
+                        try
+                        {
+                            badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"));
+                            badge.Mutate(x => x.Resize(236, 110).RoundCorner(new Size(236, 110), 20));
+                            info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
+                        }
+                        catch { }
+                        break;
+                    case 1:
+                        //dark
+                        try
+                        {
+                            badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"));
+                            badge.Mutate(x => x.Resize(236, 110).Brightness(0.6f).RoundCorner(new Size(236, 110), 20));
+                            info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
+                        }
+                        catch { }
+                        break;
+                }
+            }
 
 
 
@@ -582,11 +609,11 @@ namespace KanonBot.image
 
 
 
-
-
-
-
-
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!test info!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            textOptions.HorizontalAlignment = HorizontalAlignment.Center;
+            textOptions.Font = new Font(TorusRegular, 40);
+            textOptions.Origin = new PointF(2000, 2582);
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, "this is a test version and does not represent the final quality", new SolidBrush(detailsColor), null));
 
 
 

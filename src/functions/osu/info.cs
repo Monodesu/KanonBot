@@ -102,40 +102,30 @@ namespace KanonBot.functions.osubot
                     catch { data.daysBefore = 0; }
                 }
 
-                switch (DBOsuInfo!.customInfoEngineVer)
+                var d = await Database.Client.GetOsuPPlusData(osuID!.Value);
+                if (d != null)
                 {
-                    case 1:
-                        //new
-                        break;
-                    default:
-                        //legacy
-                        var d = await Database.Client.GetOsuPPlusData(osuID!.Value);
-                        if (d != null)
-                        {
-                            data.pplusInfo = d;
-                        }
-                        else
-                        {
-                            // 设置空数据
-                            data.pplusInfo = new();
-                            // 异步获取osupp数据，下次请求的时候就有了
-                            new Task(async () =>
-                            {
-                                try { await Database.Client.UpdateOsuPPlusData((await API.OSU.TryGetUserPlusData(tempOsuInfo!))!.User, tempOsuInfo!.Id); }
-                                catch { }//更新pp+失败，不返回信息
-                            }).Start();
-                        }
-
-                        var badgeID = DBUser!.displayed_badge_ids;
-                        // legacy只取第一个badge
-                        if (badgeID != null)
-                            try { if (badgeID.IndexOf(",") != -1) badgeID = badgeID[..badgeID.IndexOf(",")]; }
-                            catch { badgeID = "-1"; }
-                        try { data.badgeId = int.Parse(badgeID!); }
-                        catch { data.badgeId = -1; }
-
-                        break;
+                    data.pplusInfo = d;
                 }
+                else
+                {
+                    // 设置空数据
+                    data.pplusInfo = new();
+                    // 异步获取osupp数据，下次请求的时候就有了
+                    new Task(async () =>
+                    {
+                        try { await Database.Client.UpdateOsuPPlusData((await API.OSU.TryGetUserPlusData(tempOsuInfo!))!.User, tempOsuInfo!.Id); }
+                        catch { }//更新pp+失败，不返回信息
+                    }).Start();
+                }
+
+                var badgeID = DBUser!.displayed_badge_ids;
+                // legacy只取第一个badge
+                if (badgeID != null)
+                    try { if (badgeID.IndexOf(",") != -1) badgeID = badgeID[..badgeID.IndexOf(",")]; }
+                    catch { badgeID = "-1"; }
+                try { data.badgeId = int.Parse(badgeID!); }
+                catch { data.badgeId = -1; }
             }
             else
             {
@@ -166,7 +156,7 @@ namespace KanonBot.functions.osubot
             var stream = new MemoryStream();
 
             //info默认输出高质量图片？ todo:infopanel版本切换 set.cs
-            SixLabors.ImageSharp.Image img; 
+            SixLabors.ImageSharp.Image img;
             switch (DBOsuInfo!.customInfoEngineVer) //0=null 1=v1 2=v2
             {
                 case 1:

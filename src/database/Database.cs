@@ -358,8 +358,31 @@ public class Client
                 .ExecuteCommandHasChangeAsync();
         }
         var t = false;
-        if (await GetInstance().Insertable<OSUSeasonalPass>(new OSUSeasonalPass() { inittth = tth, tth = tth, mode = mode, uid = oid }).ExecuteCommandAsync() > -1)
+        if (await GetInstance().Insertable(new OSUSeasonalPass() { inittth = tth, tth = tth, mode = mode, uid = oid }).ExecuteCommandAsync() > -1)
             t = true;
         return t;
+    }
+
+    static public async Task<bool> SetOsuInfoPanelVersion(long osu_uid, int ver)
+    {
+        var result = await GetInstance().Updateable<UserOSU>()
+            .SetColumns(it => new UserOSU()
+            {
+                customInfoEngineVer = ver,
+            })
+            .Where(it => it.osu_uid == osu_uid)
+            .ExecuteCommandHasChangeAsync();
+        return result;
+    }
+    static public async Task<bool> SetOsuInfoPanelV2ColorMode(long osu_uid, int ver)
+    {
+        var result = await GetInstance().Updateable<UserOSU>()
+            .SetColumns(it => new UserOSU()
+            {
+                InfoPanelV2_Mode = ver,
+            })
+            .Where(it => it.osu_uid == osu_uid)
+            .ExecuteCommandHasChangeAsync();
+        return result;
     }
 }
