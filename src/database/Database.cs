@@ -351,6 +351,7 @@ public class Client
         var db_info = await GetInstance().Queryable<OSUSeasonalPass>().Where(it => it.uid == oid).Where(it => it.mode == mode).ToListAsync();
         if (db_info.Count > 0)
         {
+            Console.WriteLine(db_info[0].uid);
             return await GetInstance().Updateable<OSUSeasonalPass>()
                 .SetColumns(it => new OSUSeasonalPass() { tth = tth })
                 .Where(it => it.uid == oid)

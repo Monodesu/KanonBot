@@ -91,8 +91,8 @@ namespace KanonBot.functions.osu
                     global_rank = (int)userInfo.Statistics.GlobalRank,
                     gamemode = mode.ToModeStr()
                 };
-                await Database.Client.InsertOsuUserData(rec, false);
                 await Seasonalpass.Update(userInfo!.Id, mode.ToModeStr(), userInfo.Statistics.TotalHits);
+                await Database.Client.InsertOsuUserData(rec, false);
             }
         }
     }
