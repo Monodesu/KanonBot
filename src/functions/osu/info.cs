@@ -1,5 +1,6 @@
 ﻿using KanonBot.API;
 using KanonBot.Drivers;
+using KanonBot.functions.osu;
 using KanonBot.Message;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
@@ -11,7 +12,6 @@ namespace KanonBot.functions.osubot
         async public static Task Execute(Target target, string cmd)
         {
             #region 验证
-            int bannerStatus = 0;
             long? osuID = null;
             OSU.Enums.Mode? mode;
             Database.Model.User? DBUser = null;
@@ -133,7 +133,6 @@ namespace KanonBot.functions.osubot
                             catch { badgeID = "-1"; }
                         try { data.badgeId = int.Parse(badgeID!); }
                         catch { data.badgeId = -1; }
-                        bannerStatus = DBOsuInfo.customBannerStatus;// 取bannerStatus
 
                         break;
                 }
@@ -166,18 +165,27 @@ namespace KanonBot.functions.osubot
             if (data.daysBefore > 0) isDataOfDayAvaiavle = true;
             var stream = new MemoryStream();
 
-
-            //var img = await LegacyImage.Draw.DrawInfo(data, bannerStatus, DBOsuInfo != null, isDataOfDayAvaiavle);
-            var img = await image.OsuInfoPanelV2.Draw(data, bannerStatus, DBOsuInfo != null, isDataOfDayAvaiavle);
-
-
-            //await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-            await img.SaveAsync(stream, new PngEncoder());
-
+            //info默认输出高质量图片？ todo:infopanel版本切换 set.cs
+            SixLabors.ImageSharp.Image img; 
+            switch (DBOsuInfo!.customInfoEngineVer) //0=null 1=v1 2=v2
+            {
+                case 1:
+                    img = await LegacyImage.Draw.DrawInfo(data, DBOsuInfo != null, isDataOfDayAvaiavle);
+                    //await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+                    await img.SaveAsync(stream, new PngEncoder());
+                    break;
+                case 2:
+                    data.InfoPanelV2_Mode = DBOsuInfo.InfoPanelV2_Mode;
+                    img = await image.OsuInfoPanelV2.Draw(data, DBOsuInfo != null, isDataOfDayAvaiavle);
+                    await img.SaveAsync(stream, new PngEncoder());
+                    break;
+                default:
+                    return;
+            }
 
             stream.TryGetBuffer(out ArraySegment<byte> buffer);
             target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
-            //AnnualPass(data.userInfo.userId, data.userInfo.mode, data.userInfo.totalHits); //季票内容
+            await Seasonalpass.Update(tempOsuInfo!.Id, DBOsuInfo!.osu_mode!, tempOsuInfo.Statistics.TotalHits);
         }
     }
 }

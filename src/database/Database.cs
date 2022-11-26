@@ -4,6 +4,7 @@ using KanonBot.Drivers;
 using Org.BouncyCastle.Ocsp;
 using Serilog;
 using SqlSugar;
+using Tomlyn.Model;
 using static KanonBot.API.OSU.Models;
 using static KanonBot.Database.Model;
 
@@ -138,13 +139,11 @@ public class Client
 
     static public async Task<bool> InsertOsuUser(long kanon_uid, long osu_uid, int customBannerStatus)
     {
-        //customBannerStatus: 0=没有自定义banner 1=在猫猫上设置了自定义banner 2=在osuweb上设置了自定义banner但是猫猫上没有
         var d = new Model.UserOSU()
         {
             uid = kanon_uid,
             osu_uid = osu_uid,
-            osu_mode = "osu",
-            customBannerStatus = customBannerStatus
+            osu_mode = "osu"
         };
         var d2 = GetInstance();
         try { await d2.Insertable(d).ExecuteCommandAsync(); return true; } catch { return false; }
@@ -344,5 +343,23 @@ public class Client
     {
         BadgeList bl = new() { name = ENG_NAME, name_chinese = CHN_NAME, description = CHN_DECS };
         return await GetInstance().Insertable(bl).ExecuteReturnIdentityAsync();
+    }
+
+    public static async Task<bool> UpdateSeasonalPass(long oid, string mode, long tth)
+    {
+        //检查数据库中有无信息
+        var db_info = await GetInstance().Queryable<OSUSeasonalPass>().Where(it => it.uid == oid).Where(it => it.mode == mode).ToListAsync();
+        if (db_info.Count > 0)
+        {
+            return await GetInstance().Updateable<OSUSeasonalPass>()
+                .SetColumns(it => new OSUSeasonalPass() { tth = tth })
+                .Where(it => it.uid == oid)
+                .Where(it => it.mode == mode)
+                .ExecuteCommandHasChangeAsync();
+        }
+        var t = false;
+        if (await GetInstance().Insertable<OSUSeasonalPass>(new OSUSeasonalPass() { inittth = tth, tth = tth, mode = mode, uid = oid }).ExecuteCommandAsync() > -1)
+            t = true;
+        return t;
     }
 }

@@ -92,6 +92,7 @@ namespace KanonBot.functions.osu
                     gamemode = mode.ToModeStr()
                 };
                 await Database.Client.InsertOsuUserData(rec, false);
+                await Seasonalpass.Update(userInfo!.Id, mode.ToModeStr(), userInfo.Statistics.TotalHits);
             }
         }
     }

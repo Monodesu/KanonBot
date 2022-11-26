@@ -54,29 +54,29 @@ namespace KanonBot.LegacyImage
         public static FontFamily avenirLTStdMedium = fonts.Add("./work/fonts/AvenirLTStd-Medium.ttf");
 
         //customBannerStatus 0=没有自定义banner 1=在猫猫上设置了自定义banner 
-        public static async Task<Img> DrawInfo(UserPanelData data, int customBannerStatus, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
+        public static async Task<Img> DrawInfo(UserPanelData data, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
         {
             var info = new Image<Rgba32>(1200, 857);
             // custom panel
             var panelPath = "./work/legacy/default-info-v1.png";
             if (File.Exists($"./work/legacy/v1_infopanel/{data.userInfo.Id}.png")) panelPath = $"./work/legacy/v1_infopanel/{data.userInfo.Id}.png";
             Img panel = Img.Load(await Utils.LoadFile2Byte(panelPath));
-
-            var coverPath = $"./work/legacy/v1_cover/{data.userInfo.Id}.png";
-            if (customBannerStatus == 1)
+            // cover
+            var coverPath = $"./work/legacy/v1_cover/custom/{data.userInfo.Id}.png";
+            if (!File.Exists(coverPath))
             {
-                coverPath = $"./work/legacy/v1_cover/custom/{data.userInfo.Id}.png";
-            }
-            else if (!File.Exists(coverPath))
-            {
-                try
+                coverPath = $"./work/legacy/v1_cover/osu!web/{data.userInfo.Id}.png";
+                if (!File.Exists(coverPath))
                 {
-                    coverPath = await data.userInfo.CoverUrl.DownloadFileAsync("./work/legacy/v1_cover/", $"{data.userInfo.Id}.png");
-                }
-                catch
-                {
-                    int n = new Random().Next(1, 6);
-                    coverPath = $"./work/legacy/v1_cover/default/default_{n}.png";
+                    try
+                    {
+                        coverPath = await data.userInfo.CoverUrl.DownloadFileAsync("./work/legacy/v1_cover/osu!web/", $"{data.userInfo.Id}.png");
+                    }
+                    catch
+                    {
+                        int n = new Random().Next(1, 6);
+                        coverPath = $"./work/legacy/v1_cover/default/default_{n}.png";
+                    }
                 }
             }
             Img cover = Img.Load(await Utils.LoadFile2Byte(coverPath));

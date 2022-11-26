@@ -44,9 +44,9 @@ public class Model
         [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
         public long osu_uid { get; set; }
         public string? osu_mode { get; set; }
-        public int customBannerStatus { get; set; }
         public int customInfoEngineVer { get; set; } // 0=legacy 1=current
         public string? customInfov2_cmd { get; set; }
+        public int InfoPanelV2_Mode { get; set; }
     }
 
     [SugarTable("osu_archived_record")]

@@ -27,7 +27,7 @@ namespace KanonBot.image
 {
     public static class OsuInfoPanelV2
     {
-        public static async Task<Img> Draw(UserPanelData data, int customBannerStatus, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
+        public static async Task<Img> Draw(UserPanelData data, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
         {
             //var ColorMode = data.InfoPanelV2_Mode;
             var ColorMode = 1;
@@ -294,7 +294,7 @@ namespace KanonBot.image
             panel = Img.Load(await Utils.LoadFile2Byte(panelPath)).CloneAs<Rgba32>();    // 读取
             info.Mutate(x => x.DrawImage(panel, new Point(0, 0), 1));
 
-            
+
 
             //avatar
             var avatarPath = $"./work/avatar/{data.userInfo.Id}.png";
