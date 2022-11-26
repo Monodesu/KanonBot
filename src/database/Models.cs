@@ -7,7 +7,7 @@ namespace KanonBot.Database;
 public class Model
 {
 
-    [SugarTable("osu_seasonalpass_2022_s2")]
+    [SugarTable("osu_seasonalpass_2022_s4")]
     public class OSUSeasonalPass
     {
         public long uid { get; set; }

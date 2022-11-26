@@ -270,10 +270,14 @@ namespace KanonBot.image
             levelprogress_background.Mutate(x => x.Fill(levelprogressBackgroundColor));
             //levelprogress_background.Mutate(x => x.RoundCorner(new Size(2312, 6), 4.5f));
             int levelprogressFrontPos = (int)((double)2312 * (double)data.userInfo.Statistics.Level.Progress / 100.0);
-            Img levelprogress_front = new Image<Rgba32>(levelprogressFrontPos, 6);
-            levelprogress_front.Mutate(x => x.Fill(levelprogressFrontColor));
-            levelprogress_front.Mutate(x => x.RoundCorner(new Size(levelprogressFrontPos, 12), 8));
-            levelprogress_background.Mutate(x => x.DrawImage(levelprogress_front, new Point(0, 0), 1).Rotate(-90));
+            if (levelprogressFrontPos > 0)
+            {
+                Img levelprogress_front = new Image<Rgba32>(levelprogressFrontPos, 6);
+                levelprogress_front.Mutate(x => x.Fill(levelprogressFrontColor));
+                levelprogress_front.Mutate(x => x.RoundCorner(new Size(levelprogressFrontPos, 12), 8));
+                levelprogress_background.Mutate(x => x.DrawImage(levelprogress_front, new Point(0, 0), 1));
+            }
+            levelprogress_background.Mutate(x => x.Rotate(-90));
             info.Mutate(x => x.DrawImage(levelprogress_background, new Point(3900, 72), 1));
 
 
@@ -289,6 +293,8 @@ namespace KanonBot.image
             };
             panel = Img.Load(await Utils.LoadFile2Byte(panelPath)).CloneAs<Rgba32>();    // 读取
             info.Mutate(x => x.DrawImage(panel, new Point(0, 0), 1));
+
+            
 
             //avatar
             var avatarPath = $"./work/avatar/{data.userInfo.Id}.png";
@@ -372,6 +378,12 @@ namespace KanonBot.image
             textOptions.Origin = new PointF(3906, 2470);
             textOptions.Font = new Font(TorusRegular, 48);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.Statistics.Level.Current.ToString(), new SolidBrush(mainColor), null));
+
+            //update time
+            textOptions.Origin = new PointF(3955, 2582);
+            textOptions.HorizontalAlignment = HorizontalAlignment.Right;
+            textOptions.Font = new Font(TorusRegular, 40);
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, $"Update at {DateTime.Now}", new SolidBrush(detailsColor), null));
 
             //details
             textOptions.Font = new Font(TorusRegular, 50);
@@ -538,10 +550,7 @@ namespace KanonBot.image
                     }
                     otherbp_mods_pos_y += 186;
                 }
-
             }
-
-
 
             //all pp
             textOptions.Font = new Font(TorusRegular, 90);

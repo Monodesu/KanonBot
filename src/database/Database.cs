@@ -1,6 +1,7 @@
 #pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable IDE0044 // 添加只读修饰符
 using KanonBot.Drivers;
+using Org.BouncyCastle.Ocsp;
 using Serilog;
 using SqlSugar;
 using static KanonBot.API.OSU.Models;
@@ -234,20 +235,33 @@ public class Client
         return await GetInstance().Queryable<Model.BadgeList>().Where(it => it.id == int.Parse(badgeid)).FirstAsync();
     }
 
-    static public async Task<bool> SetOwnedBadge(string userid, string owned_ids)
+    static public async Task<bool> SetOwnedBadge(string email, string owned_ids)
     {
         var db = GetInstance();
-        var data = await db.Queryable<Model.User>().FirstAsync(it => it.uid == long.Parse(userid));
+        var data = await db.Queryable<Model.User>().FirstAsync(it => it.email == email);
         var result = await db.Updateable<Model.User>()
             .SetColumns(it => new Model.User()
             {
                 owned_badge_ids = owned_ids
             })
-            .Where(it => it.uid == long.Parse(userid))
+            .Where(it => it.email == email)
             .ExecuteCommandHasChangeAsync();
         return result;
     }
-
+    static public async Task<bool> SetOwnedBadgeByOsuUid(string osu_uid, string owned_ids)
+    {
+        var user = await GetOsuUser(long.Parse(osu_uid));
+        if (user == null) { return false; }
+        var userinfo = await GetInstance().Queryable<Model.User>().Where(it => it.uid == user.uid).FirstAsync();
+        var result = await GetInstance().Updateable<Model.User>()
+            .SetColumns(it => new Model.User()
+            {
+                owned_badge_ids = owned_ids
+            })
+            .Where(it => it.uid == user.uid)
+            .ExecuteCommandHasChangeAsync();
+        return result;
+    }
     static public async Task<List<long>> GetOsuUserList()
     {
         return await GetInstance().Queryable<Model.UserOSU>().Select(it => it.osu_uid).ToListAsync();
@@ -285,9 +299,12 @@ public class Client
         else
         {
             var date = DateTime.Today;
-            try {
+            try
+            {
                 date = date.AddDays(-days);
-            } catch (ArgumentOutOfRangeException) {
+            }
+            catch (ArgumentOutOfRangeException)
+            {
                 return (-1, null);
             }
             data = await db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate, OrderByType.Desc).FirstAsync(it => it.uid == oid && it.gamemode == API.OSU.Enums.ParseMode(mode) && it.lastupdate <= date);
@@ -322,5 +339,10 @@ public class Client
         return ((DateTime.Today - data.lastupdate).Days, ui);
     }
 
-
+    //return badge_id
+    public static async Task<int> InsertBadge(string ENG_NAME, string CHN_NAME, string CHN_DECS)
+    {
+        BadgeList bl = new() { name = ENG_NAME, name_chinese = CHN_NAME, description = CHN_DECS };
+        return await GetInstance().Insertable(bl).ExecuteReturnIdentityAsync();
+    }
 }

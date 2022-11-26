@@ -6,6 +6,17 @@ using Flurl.Util;
 using JetBrains.Annotations;
 using System.Security.Cryptography;
 using K4os.Hash.xxHash;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Drawing.Processing;
+using Img = SixLabors.ImageSharp.Image;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp.Formats.Png;
+using System.IO;
+using Flurl;
+using Flurl.Http;
 
 namespace KanonBot.functions.osubot
 {
@@ -101,13 +112,18 @@ namespace KanonBot.functions.osubot
             switch (rootCmd)
             {
                 case "create":
-                    SudoCreate(target, childCmd); return;
+                    await SudoCreate(target, childCmd); return;
                 case "delete":
                     SudoDelete(target, childCmd); return;
                 case "getuser":
                     SudoGetUser(target, childCmd); return;
                 case "list":
-                    await List(target, accinfo); return;
+                    //await List(target, accinfo); 
+                    return;
+                case "addbyemail":
+                    await SudoAdd(target, childCmd, 0); return;
+                case "addbyoid":
+                    await SudoAdd(target, childCmd, 1); return;
                 default:
                     return;
             }
@@ -118,7 +134,8 @@ namespace KanonBot.functions.osubot
         {
             if (int.TryParse(cmd, out int badgeNum))
             {
-                if (badgeNum < 1) {
+                if (badgeNum < 1)
+                {
                     target.reply("你提供的badge id不正确，请重新检查。");
                 }
 
@@ -202,7 +219,8 @@ namespace KanonBot.functions.osubot
         {
             if (int.TryParse(cmd, out int badgeNum))
             {
-                if (badgeNum < 1) {
+                if (badgeNum < 1)
+                {
                     target.reply("你提供的badge id不正确，请重新检查。");
                 }
 
@@ -275,22 +293,43 @@ namespace KanonBot.functions.osubot
             target.reply(msg);
         }
 
-        private static void SudoCreate(Target target, string cmd)
+        private static async Task SudoCreate(Target target, string cmd)
         {
+            //badge sudo create IMG_URL#英文名称#中文名称#详细信息
+            //检查参数数量
             var args = cmd.Split("#");
-            if (args.Length >= 3)
+            if (args.Length < 4)
             {
-                target.reply($"已提交，请在30s内发送要上传的badge图片，");
-            }
-            else
-            {
-                target.reply("输入不正确，!badge sudo create 英文名称#中文名称#详细信息");
+                target.reply("缺少参数。[!badge sudo create IMG_URL#英文名称#中文名称#详细信息]");
                 return;
             }
+            //检查URL
+            var img_url = args[0].Trim();
+            if (!Utils.IsUrl(img_url))
+            {
+                target.reply("提供的IMG_URL不正确。[!badge sudo create IMG_URL#英文名称#中文名称#详细信息]");
+                return;
+            }
+            //检查badge图片是否符合要求规范 https://desu.life/test/test_badge.png
+            //下载图片
+            var randomstr = Utils.RandomStr(50);
+            await img_url.DownloadFileAsync(@$".\work\tmp\", $"{randomstr}.png");
+            var filepath = @$".\work\tmp\{randomstr}.png";
+            Img source = Img.Load(filepath);
+            if (source.Width / 21.5 != source.Height / 10)
+            {
+                target.reply("badge尺寸不符合要求，应为 21.5 : 10（推荐为688*320），操作取消。");
+                return;
+            }
+            source.Mutate(x => x.Resize(688, 320));
 
-
-
-            //target.reply((target.msg.ToList()[1] as ImageSegment)!.value);
+            //保存badge图片&数据库插入新的badge
+            var db_badgeid = await Database.Client.InsertBadge(args[1], args[2], args[3]);
+            source.Save($"./work/badges/{db_badgeid}.png");
+            await source.SaveAsync($"./work/badges/{db_badgeid}.png", new PngEncoder());
+            target.reply($"图片成功上传，新的badgeID为{db_badgeid}");
+            source.Dispose();
+            File.Delete(filepath);
         }
         private static void SudoDelete(Target target, string cmd)
         {
@@ -301,73 +340,195 @@ namespace KanonBot.functions.osubot
         {
 
         }
-        private static async Task SudoAdd(Target target, string cmd)
+        private static async Task SudoAdd(Target target, string cmd, int addMethod)
         {
-            var args = cmd.Split("#");
-            var badgeid_s = args[2].Trim();
-
-            List<string> user_list = new();
-            //检查输入
-            if (!int.TryParse(badgeid_s, out _)) { target.reply("输入不正确，!badge sudo add [oid]#[badgeId]"); return; }
-            if (args[1].IndexOf(",") > 0)
-            {
-                var users = args[1].Split(",");
-                foreach (var x in users)
-                {
-                    if (!long.TryParse(x, out _)) { target.reply("输入不正确，!badge sudo add [oid]#[badgeId]"); return; }
-                    user_list.Add(x.Trim());
-                }
-            }
+            var args = cmd.Split("#"); //args[0]=badge id      args[1]=user(s)
+            var badgeid = args[0].Trim();
+            string[] users;
+            if (args[1].IndexOf("/") != -1)
+                users = args[1].Split("/");
             else
+                users = new string[] { args[1] };
+            string replymsg;
+            List<string> failed_msg;
+            Database.Model.BadgeList badge;
+            bool skip;
+            //0=email 1=oid
+            switch (addMethod)
             {
-                if (!long.TryParse(args[1], out _)) { target.reply("输入不正确，!badge sudo add [oid]#[badgeId]"); return; }
-                user_list.Add(args[1].Trim());
-            }
-
-            //确认badge是否存在
-            var badge = Database.Client.GetBadgeInfo(badgeid_s);
-            if (badge == null) { target.reply($"似乎没有badgeid为 {badgeid_s} 的badge呢"); return; }
-
-            //发送开始消息
-            if (user_list.Count > 1) target.reply($"开始添加任务。");
-
-            //添加badge
-            foreach (var x in user_list)
-            {
-                var userInfo = await Database.Client.GetUserByOsuUID(long.Parse(x));
-                if (userInfo == null) { target.reply($"osu!用户 {x} 不存在，无法添加，请重新检查。"); }
-                else
-                {
-                    //获取已拥有的牌子
-                    List<string> owned_badges = new();
-                    if (userInfo.owned_badge_ids == null)
+                case 0:
+                    #region email
+                    //检查各个email是否合法
+                    replymsg = "";
+                    failed_msg = new();
+                    foreach (var user in users)
+                        if (!Utils.IsMailAddr(user.Trim()))
+                            failed_msg.Add($"{user} 为无效的email，请重新检查。");
+                    if (failed_msg.Count > 0)
                     {
-                        owned_badges.Add(badgeid_s);
+                        replymsg += $"检查email有效性失败，共有{failed_msg.Count}个email为无效email，详细信息如下：";
+                        foreach (var x in failed_msg)
+                            replymsg += $"\r\n{x}";
+                        target.reply(replymsg);
+                        return;
                     }
-                    else
+
+                    //检查badge是否合法以及是否存在
+                    if (!int.TryParse(badgeid, out _)) { target.reply("badgeid不正确，请重新检查。"); return; }
+                    badge = await Database.Client.GetBadgeInfo(badgeid);
+                    if (badge == null) { target.reply($"似乎没有badgeid为 {badgeid} 的badge呢。"); return; }
+
+                    target.reply($"开始徽章添加任务。");
+                    //添加badge
+                    failed_msg = new();
+                    foreach (var x in users)
                     {
-                        if (userInfo.owned_badge_ids!.IndexOf(",") < 1)
-                        {
-                            owned_badges.Add(userInfo.owned_badge_ids.Trim());
-                        }
+                        skip = false;
+                        var userInfo = await Database.Client.GetUsers(x);
+                        if (userInfo == null)
+                            failed_msg.Add($"desu.life用户 {x} 未注册desu.life账户或email未绑定，请重新确认");
                         else
                         {
-                            var owned_badges_temp1 = userInfo.owned_badge_ids.Split(",");
-                            foreach (var xx in owned_badges_temp1)
-                                owned_badges.Add(xx);
+                            //获取已拥有的牌子
+                            List<string> owned_badges = new();
+                            if (userInfo.owned_badge_ids != null || userInfo.owned_badge_ids != "") //用户没有badge的情况下，直接写入
+                            {
+                                //用户只有一个badge的时候直接追加
+                                if (userInfo.owned_badge_ids!.IndexOf(",") == -1)
+                                {
+                                    if (userInfo.owned_badge_ids != "")
+                                        owned_badges.Add(userInfo.owned_badge_ids.Trim());
+                                }
+                                else
+                                {
+                                    //用户有2个或以上badge的情况下，先解析再追加新的badge后写入
+                                    var owned_badges_temp1 = userInfo.owned_badge_ids.Split(",");
+                                    foreach (var xx in owned_badges_temp1)
+                                        owned_badges.Add(xx);
+                                }
+                                //添加之前先查重
+                                foreach (var xx in owned_badges)
+                                {
+                                    if (xx.IndexOf(badgeid) > -1)
+                                    {
+                                        skip = true;
+                                        failed_msg.Add($"desu.life用户 {x} 已拥有此badge，跳过");
+                                        break;
+                                    }
+                                }
+                            }
+                            //添加
+                            if (!skip)
+                            {
+                                owned_badges.Add(badgeid);
+                                string t = "";
+                                foreach (var xxx in owned_badges)
+                                    t += xxx + ",";
+                                if (!await Database.Client.SetOwnedBadge(x, t[..^1]))
+                                    failed_msg.Add($"数据库发生了错误，无法为desu.life用户 {x} 添加badge，请稍后重试");
+                            }
                         }
-                        owned_badges.Add(badgeid_s);
+                    }
+                    replymsg = "完成。";
+                    if (failed_msg.Count > 0)
+                    {
+                        replymsg += $"\r\n共有{failed_msg.Count}名用户添加失败，错误信息如下：";
+                        foreach (var x in failed_msg)
+                            replymsg += $"\r\n{x}";
+                    }
+                    target.reply(replymsg);
+                    #endregion
+                    break;
+                case 1:
+                    #region oid
+                    //检查各个oid是否合法
+                    replymsg = "";
+                    failed_msg = new();
+                    foreach (var user in users)
+                        if (!long.TryParse(user.Trim(), out _))
+                            failed_msg.Add($"{user} 为无效的uid，请重新检查。");
+                    if (failed_msg.Count > 0)
+                    {
+                        replymsg += $"检查osu!uid有效性失败，共有{failed_msg.Count}个uid为无效uid，详细信息如下：";
+                        foreach (var x in failed_msg)
+                            replymsg += $"\r\n{x}";
+                        target.reply(replymsg);
+                        return;
                     }
 
-                    //添加
-                    string t = "";
-                    foreach (var xx in owned_badges)
-                        t += xx + ",";
-                    if (!await Database.Client.SetOwnedBadge(x, t[..^1]))
-                        target.reply($"数据库错误，无法为osu!用户 {x} 添加。");
-                }
+                    //检查badge是否合法以及是否存在
+                    if (!int.TryParse(badgeid, out _)) { target.reply("badgeid不正确，请重新检查。"); return; }
+                    badge = await Database.Client.GetBadgeInfo(badgeid);
+                    if (badge == null) { target.reply($"似乎没有badgeid为 {badgeid} 的badge呢。"); return; }
+
+                    target.reply($"开始徽章添加任务。");
+                    //添加badge
+                    failed_msg = new();
+                    foreach (var x in users)
+                    {
+                        skip = false;
+                        var userInfo = await Database.Client.GetUserByOsuUID(long.Parse(x));
+                        if (userInfo == null)
+                            failed_msg.Add($"osu!用户 {x} 未注册desu.life账户或osu!账户不存在，请重新确认");
+                        else
+                        {
+                            //获取已拥有的牌子
+                            List<string> owned_badges = new();
+                            if (userInfo.owned_badge_ids != null || userInfo.owned_badge_ids != "") //用户没有badge的情况下，直接写入
+                            {
+                                //用户只有一个badge的时候直接追加
+                                if (userInfo.owned_badge_ids!.IndexOf(",") == -1)
+                                {
+                                    if (userInfo.owned_badge_ids != "")
+                                        owned_badges.Add(userInfo.owned_badge_ids.Trim());
+                                }
+                                else
+                                {
+                                    //用户有2个或以上badge的情况下，先解析再追加新的badge后写入
+                                    var owned_badges_temp1 = userInfo.owned_badge_ids.Split(",");
+                                    foreach (var xx in owned_badges_temp1)
+                                        owned_badges.Add(xx);
+                                }
+                                //添加之前先查重
+                                foreach (var xx in owned_badges)
+                                {
+                                    if (xx.IndexOf(badgeid) > -1)
+                                    {
+                                        skip = true;
+                                        failed_msg.Add($"osu!用户 {x} 已拥有此badge，跳过");
+                                        break;
+                                    }
+                                }
+                            }
+                            //添加
+                            if (!skip)
+                            {
+                                owned_badges.Add(badgeid);
+                                string t = "";
+                                foreach (var xxx in owned_badges)
+                                {
+                                    t += xxx + ",";
+                                }
+
+                                if (!await Database.Client.SetOwnedBadgeByOsuUid(x, t[..^1]))
+                                    failed_msg.Add($"数据库发生了错误，无法为osu!用户 {x} 添加badge，请稍后重试");
+                            }
+                        }
+                    }
+                    replymsg = "完成。";
+                    if (failed_msg.Count > 0)
+                    {
+                        replymsg += $"\r\n共有{failed_msg.Count}名用户添加失败，错误信息如下：";
+                        foreach (var x in failed_msg)
+                            replymsg += $"\r\n{x}";
+                    }
+                    target.reply(replymsg);
+                    break;
+                #endregion
+                default:
+                    return;
             }
-            target.reply($"完成。");
+
         }
         private static void SudoRemove(Target target, string cmd)
         {
