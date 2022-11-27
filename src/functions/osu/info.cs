@@ -145,7 +145,6 @@ namespace KanonBot.functions.osubot
                         catch { }//更新pp+失败，不返回信息
                     }).Start();
                 }
-                // todo: 未绑定用户默认用新面板
             }
 
 
@@ -155,9 +154,17 @@ namespace KanonBot.functions.osubot
             if (data.daysBefore > 0) isDataOfDayAvaiavle = true;
             var stream = new MemoryStream();
 
-            //info默认输出高质量图片？ todo:infopanel版本切换 set.cs
+            //info默认输出高质量图片？
             SixLabors.ImageSharp.Image img;
-            switch (DBOsuInfo!.customInfoEngineVer) //0=null 1=v1 2=v2
+            int custominfoengineVer = 2;
+            data.InfoPanelV2_Mode = 0;
+            if (DBOsuInfo != null)
+            {
+                custominfoengineVer = DBOsuInfo!.customInfoEngineVer;
+                data.InfoPanelV2_Mode = DBOsuInfo.InfoPanelV2_Mode;
+            }
+
+            switch (custominfoengineVer) //0=null 1=v1 2=v2
             {
                 case 1:
                     img = await LegacyImage.Draw.DrawInfo(data, DBOsuInfo != null, isDataOfDayAvaiavle);
@@ -165,7 +172,6 @@ namespace KanonBot.functions.osubot
                     await img.SaveAsync(stream, new PngEncoder());
                     break;
                 case 2:
-                    data.InfoPanelV2_Mode = DBOsuInfo.InfoPanelV2_Mode;
                     img = await image.OsuInfoPanelV2.Draw(data, DBOsuInfo != null, isDataOfDayAvaiavle);
                     await img.SaveAsync(stream, new PngEncoder());
                     break;
@@ -175,7 +181,7 @@ namespace KanonBot.functions.osubot
 
             stream.TryGetBuffer(out ArraySegment<byte> buffer);
             target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
-            await Seasonalpass.Update(tempOsuInfo!.Id, DBOsuInfo!.osu_mode!, tempOsuInfo.Statistics.TotalHits);
+            if (DBOsuInfo != null) await Seasonalpass.Update(tempOsuInfo!.Id, DBOsuInfo!.osu_mode!, tempOsuInfo.Statistics.TotalHits);
         }
     }
 }

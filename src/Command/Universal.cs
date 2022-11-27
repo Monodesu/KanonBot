@@ -18,7 +18,7 @@ namespace KanonBot.command_parser
                 isAtSelf = true;
                 msg = Message.Chain.FromList(msg.ToList().Slice(1, msg.Length()));
             }
-                
+
 
             if (msg.StartsWith("!") || msg.StartsWith("/") || msg.StartsWith("！"))
             {
@@ -75,7 +75,7 @@ namespace KanonBot.command_parser
 
                         // Admin
                         case "sudo": //管理员
-                            return;
+                            await Sudo.Execute(target, childCmd); return;
                         case "su": //超级管理员
                             await Su.Execute(target, childCmd);
                             return;
@@ -92,11 +92,11 @@ namespace KanonBot.command_parser
                 {
                     target.reply("网络出现错误！错误已上报");
                     var rtmp =
-                        $"Target Message: {target.msg}\r\n"+
+                        $"Target Message: {target.msg}\r\n" +
                         $"Exception: {ex}\r\n";
-                        // $"Message: {ex.Message}\r\n" +
-                        // $"Source: {ex.Source}\r\n" +
-                        // $"StackTrace: {ex.StackTrace}";
+                    // $"Message: {ex.Message}\r\n" +
+                    // $"Source: {ex.Source}\r\n" +
+                    // $"StackTrace: {ex.StackTrace}";
                     Utils.SendDebugMail("mono@desu.life", rtmp);
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
                     Log.Error("网络异常 ↓\n{ex}", ex);
@@ -114,9 +114,9 @@ namespace KanonBot.command_parser
                     var rtmp =
                         $"Target Message: {target.msg}\r\n" +
                         $"Exception: {ex}\r\n";
-                        // $"Message: {ex.Message}\r\n" +
-                        // $"Source: {ex.Source}\r\n" +
-                        // $"StackTrace: {ex.StackTrace}";
+                    // $"Message: {ex.Message}\r\n" +
+                    // $"Source: {ex.Source}\r\n" +
+                    // $"StackTrace: {ex.StackTrace}";
                     Utils.SendDebugMail("mono@desu.life", rtmp);
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
                     Log.Error("执行指令异常 ↓\n{ex}", ex);

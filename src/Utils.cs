@@ -46,7 +46,8 @@ public static class Utils
 
     public static async Task<byte[]> LoadFile2Byte(string filePath)
     {
-        using (var fs = LoadFile2ReadStream(filePath)) {
+        using (var fs = LoadFile2ReadStream(filePath))
+        {
             byte[] bt = new byte[fs.Length];
             await fs.ReadAsync(bt, 0, bt.Length);
             fs.Close();
@@ -422,6 +423,20 @@ public static class Utils
         }
         catch { }
     }
-
+    public static void SendMail(string mailto, string title, string body)
+    {
+        Mail.MailStruct ms = new()
+        {
+            MailTo = new string[] { mailto },
+            Subject = title,
+            Body = body,
+            IsBodyHtml = false
+        };
+        try
+        {
+            Mail.Send(ms);
+        }
+        catch { }
+    }
 }
 

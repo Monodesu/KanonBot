@@ -22,6 +22,8 @@ using static KanonBot.LegacyImage.Draw;
 using KanonBot.Image;
 using SqlSugar;
 using System.IO;
+using SixLabors.ImageSharp.Formats.Png;
+using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 
 namespace KanonBot.image
 {
@@ -113,8 +115,8 @@ namespace KanonBot.image
             //自定义侧图
             string sidePicPath;
             Img sidePic;
-            if (File.Exists($"./work/panelv2/user_infopanel_sidepic/{data.userInfo.Id}.png"))
-                sidePicPath = $"./work/panelv2/user_infopanel_sidepic/{data.userInfo.Id}.png";
+            if (File.Exists($"./work/panelv2/user_customimg/{data.userInfo.Id}.png"))
+                sidePicPath = $"./work/panelv2/user_customimg/{data.userInfo.Id}.png";
             else sidePicPath = ColorMode switch
             {
                 0 => "./work/panelv2/infov2-light-customimg.png",
@@ -122,7 +124,19 @@ namespace KanonBot.image
                 _ => throw new Exception(),
             };
             sidePic = Img.Load(await Utils.LoadFile2Byte(sidePicPath)).CloneAs<Rgba32>();    // 读取
+            switch (ColorMode)
+            {
+                case 0:
+                    //light
+                    //do nothing  
+                    break;
+                case 1:
+                    //dark
+                    sidePic.Mutate(x => x.Brightness(0.6f));
+                    break;
+            }
             info.Mutate(x => x.DrawImage(sidePic, new Point(73, 41), 1));
+
 
             //进度条 - 先绘制进度条，再覆盖面板
             //pp
@@ -261,7 +275,19 @@ namespace KanonBot.image
             }
             try { bp1bg = Img.Load(bp1bgPath).CloneAs<Rgba32>(); }
             catch { bp1bg = Img.Load(await Utils.LoadFile2Byte("./work/legacy/load-failed-img.png")); }
-            bp1bg.Mutate(x => x.Resize(355, 200));
+            //bp1bg.Mutate(x => x.Resize(355, 200));
+            bp1bg.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(355, 200), Mode = ResizeMode.Min }));
+            switch (ColorMode)
+            {
+                case 0:
+                    //light
+                    //do nothing  
+                    break;
+                case 1:
+                    //dark
+                    bp1bg.Mutate(x => x.Brightness(0.6f));
+                    break;
+            }
             info.Mutate(x => x.DrawImage(bp1bg, new Point(1566, 1550), 1));
 
             //level progress
@@ -315,6 +341,17 @@ namespace KanonBot.image
                     throw;  // 下载失败直接抛出error
                 }
                 avatar = Img.Load(await Utils.LoadFile2Byte(avatarPath)).CloneAs<Rgba32>();    // 下载后再读取
+            }
+            switch (ColorMode)
+            {
+                case 0:
+                    //light
+                    //do nothing  
+                    break;
+                case 1:
+                    //dark
+                    avatar.Mutate(x => x.Brightness(0.6f));
+                    break;
             }
             avatar.Mutate(x => x.Resize(200, 200).RoundCorner(new Size(200, 200), 25));
             info.Mutate(x => x.DrawImage(avatar, new Point(1531, 72), 1));
@@ -547,8 +584,8 @@ namespace KanonBot.image
                         info.Mutate(x => x.DrawImage(modicon, new Point(otherbp_mods_pos_x, otherbp_mods_pos_y), 1));
                         otherbp_mods_pos_x += 105;
                     }
-                    otherbp_mods_pos_y += 186;
                 }
+                otherbp_mods_pos_y += 186;
             }
 
             //all pp
@@ -584,7 +621,7 @@ namespace KanonBot.image
                         //light
                         try
                         {
-                            badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"));
+                            badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"), new PngDecoder());
                             badge.Mutate(x => x.Resize(236, 110).RoundCorner(new Size(236, 110), 20));
                             info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
                         }
@@ -594,7 +631,7 @@ namespace KanonBot.image
                         //dark
                         try
                         {
-                            badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"));
+                            badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"), new PngDecoder());
                             badge.Mutate(x => x.Resize(236, 110).Brightness(0.6f).RoundCorner(new Size(236, 110), 20));
                             info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
                         }
