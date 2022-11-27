@@ -212,8 +212,8 @@ namespace KanonBot.functions.osubot
             }
             catch (Exception ex)
             {
-                var msg = $"下载图片时发生了异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
-                Log.Warning(msg);
+                target.reply($"接收图片失败，请确保提供的链接为直链（状态代码：200 OK）\n异常信息: '{ex.Message}");
+                return;
             }
             try
             {
@@ -287,8 +287,8 @@ namespace KanonBot.functions.osubot
             }
             catch (Exception ex)
             {
-                var msg = $"下载图片时发生了异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
-                Log.Warning(msg);
+                target.reply($"接收图片失败，请确保提供的链接为直链（状态代码：200 OK）\n异常信息: '{ex.Message}");
+                return;
             }
             try
             {
