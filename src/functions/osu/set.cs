@@ -35,7 +35,7 @@ namespace KanonBot.functions.osubot
                 childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
             }
             catch { rootCmd = cmd; }
-            switch (rootCmd)
+            switch (rootCmd.ToLower())
             {
                 case "osumode":
                     await Osu_mode(target, childCmd);
@@ -208,11 +208,12 @@ namespace KanonBot.functions.osubot
             //从url下载
             try
             {
+                target.reply("正在处理...");
                 imagePath = await cmd.DownloadFileAsync($"./work/panelv2/user_customimg/verify/", $"{randstr}.png");
             }
             catch (Exception ex)
             {
-                target.reply($"接收图片失败，请确保提供的链接为直链（状态代码：200 OK）\n异常信息: '{ex.Message}");
+                target.reply($"接收图片失败，请确保提供的链接为直链\n异常信息: '{ex.Message}");
                 return;
             }
             try
@@ -225,8 +226,8 @@ namespace KanonBot.functions.osubot
                 temppic.Dispose();
                 File.Delete(imagePath);
                 target.reply("已成功上传，请耐心等待审核。\r\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
-                Utils.SendMail("mono@desu.life", "有新的v2 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看");
-                Utils.SendMail("fantasyzhjk@qq.com", "有新的v2 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看");
+                Utils.SendMail("mono@desu.life", "有新的v2 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
+                Utils.SendMail("fantasyzhjk@qq.com", "有新的v2 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
             }
             catch
             {
@@ -283,11 +284,12 @@ namespace KanonBot.functions.osubot
             //从url下载
             try
             {
+                target.reply("正在处理...");
                 imagePath = await cmd.DownloadFileAsync($"./work/legacy/v1_cover/custom/verify/", $"{randstr}.png");
             }
             catch (Exception ex)
             {
-                target.reply($"接收图片失败，请确保提供的链接为直链（状态代码：200 OK）\n异常信息: '{ex.Message}");
+                target.reply($"接收图片失败，请确保提供的链接为直链\n异常信息: '{ex.Message}");
                 return;
             }
             try
@@ -300,8 +302,8 @@ namespace KanonBot.functions.osubot
                 temppic.Dispose();
                 File.Delete(imagePath);
                 target.reply("已成功上传，请耐心等待审核。\r\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
-                Utils.SendMail("mono@desu.life", "有新的v1 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看");
-                Utils.SendMail("fantasyzhjk@qq.com", "有新的v1 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看");
+                Utils.SendMail("mono@desu.life", "有新的v1 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
+                Utils.SendMail("fantasyzhjk@qq.com", "有新的v1 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
             }
             catch
             {

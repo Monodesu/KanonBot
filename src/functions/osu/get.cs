@@ -21,10 +21,10 @@ namespace KanonBot.functions.osubot
             try
             {
                 rootCmd = cmd[..cmd.IndexOf(" ")].Trim();
-                childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
+                childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim().ToLower();
             }
             catch { rootCmd = cmd; }
-            switch (rootCmd)
+            switch (rootCmd.ToLower())
             {
                 case "bonuspp":
                     await Bonuspp(target, childCmd);

@@ -423,14 +423,14 @@ public static class Utils
         }
         catch { }
     }
-    public static void SendMail(string mailto, string title, string body)
+    public static void SendMail(string mailto, string title, string body, bool isBodyHtml)
     {
         Mail.MailStruct ms = new()
         {
             MailTo = new string[] { mailto },
             Subject = title,
             Body = body,
-            IsBodyHtml = false
+            IsBodyHtml = isBodyHtml
         };
         try
         {

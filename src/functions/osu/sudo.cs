@@ -78,7 +78,7 @@ namespace KanonBot.functions.osu
                 }
                 catch { rootCmd = cmd; }
 
-                switch (rootCmd)
+                switch (rootCmd.ToLower())
                 {
                     //v1infoImg
                     case "v1imagelist":
@@ -154,6 +154,8 @@ namespace KanonBot.functions.osu
                     {
                         foreach (var x in filesall)
                         {
+                            if (File.Exists(@$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}"))
+                                File.Delete(@$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}");
                             File.Move(
                             @$"{x}",
                             @$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}");
@@ -167,6 +169,8 @@ namespace KanonBot.functions.osu
                     //approve
                     if (File.Exists(@$".\work\panelv2\user_customimg\verify\{cmd}.png"))
                     {
+                        if (File.Exists(@$".\work\panelv2\user_customimg\{cmd}.png"))
+                            File.Delete(@$".\work\panelv2\user_customimg\{cmd}.png");
                         File.Move(
                             @$".\work\panelv2\user_customimg\verify\{cmd}.png",
                             @$".\work\panelv2\user_customimg\{cmd}.png");
@@ -224,6 +228,8 @@ namespace KanonBot.functions.osu
                     {
                         foreach (var x in filesall)
                         {
+                            if (File.Exists(@$".\work\legacy\v1_cover\custom\{x[x.LastIndexOf("\\")..]}"))
+                                File.Delete(@$".\work\legacy\v1_cover\custom\{x[x.LastIndexOf("\\")..]}");
                             File.Move(
                             @$"{x}",
                             @$".\work\legacy\v1_cover\custom\{x[x.LastIndexOf("\\")..]}");
@@ -237,6 +243,8 @@ namespace KanonBot.functions.osu
                     //approve
                     if (File.Exists(@$".\work\legacy\v1_cover\custom\verify\{cmd}.png"))
                     {
+                        if (File.Exists(@$".\work\legacy\v1_cover\custom\{cmd}.png"))
+                            File.Delete(@$".\work\legacy\v1_cover\custom\{cmd}.png");
                         File.Move(
                             @$".\work\legacy\v1_cover\custom\verify\{cmd}.png",
                             @$".\work\legacy\v1_cover\custom\{cmd}.png");

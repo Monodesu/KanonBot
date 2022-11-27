@@ -10,7 +10,7 @@ namespace KanonBot.functions.osubot
     {
         public async static Task Execute(Target target, string cmd)
         {
-            var cmds = cmd.Split(' ');
+            var cmds = cmd.Split('#');
             if (cmds.Length == 1) {
                 if (cmds[0].Length == 0)
                 {
@@ -87,7 +87,7 @@ namespace KanonBot.functions.osubot
             } else if (cmds.Length == 2) {
                 if (cmds[0].Length == 0 || cmds[1].Length == 0)
                 {
-                    target.reply("!ppvs 用户1 用户2");
+                    target.reply("!ppvs 用户1#用户2");
                     return;
                 }
 
@@ -147,7 +147,7 @@ namespace KanonBot.functions.osubot
                 stream.TryGetBuffer(out ArraySegment<byte> buffer);
                 target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
             } else {
-                target.reply("!ppvs 用户1 用户2/!ppvs 要对比的用户");
+                target.reply("!ppvs 用户1#用户2/!ppvs 要对比的用户");
             }
         }
     }

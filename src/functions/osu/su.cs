@@ -72,7 +72,7 @@ namespace KanonBot.functions.osu
                 }
                 catch { rootCmd = cmd; }
 
-                switch (rootCmd)
+                switch (rootCmd.ToLower())
                 {
                     case "updateall":
                         await SuDailyUpdateAsync(target); return;

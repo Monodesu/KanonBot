@@ -26,7 +26,10 @@ else
     Config.inner = Config.Base.Default();
     Config.inner.save(configPath);
 }
-
+FlurlHttp.GlobalSettings.Redirects.Enabled = true;
+FlurlHttp.GlobalSettings.Redirects.MaxAutoRedirects = 10;
+FlurlHttp.GlobalSettings.Redirects.ForwardAuthorizationHeader = true;
+FlurlHttp.GlobalSettings.Redirects.AllowSecureToInsecure = true;
 var config = Config.inner!;
 
 var log = new LoggerConfiguration()

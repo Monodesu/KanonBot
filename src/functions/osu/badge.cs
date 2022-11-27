@@ -38,7 +38,7 @@ namespace KanonBot.functions.osubot
                 childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
             }
             catch { rootCmd = cmd; }
-            switch (rootCmd)
+            switch (rootCmd.ToLower())
             {
                 case "sudo":
                     await SudoExecute(target, childCmd, AccInfo); return;

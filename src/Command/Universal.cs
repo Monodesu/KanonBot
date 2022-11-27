@@ -29,7 +29,7 @@ namespace KanonBot.command_parser
 
             if (cmd != null)
             {
-                cmd = cmd.ToLower(); //转小写
+                //cmd = cmd.ToLower(); //转小写
                 cmd = Utils.ToDBC(cmd); //转半角
                 // cmd = Utils.ParseAt(cmd);
 
@@ -52,7 +52,7 @@ namespace KanonBot.command_parser
                 //Console.WriteLine(target.account + target.platform);
                 try
                 {
-                    switch (rootCmd)
+                    switch (rootCmd.ToLower())
                     {
                         case "reg": await Accounts.RegAccount(target, childCmd); return;
                         case "bind": await Accounts.BindService(target, childCmd); return;
