@@ -144,7 +144,10 @@ public class Client
         {
             uid = kanon_uid,
             osu_uid = osu_uid,
-            osu_mode = "osu"
+            osu_mode = "osu",
+            customInfoEngineVer = 1,
+            InfoPanelV2_Mode = 1
+
         };
         var d2 = GetInstance();
         try { await d2.Insertable(d).ExecuteCommandAsync(); return true; } catch { return false; }

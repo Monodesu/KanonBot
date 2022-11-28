@@ -103,7 +103,7 @@ namespace KanonBot.image
             float SideImgBrightness = 1.0f,
                   AvatarBrightness = 1.0f,
                   BadgeBrightness = 1.0f,
-                  MainBPImgBrightness = 1.9f,
+                  MainBPImgBrightness = 1.0f,
                   CountryFlagBrightness = 1.0f,
                   ModeCaptionBrightness = 1.0f,
                   ModIconBrightness = 1.0f;
@@ -541,7 +541,7 @@ namespace KanonBot.image
             double bounsPP = 0.00;
             double scorePP = 0.00;
             #region bnspp
-            if (allBP == null || allBP.Length > 100) { scorePP = data.userInfo.Statistics.PP; }
+            if (allBP == null || allBP.Length < 100) { scorePP = data.userInfo.Statistics.PP; }
             else if (allBP!.Length == 0) { scorePP = data.userInfo.Statistics.PP; }
             else
             {
@@ -656,38 +656,61 @@ namespace KanonBot.image
             //top score image 先绘制top bp图片再覆盖面板
             //download background image
             Img bp1bg;
-            var bp1bgPath = $"./work/background/{allBP![0].Beatmap!.BeatmapId}.png";
-            if (!File.Exists(bp1bgPath))
+            if (allBP.Length > 5)
             {
-                try
+                var bp1bgPath = $"./work/background/{allBP![0].Beatmap!.BeatmapId}.png";
+                if (!File.Exists(bp1bgPath))
                 {
-                    bp1bgPath = await OSU.SayoDownloadBeatmapBackgroundImg(allBP![0].Beatmapset!.Id, allBP![0].Beatmap!.BeatmapId, "./work/background/");
+                    try
+                    {
+                        bp1bgPath = await OSU.SayoDownloadBeatmapBackgroundImg(allBP![0].Beatmapset!.Id, allBP![0].Beatmap!.BeatmapId, "./work/background/");
+                    }
+                    catch (Exception ex)
+                    {
+                        var msg = $"从API下载背景图片时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
+                        Log.Warning(msg);
+                    }
                 }
-                catch (Exception ex)
+                try { bp1bg = Img.Load(bp1bgPath).CloneAs<Rgba32>(); }
+                catch { bp1bg = Img.Load(await Utils.LoadFile2Byte("./work/legacy/load-failed-img.png")); }
+                //bp1bg.Mutate(x => x.Resize(355, 200));
+                bp1bg.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(355, 0), Mode = ResizeMode.Max })); //355x200
+                switch (ColorMode)
                 {
-                    var msg = $"从API下载背景图片时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
-                    Log.Warning(msg);
+                    case 0:
+                        bp1bg.Mutate(x => x.Brightness(MainBPImgBrightness));
+                        break;
+                    case 1:
+                        //light
+                        //do nothing  
+                        break;
+                    case 2:
+                        //dark
+                        bp1bg.Mutate(x => x.Brightness(MainBPImgBrightness));
+                        break;
                 }
+                info.Mutate(x => x.DrawImage(bp1bg, new Point(1566, 1550), 1));
             }
-            try { bp1bg = Img.Load(bp1bgPath).CloneAs<Rgba32>(); }
-            catch { bp1bg = Img.Load(await Utils.LoadFile2Byte("./work/legacy/load-failed-img.png")); }
-            //bp1bg.Mutate(x => x.Resize(355, 200));
-            bp1bg.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(355, 0), Mode = ResizeMode.Max })); //355x200
-            switch (ColorMode)
+            else
             {
-                case 0:
-                    bp1bg.Mutate(x => x.Brightness(MainBPImgBrightness));
-                    break;
-                case 1:
-                    //light
-                    //do nothing  
-                    break;
-                case 2:
-                    //dark
-                    bp1bg.Mutate(x => x.Brightness(MainBPImgBrightness));
-                    break;
+                bp1bg = new Image<Rgba32>(355, 200);
+                switch (ColorMode)
+                {
+                    case 0:
+                        bp1bg.Mutate(x => x.Fill(Color.White));
+                        break;
+                    case 1:
+                        //light
+                        //do nothing  
+                        break;
+                    case 2:
+                        //dark
+                        bp1bg.Mutate(x => x.Fill(Color.White));
+                        break;
+                }
+                info.Mutate(x => x.DrawImage(bp1bg, new Point(1566, 1550), 1));
             }
-            info.Mutate(x => x.DrawImage(bp1bg, new Point(1566, 1550), 1));
+
 
             //level progress
             Img levelprogress_background = new Image<Rgba32>(2312, 12);
@@ -845,256 +868,438 @@ namespace KanonBot.image
             textOptions.Origin = new PointF(3420, 1217);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.RankedScore), new SolidBrush(Details_RankedScoreColor), null));
 
-            //top performance
-            //title  +mods
-            textOptions.Font = new Font(TorusRegular, 90);
-            textOptions.Origin = new PointF(1945, 1590);
-            var title = "";
-            foreach (char c in allBP![0].Beatmapset!.Title)
+            if (allBP.Length > 5)
             {
-                title += c;
-                var m = TextMeasurer.Measure(title, textOptions);
-                if (m.Width > 725)
-                {
-                    title += "...";
-                    break;
-                }
-            }
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(MainBPTitleColor), null));
-            //mods
-            if (allBP![0].Mods.Length > 0)
-            {
-                textOptions.Origin = new PointF(1945 + TextMeasurer.Measure(title, textOptions).Width + 25, 1611);
-                textOptions.Font = new Font(TorusRegular, 40);
-                var mainscoremods = "+";
-                foreach (var x in allBP![0].Mods)
-                    mainscoremods += $"{x}, ";
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, mainscoremods[..mainscoremods.LastIndexOf(",")], new SolidBrush(MainBPTitleColor), null));
-            }
-
-            //artist
-            textOptions.Font = new Font(TorusRegular, 42);
-            textOptions.Origin = new PointF(1956, 1668);
-            var artist = "";
-            foreach (char c in allBP![0].Beatmapset!.Artist)
-            {
-                artist += c;
-                var m = TextMeasurer.Measure(artist, textOptions);
-                if (m.Width > 205)
-                {
-                    artist += "...";
-                    break;
-                }
-            }
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, artist, new SolidBrush(MainBPArtistColor), null));
-
-            //creator
-            textOptions.Origin = new PointF(2231, 1668);
-            var creator = "";
-            foreach (char c in allBP![0].Beatmapset!.Creator)
-            {
-                creator += c;
-                var m = TextMeasurer.Measure(creator, textOptions);
-                if (m.Width > 145)
-                {
-                    creator += "...";
-                    break;
-                }
-            }
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, creator, new SolidBrush(MainBPMapperColor), null));
-
-            //bid
-            textOptions.Origin = new PointF(2447, 1668);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Beatmap!.BeatmapId.ToString(), new SolidBrush(MainBPBIDColor), null));
-
-            //get stars from rosupp
-            var ppinfo = await PerformanceCalculator.CalculatePanelData(allBP[0]);
-            textOptions.Origin = new PointF(2657, 1668);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo.ppInfo.star.ToString("0.##*"), new SolidBrush(MainBPStarsColor), null));
-
-            //acc
-            textOptions.Origin = new PointF(2813, 1668);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Accuracy.ToString("0.##%"), new SolidBrush(MainBPAccColor), null));
-
-            //rank
-            textOptions.Origin = new PointF(2988, 1668);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Rank, new SolidBrush(MainBPRankColor), null));
-
-            //2nd~5th bp
-            textOptions.HorizontalAlignment = HorizontalAlignment.Left;
-            var MainTitleAndDifficultyTitlePos_X = 1673;
-
-            //2nd~5th main title
-            textOptions.Font = new Font(TorusRegular, 50);
-            for (int i = 1; i < 5; ++i)
-            {
-                title = "";
-                foreach (char c in allBP![i].Beatmapset!.Title)
+                #region ppcount>=5
+                //top performance
+                //title  +mods
+                textOptions.Font = new Font(TorusRegular, 90);
+                textOptions.Origin = new PointF(1945, 1590);
+                var title = "";
+                foreach (char c in allBP![0].Beatmapset!.Title)
                 {
                     title += c;
                     var m = TextMeasurer.Measure(title, textOptions);
-                    if (m.Width > 710)
+                    if (m.Width > 725)
                     {
                         title += "...";
                         break;
                     }
                 }
-                textOptions.Origin = new PointF(MainTitleAndDifficultyTitlePos_X, 1868 + 186 * (i - 1));
-                switch (i)
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(MainBPTitleColor), null));
+                //mods
+                if (allBP![0].Mods.Length > 0)
                 {
-                    case 1:
-                        info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp2ndBPTitleColor), null));
-                        break;
-                    case 2:
-                        info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp3rdBPTitleColor), null));
-                        break;
-                    case 3:
-                        info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp4thBPTitleColor), null));
-                        break;
-                    case 4:
-                        info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp5thBPTitleColor), null));
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            //2nd~5th version and acc and bid and shdklahdksadkjkcna5hoacsporjasldjlksakdlsa
-            textOptions.Font = new Font(TorusRegular, 40);
-            var otherbp_mods_pos_y = 1853;
-            for (int i = 1; i < 5; ++i)
-            {
-                Color splitC = new(),
-                      versionC = new(),
-                      bidC = new(),
-                      starC = new(),
-                      accC = new(),
-                      rankC = new();
-                splitC = SubBpInfoSplitColor;
-                switch (i)
-                {
-                    case 1:
-                        versionC = SubBp2ndBPTitleColor;
-                        bidC = SubBp2ndBPBIDColor;
-                        starC = SubBp2ndBPStarsColor;
-                        accC = SubBp2ndBPAccColor;
-                        rankC = SubBp2ndBPRankColor;
-                        break;
-                    case 2:
-                        versionC = SubBp3rdBPTitleColor;
-                        bidC = SubBp3rdBPBIDColor;
-                        starC = SubBp3rdBPStarsColor;
-                        accC = SubBp3rdBPAccColor;
-                        rankC = SubBp3rdBPRankColor;
-                        break;
-                    case 3:
-                        versionC = SubBp4thBPTitleColor;
-                        bidC = SubBp4thBPBIDColor;
-                        starC = SubBp4thBPStarsColor;
-                        accC = SubBp4thBPAccColor;
-                        rankC = SubBp4thBPRankColor;
-                        break;
-                    case 4:
-                        versionC = SubBp5thBPTitleColor;
-                        bidC = SubBp5thBPBIDColor;
-                        starC = SubBp5thBPStarsColor;
-                        accC = SubBp5thBPAccColor;
-                        rankC = SubBp5thBPRankColor;
-                        break;
-                    default:
-                        break;
+                    textOptions.Origin = new PointF(1945 + TextMeasurer.Measure(title, textOptions).Width + 25, 1611);
+                    textOptions.Font = new Font(TorusRegular, 40);
+                    var mainscoremods = "+";
+                    foreach (var x in allBP![0].Mods)
+                        mainscoremods += $"{x}, ";
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, mainscoremods[..mainscoremods.LastIndexOf(",")], new SolidBrush(MainBPTitleColor), null));
                 }
 
-                title = "";
-                foreach (char c in allBP![i].Beatmap!.Version)
+                //artist
+                textOptions.Font = new Font(TorusRegular, 42);
+                textOptions.Origin = new PointF(1956, 1668);
+                var artist = "";
+                foreach (char c in allBP![0].Beatmapset!.Artist)
                 {
-                    title += c;
-                    var m = TextMeasurer.Measure(title, textOptions);
-                    if (m.Width > 130)
+                    artist += c;
+                    var m = TextMeasurer.Measure(artist, textOptions);
+                    if (m.Width > 205)
                     {
-                        title += "...";
+                        artist += "...";
                         break;
                     }
                 }
-                textOptions.Origin = new PointF(MainTitleAndDifficultyTitlePos_X, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(versionC), null));
-                var textMeasurePos = MainTitleAndDifficultyTitlePos_X + TextMeasurer.Measure(title, textOptions).Width + 5;
-                //split
-                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
-                textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, artist, new SolidBrush(MainBPArtistColor), null));
+
+                //creator
+                textOptions.Origin = new PointF(2231, 1668);
+                var creator = "";
+                foreach (char c in allBP![0].Beatmapset!.Creator)
+                {
+                    creator += c;
+                    var m = TextMeasurer.Measure(creator, textOptions);
+                    if (m.Width > 145)
+                    {
+                        creator += "...";
+                        break;
+                    }
+                }
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, creator, new SolidBrush(MainBPMapperColor), null));
 
                 //bid
-                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Beatmap!.BeatmapId.ToString(), new SolidBrush(bidC), null));
-                textMeasurePos = textMeasurePos + TextMeasurer.Measure(allBP![i].Beatmap!.BeatmapId.ToString(), textOptions).Width + 5;
+                textOptions.Origin = new PointF(2447, 1668);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Beatmap!.BeatmapId.ToString(), new SolidBrush(MainBPBIDColor), null));
 
-                //split
-                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
-                textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
-
-                //star
-                var ppinfo1 = await PerformanceCalculator.CalculatePanelData(allBP[i]);
-                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo1.ppInfo.star.ToString("0.##*"), new SolidBrush(starC), null));
-                textMeasurePos = textMeasurePos + TextMeasurer.Measure(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions).Width + 5;
-
-                //split
-                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
-                textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                //get stars from rosupp
+                var ppinfo = await PerformanceCalculator.CalculatePanelData(allBP[0]);
+                textOptions.Origin = new PointF(2657, 1668);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo.ppInfo.star.ToString("0.##*"), new SolidBrush(MainBPStarsColor), null));
 
                 //acc
-                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Accuracy.ToString("0.##%"), new SolidBrush(accC), null));
-                textMeasurePos = textMeasurePos + TextMeasurer.Measure(allBP![i].Accuracy.ToString("0.##%"), textOptions).Width + 5;
+                textOptions.Origin = new PointF(2813, 1668);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Accuracy.ToString("0.##%"), new SolidBrush(MainBPAccColor), null));
 
-                //split
-                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
-                textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                //rank
+                textOptions.Origin = new PointF(2988, 1668);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Rank, new SolidBrush(MainBPRankColor), null));
 
-                //ranking
-                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Rank, new SolidBrush(rankC), null));
-                //shdklahdksadkjkcna5hoacsporjasldjlksakdlsa
-                if (allBP![i].Mods.Length > 0)
+                //2nd~5th bp
+                textOptions.HorizontalAlignment = HorizontalAlignment.Left;
+                var MainTitleAndDifficultyTitlePos_X = 1673;
+
+                //2nd~5th main title
+                textOptions.Font = new Font(TorusRegular, 50);
+                for (int i = 1; i < 5; ++i)
                 {
-                    var otherbp_mods_pos_x = 2580;
-                    foreach (var x in allBP![i].Mods)
+                    title = "";
+                    foreach (char c in allBP![i].Beatmapset!.Title)
                     {
-                        Img modicon = Img.Load(await Utils.LoadFile2Byte($"./work/mods_v2/2x/{x}.png"));
-                        modicon.Mutate(x => x.Resize(90, 90));
-                        info.Mutate(x => x.DrawImage(modicon, new Point(otherbp_mods_pos_x, otherbp_mods_pos_y), 1));
-                        otherbp_mods_pos_x += 105;
+                        title += c;
+                        var m = TextMeasurer.Measure(title, textOptions);
+                        if (m.Width > 710)
+                        {
+                            title += "...";
+                            break;
+                        }
+                    }
+                    textOptions.Origin = new PointF(MainTitleAndDifficultyTitlePos_X, 1868 + 186 * (i - 1));
+                    switch (i)
+                    {
+                        case 1:
+                            info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp2ndBPTitleColor), null));
+                            break;
+                        case 2:
+                            info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp3rdBPTitleColor), null));
+                            break;
+                        case 3:
+                            info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp4thBPTitleColor), null));
+                            break;
+                        case 4:
+                            info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp5thBPTitleColor), null));
+                            break;
+                        default:
+                            break;
                     }
                 }
-                otherbp_mods_pos_y += 186;
+
+                //2nd~5th version and acc and bid and shdklahdksadkjkcna5hoacsporjasldjlksakdlsa
+                textOptions.Font = new Font(TorusRegular, 40);
+                var otherbp_mods_pos_y = 1853;
+                for (int i = 1; i < 5; ++i)
+                {
+                    Color splitC = new(),
+                          versionC = new(),
+                          bidC = new(),
+                          starC = new(),
+                          accC = new(),
+                          rankC = new();
+                    splitC = SubBpInfoSplitColor;
+                    switch (i)
+                    {
+                        case 1:
+                            versionC = SubBp2ndBPVersionColor;
+                            bidC = SubBp2ndBPBIDColor;
+                            starC = SubBp2ndBPStarsColor;
+                            accC = SubBp2ndBPAccColor;
+                            rankC = SubBp2ndBPRankColor;
+                            break;
+                        case 2:
+                            versionC = SubBp3rdBPVersionColor;
+                            bidC = SubBp3rdBPBIDColor;
+                            starC = SubBp3rdBPStarsColor;
+                            accC = SubBp3rdBPAccColor;
+                            rankC = SubBp3rdBPRankColor;
+                            break;
+                        case 3:
+                            versionC = SubBp4thBPVersionColor;
+                            bidC = SubBp4thBPBIDColor;
+                            starC = SubBp4thBPStarsColor;
+                            accC = SubBp4thBPAccColor;
+                            rankC = SubBp4thBPRankColor;
+                            break;
+                        case 4:
+                            versionC = SubBp5thBPVersionColor;
+                            bidC = SubBp5thBPBIDColor;
+                            starC = SubBp5thBPStarsColor;
+                            accC = SubBp5thBPAccColor;
+                            rankC = SubBp5thBPRankColor;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    title = "";
+                    foreach (char c in allBP![i].Beatmap!.Version)
+                    {
+                        title += c;
+                        var m = TextMeasurer.Measure(title, textOptions);
+                        if (m.Width > 130)
+                        {
+                            title += "...";
+                            break;
+                        }
+                    }
+                    textOptions.Origin = new PointF(MainTitleAndDifficultyTitlePos_X, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(versionC), null));
+                    var textMeasurePos = MainTitleAndDifficultyTitlePos_X + TextMeasurer.Measure(title, textOptions).Width + 5;
+                    //split
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
+                    //bid
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Beatmap!.BeatmapId.ToString(), new SolidBrush(bidC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(allBP![i].Beatmap!.BeatmapId.ToString(), textOptions).Width + 5;
+
+                    //split
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
+                    //star
+                    var ppinfo1 = await PerformanceCalculator.CalculatePanelData(allBP[i]);
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo1.ppInfo.star.ToString("0.##*"), new SolidBrush(starC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions).Width + 5;
+
+                    //split
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
+                    //acc
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Accuracy.ToString("0.##%"), new SolidBrush(accC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(allBP![i].Accuracy.ToString("0.##%"), textOptions).Width + 5;
+
+                    //split
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
+                    //ranking
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Rank, new SolidBrush(rankC), null));
+                    //shdklahdksadkjkcna5hoacsporjasldjlksakdlsa
+                    if (allBP![i].Mods.Length > 0)
+                    {
+                        var otherbp_mods_pos_x = 2580;
+                        foreach (var x in allBP![i].Mods)
+                        {
+                            Img modicon = Img.Load(await Utils.LoadFile2Byte($"./work/mods_v2/2x/{x}.png"));
+                            modicon.Mutate(x => x.Resize(90, 90));
+                            info.Mutate(x => x.DrawImage(modicon, new Point(otherbp_mods_pos_x, otherbp_mods_pos_y), 1));
+                            otherbp_mods_pos_x += 105;
+                        }
+                    }
+                    otherbp_mods_pos_y += 186;
+                }
+
+                //all pp
+                textOptions.Font = new Font(TorusRegular, 90);
+                textOptions.HorizontalAlignment = HorizontalAlignment.Center;
+                textOptions.Origin = new PointF(3642, 1670);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N1}", allBP![0].PP), new SolidBrush(MainBPppMainColor), null));
+                var bp1pptextMeasure = TextMeasurer.Measure(string.Format("{0:N1}", allBP![0].PP), textOptions);
+                int bp1pptextpos = 3642 - (int)bp1pptextMeasure.Width / 2;
+                textOptions.Font = new Font(TorusRegular, 40);
+                textOptions.Origin = new PointF(bp1pptextpos, 1610);
+                textOptions.HorizontalAlignment = HorizontalAlignment.Left;
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(MainBPppTitleColor), null));
+
+                textOptions.HorizontalAlignment = HorizontalAlignment.Center;
+                textOptions.Font = new Font(TorusRegular, 70);
+                textOptions.Origin = new PointF(3642, 1895);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![1].PP), new SolidBrush(SubBp2ndBPppMainColor), null));
+                textOptions.Origin = new PointF(3642, 2081);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![2].PP), new SolidBrush(SubBp3rdBPppMainColor), null));
+                textOptions.Origin = new PointF(3642, 2266);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![3].PP), new SolidBrush(SubBp4thBPppMainColor), null));
+                textOptions.Origin = new PointF(3642, 2450);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![4].PP), new SolidBrush(SubBp5thBPppMainColor), null));
+                #endregion
+            }
+            else
+            {
+                #region ppcount<5
+                //top performance
+                //title  +mods
+                textOptions.Font = new Font(TorusRegular, 90);
+                textOptions.Origin = new PointF(1945, 1590);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(MainBPTitleColor), null));
+
+                //artist
+                textOptions.Font = new Font(TorusRegular, 42);
+                textOptions.Origin = new PointF(1956, 1668);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(MainBPArtistColor), null));
+
+                //creator
+                textOptions.Origin = new PointF(2231, 1668);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(MainBPMapperColor), null));
+
+                //bid
+                textOptions.Origin = new PointF(2447, 1668);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(MainBPBIDColor), null));
+
+                //star
+                textOptions.Origin = new PointF(2657, 1668);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(MainBPStarsColor), null));
+
+                //acc
+                textOptions.Origin = new PointF(2813, 1668);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(MainBPAccColor), null));
+
+                //rank
+                textOptions.Origin = new PointF(2988, 1668);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(MainBPRankColor), null));
+
+                //2nd~5th bp
+                textOptions.HorizontalAlignment = HorizontalAlignment.Left;
+                var MainTitleAndDifficultyTitlePos_X = 1673;
+
+                //2nd~5th main title
+                textOptions.Font = new Font(TorusRegular, 50);
+                for (int i = 1; i < 5; ++i)
+                {
+                    textOptions.Origin = new PointF(MainTitleAndDifficultyTitlePos_X, 1868 + 186 * (i - 1));
+                    switch (i)
+                    {
+                        case 1:
+                            info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(SubBp2ndBPTitleColor), null));
+                            break;
+                        case 2:
+                            info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(SubBp3rdBPTitleColor), null));
+                            break;
+                        case 3:
+                            info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(SubBp4thBPTitleColor), null));
+                            break;
+                        case 4:
+                            info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(SubBp5thBPTitleColor), null));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                //2nd~5th version and acc and bid and shdklahdksadkjkcna5hoacsporjasldjlksakdlsa
+                textOptions.Font = new Font(TorusRegular, 40);
+                var otherbp_mods_pos_y = 1853;
+                for (int i = 1; i < 5; ++i)
+                {
+                    Color splitC = new(),
+                          versionC = new(),
+                          bidC = new(),
+                          starC = new(),
+                          accC = new(),
+                          rankC = new();
+                    splitC = SubBpInfoSplitColor;
+                    switch (i)
+                    {
+                        case 1:
+                            versionC = SubBp2ndBPVersionColor;
+                            bidC = SubBp2ndBPBIDColor;
+                            starC = SubBp2ndBPStarsColor;
+                            accC = SubBp2ndBPAccColor;
+                            rankC = SubBp2ndBPRankColor;
+                            break;
+                        case 2:
+                            versionC = SubBp3rdBPVersionColor;
+                            bidC = SubBp3rdBPBIDColor;
+                            starC = SubBp3rdBPStarsColor;
+                            accC = SubBp3rdBPAccColor;
+                            rankC = SubBp3rdBPRankColor;
+                            break;
+                        case 3:
+                            versionC = SubBp4thBPVersionColor;
+                            bidC = SubBp4thBPBIDColor;
+                            starC = SubBp4thBPStarsColor;
+                            accC = SubBp4thBPAccColor;
+                            rankC = SubBp4thBPRankColor;
+                            break;
+                        case 4:
+                            versionC = SubBp5thBPVersionColor;
+                            bidC = SubBp5thBPBIDColor;
+                            starC = SubBp5thBPStarsColor;
+                            accC = SubBp5thBPAccColor;
+                            rankC = SubBp5thBPRankColor;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    textOptions.Origin = new PointF(MainTitleAndDifficultyTitlePos_X, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(versionC), null));
+                    var textMeasurePos = MainTitleAndDifficultyTitlePos_X + TextMeasurer.Measure("-", textOptions).Width + 5;
+                    //split
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
+                    //bid
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(bidC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure("-", textOptions).Width + 5;
+
+                    //split
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
+                    //star
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(starC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure("-", textOptions).Width + 5;
+
+                    //split
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
+                    //acc
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(accC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure("-", textOptions).Width + 5;
+
+                    //split
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                    textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
+                    //ranking
+                    textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(rankC), null));
+                    otherbp_mods_pos_y += 186;
+                }
+
+                //all pp
+                textOptions.Font = new Font(TorusRegular, 90);
+                textOptions.HorizontalAlignment = HorizontalAlignment.Center;
+                textOptions.Origin = new PointF(3642, 1670);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(MainBPppMainColor), null));
+                var bp1pptextMeasure = TextMeasurer.Measure("-", textOptions);
+                int bp1pptextpos = 3642 - (int)bp1pptextMeasure.Width / 2;
+                textOptions.Font = new Font(TorusRegular, 40);
+                textOptions.Origin = new PointF(bp1pptextpos, 1610);
+                textOptions.HorizontalAlignment = HorizontalAlignment.Left;
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(MainBPppTitleColor), null));
+
+                textOptions.HorizontalAlignment = HorizontalAlignment.Center;
+                textOptions.Font = new Font(TorusRegular, 70);
+                textOptions.Origin = new PointF(3642, 1895);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(SubBp2ndBPppMainColor), null));
+                textOptions.Origin = new PointF(3642, 2081);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(SubBp3rdBPppMainColor), null));
+                textOptions.Origin = new PointF(3642, 2266);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(SubBp4thBPppMainColor), null));
+                textOptions.Origin = new PointF(3642, 2450);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(SubBp5thBPppMainColor), null));
+                #endregion
             }
 
-            //all pp
-            textOptions.Font = new Font(TorusRegular, 90);
-            textOptions.HorizontalAlignment = HorizontalAlignment.Center;
-            textOptions.Origin = new PointF(3642, 1670);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N1}", allBP![0].PP), new SolidBrush(MainBPppMainColor), null));
-            var bp1pptextMeasure = TextMeasurer.Measure(string.Format("{0:N1}", allBP![0].PP), textOptions);
-            int bp1pptextpos = 3642 - (int)bp1pptextMeasure.Width / 2;
-            textOptions.Font = new Font(TorusRegular, 40);
-            textOptions.Origin = new PointF(bp1pptextpos, 1610);
-            textOptions.HorizontalAlignment = HorizontalAlignment.Left;
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(MainBPppTitleColor), null));
-
-            textOptions.HorizontalAlignment = HorizontalAlignment.Center;
-            textOptions.Font = new Font(TorusRegular, 70);
-            textOptions.Origin = new PointF(3642, 1895);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![1].PP), new SolidBrush(SubBp2ndBPppMainColor), null));
-            textOptions.Origin = new PointF(3642, 2081);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![2].PP), new SolidBrush(SubBp3rdBPppMainColor), null));
-            textOptions.Origin = new PointF(3642, 2266);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![3].PP), new SolidBrush(SubBp4thBPppMainColor), null));
-            textOptions.Origin = new PointF(3642, 2450);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![4].PP), new SolidBrush(SubBp5thBPppMainColor), null));
 
             //badges
             if (data.badgeId != -1)

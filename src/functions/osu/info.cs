@@ -162,10 +162,7 @@ namespace KanonBot.functions.osubot
             {
                 custominfoengineVer = DBOsuInfo!.customInfoEngineVer;
                 data.InfoPanelV2_Mode = DBOsuInfo.InfoPanelV2_Mode;
-                if (DBOsuInfo.InfoPanelV2_CustomMode == null || DBOsuInfo.InfoPanelV2_CustomMode == "")
-                    //应该不用写这里，但是为了保险
-                    data.InfoPanelV2_Mode = 1;
-                else
+                if (data.InfoPanelV2_Mode == 0)
                     data.ColorConfigRaw = DBOsuInfo.InfoPanelV2_CustomMode!;
             }
 

@@ -131,11 +131,12 @@ namespace KanonBot.functions.osubot
                         target.reply("配色方案号码不正确。(0=custom、1=light、2=dark)");
                         return;
                     }
-                    if (DBOsuInfo.InfoPanelV2_CustomMode == null || DBOsuInfo.InfoPanelV2_CustomMode == "")
-                    {
-                        target.reply("请先设置自定义配色方案后再将此配置项更改为custom。");
-                        return;
-                    }
+                    if (t == 0)
+                        if (DBOsuInfo.InfoPanelV2_CustomMode == null || DBOsuInfo.InfoPanelV2_CustomMode == "")
+                        {
+                            target.reply("请先设置自定义配色方案后再将此配置项更改为custom。");
+                            return;
+                        }
                     await Database.Client.SetOsuInfoPanelV2ColorMode(DBOsuInfo.osu_uid, t);
                     target.reply("成功设置配色方案。");
                 }
@@ -586,14 +587,16 @@ namespace KanonBot.functions.osubot
             float SideImgBrightness = 1.0f,
                   AvatarBrightness = 1.0f,
                   BadgeBrightness = 1.0f,
-                  MainBPImgBrightness = 1.9f,
+                  MainBPImgBrightness = 1.0f,
                   CountryFlagBrightness = 1.0f,
                   ModeCaptionBrightness = 1.0f,
                   ModIconBrightness = 1.0f;
             #endregion
-            string[] argstemp = { "" };
+            string[] argstemp;
             try
             {
+                if (cmd.IndexOf("\r\n") == -1)
+                    cmd = cmd.Replace("\n", "\r\n");
                 argstemp = cmd.Split("\r\n");
                 if (argstemp.Length < 71)
                     throw new Exception();
