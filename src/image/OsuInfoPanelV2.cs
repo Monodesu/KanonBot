@@ -24,6 +24,7 @@ using SqlSugar;
 using System.IO;
 using SixLabors.ImageSharp.Formats.Png;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
+using SixLabors.ImageSharp.Advanced;
 
 namespace KanonBot.image
 {
@@ -50,10 +51,11 @@ namespace KanonBot.image
                 highlightColor = new(),
                 levelprogressBackgroundColor = new(),
                 levelprogressFrontColor = new();
-            //配色方案 0=模板light 1=模板dark 2...3...4...
+            float ImgBrightness = 1.0f;
+            //配色方案 1=模板light 2=模板dark 3...4...5...
             switch (ColorMode)
             {
-                case 0:
+                case 1:
                     mainColor = Color.ParseHex("#656b6d");
                     usernameColor = Color.ParseHex("#4d4d4d");
                     ppMainColor = Color.ParseHex("#e36a79");
@@ -72,8 +74,9 @@ namespace KanonBot.image
                     highlightColor = Color.ParseHex("#ffcd22");
                     levelprogressBackgroundColor = Color.ParseHex("#E6E6E6");
                     levelprogressFrontColor = Color.ParseHex("#F3B6CD");
+                    //do not change ImgBrightness = 1.0f;
                     break;
-                case 1:
+                case 2:
                     mainColor = Color.ParseHex("#e6e6e6");
                     usernameColor = Color.ParseHex("#e6e6e6");
                     ppMainColor = Color.ParseHex("#e36a79");
@@ -92,6 +95,7 @@ namespace KanonBot.image
                     highlightColor = Color.ParseHex("#ffcd22");
                     levelprogressBackgroundColor = Color.ParseHex("#000000");
                     levelprogressFrontColor = Color.ParseHex("#85485F");
+                    ImgBrightness = 0.6f;
                     break;
             }
             var info = new Image<Rgba32>(4000, 2640);
@@ -126,16 +130,16 @@ namespace KanonBot.image
             sidePic = Img.Load(await Utils.LoadFile2Byte(sidePicPath)).CloneAs<Rgba32>();    // 读取
             switch (ColorMode)
             {
-                case 0:
+                case 1:
                     //light
                     //do nothing  
                     break;
-                case 1:
+                case 2:
                     //dark
-                    sidePic.Mutate(x => x.Brightness(0.6f));
+                    sidePic.Mutate(x => x.Brightness(ImgBrightness));
                     break;
             }
-            info.Mutate(x => x.DrawImage(sidePic, new Point(73, 41), 1));
+            info.Mutate(x => x.DrawImage(sidePic, new Point(90, 72), 1));
 
 
             //进度条 - 先绘制进度条，再覆盖面板
@@ -148,7 +152,7 @@ namespace KanonBot.image
             double bounsPP = 0.00;
             double scorePP = 0.00;
             #region bnspp
-            if (allBP == null) { scorePP = data.userInfo.Statistics.PP; }
+            if (allBP == null || allBP.Length > 100) { scorePP = data.userInfo.Statistics.PP; }
             else if (allBP!.Length == 0) { scorePP = data.userInfo.Statistics.PP; }
             else
             {
@@ -208,6 +212,7 @@ namespace KanonBot.image
             #endregion
             //绘制mainpp
             int pp_front_length = 1443 - (int)(1443.0 * (bounsPP / scorePP));
+            if (pp_front_length < 1) pp_front_length = 1443;
             Img pp_front = new Image<Rgba32>(pp_front_length, 68);
             pp_front.Mutate(x => x.Fill(ppFrontColor));
             pp_front.Mutate(x => x.RoundCorner_Parts(new Size(pp_front_length, 68), 10, 10, 20, 20));
@@ -220,7 +225,9 @@ namespace KanonBot.image
             info.Mutate(x => x.DrawImage(acc_background, new Point(2358, 611), 1));
 
             //300
-            Img acc_300 = new Image<Rgba32>((int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0)), 68);
+            int acc_front_length = (int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0));
+            if (acc_front_length < 1) acc_front_length = 1443;
+            Img acc_300 = new Image<Rgba32>(acc_front_length, 68);
             acc_300.Mutate(x => x.Fill(accFrontColor));
             acc_300.Mutate(x => x.RoundCorner_Parts(new Size((int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0)), 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(acc_300, new Point(2358, 611), 1));
@@ -276,16 +283,16 @@ namespace KanonBot.image
             try { bp1bg = Img.Load(bp1bgPath).CloneAs<Rgba32>(); }
             catch { bp1bg = Img.Load(await Utils.LoadFile2Byte("./work/legacy/load-failed-img.png")); }
             //bp1bg.Mutate(x => x.Resize(355, 200));
-            bp1bg.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(355, 200), Mode = ResizeMode.Min }));
+            bp1bg.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(0, 200), Mode = ResizeMode.Max }));
             switch (ColorMode)
             {
-                case 0:
+                case 1:
                     //light
                     //do nothing  
                     break;
-                case 1:
+                case 2:
                     //dark
-                    bp1bg.Mutate(x => x.Brightness(0.6f));
+                    bp1bg.Mutate(x => x.Brightness(ImgBrightness));
                     break;
             }
             info.Mutate(x => x.DrawImage(bp1bg, new Point(1566, 1550), 1));
@@ -344,13 +351,13 @@ namespace KanonBot.image
             }
             switch (ColorMode)
             {
-                case 0:
+                case 1:
                     //light
                     //do nothing  
                     break;
-                case 1:
+                case 2:
                     //dark
-                    avatar.Mutate(x => x.Brightness(0.6f));
+                    avatar.Mutate(x => x.Brightness(ImgBrightness));
                     break;
             }
             avatar.Mutate(x => x.Resize(200, 200).RoundCorner(new Size(200, 200), 25));
@@ -421,9 +428,14 @@ namespace KanonBot.image
             textOptions.Font = new Font(TorusRegular, 40);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, $"Update at {DateTime.Now}", new SolidBrush(detailsColor), null));
 
+            //desu.life
+            textOptions.HorizontalAlignment = HorizontalAlignment.Left;
+            textOptions.Origin = new PointF(90, 2582);
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, $"Kanonbot - desu.life", new SolidBrush(detailsColor), null));
+
             //details
             textOptions.Font = new Font(TorusRegular, 50);
-            textOptions.HorizontalAlignment = HorizontalAlignment.Left;
+            
             //play time
             textOptions.Origin = new PointF(1705, 1217);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, Utils.Duration2StringWithoutSec(data.userInfo.Statistics.PlayTime), new SolidBrush(detailsColor), null));
@@ -615,29 +627,28 @@ namespace KanonBot.image
             if (data.badgeId != -1)
             {
                 Img badge;
+                badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"));
+
                 switch (ColorMode)
                 {
-                    case 0:
+                    case 1:
                         //light
                         try
                         {
-                            badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"), new PngDecoder());
                             badge.Mutate(x => x.Resize(236, 110).RoundCorner(new Size(236, 110), 20));
-                            info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
                         }
                         catch { }
                         break;
-                    case 1:
+                    case 2:
                         //dark
                         try
                         {
-                            badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"), new PngDecoder());
-                            badge.Mutate(x => x.Resize(236, 110).Brightness(0.6f).RoundCorner(new Size(236, 110), 20));
-                            info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
+                            badge.Mutate(x => x.Resize(236, 110).Brightness(ImgBrightness).RoundCorner(new Size(236, 110), 20));
                         }
                         catch { }
                         break;
                 }
+                info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
             }
 
 
@@ -663,7 +674,8 @@ namespace KanonBot.image
 
 
 
-
+            //resize to 1080p
+            info.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(1920, 0), Mode = ResizeMode.Max }));
             return info;
         }
     }
