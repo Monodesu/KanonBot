@@ -234,7 +234,13 @@ namespace KanonBot.functions.osubot
                 image = new Image<Rgba32>(1382, 2456);
                 var temppic = Img.Load(imagePath).CloneAs<Rgba32>();
                 temppic.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(0, 2456), Mode = ResizeMode.Max }));
-                temppic.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(1382, 0), Mode = ResizeMode.Max }));
+                if (temppic.Width < 1382)
+                {
+                    temppic.Dispose();
+                    File.Delete(imagePath);
+                    target.reply("图像长度太小了，自己裁剪一下再上传吧~（9:16，推荐1382x2456)");
+                    return;
+                }
                 image.Mutate(x => x.DrawImage(temppic, new Point(0, 0), 1));
                 image.Save($"./work/panelv2/user_customimg/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
                 temppic.Dispose();
@@ -311,6 +317,13 @@ namespace KanonBot.functions.osubot
                 image = new Image<Rgba32>(1200, 350);
                 var temppic = Img.Load(imagePath).CloneAs<Rgba32>();
                 temppic.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(1200, 0), Mode = ResizeMode.Max }));
+                if (temppic.Height < 350)
+                {
+                    temppic.Dispose();
+                    File.Delete(imagePath);
+                    target.reply("图像长度太小了，自己裁剪一下再上传吧~（1200x350)");
+                    return;
+                }
                 image.Mutate(x => x.DrawImage(temppic, new Point(0, 0), 1));
                 image.Save($"./work/legacy/v1_cover/custom/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
                 temppic.Dispose();
@@ -345,7 +358,7 @@ namespace KanonBot.functions.osubot
                     //删除info image
                     try
                     {
-                        File.Delete($"./work/panelv2/user_customimg/{DBOsuInfo.osu_uid}.png");
+                        File.Delete($"./work/panelv2/user_infopanel/{DBOsuInfo.osu_uid}.png");
                         target.reply("已重置。");
                         return;
                     }
@@ -357,7 +370,7 @@ namespace KanonBot.functions.osubot
                 }
                 else
                 {
-                    target.reply("url不正确，请重试。!set osuinfopanelv2img [url]");
+                    target.reply("url不正确，请重试。!set osuinfopanelv2 [url]");
                     return;
                 }
             }
@@ -395,7 +408,7 @@ namespace KanonBot.functions.osubot
                 }
                 temppic.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(0, 2518), Mode = ResizeMode.Max }));
                 image.Mutate(x => x.DrawImage(temppic, new Point(0, 0), 1));
-                image.Save($"./work/panelv2/user_customimg/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
+                image.Save($"./work/panelv2/user_infopanel/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
                 temppic.Dispose();
                 File.Delete(imagePath);
                 target.reply("已成功上传，请耐心等待审核。\r\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
@@ -427,7 +440,7 @@ namespace KanonBot.functions.osubot
                     //删除info image
                     try
                     {
-                        File.Delete($"./work/panelv2/user_customimg/{DBOsuInfo.osu_uid}.png");
+                        File.Delete($"./work/legacy/v1_infopanel/{DBOsuInfo.osu_uid}.png");
                         target.reply("已重置。");
                         return;
                     }
@@ -439,7 +452,7 @@ namespace KanonBot.functions.osubot
                 }
                 else
                 {
-                    target.reply("url不正确，请重试。!set osuinfopanelv2img [url]");
+                    target.reply("url不正确，请重试。!set osuinfopanelv1 [url]");
                     return;
                 }
             }
@@ -477,7 +490,7 @@ namespace KanonBot.functions.osubot
                 }
                 temppic.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(0, 2518), Mode = ResizeMode.Max }));
                 image.Mutate(x => x.DrawImage(temppic, new Point(0, 0), 1));
-                image.Save($"./work/panelv2/user_customimg/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
+                image.Save($"./work/legacy/v1_infopanel/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
                 temppic.Dispose();
                 File.Delete(imagePath);
                 target.reply("已成功上传，请耐心等待审核。\r\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");

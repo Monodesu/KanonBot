@@ -32,7 +32,7 @@ namespace KanonBot.image
     {
         public static async Task<Img> Draw(UserPanelData data, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
         {
-            var ColorMode = data.InfoPanelV2_Mode;
+            var ColorMode = data.InfoPanelV2_Mode == null ? 1 : data.InfoPanelV2_Mode;
             Color mainColor = new(),
                 ppMainColor = new(),
                 accMainColor = new(),
@@ -123,8 +123,8 @@ namespace KanonBot.image
                 sidePicPath = $"./work/panelv2/user_customimg/{data.userInfo.Id}.png";
             else sidePicPath = ColorMode switch
             {
-                0 => "./work/panelv2/infov2-light-customimg.png",
-                1 => "./work/panelv2/infov2-dark-customimg.png",
+                1 => "./work/panelv2/infov2-light-customimg.png",
+                2 => "./work/panelv2/infov2-dark-customimg.png",
                 _ => throw new Exception(),
             };
             sidePic = Img.Load(await Utils.LoadFile2Byte(sidePicPath)).CloneAs<Rgba32>();    // 读取
@@ -319,8 +319,8 @@ namespace KanonBot.image
             if (File.Exists($"./work/panelv2/user_infopanel/{data.userInfo.Id}.png")) panelPath = $"./work/panelv2/user_infopanel/{data.userInfo.Id}.png";
             else panelPath = ColorMode switch
             {
-                0 => "./work/panelv2/infov2-light.png",
-                1 => "./work/panelv2/infov2-dark.png",
+                1 => "./work/panelv2/infov2-light.png",
+                2 => "./work/panelv2/infov2-dark.png",
                 _ => throw new Exception(),
             };
             panel = Img.Load(await Utils.LoadFile2Byte(panelPath)).CloneAs<Rgba32>();    // 读取
@@ -435,7 +435,7 @@ namespace KanonBot.image
 
             //details
             textOptions.Font = new Font(TorusRegular, 50);
-            
+
             //play time
             textOptions.Origin = new PointF(1705, 1217);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, Utils.Duration2StringWithoutSec(data.userInfo.Statistics.PlayTime), new SolidBrush(detailsColor), null));

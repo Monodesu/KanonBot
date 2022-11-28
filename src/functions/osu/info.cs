@@ -157,7 +157,7 @@ namespace KanonBot.functions.osubot
             //info默认输出高质量图片？
             SixLabors.ImageSharp.Image img;
             int custominfoengineVer = 2;
-            data.InfoPanelV2_Mode = 0;
+            data.InfoPanelV2_Mode = 2;
             if (DBOsuInfo != null)
             {
                 custominfoengineVer = DBOsuInfo!.customInfoEngineVer;

@@ -114,6 +114,23 @@ namespace KanonBot.functions.osu
                         await InfoImageV2(target, 2, childCmd); return;
                     case "2ij":
                         await InfoImageV2(target, 2, childCmd); return;
+                    //v2infoPanel
+                    case "v2panellist":
+                        await InfoPanelV2(target, -1, childCmd); return;
+                    case "2pl":
+                        await InfoPanelV2(target, -1, childCmd); return;
+                    case "v2panelapproveall":
+                        await InfoPanelV2(target, 0, childCmd); return;
+                    case "2pall":
+                        await InfoPanelV2(target, 0, childCmd); return;
+                    case "v2panelapprove":
+                        await InfoPanelV2(target, 1, childCmd); return;
+                    case "2pa":
+                        await InfoPanelV2(target, 1, childCmd); return;
+                    case "v2panelreject":
+                        await InfoPanelV2(target, 2, childCmd); return;
+                    case "2pj":
+                        await InfoPanelV2(target, 2, childCmd); return;
                     default:
                         return;
                 }
@@ -122,6 +139,79 @@ namespace KanonBot.functions.osu
         }
 
         //approve -1=sendlist 0=approveall 1=approve 2=reject
+        public static async Task InfoPanelV2(Target target, int approve, string cmd)
+        {
+            switch (approve)
+            {
+                case -1:
+                    //send list
+                    var files = Directory.GetFiles(@".\work\panelv2\user_customimg\verify\");
+                    if (files.Length > 0)
+                    {
+                        var msg = new Chain();
+                        msg.msg("以下v2 info image需要审核");
+                        foreach (var x in files)
+                        {
+                            msg.msg($"\r\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\r\n");
+                            var stream = new MemoryStream();
+                            await SixLabors.ImageSharp.Image.Load(x)
+                                .CloneAs<Rgba32>().SaveAsync(stream, new PngEncoder());
+                            stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                            msg.image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64);
+                        }
+                        target.reply(msg);
+                        return;
+                    }
+                    target.reply("暂时没有待审核的内容。");
+                    return;
+                case 0:
+                    //approve all
+                    var filesall = Directory.GetFiles(@".\work\panelv2\user_customimg\verify\");
+                    if (filesall.Length > 0)
+                    {
+                        foreach (var x in filesall)
+                        {
+                            if (File.Exists(@$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}"))
+                                File.Delete(@$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}");
+                            File.Move(
+                            @$"{x}",
+                            @$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}");
+                        }
+                        target.reply("approved.");
+                        return;
+                    }
+                    target.reply("暂时没有待审核的内容。");
+                    return;
+                case 1:
+                    //approve
+                    if (File.Exists(@$".\work\panelv2\user_customimg\verify\{cmd}.png"))
+                    {
+                        if (File.Exists(@$".\work\panelv2\user_customimg\{cmd}.png"))
+                            File.Delete(@$".\work\panelv2\user_customimg\{cmd}.png");
+                        File.Move(
+                            @$".\work\panelv2\user_customimg\verify\{cmd}.png",
+                            @$".\work\panelv2\user_customimg\{cmd}.png");
+                        target.reply("approved.");
+                        return;
+                    }
+                    target.reply("指定内容不存在，请重新检查。");
+                    return;
+                case 2:
+                    //reject
+                    if (File.Exists(@$".\work\panelv2\user_customimg\verify\{cmd}.png"))
+                    {
+                        File.Delete(@$".\work\panelv2\user_customimg\verify\{cmd}.png");
+                        target.reply("rejected.");
+                        return;
+                    }
+                    target.reply("要审核的内容不存在，请重新检查。");
+                    return;
+                default:
+                    //do nothing
+                    target.reply("无效的指令，请重新检查。");
+                    return;
+            }
+        }
         public static async Task InfoImageV2(Target target, int approve, string cmd)
         {
             switch (approve)
