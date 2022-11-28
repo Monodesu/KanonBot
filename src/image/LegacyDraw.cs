@@ -31,6 +31,7 @@ namespace KanonBot.LegacyImage
             public int daysBefore = 0;
             public int badgeId = -1;
             public int InfoPanelV2_Mode = 0; //0=light 1=dark
+            public string ColorConfigRaw;
         }
         public class ScorePanelData
         {

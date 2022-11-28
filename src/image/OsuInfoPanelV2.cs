@@ -32,71 +32,456 @@ namespace KanonBot.image
     {
         public static async Task<Img> Draw(UserPanelData data, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
         {
-            var ColorMode = data.InfoPanelV2_Mode == null ? 1 : data.InfoPanelV2_Mode;
-            Color mainColor = new(),
-                ppMainColor = new(),
-                accMainColor = new(),
-                rankMainColor = new(),
-                gradeCountsColor = new(),
-                usernameColor = new(),
-                detailsColor = new(),
-                ppBackgroundColor = new(),
-                ppFrontColor = new(),
-                accBackgroundColor = new(),
-                accFrontColor = new(),
-                ppSubColor = new(),
-                accSubColor = new(),
-                scoreppTopColor = new(),
-                scoreppColor = new(),
-                highlightColor = new(),
-                levelprogressBackgroundColor = new(),
-                levelprogressFrontColor = new();
-            float ImgBrightness = 1.0f;
-            //配色方案 1=模板light 2=模板dark 3...4...5...
+            var ColorMode = data.InfoPanelV2_Mode;
+
+            #region Colors
+            Color UsernameColor = new(),
+                  RankColor = new(),
+                  CountryRankColor = new(),
+                  RankLineChartColor = new(),
+                  RankLineChartTextColor = new(),
+                  ppMainColor = new(),
+                  ppProgressBarColorTextColor = new(),
+                  ppProgressBarColor = new(),
+                  ppProgressBarBackgroundColor = new(),
+                  accMainColor = new(),
+                  accProgressBarColorTextColor = new(),
+                  accProgressBarColor = new(),
+                  accProgressBarBackgroundColor = new(),
+                  GradeStatisticsColor_XH = new(),
+                  GradeStatisticsColor_X = new(),
+                  GradeStatisticsColor_SH = new(),
+                  GradeStatisticsColor_S = new(),
+                  GradeStatisticsColor_A = new(),
+                  Details_PlayTimeColor = new(),
+                  Details_TotalHitsColor = new(),
+                  Details_PlayCountColor = new(),
+                  Details_RankedScoreColor = new(),
+                  LevelTitleColor = new(),
+                  LevelProgressBarColor = new(),
+                  LevelProgressBarBackgroundColor = new(),
+                  MainBPTitleColor = new(),
+                  MainBPArtistColor = new(),
+                  MainBPMapperColor = new(),
+                  MainBPBIDColor = new(),
+                  MainBPStarsColor = new(),
+                  MainBPAccColor = new(),
+                  MainBPRankColor = new(),
+                  MainBPppMainColor = new(),
+                  MainBPppTitleColor = new(),
+                  SubBp2ndBPTitleColor = new(),
+                  SubBp2ndBPVersionColor = new(),
+                  SubBp2ndBPBIDColor = new(),
+                  SubBp2ndBPStarsColor = new(),
+                  SubBp2ndBPAccColor = new(),
+                  SubBp2ndBPRankColor = new(),
+                  SubBp2ndBPppMainColor = new(),
+                  SubBp3rdBPTitleColor = new(),
+                  SubBp3rdBPVersionColor = new(),
+                  SubBp3rdBPBIDColor = new(),
+                  SubBp3rdBPStarsColor = new(),
+                  SubBp3rdBPAccColor = new(),
+                  SubBp3rdBPRankColor = new(),
+                  SubBp3rdBPppMainColor = new(),
+                  SubBp4thBPTitleColor = new(),
+                  SubBp4thBPVersionColor = new(),
+                  SubBp4thBPBIDColor = new(),
+                  SubBp4thBPStarsColor = new(),
+                  SubBp4thBPAccColor = new(),
+                  SubBp4thBPRankColor = new(),
+                  SubBp4thBPppMainColor = new(),
+                  SubBp5thBPTitleColor = new(),
+                  SubBp5thBPVersionColor = new(),
+                  SubBp5thBPBIDColor = new(),
+                  SubBp5thBPStarsColor = new(),
+                  SubBp5thBPAccColor = new(),
+                  SubBp5thBPRankColor = new(),
+                  SubBp5thBPppMainColor = new(),
+                  footerColor = new(),
+                  SubBpInfoSplitColor = new();
+
+            float SideImgBrightness = 1.0f,
+                  AvatarBrightness = 1.0f,
+                  BadgeBrightness = 1.0f,
+                  MainBPImgBrightness = 1.9f,
+                  CountryFlagBrightness = 1.0f,
+                  ModeCaptionBrightness = 1.0f,
+                  ModIconBrightness = 1.0f;
+
+            #endregion
+            //配色方案 0=用户自定义 1=模板light 2=模板dark 3...4...5...
+            //本来应该做个class的 算了 懒了 就这样吧 复制粘贴没什么不好的
             switch (ColorMode)
             {
+                case 0:
+                    //custom
+                    //解析
+                    var argstemp = data.ColorConfigRaw.Split("\r\n");
+                    foreach (string arg in argstemp)
+                    {
+                        switch (arg.Split(":")[0].Trim())
+                        {
+                            case "UsernameColor":
+                                UsernameColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "RankColor":
+                                RankColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "CountryRankColor":
+                                CountryRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "RankLineChartColor":
+                                RankLineChartColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "RankLineChartTextColor":
+                                RankLineChartTextColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "ppMainColor":
+                                ppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "ppProgressBarColorTextColor":
+                                ppProgressBarColorTextColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "ppProgressBarColor":
+                                ppProgressBarColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "ppProgressBarBackgroundColor":
+                                ppProgressBarBackgroundColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "accMainColor":
+                                accMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "accProgressBarColorTextColor":
+                                accProgressBarColorTextColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "accProgressBarColor":
+                                accProgressBarColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "accProgressBarBackgroundColor":
+                                accProgressBarBackgroundColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "GradeStatisticsColor_XH":
+                                GradeStatisticsColor_XH = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "GradeStatisticsColor_X":
+                                GradeStatisticsColor_X = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "GradeStatisticsColor_SH":
+                                GradeStatisticsColor_SH = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "GradeStatisticsColor_S":
+                                GradeStatisticsColor_S = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "GradeStatisticsColor_A":
+                                GradeStatisticsColor_A = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "Details_PlayTimeColor":
+                                Details_PlayTimeColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "Details_TotalHitsColor":
+                                Details_TotalHitsColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "Details_PlayCountColor":
+                                Details_PlayCountColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "Details_RankedScoreColor":
+                                Details_RankedScoreColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "LevelTitleColor":
+                                LevelTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "LevelProgressBarColor":
+                                LevelProgressBarColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "LevelProgressBarBackgroundColor":
+                                LevelProgressBarBackgroundColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "MainBPTitleColor":
+                                MainBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "MainBPArtistColor":
+                                MainBPArtistColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "MainBPMapperColor":
+                                MainBPMapperColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "MainBPBIDColor":
+                                MainBPBIDColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "MainBPStarsColor":
+                                MainBPStarsColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "MainBPAccColor":
+                                MainBPAccColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "MainBPRankColor":
+                                MainBPRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "MainBPppMainColor":
+                                MainBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "MainBPppTitleColor":
+                                MainBPppTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp2ndBPTitleColor":
+                                SubBp2ndBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp2ndBPVersionColor":
+                                SubBp2ndBPVersionColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp2ndBPBIDColor":
+                                SubBp2ndBPBIDColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp2ndBPStarsColor":
+                                SubBp2ndBPStarsColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp2ndBPAccColor":
+                                SubBp2ndBPAccColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp2ndBPRankColor":
+                                SubBp2ndBPRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp2ndBPppMainColor":
+                                SubBp2ndBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp3rdBPTitleColor":
+                                SubBp3rdBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp3rdBPVersionColor":
+                                SubBp3rdBPVersionColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp3rdBPBIDColor":
+                                SubBp3rdBPBIDColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp3rdBPStarsColor":
+                                SubBp3rdBPStarsColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp3rdBPAccColor":
+                                SubBp3rdBPAccColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp3rdBPRankColor":
+                                SubBp3rdBPRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp3rdBPppMainColor":
+                                SubBp3rdBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp4thBPTitleColor":
+                                SubBp4thBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp4thBPVersionColor":
+                                SubBp4thBPVersionColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp4thBPBIDColor":
+                                SubBp4thBPBIDColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp4thBPStarsColor":
+                                SubBp4thBPStarsColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp4thBPAccColor":
+                                SubBp4thBPAccColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp4thBPRankColor":
+                                SubBp4thBPRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp4thBPppMainColor":
+                                SubBp4thBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp5thBPTitleColor":
+                                SubBp5thBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp5thBPVersionColor":
+                                SubBp5thBPVersionColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp5thBPBIDColor":
+                                SubBp5thBPBIDColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp5thBPStarsColor":
+                                SubBp5thBPStarsColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp5thBPAccColor":
+                                SubBp5thBPAccColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp5thBPRankColor":
+                                SubBp5thBPRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp5thBPppMainColor":
+                                SubBp5thBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBpInfoSplitColor":
+                                SubBpInfoSplitColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "footerColor":
+                                footerColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SideImgBrightness":
+                                SideImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                break;
+                            case "AvatarBrightness":
+                                AvatarBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                break;
+                            case "BadgeBrightness":
+                                BadgeBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                break;
+                            case "MainBPImgBrightness":
+                                MainBPImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                break;
+                            case "CountryFlagBrightness":
+                                CountryFlagBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                break;
+                            case "ModeCaptionBrightness":
+                                ModeCaptionBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                break;
+                            case "ModIconBrightness":
+                                ModIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                break;
+                        }
+                    }
+                    break;
                 case 1:
-                    mainColor = Color.ParseHex("#656b6d");
-                    usernameColor = Color.ParseHex("#4d4d4d");
+                    #region LightMode
+                    UsernameColor = Color.ParseHex("#4d4d4d");
+                    RankColor = Color.ParseHex("#5872df");
+                    CountryRankColor = Color.ParseHex("#5872df");
+                    RankLineChartColor = Color.ParseHex("#FFFFFF");
+                    RankLineChartTextColor = Color.ParseHex("#FFFFFF");
                     ppMainColor = Color.ParseHex("#e36a79");
+                    ppProgressBarColorTextColor = Color.ParseHex("#d84356");
+                    ppProgressBarColor = Color.ParseHex("#f7bebe");
+                    ppProgressBarBackgroundColor = Color.ParseHex("#fddcd7");
                     accMainColor = Color.ParseHex("#6cac9c");
-                    rankMainColor = Color.ParseHex("#5872df");
-                    gradeCountsColor = Color.ParseHex("#3a4d78");
-                    detailsColor = Color.ParseHex("#7f7f7f");
-                    ppBackgroundColor = Color.ParseHex("#fddcd7");
-                    ppFrontColor = Color.ParseHex("#f7bebe");
-                    accBackgroundColor = Color.ParseHex("#c3e7cb");
-                    accFrontColor = Color.ParseHex("#a4d8b1");
-                    ppSubColor = Color.ParseHex("#d84356");
-                    accSubColor = Color.ParseHex("#006837");
-                    scoreppTopColor = Color.ParseHex("#364a75");
-                    scoreppColor = Color.ParseHex("#ff7bac");
-                    highlightColor = Color.ParseHex("#ffcd22");
-                    levelprogressBackgroundColor = Color.ParseHex("#E6E6E6");
-                    levelprogressFrontColor = Color.ParseHex("#F3B6CD");
-                    //do not change ImgBrightness = 1.0f;
+                    accProgressBarColorTextColor = Color.ParseHex("#006837");
+                    accProgressBarColor = Color.ParseHex("#a4d8b1");
+                    accProgressBarBackgroundColor = Color.ParseHex("#c3e7cb");
+                    GradeStatisticsColor_XH = Color.ParseHex("#3a4d78");
+                    GradeStatisticsColor_X = Color.ParseHex("#3a4d78");
+                    GradeStatisticsColor_SH = Color.ParseHex("#3a4d78");
+                    GradeStatisticsColor_S = Color.ParseHex("#3a4d78");
+                    GradeStatisticsColor_A = Color.ParseHex("#3a4d78");
+                    Details_PlayTimeColor = Color.ParseHex("#7f7f7f");
+                    Details_TotalHitsColor = Color.ParseHex("#7f7f7f");
+                    Details_PlayCountColor = Color.ParseHex("#7f7f7f");
+                    Details_RankedScoreColor = Color.ParseHex("#7f7f7f");
+                    LevelTitleColor = Color.ParseHex("#656b6d");
+                    LevelProgressBarColor = Color.ParseHex("#f3b6cd");
+                    LevelProgressBarBackgroundColor = Color.ParseHex("#e6e6e6");
+                    MainBPTitleColor = Color.ParseHex("#656b6d");
+                    MainBPArtistColor = Color.ParseHex("#656b6d");
+                    MainBPMapperColor = Color.ParseHex("#656b6d");
+                    MainBPBIDColor = Color.ParseHex("#656b6d");
+                    MainBPStarsColor = Color.ParseHex("#656b6d");
+                    MainBPAccColor = Color.ParseHex("#656b6d");
+                    MainBPRankColor = Color.ParseHex("#656b6d");
+                    MainBPppMainColor = Color.ParseHex("#364a75");
+                    MainBPppTitleColor = Color.ParseHex("#656b6d");
+                    SubBp2ndBPTitleColor = Color.ParseHex("#656b6d");
+                    SubBp2ndBPVersionColor = Color.ParseHex("#656b6d");
+                    SubBp2ndBPBIDColor = Color.ParseHex("#656b6d");
+                    SubBp2ndBPStarsColor = Color.ParseHex("#656b6d");
+                    SubBp2ndBPAccColor = Color.ParseHex("#ffcd22");
+                    SubBp2ndBPRankColor = Color.ParseHex("#656b6d");
+                    SubBp2ndBPppMainColor = Color.ParseHex("#ff7bac");
+                    SubBp3rdBPTitleColor = Color.ParseHex("#656b6d");
+                    SubBp3rdBPVersionColor = Color.ParseHex("#656b6d");
+                    SubBp3rdBPBIDColor = Color.ParseHex("#656b6d");
+                    SubBp3rdBPStarsColor = Color.ParseHex("#656b6d");
+                    SubBp3rdBPAccColor = Color.ParseHex("#ffcd22");
+                    SubBp3rdBPRankColor = Color.ParseHex("#656b6d");
+                    SubBp3rdBPppMainColor = Color.ParseHex("#ff7bac");
+                    SubBp4thBPTitleColor = Color.ParseHex("#656b6d");
+                    SubBp4thBPVersionColor = Color.ParseHex("#656b6d");
+                    SubBp4thBPBIDColor = Color.ParseHex("#656b6d");
+                    SubBp4thBPStarsColor = Color.ParseHex("#656b6d");
+                    SubBp4thBPAccColor = Color.ParseHex("#ffcd22");
+                    SubBp4thBPRankColor = Color.ParseHex("#656b6d");
+                    SubBp4thBPppMainColor = Color.ParseHex("#ff7bac");
+                    SubBp5thBPTitleColor = Color.ParseHex("#656b6d");
+                    SubBp5thBPVersionColor = Color.ParseHex("#656b6d");
+                    SubBp5thBPBIDColor = Color.ParseHex("#656b6d");
+                    SubBp5thBPStarsColor = Color.ParseHex("#656b6d");
+                    SubBp5thBPAccColor = Color.ParseHex("#ffcd22");
+                    SubBp5thBPRankColor = Color.ParseHex("#656b6d");
+                    SubBp5thBPppMainColor = Color.ParseHex("#ff7bac");
+                    footerColor = Color.ParseHex("#7f7f7f");
+                    SubBpInfoSplitColor = Color.ParseHex("#656b6d");
+                    //do not change brightness;
                     break;
+                #endregion
                 case 2:
-                    mainColor = Color.ParseHex("#e6e6e6");
-                    usernameColor = Color.ParseHex("#e6e6e6");
+                    #region DarkMode
+                    UsernameColor = Color.ParseHex("#e6e6e6");
+                    RankColor = Color.ParseHex("#5872DF");
+                    CountryRankColor = Color.ParseHex("#5872DF");
+                    RankLineChartColor = Color.ParseHex("#FFFFFF");
+                    RankLineChartTextColor = Color.ParseHex("#FFFFFF");
                     ppMainColor = Color.ParseHex("#e36a79");
+                    ppProgressBarColorTextColor = Color.ParseHex("#FF7BAC");
+                    ppProgressBarColor = Color.ParseHex("#5D3B3A");
+                    ppProgressBarBackgroundColor = Color.ParseHex("#44312F");
                     accMainColor = Color.ParseHex("#6cac9c");
-                    rankMainColor = Color.ParseHex("#5872DF");
-                    gradeCountsColor = Color.ParseHex("#6C91E0");
-                    detailsColor = Color.ParseHex("#e6e6e6");
-                    ppBackgroundColor = Color.ParseHex("#44312F");
-                    ppFrontColor = Color.ParseHex("#5D3B3A");
-                    accBackgroundColor = Color.ParseHex("#243829");
-                    accFrontColor = Color.ParseHex("#294B32");
-                    ppSubColor = Color.ParseHex("#FF7BAC");
-                    accSubColor = Color.ParseHex("#00DE75");
-                    scoreppTopColor = Color.ParseHex("#5979bd");
-                    scoreppColor = Color.ParseHex("#E36A79");
-                    highlightColor = Color.ParseHex("#ffcd22");
-                    levelprogressBackgroundColor = Color.ParseHex("#000000");
-                    levelprogressFrontColor = Color.ParseHex("#85485F");
-                    ImgBrightness = 0.6f;
+                    accProgressBarColorTextColor = Color.ParseHex("#00DE75");
+                    accProgressBarColor = Color.ParseHex("#294B32");
+                    accProgressBarBackgroundColor = Color.ParseHex("#294B32");
+                    GradeStatisticsColor_XH = Color.ParseHex("#6C91E0");
+                    GradeStatisticsColor_X = Color.ParseHex("#6C91E0");
+                    GradeStatisticsColor_SH = Color.ParseHex("#6C91E0");
+                    GradeStatisticsColor_S = Color.ParseHex("#6C91E0");
+                    GradeStatisticsColor_A = Color.ParseHex("#6C91E0");
+                    Details_PlayTimeColor = Color.ParseHex("#e6e6e6");
+                    Details_TotalHitsColor = Color.ParseHex("#e6e6e6");
+                    Details_PlayCountColor = Color.ParseHex("#e6e6e6");
+                    Details_RankedScoreColor = Color.ParseHex("#e6e6e6");
+                    LevelTitleColor = Color.ParseHex("#e6e6e6");
+                    LevelProgressBarColor = Color.ParseHex("#85485F");
+                    LevelProgressBarBackgroundColor = Color.ParseHex("#000000");
+                    MainBPTitleColor = Color.ParseHex("#e6e6e6");
+                    MainBPArtistColor = Color.ParseHex("#e6e6e6");
+                    MainBPMapperColor = Color.ParseHex("#e6e6e6");
+                    MainBPBIDColor = Color.ParseHex("#e6e6e6");
+                    MainBPStarsColor = Color.ParseHex("#e6e6e6");
+                    MainBPAccColor = Color.ParseHex("#e6e6e6");
+                    MainBPRankColor = Color.ParseHex("#e6e6e6");
+                    MainBPppMainColor = Color.ParseHex("#5979bd");
+                    MainBPppTitleColor = Color.ParseHex("#e6e6e6");
+                    SubBp2ndBPTitleColor = Color.ParseHex("#e6e6e6");
+                    SubBp2ndBPVersionColor = Color.ParseHex("#e6e6e6");
+                    SubBp2ndBPBIDColor = Color.ParseHex("#e6e6e6");
+                    SubBp2ndBPStarsColor = Color.ParseHex("#e6e6e6");
+                    SubBp2ndBPAccColor = Color.ParseHex("#ffcd22");
+                    SubBp2ndBPRankColor = Color.ParseHex("#e6e6e6");
+                    SubBp2ndBPppMainColor = Color.ParseHex("#e36a79");
+                    SubBp3rdBPTitleColor = Color.ParseHex("#e6e6e6");
+                    SubBp3rdBPVersionColor = Color.ParseHex("#e6e6e6");
+                    SubBp3rdBPBIDColor = Color.ParseHex("#e6e6e6");
+                    SubBp3rdBPStarsColor = Color.ParseHex("#e6e6e6");
+                    SubBp3rdBPAccColor = Color.ParseHex("#ffcd22");
+                    SubBp3rdBPRankColor = Color.ParseHex("#e6e6e6");
+                    SubBp3rdBPppMainColor = Color.ParseHex("#e36a79");
+                    SubBp4thBPTitleColor = Color.ParseHex("#e6e6e6");
+                    SubBp4thBPVersionColor = Color.ParseHex("#e6e6e6");
+                    SubBp4thBPBIDColor = Color.ParseHex("#e6e6e6");
+                    SubBp4thBPStarsColor = Color.ParseHex("#e6e6e6");
+                    SubBp4thBPAccColor = Color.ParseHex("#ffcd22");
+                    SubBp4thBPRankColor = Color.ParseHex("#e6e6e6");
+                    SubBp4thBPppMainColor = Color.ParseHex("#e36a79");
+                    SubBp5thBPTitleColor = Color.ParseHex("#e6e6e6");
+                    SubBp5thBPVersionColor = Color.ParseHex("#e6e6e6");
+                    SubBp5thBPBIDColor = Color.ParseHex("#e6e6e6");
+                    SubBp5thBPStarsColor = Color.ParseHex("#e6e6e6");
+                    SubBp5thBPAccColor = Color.ParseHex("#ffcd22");
+                    SubBp5thBPRankColor = Color.ParseHex("#e6e6e6");
+                    SubBp5thBPppMainColor = Color.ParseHex("#e36a79");
+                    footerColor = Color.ParseHex("#e6e6e6");
+                    SubBpInfoSplitColor = Color.ParseHex("#e6e6e6");
+                    //change brightness
+                    SideImgBrightness = 0.6f;
+                    AvatarBrightness = 1.0f;
+                    BadgeBrightness = 1.0f;
+                    MainBPImgBrightness = 1.9f;
+                    CountryFlagBrightness = 1.0f;
+                    ModeCaptionBrightness = 1.0f;
+                    ModIconBrightness = 1.0f;
                     break;
+                    #endregion
             }
             var info = new Image<Rgba32>(4000, 2640);
             //获取全部bp
@@ -130,13 +515,16 @@ namespace KanonBot.image
             sidePic = Img.Load(await Utils.LoadFile2Byte(sidePicPath)).CloneAs<Rgba32>();    // 读取
             switch (ColorMode)
             {
+                case 0:
+                    sidePic.Mutate(x => x.Brightness(SideImgBrightness));
+                    break;
                 case 1:
                     //light
                     //do nothing  
                     break;
                 case 2:
                     //dark
-                    sidePic.Mutate(x => x.Brightness(ImgBrightness));
+                    sidePic.Mutate(x => x.Brightness(SideImgBrightness));
                     break;
             }
             info.Mutate(x => x.DrawImage(sidePic, new Point(90, 72), 1));
@@ -145,7 +533,7 @@ namespace KanonBot.image
             //进度条 - 先绘制进度条，再覆盖面板
             //pp
             Img pp_background = new Image<Rgba32>(1443, 68);
-            pp_background.Mutate(x => x.Fill(ppBackgroundColor));
+            pp_background.Mutate(x => x.Fill(ppProgressBarBackgroundColor));
             pp_background.Mutate(x => x.RoundCorner_Parts(new Size(1443, 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(pp_background, new Point(2358, 410), 1));
             //获取bnspp
@@ -214,13 +602,13 @@ namespace KanonBot.image
             int pp_front_length = 1443 - (int)(1443.0 * (bounsPP / scorePP));
             if (pp_front_length < 1) pp_front_length = 1443;
             Img pp_front = new Image<Rgba32>(pp_front_length, 68);
-            pp_front.Mutate(x => x.Fill(ppFrontColor));
+            pp_front.Mutate(x => x.Fill(ppProgressBarColor));
             pp_front.Mutate(x => x.RoundCorner_Parts(new Size(pp_front_length, 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(pp_front, new Point(2358, 410), 1));
 
             //50&100
             Img acc_background = new Image<Rgba32>(1443, 68);
-            acc_background.Mutate(x => x.Fill(accBackgroundColor));
+            acc_background.Mutate(x => x.Fill(accProgressBarBackgroundColor));
             acc_background.Mutate(x => x.RoundCorner_Parts(new Size(1443, 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(acc_background, new Point(2358, 611), 1));
 
@@ -228,7 +616,7 @@ namespace KanonBot.image
             int acc_front_length = (int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0));
             if (acc_front_length < 1) acc_front_length = 1443;
             Img acc_300 = new Image<Rgba32>(acc_front_length, 68);
-            acc_300.Mutate(x => x.Fill(accFrontColor));
+            acc_300.Mutate(x => x.Fill(accProgressBarColor));
             acc_300.Mutate(x => x.RoundCorner_Parts(new Size((int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0)), 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(acc_300, new Point(2358, 611), 1));
 
@@ -283,29 +671,32 @@ namespace KanonBot.image
             try { bp1bg = Img.Load(bp1bgPath).CloneAs<Rgba32>(); }
             catch { bp1bg = Img.Load(await Utils.LoadFile2Byte("./work/legacy/load-failed-img.png")); }
             //bp1bg.Mutate(x => x.Resize(355, 200));
-            bp1bg.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(0, 200), Mode = ResizeMode.Max }));
+            bp1bg.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(355, 0), Mode = ResizeMode.Max })); //355x200
             switch (ColorMode)
             {
+                case 0:
+                    bp1bg.Mutate(x => x.Brightness(MainBPImgBrightness));
+                    break;
                 case 1:
                     //light
                     //do nothing  
                     break;
                 case 2:
                     //dark
-                    bp1bg.Mutate(x => x.Brightness(ImgBrightness));
+                    bp1bg.Mutate(x => x.Brightness(MainBPImgBrightness));
                     break;
             }
             info.Mutate(x => x.DrawImage(bp1bg, new Point(1566, 1550), 1));
 
             //level progress
             Img levelprogress_background = new Image<Rgba32>(2312, 12);
-            levelprogress_background.Mutate(x => x.Fill(levelprogressBackgroundColor));
+            levelprogress_background.Mutate(x => x.Fill(LevelProgressBarBackgroundColor));
             //levelprogress_background.Mutate(x => x.RoundCorner(new Size(2312, 6), 4.5f));
             int levelprogressFrontPos = (int)((double)2312 * (double)data.userInfo.Statistics.Level.Progress / 100.0);
             if (levelprogressFrontPos > 0)
             {
                 Img levelprogress_front = new Image<Rgba32>(levelprogressFrontPos, 6);
-                levelprogress_front.Mutate(x => x.Fill(levelprogressFrontColor));
+                levelprogress_front.Mutate(x => x.Fill(LevelProgressBarColor));
                 levelprogress_front.Mutate(x => x.RoundCorner(new Size(levelprogressFrontPos, 12), 8));
                 levelprogress_background.Mutate(x => x.DrawImage(levelprogress_front, new Point(0, 0), 1));
             }
@@ -351,13 +742,16 @@ namespace KanonBot.image
             }
             switch (ColorMode)
             {
+                case 0:
+                    avatar.Mutate(x => x.Brightness(AvatarBrightness));
+                    break;
                 case 1:
                     //light
                     //do nothing  
                     break;
                 case 2:
                     //dark
-                    avatar.Mutate(x => x.Brightness(ImgBrightness));
+                    avatar.Mutate(x => x.Brightness(AvatarBrightness));
                     break;
             }
             avatar.Mutate(x => x.Resize(200, 200).RoundCorner(new Size(200, 200), 25));
@@ -366,13 +760,13 @@ namespace KanonBot.image
 
             //username
             textOptions.Origin = new PointF(1780, 230);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.Username, new SolidBrush(usernameColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.Username, new SolidBrush(UsernameColor), null));
 
             //rank
             textOptions.Font = new Font(TorusRegular, 60);
             textOptions.Origin = new PointF(1972, 481);
             textOptions.VerticalAlignment = VerticalAlignment.Center;
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("#{0:N0}", data.userInfo.Statistics.GlobalRank), new SolidBrush(rankMainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("#{0:N0}", data.userInfo.Statistics.GlobalRank), new SolidBrush(RankColor), null));
 
             //country_flag
             Img flags = Img.Load(await Utils.LoadFile2Byte($"./work/flags/{data.userInfo.Country.Code}.png"));
@@ -381,7 +775,7 @@ namespace KanonBot.image
 
             //country_rank
             textOptions.Origin = new PointF(1687, 629);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("#{0:N0}", data.userInfo.Statistics.CountryRank), new SolidBrush(rankMainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("#{0:N0}", data.userInfo.Statistics.CountryRank), new SolidBrush(CountryRankColor), null));
 
             //pp
             textOptions.Origin = new PointF(3120, 350);
@@ -396,58 +790,58 @@ namespace KanonBot.image
             textOptions.Font = new Font(TorusRegular, 40);
             var ppsub_point = 2374 + pp_front_length - 40;
             textOptions.Origin = new PointF(ppsub_point, 440);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", scorePP), new SolidBrush(ppSubColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", scorePP), new SolidBrush(ppProgressBarColorTextColor), null));
 
             //acc sub
             var accsub_point = (2374 + (int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0))) - 40;
             textOptions.Origin = new PointF(accsub_point, 641);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, "300", new SolidBrush(accSubColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, "300", new SolidBrush(accProgressBarColorTextColor), null));
 
             //grades
             textOptions.Font = new Font(TorusRegular, 38);
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;
             textOptions.Origin = new PointF(2646, 988);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SSH), new SolidBrush(gradeCountsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SSH), new SolidBrush(GradeStatisticsColor_XH), null));
             textOptions.Origin = new PointF(2646 + 218, 988);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SS), new SolidBrush(gradeCountsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SS), new SolidBrush(GradeStatisticsColor_X), null));
             textOptions.Origin = new PointF(2646 + 218 * 2, 988);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SH), new SolidBrush(gradeCountsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.SH), new SolidBrush(GradeStatisticsColor_SH), null));
             textOptions.Origin = new PointF(2646 + 218 * 3, 988);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.S), new SolidBrush(gradeCountsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.S), new SolidBrush(GradeStatisticsColor_S), null));
             textOptions.Origin = new PointF(2646 + 218 * 4, 988);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.A), new SolidBrush(gradeCountsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GradeCounts.A), new SolidBrush(GradeStatisticsColor_A), null));
 
             //level main
             textOptions.Origin = new PointF(3906, 2470);
             textOptions.Font = new Font(TorusRegular, 48);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.Statistics.Level.Current.ToString(), new SolidBrush(mainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, data.userInfo.Statistics.Level.Current.ToString(), new SolidBrush(LevelTitleColor), null));
 
             //update time
             textOptions.Origin = new PointF(3955, 2582);
             textOptions.HorizontalAlignment = HorizontalAlignment.Right;
             textOptions.Font = new Font(TorusRegular, 40);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, $"Update at {DateTime.Now}", new SolidBrush(detailsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, $"Update at {DateTime.Now}", new SolidBrush(footerColor), null));
 
             //desu.life
             textOptions.HorizontalAlignment = HorizontalAlignment.Left;
             textOptions.Origin = new PointF(90, 2582);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, $"Kanonbot - desu.life", new SolidBrush(detailsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, $"Kanonbot - desu.life", new SolidBrush(footerColor), null));
 
             //details
             textOptions.Font = new Font(TorusRegular, 50);
 
             //play time
             textOptions.Origin = new PointF(1705, 1217);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, Utils.Duration2StringWithoutSec(data.userInfo.Statistics.PlayTime), new SolidBrush(detailsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, Utils.Duration2StringWithoutSec(data.userInfo.Statistics.PlayTime), new SolidBrush(Details_PlayTimeColor), null));
             //total hits
             textOptions.Origin = new PointF(2285, 1217);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.TotalHits), new SolidBrush(detailsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.TotalHits), new SolidBrush(Details_TotalHitsColor), null));
             //play count
             textOptions.Origin = new PointF(2853, 1217);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.PlayCount), new SolidBrush(detailsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.PlayCount), new SolidBrush(Details_PlayCountColor), null));
             //ranked scores
             textOptions.Origin = new PointF(3420, 1217);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.RankedScore), new SolidBrush(detailsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.RankedScore), new SolidBrush(Details_RankedScoreColor), null));
 
             //top performance
             //title  +mods
@@ -464,7 +858,7 @@ namespace KanonBot.image
                     break;
                 }
             }
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(mainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(MainBPTitleColor), null));
             //mods
             if (allBP![0].Mods.Length > 0)
             {
@@ -473,7 +867,7 @@ namespace KanonBot.image
                 var mainscoremods = "+";
                 foreach (var x in allBP![0].Mods)
                     mainscoremods += $"{x}, ";
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, mainscoremods[..mainscoremods.LastIndexOf(",")], new SolidBrush(mainColor), null));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, mainscoremods[..mainscoremods.LastIndexOf(",")], new SolidBrush(MainBPTitleColor), null));
             }
 
             //artist
@@ -490,7 +884,7 @@ namespace KanonBot.image
                     break;
                 }
             }
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, artist, new SolidBrush(mainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, artist, new SolidBrush(MainBPArtistColor), null));
 
             //creator
             textOptions.Origin = new PointF(2231, 1668);
@@ -505,24 +899,24 @@ namespace KanonBot.image
                     break;
                 }
             }
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, creator, new SolidBrush(mainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, creator, new SolidBrush(MainBPMapperColor), null));
 
             //bid
             textOptions.Origin = new PointF(2447, 1668);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Beatmap!.BeatmapId.ToString(), new SolidBrush(mainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Beatmap!.BeatmapId.ToString(), new SolidBrush(MainBPBIDColor), null));
 
             //get stars from rosupp
             var ppinfo = await PerformanceCalculator.CalculatePanelData(allBP[0]);
             textOptions.Origin = new PointF(2657, 1668);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo.ppInfo.star.ToString("0.##*"), new SolidBrush(mainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo.ppInfo.star.ToString("0.##*"), new SolidBrush(MainBPStarsColor), null));
 
             //acc
             textOptions.Origin = new PointF(2813, 1668);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Accuracy.ToString("0.##%"), new SolidBrush(mainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Accuracy.ToString("0.##%"), new SolidBrush(MainBPAccColor), null));
 
             //rank
             textOptions.Origin = new PointF(2988, 1668);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Rank, new SolidBrush(mainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![0].Rank, new SolidBrush(MainBPRankColor), null));
 
             //2nd~5th bp
             textOptions.HorizontalAlignment = HorizontalAlignment.Left;
@@ -544,7 +938,23 @@ namespace KanonBot.image
                     }
                 }
                 textOptions.Origin = new PointF(MainTitleAndDifficultyTitlePos_X, 1868 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(mainColor), null));
+                switch (i)
+                {
+                    case 1:
+                        info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp2ndBPTitleColor), null));
+                        break;
+                    case 2:
+                        info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp3rdBPTitleColor), null));
+                        break;
+                    case 3:
+                        info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp4thBPTitleColor), null));
+                        break;
+                    case 4:
+                        info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(SubBp5thBPTitleColor), null));
+                        break;
+                    default:
+                        break;
+                }
             }
 
             //2nd~5th version and acc and bid and shdklahdksadkjkcna5hoacsporjasldjlksakdlsa
@@ -552,6 +962,47 @@ namespace KanonBot.image
             var otherbp_mods_pos_y = 1853;
             for (int i = 1; i < 5; ++i)
             {
+                Color splitC = new(),
+                      versionC = new(),
+                      bidC = new(),
+                      starC = new(),
+                      accC = new(),
+                      rankC = new();
+                splitC = SubBpInfoSplitColor;
+                switch (i)
+                {
+                    case 1:
+                        versionC = SubBp2ndBPTitleColor;
+                        bidC = SubBp2ndBPBIDColor;
+                        starC = SubBp2ndBPStarsColor;
+                        accC = SubBp2ndBPAccColor;
+                        rankC = SubBp2ndBPRankColor;
+                        break;
+                    case 2:
+                        versionC = SubBp3rdBPTitleColor;
+                        bidC = SubBp3rdBPBIDColor;
+                        starC = SubBp3rdBPStarsColor;
+                        accC = SubBp3rdBPAccColor;
+                        rankC = SubBp3rdBPRankColor;
+                        break;
+                    case 3:
+                        versionC = SubBp4thBPTitleColor;
+                        bidC = SubBp4thBPBIDColor;
+                        starC = SubBp4thBPStarsColor;
+                        accC = SubBp4thBPAccColor;
+                        rankC = SubBp4thBPRankColor;
+                        break;
+                    case 4:
+                        versionC = SubBp5thBPTitleColor;
+                        bidC = SubBp5thBPBIDColor;
+                        starC = SubBp5thBPStarsColor;
+                        accC = SubBp5thBPAccColor;
+                        rankC = SubBp5thBPRankColor;
+                        break;
+                    default:
+                        break;
+                }
+
                 title = "";
                 foreach (char c in allBP![i].Beatmap!.Version)
                 {
@@ -564,27 +1015,47 @@ namespace KanonBot.image
                     }
                 }
                 textOptions.Origin = new PointF(MainTitleAndDifficultyTitlePos_X, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, title + " | ", new SolidBrush(mainColor), null));
-                var textMeasurePos = MainTitleAndDifficultyTitlePos_X + TextMeasurer.Measure(title + " | ", textOptions).Width + 5;
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, title, new SolidBrush(versionC), null));
+                var textMeasurePos = MainTitleAndDifficultyTitlePos_X + TextMeasurer.Measure(title, textOptions).Width + 5;
+                //split
+                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
                 //bid
                 textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Beatmap!.BeatmapId.ToString() + " | ", new SolidBrush(mainColor), null));
-                textMeasurePos = textMeasurePos + TextMeasurer.Measure(allBP![i].Beatmap!.BeatmapId.ToString() + " | ", textOptions).Width + 5;
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Beatmap!.BeatmapId.ToString(), new SolidBrush(bidC), null));
+                textMeasurePos = textMeasurePos + TextMeasurer.Measure(allBP![i].Beatmap!.BeatmapId.ToString(), textOptions).Width + 5;
+
+                //split
+                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
                 //star
                 var ppinfo1 = await PerformanceCalculator.CalculatePanelData(allBP[i]);
                 textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo1.ppInfo.star.ToString("0.##*") + " | ", new SolidBrush(mainColor), null));
-                textMeasurePos = textMeasurePos + TextMeasurer.Measure(ppinfo1.ppInfo.star.ToString("0.##*") + " | ", textOptions).Width + 5;
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, ppinfo1.ppInfo.star.ToString("0.##*"), new SolidBrush(starC), null));
+                textMeasurePos = textMeasurePos + TextMeasurer.Measure(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions).Width + 5;
+
+                //split
+                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
                 //acc
                 textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Accuracy.ToString("0.##%"), new SolidBrush(highlightColor), null));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Accuracy.ToString("0.##%"), new SolidBrush(accC), null));
                 textMeasurePos = textMeasurePos + TextMeasurer.Measure(allBP![i].Accuracy.ToString("0.##%"), textOptions).Width + 5;
+
+                //split
+                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(splitC), null));
+                textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+
                 //ranking
                 textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, " | ", new SolidBrush(mainColor), null));
-                textMeasurePos = textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
-                textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
-                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Rank, new SolidBrush(mainColor), null));
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, allBP![i].Rank, new SolidBrush(rankC), null));
                 //shdklahdksadkjkcna5hoacsporjasldjlksakdlsa
                 if (allBP![i].Mods.Length > 0)
                 {
@@ -604,24 +1075,24 @@ namespace KanonBot.image
             textOptions.Font = new Font(TorusRegular, 90);
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;
             textOptions.Origin = new PointF(3642, 1670);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N1}", allBP![0].PP), new SolidBrush(scoreppTopColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N1}", allBP![0].PP), new SolidBrush(MainBPppMainColor), null));
             var bp1pptextMeasure = TextMeasurer.Measure(string.Format("{0:N1}", allBP![0].PP), textOptions);
             int bp1pptextpos = 3642 - (int)bp1pptextMeasure.Width / 2;
             textOptions.Font = new Font(TorusRegular, 40);
             textOptions.Origin = new PointF(bp1pptextpos, 1610);
             textOptions.HorizontalAlignment = HorizontalAlignment.Left;
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(mainColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, "pp", new SolidBrush(MainBPppTitleColor), null));
 
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;
             textOptions.Font = new Font(TorusRegular, 70);
             textOptions.Origin = new PointF(3642, 1895);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![1].PP), new SolidBrush(scoreppColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![1].PP), new SolidBrush(SubBp2ndBPppMainColor), null));
             textOptions.Origin = new PointF(3642, 2081);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![2].PP), new SolidBrush(scoreppColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![2].PP), new SolidBrush(SubBp3rdBPppMainColor), null));
             textOptions.Origin = new PointF(3642, 2266);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![3].PP), new SolidBrush(scoreppColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![3].PP), new SolidBrush(SubBp4thBPppMainColor), null));
             textOptions.Origin = new PointF(3642, 2450);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![4].PP), new SolidBrush(scoreppColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}pp", allBP![4].PP), new SolidBrush(SubBp5thBPppMainColor), null));
 
             //badges
             if (data.badgeId != -1)
@@ -631,21 +1102,16 @@ namespace KanonBot.image
 
                 switch (ColorMode)
                 {
+                    case 0:
+                        badge.Mutate(x => x.Resize(236, 110).Brightness(BadgeBrightness).RoundCorner(new Size(236, 110), 20));
+                        break;
                     case 1:
                         //light
-                        try
-                        {
-                            badge.Mutate(x => x.Resize(236, 110).RoundCorner(new Size(236, 110), 20));
-                        }
-                        catch { }
+                        badge.Mutate(x => x.Resize(236, 110).RoundCorner(new Size(236, 110), 20));
                         break;
                     case 2:
                         //dark
-                        try
-                        {
-                            badge.Mutate(x => x.Resize(236, 110).Brightness(ImgBrightness).RoundCorner(new Size(236, 110), 20));
-                        }
-                        catch { }
+                        badge.Mutate(x => x.Resize(236, 110).Brightness(BadgeBrightness).RoundCorner(new Size(236, 110), 20));
                         break;
                 }
                 info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
@@ -661,7 +1127,7 @@ namespace KanonBot.image
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;
             textOptions.Font = new Font(TorusRegular, 40);
             textOptions.Origin = new PointF(2000, 2582);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, "this is a test version and does not represent the final quality", new SolidBrush(detailsColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, "this is a test version and does not represent the final quality", new SolidBrush(footerColor), null));
 
 
 
@@ -674,7 +1140,7 @@ namespace KanonBot.image
 
 
 
-            //resize to 1080p
+            //resize to 1920x?
             info.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(1920, 0), Mode = ResizeMode.Max }));
             return info;
         }

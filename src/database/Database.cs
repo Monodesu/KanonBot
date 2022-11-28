@@ -4,6 +4,7 @@ using KanonBot.Drivers;
 using Org.BouncyCastle.Ocsp;
 using Serilog;
 using SqlSugar;
+using System.Runtime.ConstrainedExecution;
 using Tomlyn.Model;
 using static KanonBot.API.OSU.Models;
 using static KanonBot.Database.Model;
@@ -380,6 +381,19 @@ public class Client
             .SetColumns(it => new UserOSU()
             {
                 InfoPanelV2_Mode = ver,
+            })
+            .Where(it => it.osu_uid == osu_uid)
+            .ExecuteCommandHasChangeAsync();
+        return result;
+    }
+
+
+    public static async Task<bool> UpdateInfoPanelV2CustomCmd(long osu_uid, string cmd)
+    {
+        var result = await GetInstance().Updateable<UserOSU>()
+            .SetColumns(it => new UserOSU()
+            {
+                InfoPanelV2_CustomMode = cmd,
             })
             .Where(it => it.osu_uid == osu_uid)
             .ExecuteCommandHasChangeAsync();
