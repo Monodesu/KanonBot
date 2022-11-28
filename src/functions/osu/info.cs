@@ -162,6 +162,11 @@ namespace KanonBot.functions.osubot
             {
                 custominfoengineVer = DBOsuInfo!.customInfoEngineVer;
                 data.InfoPanelV2_Mode = DBOsuInfo.InfoPanelV2_Mode;
+                if (DBOsuInfo.InfoPanelV2_CustomMode == null || DBOsuInfo.InfoPanelV2_CustomMode == "")
+                    //应该不用写这里，但是为了保险
+                    data.InfoPanelV2_Mode = 1;
+                else
+                    data.ColorConfigRaw = DBOsuInfo.InfoPanelV2_CustomMode!;
             }
 
             switch (custominfoengineVer) //0=null 1=v1 2=v2
@@ -172,6 +177,7 @@ namespace KanonBot.functions.osubot
                     await img.SaveAsync(stream, new PngEncoder());
                     break;
                 case 2:
+
                     img = await image.OsuInfoPanelV2.Draw(data, DBOsuInfo != null, isDataOfDayAvaiavle);
                     await img.SaveAsync(stream, new PngEncoder());
                     break;

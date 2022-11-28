@@ -314,25 +314,25 @@ namespace KanonBot.image
                                 footerColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
                             case "SideImgBrightness":
-                                SideImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                SideImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                                 break;
                             case "AvatarBrightness":
-                                AvatarBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                AvatarBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                                 break;
                             case "BadgeBrightness":
-                                BadgeBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                BadgeBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                                 break;
                             case "MainBPImgBrightness":
-                                MainBPImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                MainBPImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                                 break;
                             case "CountryFlagBrightness":
-                                CountryFlagBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                CountryFlagBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                                 break;
                             case "ModeCaptionBrightness":
-                                ModeCaptionBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                ModeCaptionBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                                 break;
                             case "ModIconBrightness":
-                                ModIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                                ModIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                                 break;
                         }
                     }
@@ -508,6 +508,7 @@ namespace KanonBot.image
                 sidePicPath = $"./work/panelv2/user_customimg/{data.userInfo.Id}.png";
             else sidePicPath = ColorMode switch
             {
+                0 => "./work/panelv2/infov2-dark-customimg.png",
                 1 => "./work/panelv2/infov2-light-customimg.png",
                 2 => "./work/panelv2/infov2-dark-customimg.png",
                 _ => throw new Exception(),
@@ -710,6 +711,7 @@ namespace KanonBot.image
             if (File.Exists($"./work/panelv2/user_infopanel/{data.userInfo.Id}.png")) panelPath = $"./work/panelv2/user_infopanel/{data.userInfo.Id}.png";
             else panelPath = ColorMode switch
             {
+                0 => "./work/panelv2/infov2-light.png",
                 1 => "./work/panelv2/infov2-light.png",
                 2 => "./work/panelv2/infov2-dark.png",
                 _ => throw new Exception(),

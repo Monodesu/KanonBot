@@ -60,7 +60,7 @@ namespace KanonBot.functions.osubot
                     await Osu_InfoPanelV1Panel(target, childCmd);
                     break;
                 case "osuinfopanelv2colorcustom":
-
+                    await Osu_InfoPanelV2CustomColorValue(target, childCmd);
                     break;
                 default:
                     target.reply("!set osumode/" +
@@ -126,9 +126,14 @@ namespace KanonBot.functions.osubot
                 try
                 {
                     var t = int.Parse(cmd);
-                    if (t < 1 || t > 2)
+                    if (t < 0 || t > 2)
                     {
-                        target.reply("配色方案号码不正确。(1=light、2=dark)");
+                        target.reply("配色方案号码不正确。(0=custom、1=light、2=dark)");
+                        return;
+                    }
+                    if (DBOsuInfo.InfoPanelV2_CustomMode == null || DBOsuInfo.InfoPanelV2_CustomMode == "")
+                    {
+                        target.reply("请先设置自定义配色方案后再将此配置项更改为custom。");
                         return;
                     }
                     await Database.Client.SetOsuInfoPanelV2ColorMode(DBOsuInfo.osu_uid, t);
@@ -590,6 +595,8 @@ namespace KanonBot.functions.osubot
             try
             {
                 argstemp = cmd.Split("\r\n");
+                if (argstemp.Length < 71)
+                    throw new Exception();
             }
             catch
             {
@@ -795,32 +802,32 @@ namespace KanonBot.functions.osubot
                             footerColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;
                         case "SideImgBrightness":
-                            SideImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                            SideImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                             break;
                         case "AvatarBrightness":
-                            AvatarBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                            AvatarBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                             break;
                         case "BadgeBrightness":
-                            BadgeBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                            BadgeBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                             break;
                         case "MainBPImgBrightness":
-                            MainBPImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                            MainBPImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                             break;
                         case "CountryFlagBrightness":
-                            CountryFlagBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                            CountryFlagBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                             break;
                         case "ModeCaptionBrightness":
-                            ModeCaptionBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                            ModeCaptionBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                             break;
                         case "ModIconBrightness":
-                            ModIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}f");
+                            ModIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                             break;
                     }
                     //检查通过，写入数据库
                     try
                     {
                         await Database.Client.UpdateInfoPanelV2CustomCmd(DBOsuInfo.osu_uid, cmd.Trim());
-                        target.reply($"已成功设置自定义配色方案，您或许还需要手动将osuinfopanelv2colormode改为0才可生效。");
+                        target.reply($"已成功设置，您或许还需要将osuinfopanelv2colormode改为0才可生效。");
                         return;
                     }
                     catch
