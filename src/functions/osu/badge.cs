@@ -182,7 +182,7 @@ namespace KanonBot.functions.osubot
                 }
 
                 //检查用户是否拥有此badge
-                if (owned_badges.Count < badgeNum)
+                if (owned_badges.Count < badgeNum && badgeNum > 0)
                 {
                     target.reply($"你好像没有编号为 {badgeNum} 的badge呢..."); return;
                 }
@@ -191,11 +191,22 @@ namespace KanonBot.functions.osubot
                 //没有完全适配多徽章安装，需要等新面板后再取消注释
                 //if (displayed_badges.Count == 0)
                 //{
-                if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), owned_badges[badgeNum - 1]))
-                    target.reply($"设置成功");
+                if (badgeNum > 0)
+                {
+                    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), owned_badges[badgeNum - 1]))
+                        target.reply($"设置成功");
+                    else
+                        target.reply($"因数据库原因设置失败，请稍后再试。");
+                    return;
+                }
                 else
-                    target.reply($"因数据库原因设置失败，请稍后再试。");
-                return;
+                {
+                    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), "-1"))
+                        target.reply($"设置成功，已关闭badge显示。");
+                    else
+                        target.reply($"因数据库原因设置失败，请稍后再试。");
+                    return;
+                }
                 //}
                 //else
                 //{
@@ -474,7 +485,7 @@ namespace KanonBot.functions.osubot
                         {
                             //获取已拥有的牌子
                             List<string> owned_badges = new();
-                            if (userInfo.owned_badge_ids != null || userInfo.owned_badge_ids != "") //用户没有badge的情况下，直接写入
+                            if (userInfo.owned_badge_ids != null && userInfo.owned_badge_ids != "") //用户没有badge的情况下，直接写入
                             {
                                 //用户只有一个badge的时候直接追加
                                 if (userInfo.owned_badge_ids!.IndexOf(",") == -1)

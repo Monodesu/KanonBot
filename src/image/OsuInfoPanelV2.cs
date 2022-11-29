@@ -25,6 +25,7 @@ using System.IO;
 using SixLabors.ImageSharp.Formats.Png;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Formats;
 
 namespace KanonBot.image
 {
@@ -474,12 +475,12 @@ namespace KanonBot.image
                     SubBpInfoSplitColor = Color.ParseHex("#e6e6e6");
                     //change brightness
                     SideImgBrightness = 0.6f;
-                    AvatarBrightness = 1.0f;
-                    BadgeBrightness = 1.0f;
-                    MainBPImgBrightness = 1.9f;
-                    CountryFlagBrightness = 1.0f;
-                    ModeCaptionBrightness = 1.0f;
-                    ModIconBrightness = 1.0f;
+                    AvatarBrightness = 0.6f;
+                    BadgeBrightness = 0.6f;
+                    MainBPImgBrightness = 0.6f;
+                    CountryFlagBrightness = 0.6f;
+                    ModeCaptionBrightness = 0.6f;
+                    ModIconBrightness = 0.6f;
                     break;
                     #endregion
             }
@@ -1305,8 +1306,15 @@ namespace KanonBot.image
             if (data.badgeId != -1)
             {
                 Img badge;
-                badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"));
-
+                badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"), out IImageFormat format).CloneAs<Rgba32>();
+                //检测上传的infopanel尺寸是否正确
+                if (format.DefaultMimeType.Trim().ToLower()[..3] != "png")
+                {
+                    Img temp = badge;
+                    File.Delete($"./work/badges/{data.badgeId}.png");
+                    temp.Save($"./work/badges/{data.badgeId}.png", new PngEncoder());
+                    badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png")).CloneAs<Rgba32>();
+                }
                 switch (ColorMode)
                 {
                     case 0:
