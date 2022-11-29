@@ -1092,7 +1092,7 @@ namespace KanonBot.image
                         foreach (var x in allBP![i].Mods)
                         {
                             Img modicon = Img.Load(await Utils.LoadFile2Byte($"./work/mods_v2/2x/{x}.png"));
-                            modicon.Mutate(x => x.Resize(90, 90));
+                            modicon.Mutate(x => x.Resize(90, 90).Brightness(ModIconBrightness));
                             info.Mutate(x => x.DrawImage(modicon, new Point(otherbp_mods_pos_x, otherbp_mods_pos_y), 1));
                             otherbp_mods_pos_x += 105;
                         }

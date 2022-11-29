@@ -97,6 +97,23 @@ namespace KanonBot.functions.osu
                         await InfoImageV1(target, 2, childCmd); return;
                     case "1ij":
                         await InfoImageV1(target, 2, childCmd); return;
+                    //v1infoPanel
+                    case "v1panellist":
+                        await InfoPanelV1(target, -1, childCmd); return;
+                    case "1pl":
+                        await InfoPanelV1(target, -1, childCmd); return;
+                    case "v1panelapproveall":
+                        await InfoPanelV1(target, 0, childCmd); return;
+                    case "1pall":
+                        await InfoPanelV1(target, 0, childCmd); return;
+                    case "v1panelapprove":
+                        await InfoPanelV1(target, 1, childCmd); return;
+                    case "1pa":
+                        await InfoPanelV1(target, 1, childCmd); return;
+                    case "v1panelreject":
+                        await InfoPanelV1(target, 2, childCmd); return;
+                    case "1pj":
+                        await InfoPanelV1(target, 2, childCmd); return;
                     //v2infoImg
                     case "v2imagelist":
                         await InfoImageV2(target, -1, childCmd); return;
@@ -139,6 +156,79 @@ namespace KanonBot.functions.osu
         }
 
         //approve -1=sendlist 0=approveall 1=approve 2=reject
+        public static async Task InfoPanelV1(Target target, int approve, string cmd)
+        {
+            switch (approve)
+            {
+                case -1:
+                    //send list
+                    var files = Directory.GetFiles(@".\work\legacy\v1_infopanel\verify\");
+                    if (files.Length > 0)
+                    {
+                        var msg = new Chain();
+                        msg.msg("以下v1 info panel需要审核");
+                        foreach (var x in files)
+                        {
+                            msg.msg($"\r\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\r\n");
+                            var stream = new MemoryStream();
+                            await SixLabors.ImageSharp.Image.Load(x)
+                                .CloneAs<Rgba32>().SaveAsync(stream, new PngEncoder());
+                            stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                            msg.image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64);
+                        }
+                        target.reply(msg);
+                        return;
+                    }
+                    target.reply("暂时没有待审核的内容。");
+                    return;
+                case 0:
+                    //approve all
+                    var filesall = Directory.GetFiles(@".\work\legacy\v1_infopanel\verify\");
+                    if (filesall.Length > 0)
+                    {
+                        foreach (var x in filesall)
+                        {
+                            if (File.Exists(@$".\work\legacy\v1_infopanel\{x[x.LastIndexOf("\\")..]}"))
+                                File.Delete(@$".\work\legacy\v1_infopanel\{x[x.LastIndexOf("\\")..]}");
+                            File.Move(
+                            @$"{x}",
+                            @$".\work\legacy\v1_infopanel\{x[x.LastIndexOf("\\")..]}");
+                        }
+                        target.reply("approved.");
+                        return;
+                    }
+                    target.reply("暂时没有待审核的内容。");
+                    return;
+                case 1:
+                    //approve
+                    if (File.Exists(@$".\work\legacy\v1_infopanel\verify\{cmd}.png"))
+                    {
+                        if (File.Exists(@$".\work\legacy\v1_infopanel\{cmd}.png"))
+                            File.Delete(@$".\work\legacy\v1_infopanel\{cmd}.png");
+                        File.Move(
+                            @$".\work\legacy\v1_infopanel\verify\{cmd}.png",
+                            @$".\work\legacy\v1_infopanel\{cmd}.png");
+                        target.reply("approved.");
+                        return;
+                    }
+                    target.reply("指定内容不存在，请重新检查。");
+                    return;
+                case 2:
+                    //reject
+                    if (File.Exists(@$".\work\legacy\v1_infopanel\verify\{cmd}.png"))
+                    {
+                        File.Delete(@$".\work\legacy\v1_infopanel\verify\{cmd}.png");
+                        target.reply("rejected.");
+                        return;
+                    }
+                    target.reply("要审核的内容不存在，请重新检查。");
+                    return;
+                default:
+                    //do nothing
+                    target.reply("无效的指令，请重新检查。");
+                    return;
+            }
+        }
         public static async Task InfoPanelV2(Target target, int approve, string cmd)
         {
             switch (approve)
@@ -149,7 +239,7 @@ namespace KanonBot.functions.osu
                     if (files.Length > 0)
                     {
                         var msg = new Chain();
-                        msg.msg("以下v2 info image需要审核");
+                        msg.msg("以下v2 info panel需要审核");
                         foreach (var x in files)
                         {
                             msg.msg($"\r\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\r\n");
@@ -292,7 +382,7 @@ namespace KanonBot.functions.osu
             {
                 case -1:
                     //send list
-                    var files = Directory.GetFiles(@".\work\panelv2\user_customimg\verify\");
+                    var files = Directory.GetFiles(@".\work\legacy\v1_cover\custom\verify\");
                     if (files.Length > 0)
                     {
                         var msg = new Chain();
