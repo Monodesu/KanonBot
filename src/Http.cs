@@ -1,9 +1,9 @@
 ﻿#pragma warning disable CS8625 // 无法将 null 字面量转换为非 null 的引用类型。
 using System.Net;
 using System.Net.Http.Headers;
-using Newtonsoft.Json.Linq;
 using Flurl;
 using Flurl.Http;
+using Newtonsoft.Json.Linq;
 
 namespace KanonBot
 {
@@ -11,13 +11,13 @@ namespace KanonBot
     {
         public struct ResponseResult
         {
-            public HttpStatusCode Status;
-            public string Body;
+            public required HttpStatusCode Status;
+            public required string Body;
         }
         public struct ResponseResultByte
         {
-            public HttpStatusCode Status;
-            public byte[] Body;
+            public required HttpStatusCode Status;
+            public required byte[] Body;
         }
 
         /// <summary>
@@ -62,9 +62,10 @@ namespace KanonBot
             }
             HttpResponseMessage response = await client.DeleteAsync(url);
             // response.EnsureSuccessStatusCode();//用来抛异常的
-            ResponseResult result = new();
-            result.Status = response.StatusCode;
-            result.Body = await response.Content.ReadAsStringAsync();
+            ResponseResult result = new() {
+                Status = response.StatusCode,
+                Body = await response.Content.ReadAsStringAsync()
+            };
             return result;
         }
 
@@ -86,9 +87,11 @@ namespace KanonBot
             //multipartFromDataContent.Headers.ContentType = new MediaTypeHeaderValue("form-data");
             HttpResponseMessage response = await client.PostAsync(url, DataContent);
             // response.EnsureSuccessStatusCode();
-            ResponseResult result = new();
-            result.Status = response.StatusCode;
-            result.Body = await response.Content.ReadAsStringAsync();
+            ResponseResult result = new()
+            {
+                Status = response.StatusCode,
+                Body = await response.Content.ReadAsStringAsync()
+            };
             return result;
         }
 
@@ -120,9 +123,11 @@ namespace KanonBot
                 catch { if (i == 2) throw new Exception("postAsync错误, A task was canceled."); else Thread.Sleep(1000); }
             }
             // response.EnsureSuccessStatusCode();
-            ResponseResult result = new();
-            result.Status = response.StatusCode;
-            result.Body = await response.Content.ReadAsStringAsync();
+            ResponseResult result = new()
+            {
+                Status = response.StatusCode,
+                Body = await response.Content.ReadAsStringAsync()
+            };
             return result;
 
         }
@@ -150,9 +155,11 @@ namespace KanonBot
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             HttpResponseMessage response = await client.PostAsync(url, content);
             // response.EnsureSuccessStatusCode();
-            ResponseResult result = new();
-            result.Status = response.StatusCode;
-            result.Body = await response.Content.ReadAsStringAsync();
+            ResponseResult result = new()
+            {
+                Status = response.StatusCode,
+                Body = await response.Content.ReadAsStringAsync()
+            };
             return result;
         }
 
@@ -177,9 +184,11 @@ namespace KanonBot
             }
             HttpResponseMessage response = await client.PostAsync(url, content);
             // response.EnsureSuccessStatusCode();
-            ResponseResult result = new();
-            result.Status = response.StatusCode;
-            result.Body = await response.Content.ReadAsStringAsync();
+            ResponseResult result = new()
+            {
+                Status = response.StatusCode,
+                Body = await response.Content.ReadAsStringAsync()
+            };
             return result;
         }
 
@@ -202,9 +211,11 @@ namespace KanonBot
             }
             HttpResponseMessage response = await client.GetAsync(url);
             // response.EnsureSuccessStatusCode();//用来抛异常的
-            ResponseResult result = new();
-            result.Status = response.StatusCode;
-            result.Body = await response.Content.ReadAsStringAsync();
+            ResponseResult result = new()
+            {
+                Status = response.StatusCode,
+                Body = await response.Content.ReadAsStringAsync()
+            };
             return result;
         }
 
@@ -223,9 +234,11 @@ namespace KanonBot
             }
             HttpResponseMessage response = await client.GetAsync(url);
             // response.EnsureSuccessStatusCode();//用来抛异常的
-            ResponseResultByte result = new();
-            result.Status = response.StatusCode;
-            result.Body = await response.Content.ReadAsByteArrayAsync();
+            ResponseResultByte result = new()
+            {
+                Status = response.StatusCode,
+                Body = await response.Content.ReadAsByteArrayAsync()
+            };
             return result;
         }
         async public static Task<string> DownloadFile(string url, string filePath)

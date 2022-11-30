@@ -175,7 +175,7 @@ namespace KanonBot
                 {
                     // arg1 = bid
                     // arg2 = osu_mode
-                    // arg3 = 
+                    // arg3 =
                     // arg4 = mods
                     if (arg1 == "") param.order_number = 0; // 若bid为空，返回0
                     else

@@ -12,8 +12,8 @@ namespace KanonBot.functions
     {
         public struct AccInfo
         {
-            public Platform platform;
-            public string uid;
+            public required Platform platform;
+            public required string uid;
         }
         public static async Task RegAccount(Target target, string cmd)
         {

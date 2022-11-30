@@ -1,22 +1,22 @@
 ﻿#pragma warning disable CS8618 // 非null 字段未初始化
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
-using KanonBot.API;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Drawing;
-using Img = SixLabors.ImageSharp.Image;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp.ColorSpaces;
-using Serilog;
+using System.Security.Claims;
 using Flurl;
 using Flurl.Http;
+using KanonBot.API;
 using KanonBot.functions.osu.rosupp;
+using Serilog;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using static KanonBot.functions.osu.rosupp.PerformanceCalculator;
-using System.Security.Claims;
-using System.Diagnostics.CodeAnalysis;
+using Img = SixLabors.ImageSharp.Image;
 
 namespace KanonBot.LegacyImage
 {
@@ -54,7 +54,7 @@ namespace KanonBot.LegacyImage
         public static FontFamily TorusSemiBold = fonts.Add("./work/fonts/Torus-SemiBold.ttf");
         public static FontFamily avenirLTStdMedium = fonts.Add("./work/fonts/AvenirLTStd-Medium.ttf");
 
-        //customBannerStatus 0=没有自定义banner 1=在猫猫上设置了自定义banner 
+        //customBannerStatus 0=没有自定义banner 1=在猫猫上设置了自定义banner
         public static async Task<Img> DrawInfo(UserPanelData data, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
         {
             var info = new Image<Rgba32>(1200, 857);
@@ -150,16 +150,17 @@ namespace KanonBot.LegacyImage
             {
                 Img ppdataPanel = Img.Load(await Utils.LoadFile2Byte("./work/legacy/pp+-v1.png"));
                 info.Mutate(x => x.DrawImage(ppdataPanel, new Point(0, 0), 1));
-                Hexagram.HexagramInfo hi = new();
-                hi.abilityFillColor = Color.FromRgba(253, 148, 62, 128);
-                hi.abilityLineColor = Color.ParseHex("#fd943e");
-                hi.nodeMaxValue = 10000;
-                hi.nodeCount = 6;
-                hi.size = 200;
-                hi.sideLength = 200;
-                hi.mode = 1;
-                hi.strokeWidth = 2f;
-                hi.nodesize = new SizeF(5f, 5f);
+                Hexagram.HexagramInfo hi = new() {
+                    abilityFillColor = Color.FromRgba(253, 148, 62, 128),
+                    abilityLineColor = Color.ParseHex("#fd943e"),
+                    nodeMaxValue = 10000,
+                    nodeCount = 6,
+                    size = 200,
+                    sideLength = 200,
+                    mode = 1,
+                    strokeWidth = 2f,
+                    nodesize = new SizeF(5f, 5f)
+                };
                 // acc ,flow, jump, pre, speed, sta
                 var ppd = new int[6];       // 这里就强制转换了
                 try
@@ -943,15 +944,16 @@ namespace KanonBot.LegacyImage
         public static async Task<Img> DrawPPVS(PPVSPanelData data)
         {
             var ppvsImg = Img.Load(await Utils.LoadFile2Byte("work/legacy/ppvs.png"));
-            Hexagram.HexagramInfo hi = new();
+            Hexagram.HexagramInfo hi = new() {
+                nodeCount = 6,
+                nodeMaxValue = 12000,
+                size = 1134,
+                sideLength = 791,
+                mode = 2,
+                strokeWidth = 6f,
+                nodesize = new SizeF(15f, 15f)
+            };
             // hi.abilityLineColor = Color.ParseHex("#FF7BAC");
-            hi.nodeCount = 6;
-            hi.nodeMaxValue = 12000;
-            hi.size = 1134;
-            hi.sideLength = 791;
-            hi.mode = 2;
-            hi.strokeWidth = 6f;
-            hi.nodesize = new SizeF(15f, 15f);
             var multi = new double[6] { 14.1, 69.7, 1.92, 19.8, 0.588, 3.06 };
             var exp = new double[6] { 0.769, 0.596, 0.953, 0.8, 1.175, 0.993 };
             var u1d = new int[6];
@@ -1089,12 +1091,12 @@ namespace KanonBot.LegacyImage
         #region Hexagram
         public class Hexagram
         {
-            public struct R8 { public double r, _8; }
+            public struct R8 { public required double r, _8; }
             public struct HexagramInfo
             {
-                public int size, nodeCount, nodeMaxValue, sideLength, mode;
-                public float strokeWidth;
-                public SizeF nodesize;
+                public required int size, nodeCount, nodeMaxValue, sideLength, mode;
+                public required float strokeWidth;
+                public required SizeF nodesize;
                 public Color abilityFillColor, abilityLineColor;
             }
 
@@ -1120,9 +1122,10 @@ namespace KanonBot.LegacyImage
                     if (hi.mode == 1 && r > 100.00) r = 100.00;
                     if (hi.mode == 2 && r > 395.00) r = 395.00;
                     if (hi.mode == 3 && r > 495.00) r = 495.00;
-                    Hexagram.R8 r8 = new();
-                    r8.r = r;
-                    r8._8 = 360.0 / hi.nodeCount * i + 90;
+                    Hexagram.R8 r8 = new() {
+                        r = r,
+                        _8 = 360.0 / hi.nodeCount * i + 90
+                    };
                     var xy = Hexagram.r82xy(r8);
                     xy.X += hi.size / 2;
                     xy.Y += hi.size / 2;

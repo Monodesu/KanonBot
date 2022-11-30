@@ -37,14 +37,14 @@ namespace KanonBot.functions.osu.rosupp
                                                     "K9", "KC", "K1", "K3", "K2", "S2", "MR" };
         public struct PPInfo
         {
-            public double star, CS, HP, AR, OD;
+            public required double star, CS, HP, AR, OD;
             public double? accuracy;
             public uint? maxCombo;
-            public PPStat ppStat;
+            public required PPStat ppStat;
             public List<PPStat>? ppStats;
             public struct PPStat
             {
-                public double total;
+                public required double total;
                 public double? aim, speed, acc, strain, flashlight;
             }
         }
@@ -116,7 +116,7 @@ namespace KanonBot.functions.osu.rosupp
 
         public struct Params
         {
-            public OSU.Enums.Mode mode;
+            public required OSU.Enums.Mode mode;
             public string[]? mods;
             public double? acc;
             public uint? n300, n100, n50, nmisses, nkatu, combo, passedObjects, clockRate;
