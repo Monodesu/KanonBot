@@ -75,8 +75,8 @@ namespace KanonBot.command_parser
                         case "pr": await Recent.Execute(target, childCmd, false); return;
                         case "bp": await BestPerformance.Execute(target, childCmd); return;
                         case "score": await Score.Execute(target, childCmd); return;
-                        case "help": Help.Execute(target, childCmd); return;
-                        case "ping": Ping.Execute(target, childCmd); return;
+                        case "help": await Help.Execute(target, childCmd); return;
+                        case "ping": await Ping.Execute(target, childCmd); return;
                         case "update": await Update.Execute(target, childCmd); return;
                         case "get": await Get.Execute(target, childCmd); return;// get bonuspp/elo/rolecost/bpht/todaybp/annualpass
                         case "badge": await Badge.Execute(target, childCmd); return;
