@@ -9,21 +9,13 @@ namespace KanonBot;
 public static class Mail
 {
     private static Config.Base config = Config.inner!;
-    public struct MailStruct
+    public class MailStruct
     {
-        public string[] MailTo; //收件人，可添加多个
-        public string[] MailCC; //抄送人，不建议添加
-        public string Subject; //标题
-        public string Body; //正文
-        public bool IsBodyHtml;
-        public MailStruct()
-        {
-            MailTo = Array.Empty<string>();
-            MailCC = Array.Empty<string>();
-            Subject = string.Empty;
-            Body = string.Empty;
-            IsBodyHtml = false;
-        }
+        public required Arr<String> MailTo; //收件人，可添加多个
+        public Arr<String> MailCC = Arr.empty<String>(); //抄送人，不建议添加
+        public required string Subject; //标题
+        public required string Body; //正文
+        public required bool IsBodyHtml;
     }
     public static void Send(MailStruct ms)
     {

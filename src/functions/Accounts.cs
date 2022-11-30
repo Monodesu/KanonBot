@@ -1,9 +1,10 @@
 ﻿#pragma warning disable CS8602 // 解引用可能出现空引用。
 using System;
-using KanonBot.Drivers;
-using KanonBot.Message;
+using Flurl.Util;
 using KanonBot.API;
+using KanonBot.Drivers;
 using KanonBot.functions.osu;
+using KanonBot.Message;
 
 namespace KanonBot.functions
 {
@@ -201,8 +202,9 @@ namespace KanonBot.functions
             string childCmd_1 = "", childCmd_2 = "";
             try
             {
-                childCmd_1 = cmd[..cmd.IndexOf(" ")];
-                childCmd_2 = cmd[(cmd.IndexOf(" ") + 1)..];
+                var tmp = cmd.SplitOnFirstOccurence(" ");
+                childCmd_1 = tmp[0];
+                childCmd_2 = tmp[1];
             }
             catch { }
 

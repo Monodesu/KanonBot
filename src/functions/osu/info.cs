@@ -122,7 +122,7 @@ namespace KanonBot.functions.osubot
                 var badgeID = DBUser!.displayed_badge_ids;
                 // legacy只取第一个badge
                 if (badgeID != null)
-                    try { if (badgeID.IndexOf(",") != -1) badgeID = badgeID[..badgeID.IndexOf(",")]; }
+                    try { if (badgeID.Contains(",")) badgeID = badgeID[..badgeID.IndexOf(",")]; }
                     catch { badgeID = "-1"; }
                 try { data.badgeId = int.Parse(badgeID!); }
                 catch { data.badgeId = -1; }

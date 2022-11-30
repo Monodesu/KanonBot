@@ -1,4 +1,5 @@
-﻿using KanonBot.Drivers;
+﻿using Flurl.Util;
+using KanonBot.Drivers;
 using KanonBot.functions;
 using KanonBot.functions.osu;
 using KanonBot.functions.osubot;
@@ -44,8 +45,9 @@ namespace KanonBot.command_parser
                 string rootCmd, childCmd = "";
                 try
                 {
-                    rootCmd = cmd[..cmd.IndexOf(" ")].Trim();
-                    childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
+                    var tmp = cmd.SplitOnFirstOccurence(" ");
+                    rootCmd = tmp[0].Trim();
+                    childCmd = tmp[1].Trim();
                 }
                 catch { rootCmd = cmd; }
 
@@ -70,7 +72,7 @@ namespace KanonBot.command_parser
                         case "leeway":
                         case "lc":
                             await Leeway.Execute(target, childCmd); return;
-                        case "set": await Set.Execute(target, childCmd); return;
+                        case "set": await Setter.Execute(target, childCmd); return;
                         case "ppvs": await PPvs.Execute(target, childCmd); return;
 
                         // Admin
@@ -92,10 +94,10 @@ namespace KanonBot.command_parser
                 {
                     target.reply("网络出现错误！错误已上报");
                     var rtmp =
-                        $"Target Message: {target.msg}\r\n" +
-                        $"Exception: {ex}\r\n";
-                    // $"Message: {ex.Message}\r\n" +
-                    // $"Source: {ex.Source}\r\n" +
+                        $"Target Message: {target.msg}\n" +
+                        $"Exception: {ex}\n";
+                    // $"Message: {ex.Message}\n" +
+                    // $"Source: {ex.Source}\n" +
                     // $"StackTrace: {ex.StackTrace}";
                     Utils.SendDebugMail("mono@desu.life", rtmp);
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
@@ -112,10 +114,10 @@ namespace KanonBot.command_parser
                 {
                     target.reply("出现了未知错误，错误内容已自动上报");
                     var rtmp =
-                        $"Target Message: {target.msg}\r\n" +
-                        $"Exception: {ex}\r\n";
-                    // $"Message: {ex.Message}\r\n" +
-                    // $"Source: {ex.Source}\r\n" +
+                        $"Target Message: {target.msg}\n" +
+                        $"Exception: {ex}\n";
+                    // $"Message: {ex.Message}\n" +
+                    // $"Source: {ex.Source}\n" +
                     // $"StackTrace: {ex.StackTrace}";
                     Utils.SendDebugMail("mono@desu.life", rtmp);
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);

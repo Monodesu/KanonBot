@@ -1,5 +1,6 @@
-﻿using static KanonBot.functions.Accounts;
+﻿using Flurl.Util;
 using KanonBot.Drivers;
+using static KanonBot.functions.Accounts;
 
 namespace KanonBot.functions.osu
 {
@@ -59,7 +60,7 @@ namespace KanonBot.functions.osu
                 {
                     Console.WriteLine(x);
                 }
-                Console.WriteLine(permissions + "\r\n" + permissions_flag);
+                Console.WriteLine(permissions + "\n" + permissions_flag);
 
                 if (permissions_flag != 3) return; //权限不够不处理
 
@@ -67,8 +68,9 @@ namespace KanonBot.functions.osu
                 string rootCmd, childCmd = "";
                 try
                 {
-                    rootCmd = cmd[..cmd.IndexOf(" ")].Trim();
-                    childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
+                    var tmp = cmd.SplitOnFirstOccurence(" ");
+                    rootCmd = tmp[0].Trim();
+                    childCmd = tmp[1].Trim();
                 }
                 catch { rootCmd = cmd; }
 

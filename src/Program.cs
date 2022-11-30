@@ -1,17 +1,19 @@
-﻿using System.Reflection.Metadata;
-using Msg = KanonBot.Message;
-using KanonBot.Drivers;
-using KanonBot.Event;
+﻿global using Serilog;
+global using Flurl;
+global using Flurl.Http;
+global using LanguageExt;
+global using static LanguageExt.Prelude;
+
 using KanonBot;
 using KanonBot.API;
-using KanonBot.Serializer;
 using KanonBot.command_parser;
+using KanonBot.Drivers;
+using KanonBot.Event;
+using KanonBot.functions.osu;
+using KanonBot.Serializer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Serilog;
-using Flurl;
-using Flurl.Http;
-using KanonBot.functions.osu;
+using Msg = KanonBot.Message;
 
 
 #region 初始化

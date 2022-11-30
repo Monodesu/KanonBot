@@ -17,6 +17,7 @@
 		<PackageReference Include="Fleck" Version="1.2.0" />
 		<PackageReference Include="Flurl.Http" Version="3.2.4" />
 		<PackageReference Include="Kook.Net" Version="0.0.43-alpha" />
+		<PackageReference Include="LanguageExt.Core" Version="4.4.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.3.0" />
 		<PackageReference Include="MySql.Data" Version="8.0.31" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

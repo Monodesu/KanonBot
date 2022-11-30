@@ -2,8 +2,8 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
 using Serilog;
+using NullValueHandling = Newtonsoft.Json.NullValueHandling;
 
 namespace KanonBot.Drivers;
 public partial class Kook

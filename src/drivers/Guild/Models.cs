@@ -5,7 +5,7 @@ using System.ComponentModel;
 using KanonBot.Message;
 using KanonBot.Serializer;
 using Newtonsoft.Json.Linq;
-
+using NullValueHandling = Newtonsoft.Json.NullValueHandling;
 
 namespace KanonBot.Drivers;
 public partial class Guild
@@ -64,7 +64,7 @@ public partial class Guild
             [JsonProperty(PropertyName = "t", NullValueHandling = NullValueHandling.Ignore)]
             [JsonConverter(typeof(JsonEnumConverter))]
             public Enums.EventType Type { get; set; }
-            
+
             /// <summary>
             /// 事件内容
             /// </summary>
@@ -79,7 +79,7 @@ public partial class Guild
 
         }
 
-        
+
         public class Member
         {
             /// <summary>
@@ -306,7 +306,7 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "properties")]
             public Properties Prop { get; set; } = new Properties();
-            
+
             public class Properties {
                 // 自动获取当前运行系统类型
                 [JsonProperty(PropertyName = "$os")]

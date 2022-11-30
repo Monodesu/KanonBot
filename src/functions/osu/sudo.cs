@@ -1,11 +1,12 @@
-﻿using static KanonBot.functions.Accounts;
+﻿using System.Collections.Generic;
+using System.IO;
+using Flurl.Util;
 using KanonBot.Drivers;
 using KanonBot.Message;
-using System.IO;
-using System.Collections.Generic;
-using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using static KanonBot.functions.Accounts;
 
 namespace KanonBot.functions.osu
 {
@@ -65,7 +66,7 @@ namespace KanonBot.functions.osu
                 //{
                 //    Console.WriteLine(x);
                 //}
-                //Console.WriteLine(permissions + "\r\n" + permissions_flag);
+                //Console.WriteLine(permissions + "\n" + permissions_flag);
 
                 if (permissions_flag < 2) return; //权限不够不处理
 
@@ -73,8 +74,9 @@ namespace KanonBot.functions.osu
                 string rootCmd, childCmd = "";
                 try
                 {
-                    rootCmd = cmd[..cmd.IndexOf(" ")].Trim();
-                    childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
+                    var tmp = cmd.SplitOnFirstOccurence(" ");
+                    rootCmd = tmp[0].Trim();
+                    childCmd = tmp[1].Trim();
                 }
                 catch { rootCmd = cmd; }
 
@@ -167,11 +169,11 @@ namespace KanonBot.functions.osu
                     {
                         var msg = new Chain();
                         msg.msg("以下v1 info panel需要审核");
-                        foreach (var x in files)
+                        foreach (var file in files)
                         {
-                            msg.msg($"\r\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\r\n");
+                            msg.msg($"\n{file[(file.LastIndexOf("\\") + 1)..][..file[(file.LastIndexOf("\\") + 1)..].IndexOf(".")]}\n");
                             var stream = new MemoryStream();
-                            await SixLabors.ImageSharp.Image.Load(x)
+                            await SixLabors.ImageSharp.Image.Load(file)
                                 .CloneAs<Rgba32>().SaveAsync(stream, new PngEncoder());
                             stream.TryGetBuffer(out ArraySegment<byte> buffer);
                             msg.image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64);
@@ -186,13 +188,13 @@ namespace KanonBot.functions.osu
                     var filesall = Directory.GetFiles(@".\work\legacy\v1_infopanel\verify\");
                     if (filesall.Length > 0)
                     {
-                        foreach (var x in filesall)
+                        foreach (var file in filesall)
                         {
-                            if (File.Exists(@$".\work\legacy\v1_infopanel\{x[x.LastIndexOf("\\")..]}"))
-                                File.Delete(@$".\work\legacy\v1_infopanel\{x[x.LastIndexOf("\\")..]}");
+                            if (File.Exists(@$".\work\legacy\v1_infopanel\{file[file.LastIndexOf("\\")..]}"))
+                                File.Delete(@$".\work\legacy\v1_infopanel\{file[file.LastIndexOf("\\")..]}");
                             File.Move(
-                            @$"{x}",
-                            @$".\work\legacy\v1_infopanel\{x[x.LastIndexOf("\\")..]}");
+                            @$"{file}",
+                            @$".\work\legacy\v1_infopanel\{file[file.LastIndexOf("\\")..]}");
                         }
                         target.reply("approved.");
                         return;
@@ -240,11 +242,11 @@ namespace KanonBot.functions.osu
                     {
                         var msg = new Chain();
                         msg.msg("以下v2 info panel需要审核");
-                        foreach (var x in files)
+                        foreach (var file in files)
                         {
-                            msg.msg($"\r\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\r\n");
+                            msg.msg($"\n{file[(file.LastIndexOf("\\") + 1)..][..file[(file.LastIndexOf("\\") + 1)..].IndexOf(".")]}\n");
                             var stream = new MemoryStream();
-                            await SixLabors.ImageSharp.Image.Load(x)
+                            await SixLabors.ImageSharp.Image.Load(file)
                                 .CloneAs<Rgba32>().SaveAsync(stream, new PngEncoder());
                             stream.TryGetBuffer(out ArraySegment<byte> buffer);
                             msg.image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64);
@@ -259,13 +261,13 @@ namespace KanonBot.functions.osu
                     var filesall = Directory.GetFiles(@".\work\panelv2\user_customimg\verify\");
                     if (filesall.Length > 0)
                     {
-                        foreach (var x in filesall)
+                        foreach (var file in filesall)
                         {
-                            if (File.Exists(@$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}"))
-                                File.Delete(@$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}");
+                            if (File.Exists(@$".\work\panelv2\user_customimg\{file[file.LastIndexOf("\\")..]}"))
+                                File.Delete(@$".\work\panelv2\user_customimg\{file[file.LastIndexOf("\\")..]}");
                             File.Move(
-                            @$"{x}",
-                            @$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}");
+                            @$"{file}",
+                            @$".\work\panelv2\user_customimg\{file[file.LastIndexOf("\\")..]}");
                         }
                         target.reply("approved.");
                         return;
@@ -315,7 +317,7 @@ namespace KanonBot.functions.osu
                         msg.msg("以下v2 info image需要审核");
                         foreach (var x in files)
                         {
-                            msg.msg($"\r\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\r\n");
+                            msg.msg($"\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\n");
                             var stream = new MemoryStream();
                             await SixLabors.ImageSharp.Image.Load(x)
                                 .CloneAs<Rgba32>().SaveAsync(stream, new PngEncoder());
@@ -389,7 +391,7 @@ namespace KanonBot.functions.osu
                         msg.msg("以下v1 info image需要审核");
                         foreach (var x in files)
                         {
-                            msg.msg($"\r\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\r\n");
+                            msg.msg($"\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\n");
                             var stream = new MemoryStream();
                             await SixLabors.ImageSharp.Image.Load(x)
                                 .CloneAs<Rgba32>().SaveAsync(stream, new PngEncoder());

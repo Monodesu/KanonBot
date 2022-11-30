@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Flurl.Util;
+using KanonBot.API;
 using KanonBot.Drivers;
 using KanonBot.Message;
-using KanonBot.API;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Linq.Expressions;
+using Newtonsoft.Json.Linq;
 using static KanonBot.API.OSU.Models;
 
 namespace KanonBot.functions.osubot
@@ -20,8 +21,9 @@ namespace KanonBot.functions.osubot
             string rootCmd, childCmd = "";
             try
             {
-                rootCmd = cmd[..cmd.IndexOf(" ")].Trim();
-                childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim().ToLower();
+                var tmp = cmd.SplitOnFirstOccurence(" ");
+                rootCmd = tmp[0].Trim();
+                childCmd = tmp[1].Trim().ToLower();
             }
             catch { rootCmd = cmd; }
             switch (rootCmd.ToLower())

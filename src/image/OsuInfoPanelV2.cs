@@ -1,31 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using System.Numerics;
-using KanonBot.API;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Drawing;
-using Img = SixLabors.ImageSharp.Image;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp.ColorSpaces;
-using Serilog;
 using Flurl;
 using Flurl.Http;
+using KanonBot.API;
 using KanonBot.functions.osu.rosupp;
-using KanonBot.LegacyImage;
-using static KanonBot.LegacyImage.Draw;
 using KanonBot.Image;
-using SqlSugar;
-using System.IO;
-using SixLabors.ImageSharp.Formats.Png;
-using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
+using KanonBot.LegacyImage;
+using Serilog;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SqlSugar;
+using static KanonBot.LegacyImage.Draw;
+using Img = SixLabors.ImageSharp.Image;
+using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 
 namespace KanonBot.image
 {
@@ -117,7 +117,7 @@ namespace KanonBot.image
                 case 0:
                     //custom
                     //解析
-                    var argstemp = data.ColorConfigRaw.Split("\r\n");
+                    var argstemp = data.ColorConfigRaw.Split("\n");
                     foreach (string arg in argstemp)
                     {
                         switch (arg.Split(":")[0].Trim())
@@ -515,20 +515,7 @@ namespace KanonBot.image
                 _ => throw new Exception(),
             };
             sidePic = Img.Load(await Utils.LoadFile2Byte(sidePicPath)).CloneAs<Rgba32>();    // 读取
-            switch (ColorMode)
-            {
-                case 0:
-                    sidePic.Mutate(x => x.Brightness(SideImgBrightness));
-                    break;
-                case 1:
-                    //light
-                    //do nothing  
-                    break;
-                case 2:
-                    //dark
-                    sidePic.Mutate(x => x.Brightness(SideImgBrightness));
-                    break;
-            }
+            sidePic.Mutate(x => x.Brightness(SideImgBrightness));
             info.Mutate(x => x.DrawImage(sidePic, new Point(90, 72), 1));
 
 
@@ -657,7 +644,7 @@ namespace KanonBot.image
             //top score image 先绘制top bp图片再覆盖面板
             //download background image
             Img bp1bg;
-            if (allBP.Length > 5)
+            if (allBP!.Length > 5)
             {
                 var bp1bgPath = $"./work/background/{allBP![0].Beatmap!.BeatmapId}.png";
                 if (!File.Exists(bp1bgPath))
@@ -676,20 +663,7 @@ namespace KanonBot.image
                 catch { bp1bg = Img.Load(await Utils.LoadFile2Byte("./work/legacy/load-failed-img.png")); }
                 //bp1bg.Mutate(x => x.Resize(355, 200));
                 bp1bg.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(355, 0), Mode = ResizeMode.Max })); //355x200
-                switch (ColorMode)
-                {
-                    case 0:
-                        bp1bg.Mutate(x => x.Brightness(MainBPImgBrightness));
-                        break;
-                    case 1:
-                        //light
-                        //do nothing  
-                        break;
-                    case 2:
-                        //dark
-                        bp1bg.Mutate(x => x.Brightness(MainBPImgBrightness));
-                        break;
-                }
+                bp1bg.Mutate(x => x.Brightness(MainBPImgBrightness));
                 info.Mutate(x => x.DrawImage(bp1bg, new Point(1566, 1550), 1));
             }
             else
@@ -702,7 +676,7 @@ namespace KanonBot.image
                         break;
                     case 1:
                         //light
-                        //do nothing  
+                        //do nothing
                         break;
                     case 2:
                         //dark
@@ -766,20 +740,8 @@ namespace KanonBot.image
                 }
                 avatar = Img.Load(await Utils.LoadFile2Byte(avatarPath)).CloneAs<Rgba32>();    // 下载后再读取
             }
-            switch (ColorMode)
-            {
-                case 0:
-                    avatar.Mutate(x => x.Brightness(AvatarBrightness));
-                    break;
-                case 1:
-                    //light
-                    //do nothing  
-                    break;
-                case 2:
-                    //dark
-                    avatar.Mutate(x => x.Brightness(AvatarBrightness));
-                    break;
-            }
+            // 亮度
+            avatar.Mutate(x => x.Brightness(AvatarBrightness));
             avatar.Mutate(x => x.Resize(200, 200).RoundCorner(new Size(200, 200), 25));
             info.Mutate(x => x.DrawImage(avatar, new Point(1531, 72), 1));
 
@@ -796,7 +758,7 @@ namespace KanonBot.image
 
             //country_flag
             Img flags = Img.Load(await Utils.LoadFile2Byte($"./work/flags/{data.userInfo.Country.Code}.png"));
-            flags.Mutate(x => x.Resize(100, 67));
+            flags.Mutate(x => x.Resize(100, 67).Brightness(CountryFlagBrightness));
             info.Mutate(x => x.DrawImage(flags, new Point(1577, 600), 1));
 
             //country_rank
@@ -1315,20 +1277,7 @@ namespace KanonBot.image
                     temp.Save($"./work/badges/{data.badgeId}.png", new PngEncoder());
                     badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png")).CloneAs<Rgba32>();
                 }
-                switch (ColorMode)
-                {
-                    case 0:
-                        badge.Mutate(x => x.Resize(236, 110).Brightness(BadgeBrightness).RoundCorner(new Size(236, 110), 20));
-                        break;
-                    case 1:
-                        //light
-                        badge.Mutate(x => x.Resize(236, 110).RoundCorner(new Size(236, 110), 20));
-                        break;
-                    case 2:
-                        //dark
-                        badge.Mutate(x => x.Resize(236, 110).Brightness(BadgeBrightness).RoundCorner(new Size(236, 110), 20));
-                        break;
-                }
+                badge.Mutate(x => x.Resize(236, 110).Brightness(BadgeBrightness).RoundCorner(new Size(236, 110), 20));
                 info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
             }
 

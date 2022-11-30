@@ -1,10 +1,10 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
 using System.Reflection;
-using System.ComponentModel;
-using Newtonsoft.Json.Linq;
-using static KanonBot.LegacyImage.Draw;
+using System.Text.RegularExpressions;
 using KanonBot.API;
+using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1.Crmf;
+using static KanonBot.LegacyImage.Draw;
 
 namespace KanonBot;
 
@@ -412,7 +412,7 @@ public static class Utils
     {
         Mail.MailStruct ms = new()
         {
-            MailTo = new string[] { mailto },
+            MailTo = Array(mailto),
             Subject = $"KanonBot 错误自动上报 - 发生于 {DateTime.Now}",
             Body = body,
             IsBodyHtml = false
@@ -427,7 +427,7 @@ public static class Utils
     {
         Mail.MailStruct ms = new()
         {
-            MailTo = new string[] { mailto },
+            MailTo = Array(mailto),
             Subject = title,
             Body = body,
             IsBodyHtml = isBodyHtml

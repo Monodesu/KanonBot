@@ -1,39 +1,41 @@
-﻿using KanonBot.Drivers;
-using KanonBot.Message;
-using KanonBot.API;
-using Serilog;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.Drawing;
-using Img = SixLabors.ImageSharp.Image;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp.ColorSpaces;
+﻿using System.IO;
 using Flurl;
 using Flurl.Http;
+using Flurl.Util;
+using KanonBot.API;
+using KanonBot.Drivers;
 using KanonBot.functions.osu.rosupp;
-using KanonBot.LegacyImage;
-using static KanonBot.LegacyImage.Draw;
 using KanonBot.Image;
-using SqlSugar;
-using System.IO;
-using SixLabors.ImageSharp.Formats.Png;
-using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using KanonBot.LegacyImage;
+using KanonBot.Message;
+using Serilog;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SqlSugar;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using static KanonBot.LegacyImage.Draw;
+using Img = SixLabors.ImageSharp.Image;
+using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 
 namespace KanonBot.functions.osubot
 {
-    public class Set
+    public class Setter
     {
         public static async Task Execute(Target target, string cmd)
         {
             string rootCmd, childCmd = "";
             try
             {
-                rootCmd = cmd[..cmd.IndexOf(" ")].Trim();
-                childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
+                var tmp = cmd.SplitOnFirstOccurence(" ");
+                rootCmd = tmp[0].Trim();
+                childCmd = tmp[1].Trim();
             }
             catch { rootCmd = cmd; }
             switch (rootCmd.ToLower())
@@ -63,14 +65,18 @@ namespace KanonBot.functions.osubot
                     await Osu_InfoPanelV2CustomColorValue(target, childCmd);
                     break;
                 default:
-                    target.reply("!set osumode/" +
-                        "osuinfopanelversion\r\n" +
-                        "osuinfopanelv1img/" +
-                        "osuinfopanelv2img\r\n" +
-                        "osuinfopanelv1panel/" +
-                        "osuinfopanelv2panel\r\n" +
-                        "osuinfopanelv2colormode\r\n" +
-                        "osuinfopanelv2colorcustom");
+                    target.reply(
+                        """
+                        !set osumode
+                             osuinfopanelversion
+                             osuinfopanelv1img
+                             osuinfopanelv2img
+                             osuinfopanelv1panel
+                             osuinfopanelv2panel
+                             osuinfopanelv2colormode
+                             osuinfopanelv2colorcustom
+                        """
+                    );
                     return;
             }
         }
@@ -255,9 +261,9 @@ namespace KanonBot.functions.osubot
                 image.Save($"./work/panelv2/user_customimg/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
                 temppic.Dispose();
                 File.Delete(imagePath);
-                target.reply("已成功上传，请耐心等待审核。\r\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
-                Utils.SendMail("mono@desu.life", "有新的v2 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
-                Utils.SendMail("fantasyzhjk@qq.com", "有新的v2 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
+                target.reply("已成功上传，请耐心等待审核。\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
+                Utils.SendMail("mono@desu.life", "有新的v2 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\n<img src={cmd}>", true);
+                Utils.SendMail("fantasyzhjk@qq.com", "有新的v2 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\n<img src={cmd}>", true);
             }
             catch
             {
@@ -338,9 +344,9 @@ namespace KanonBot.functions.osubot
                 image.Save($"./work/legacy/v1_cover/custom/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
                 temppic.Dispose();
                 File.Delete(imagePath);
-                target.reply("已成功上传，请耐心等待审核。\r\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
-                Utils.SendMail("mono@desu.life", "有新的v1 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
-                Utils.SendMail("fantasyzhjk@qq.com", "有新的v1 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
+                target.reply("已成功上传，请耐心等待审核。\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
+                Utils.SendMail("mono@desu.life", "有新的v1 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\n<img src={cmd}>", true);
+                Utils.SendMail("fantasyzhjk@qq.com", "有新的v1 info image需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\n<img src={cmd}>", true);
             }
             catch
             {
@@ -417,9 +423,9 @@ namespace KanonBot.functions.osubot
                 temppic.Save($"./work/panelv2/user_infopanel/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
                 temppic.Dispose();
                 File.Delete(imagePath);
-                target.reply("已成功上传，请耐心等待审核。\r\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
-                Utils.SendMail("mono@desu.life", "有新的v2 info panel需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
-                Utils.SendMail("fantasyzhjk@qq.com", "有新的v2 info panel需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
+                target.reply("已成功上传，请耐心等待审核。\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
+                Utils.SendMail("mono@desu.life", "有新的v2 info panel需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\n<img src={cmd}>", true);
+                Utils.SendMail("fantasyzhjk@qq.com", "有新的v2 info panel需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\n<img src={cmd}>", true);
             }
             catch
             {
@@ -495,9 +501,9 @@ namespace KanonBot.functions.osubot
                 temppic.Save($"./work/legacy/v1_infopanel/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
                 temppic.Dispose();
                 File.Delete(imagePath);
-                target.reply("已成功上传，请耐心等待审核。\r\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
-                Utils.SendMail("mono@desu.life", "有新的v1 info panel需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
-                Utils.SendMail("fantasyzhjk@qq.com", "有新的v1 info panel需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\r\n<img src={cmd}>", true);
+                target.reply("已成功上传，请耐心等待审核。\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
+                Utils.SendMail("mono@desu.life", "有新的v1 info panel需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\n<img src={cmd}>", true);
+                Utils.SendMail("fantasyzhjk@qq.com", "有新的v1 info panel需要审核", $"osuid: {DBOsuInfo.osu_uid}  请及时查看\n<img src={cmd}>", true);
             }
             catch
             {
@@ -595,11 +601,9 @@ namespace KanonBot.functions.osubot
             string[] argstemp;
             try
             {
-                if (cmd.IndexOf("\r\n") == -1)
-                    cmd = cmd.Replace("\n", "\r\n");
-                argstemp = cmd.Split("\r\n");
+                argstemp = cmd.Split("\n");
                 if (argstemp.Length < 71)
-                    throw new Exception();
+                    throw new ArgumentException("颜色参数缺失或错误");
             }
             catch
             {

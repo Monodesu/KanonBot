@@ -1,22 +1,22 @@
-﻿using KanonBot.Drivers;
-using KanonBot.Message;
-using KanonBot.API;
-using static KanonBot.functions.Accounts;
-using Flurl.Util;
-using JetBrains.Annotations;
+﻿using System.IO;
 using System.Security.Cryptography;
-using K4os.Hash.xxHash;
-using SixLabors.ImageSharp.Drawing;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Drawing.Processing;
-using Img = SixLabors.ImageSharp.Image;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp.Formats.Png;
-using System.IO;
 using Flurl;
 using Flurl.Http;
+using Flurl.Util;
+using JetBrains.Annotations;
+using K4os.Hash.xxHash;
+using KanonBot.API;
+using KanonBot.Drivers;
+using KanonBot.Message;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using static KanonBot.functions.Accounts;
+using Img = SixLabors.ImageSharp.Image;
 
 namespace KanonBot.functions.osubot
 {
@@ -34,8 +34,9 @@ namespace KanonBot.functions.osubot
             string rootCmd, childCmd = "";
             try
             {
-                rootCmd = cmd[..cmd.IndexOf(" ")].Trim();
-                childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
+                var tmp = cmd.SplitOnFirstOccurence(" ");
+                rootCmd = tmp[0].Trim();
+                childCmd = tmp[1].Trim();
             }
             catch { rootCmd = cmd; }
             switch (rootCmd.ToLower())
@@ -104,8 +105,9 @@ namespace KanonBot.functions.osubot
             string rootCmd, childCmd = "";
             try
             {
-                rootCmd = cmd[..cmd.IndexOf(" ")].Trim();
-                childCmd = cmd[(cmd.IndexOf(" ") + 1)..].Trim();
+                var tmp = cmd.SplitOnFirstOccurence(" ");
+                rootCmd = tmp[0].Trim();
+                childCmd = tmp[1].Trim();
             }
             catch { rootCmd = cmd; }
 
@@ -118,7 +120,7 @@ namespace KanonBot.functions.osubot
                 case "getuser":
                     SudoGetUser(target, childCmd); return;
                 case "list":
-                    //await List(target, accinfo); 
+                    //await List(target, accinfo);
                     return;
                 case "addbyemail":
                     await SudoAdd(target, childCmd, 0); return;
@@ -356,13 +358,13 @@ namespace KanonBot.functions.osubot
             var args = cmd.Split("#"); //args[0]=badge id      args[1]=user(s)
             var badgeid = args[0].Trim();
             string[] users;
-            if (args[1].IndexOf("/") != -1)
+            if (args[1].Contains("/"))
                 users = args[1].Split("/");
             else
                 users = new string[] { args[1] };
             string replymsg;
             List<string> failed_msg;
-            Database.Model.BadgeList badge;
+            Database.Model.BadgeList? badge;
             bool skip;
             //0=email 1=oid
             switch (addMethod)
@@ -379,7 +381,7 @@ namespace KanonBot.functions.osubot
                     {
                         replymsg += $"检查email有效性失败，共有{failed_msg.Count}个email为无效email，详细信息如下：";
                         foreach (var x in failed_msg)
-                            replymsg += $"\r\n{x}";
+                            replymsg += $"\n{x}";
                         target.reply(replymsg);
                         return;
                     }
@@ -420,7 +422,7 @@ namespace KanonBot.functions.osubot
                                 //添加之前先查重
                                 foreach (var xx in owned_badges)
                                 {
-                                    if (xx.IndexOf(badgeid) > -1)
+                                    if (xx.Contains(badgeid))
                                     {
                                         skip = true;
                                         failed_msg.Add($"desu.life用户 {x} 已拥有此badge，跳过");
@@ -443,9 +445,9 @@ namespace KanonBot.functions.osubot
                     replymsg = "完成。";
                     if (failed_msg.Count > 0)
                     {
-                        replymsg += $"\r\n共有{failed_msg.Count}名用户添加失败，错误信息如下：";
+                        replymsg += $"\n共有{failed_msg.Count}名用户添加失败，错误信息如下：";
                         foreach (var x in failed_msg)
-                            replymsg += $"\r\n{x}";
+                            replymsg += $"\n{x}";
                     }
                     target.reply(replymsg);
                     #endregion
@@ -462,7 +464,7 @@ namespace KanonBot.functions.osubot
                     {
                         replymsg += $"检查osu!uid有效性失败，共有{failed_msg.Count}个uid为无效uid，详细信息如下：";
                         foreach (var x in failed_msg)
-                            replymsg += $"\r\n{x}";
+                            replymsg += $"\n{x}";
                         target.reply(replymsg);
                         return;
                     }
@@ -503,7 +505,7 @@ namespace KanonBot.functions.osubot
                                 //添加之前先查重
                                 foreach (var xx in owned_badges)
                                 {
-                                    if (xx.IndexOf(badgeid) > -1)
+                                    if (xx.Contains(badgeid))
                                     {
                                         skip = true;
                                         failed_msg.Add($"osu!用户 {x} 已拥有此badge，跳过");
@@ -529,9 +531,9 @@ namespace KanonBot.functions.osubot
                     replymsg = "完成。";
                     if (failed_msg.Count > 0)
                     {
-                        replymsg += $"\r\n共有{failed_msg.Count}名用户添加失败，错误信息如下：";
+                        replymsg += $"\n共有{failed_msg.Count}名用户添加失败，错误信息如下：";
                         foreach (var x in failed_msg)
-                            replymsg += $"\r\n{x}";
+                            replymsg += $"\n{x}";
                     }
                     target.reply(replymsg);
                     break;
