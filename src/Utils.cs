@@ -374,7 +374,7 @@ public static class Utils
         catch { }
     }
 
-    public static double ToLinear(double color) => color <= 0.04045 ? color / 12.92 : Math.Pow((color + 0.055) / 1.055, 2.5);
+    public static double ToLinear(double color) => color <= 0.04045 ? color / 12.92 : Math.Pow((color + 0.055) / 1.055, 2.4);
 
     public static Vector4 ToLinear(this Vector4 colour) =>
             new Vector4(
@@ -390,16 +390,16 @@ public static class Utils
                 (byte)(colour.W * 255)
             );
 
-    public static Color ValueAt(double time, Vector4 startColour, Vector4 endColour, double startTime, double endTime)
+    public static Vector4 ValueAt(double time, Vector4 startColour, Vector4 endColour, double startTime, double endTime)
     {
         if (startColour == endColour)
-            return startColour.ToColor();
+            return startColour;
 
         double current = time - startTime;
         double duration = endTime - startTime;
 
         if (duration == 0 || current == 0)
-            return startColour.ToColor();
+            return startColour;
 
         var startLinear = startColour.ToLinear();
         var endLinear = endColour.ToLinear();
@@ -410,15 +410,15 @@ public static class Utils
             startLinear.X + t * (endLinear.X - startLinear.X),
             startLinear.Y + t * (endLinear.Y - startLinear.Y),
             startLinear.Z + t * (endLinear.Z - startLinear.Z),
-            startLinear.W + t * (endLinear.W - startLinear.W))
-            .ToColor();
+            startLinear.W + t * (endLinear.W - startLinear.W)
+        );
     }
 
 
-    public static Color SampleFromLinearGradient(IReadOnlyList<(float position, Vector4 colour)> gradient, float point)
+    public static Vector4 SampleFromLinearGradient(IReadOnlyList<(float position, Vector4 colour)> gradient, float point)
     {
         if (point < gradient[0].position)
-            return gradient[0].colour.ToColor();
+            return gradient[0].colour;
 
         for (int i = 0; i < gradient.Count - 1; i++)
         {
@@ -431,23 +431,23 @@ public static class Utils
             return ValueAt(point, startStop.colour, endStop.colour, startStop.position, endStop.position);
         }
 
-        return gradient[^1].colour.ToColor();
+        return gradient[^1].colour;
     }
 
     static public Color ForStarDifficulty(double starDifficulty) => SampleFromLinearGradient(new[]
-        {
-            (0.1f, Rgba32.ParseHex("#aaaaaa").ToVector4()),
-            (0.1f, Rgba32.ParseHex("#4290fb").ToVector4()),
-            (1.25f, Rgba32.ParseHex("#4fc0ff").ToVector4()),
-            (2.0f, Rgba32.ParseHex("#4fffd5").ToVector4()),
-            (2.5f, Rgba32.ParseHex("#7cff4f").ToVector4()),
-            (3.3f, Rgba32.ParseHex("#f6f05c").ToVector4()),
-            (4.2f, Rgba32.ParseHex("#ff8068").ToVector4()),
-            (4.9f, Rgba32.ParseHex("#ff4e6f").ToVector4()),
-            (5.8f, Rgba32.ParseHex("#c645b8").ToVector4()),
-            (6.7f, Rgba32.ParseHex("#6563de").ToVector4()),
-            (7.7f, Rgba32.ParseHex("#18158e").ToVector4()),
-            (9.0f, Rgba32.ParseHex("#000000").ToVector4()),
-        }, (float)Math.Round(starDifficulty, 2, MidpointRounding.AwayFromZero));
+    {
+        (0.1f, Rgba32.ParseHex("#aaaaaa").ToVector4()),
+        (0.1f, Rgba32.ParseHex("#4290fb").ToVector4()),
+        (1.25f, Rgba32.ParseHex("#4fc0ff").ToVector4()),
+        (2.0f, Rgba32.ParseHex("#4fffd5").ToVector4()),
+        (2.5f, Rgba32.ParseHex("#7cff4f").ToVector4()),
+        (3.3f, Rgba32.ParseHex("#f6f05c").ToVector4()),
+        (4.2f, Rgba32.ParseHex("#ff8068").ToVector4()),
+        (4.9f, Rgba32.ParseHex("#ff4e6f").ToVector4()),
+        (5.8f, Rgba32.ParseHex("#c645b8").ToVector4()),
+        (6.7f, Rgba32.ParseHex("#6563de").ToVector4()),
+        (7.7f, Rgba32.ParseHex("#18158e").ToVector4()),
+        (9.0f, Rgba32.ParseHex("#000000").ToVector4()),
+    }, (float)Math.Round(starDifficulty, 2, MidpointRounding.AwayFromZero)).ToColor();
 }
 
