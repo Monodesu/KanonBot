@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using static KanonBot.Database.Model;
 using CronNET.Impl;
+using SqlSugar;
 
 namespace KanonBot.functions.osu
 {
@@ -49,7 +50,8 @@ namespace KanonBot.functions.osu
             var stopwatch = Stopwatch.StartNew();
             var userList = await Database.Client.GetOsuUserList();
             ParallelOptions options = new ParallelOptions { MaxDegreeOfParallelism = 4 };
-            await Parallel.ForEachAsync(userList, options, async (userID, _) => {
+            await Parallel.ForEachAsync(userList, options, async (userID, _) =>
+            {
                 try
                 {
                     await UpdateUser(userID, false);
@@ -60,6 +62,9 @@ namespace KanonBot.functions.osu
                 }
             });
             stopwatch.Stop();
+            //删除头像以及osu!web缓存
+            try { try { var files = Directory.GetFiles($@".\work\avatar\"); foreach (var file in files) try { File.Delete(file); } catch { } } catch { } } catch { }
+            try { try { var files = Directory.GetFiles($@".\work\legacy\v1_cover\osu!web\"); foreach (var file in files) try { File.Delete(file); } catch { } } catch { } } catch { }
             return (userList.Count, stopwatch.Elapsed);
         }
 
