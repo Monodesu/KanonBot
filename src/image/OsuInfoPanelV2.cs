@@ -459,7 +459,7 @@ namespace KanonBot.image
                     accMainColor = Color.ParseHex("#6cac9c");
                     accProgressBarColorTextColor = Color.ParseHex("#00DE75");
                     accProgressBarColor = Color.ParseHex("#294B32");
-                    accProgressBarBackgroundColor = Color.ParseHex("#294B32");
+                    accProgressBarBackgroundColor = Color.ParseHex("#243829");
                     GradeStatisticsColor_XH = Color.ParseHex("#6C91E0");
                     GradeStatisticsColor_X = Color.ParseHex("#6C91E0");
                     GradeStatisticsColor_SH = Color.ParseHex("#6C91E0");
