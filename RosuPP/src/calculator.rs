@@ -1,6 +1,6 @@
 use crate::*;
 use interoptopus::{
-    ffi_service, ffi_service_ctor, ffi_service_method, ffi_type, patterns::slice::FFISlice
+    ffi_service, ffi_service_ctor, ffi_service_method, ffi_type, patterns::{slice::FFISlice, option::FFIOption},
 };
 use rosu_pp::{AnyPP, Beatmap};
 
@@ -31,5 +31,43 @@ impl Calculator {
             mods,
             clock_rate.into_option(),
         )
+    }
+
+    #[allow(non_snake_case)]
+    #[ffi_service_method(on_panic = "undefined_behavior")]
+    pub fn scorePos(&self, res: CalculateResult) -> FFIOption<f64> {
+        let map = self.inner.convert_mode(res.mode.into());
+        let idx = match res.mode {
+            Mode::Osu | Mode::Taiko => {
+                let (Some(nCircles), Some(nSliders), Some(nSpinners)) = (
+                    res.nCircles.into_option(),
+                    res.nSliders.into_option(),
+                    res.nSpinners.into_option(),
+                ) else { unreachable!() };
+                nCircles + nSliders + nSpinners
+            }
+            Mode::Catch => {
+                let (Some(nFruits), Some(nDroplets), Some(nTinyDroplets), Some(nSpinners)) = (
+                    res.nFruits.into_option(),
+                    res.nDroplets.into_option(),
+                    res.nTinyDroplets.into_option(),
+                    res.nSpinners.into_option(),
+                ) else { unreachable!() };
+                nFruits + nDroplets + nTinyDroplets + nSpinners
+            }
+            Mode::Mania => {
+                let (Some(nCircles), Some(nSliders)) = (
+                    res.nCircles.into_option(),
+                    res.nSliders.into_option()
+                ) else { unreachable!() };
+                nCircles + nSliders
+            }
+        } as usize;
+        map.hit_objects
+            .iter()
+            .enumerate()
+            .find(|(i, _)| *i > idx)
+            .map(|(_, o)| o.start_time)
+            .into()
     }
 }

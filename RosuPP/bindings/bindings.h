@@ -30,7 +30,9 @@ typedef enum ffierror
     FFIERROR_OK = 0,
     FFIERROR_NULL = 100,
     FFIERROR_PANIC = 200,
-    FFIERROR_FAIL = 300,
+    FFIERROR_PARSEERROR = 300,
+    FFIERROR_INVALIDSTRING = 400,
+    FFIERROR_UNKNOWN = 1000,
     } ffierror;
 
 ///Option type containing boolean flag and maybe valid data.
@@ -49,7 +51,7 @@ typedef struct optionu32
 
 typedef struct calculateresult
     {
-    uint8_t mode;
+    mode mode;
     double stars;
     double pp;
     optionf64 ppAcc;
@@ -57,6 +59,7 @@ typedef struct calculateresult
     optionf64 ppFlashlight;
     optionf64 ppSpeed;
     optionf64 ppStrain;
+    optionf64 ppDifficulty;
     optionu32 nFruits;
     optionu32 nDroplets;
     optionu32 nTinyDroplets;
@@ -76,7 +79,15 @@ typedef struct calculateresult
     optionu32 nSliders;
     optionu32 nSpinners;
     optionu32 maxCombo;
+    optionf64 EffectiveMissCount;
     } calculateresult;
+
+///A pointer to an array of data someone else owns which may not be modified.
+typedef struct sliceu8
+    {
+    const uint8_t* data;
+    uint64_t len;
+    } sliceu8;
 
 
 /// Destroys the given instance.
@@ -87,9 +98,11 @@ typedef struct calculateresult
 /// passing any other value results in undefined behavior.
 ffierror calculator_destroy(calculator** context);
 
-ffierror calculator_new(calculator** context, const char* beatmap_path);
+ffierror calculator_new(calculator** context, sliceu8 beatmap_data);
 
 calculateresult calculator_calculate(calculator* context, scoreparams score_params);
+
+optionf64 calculator_scorePos(const calculator* context, calculateresult res);
 
 /// Destroys the given instance.
 ///
@@ -116,8 +129,6 @@ void score_params_n50(scoreparams* context, uint32_t n50);
 
 void score_params_combo(scoreparams* context, uint32_t combo);
 
-void score_params_score(scoreparams* context, uint32_t score);
-
 void score_params_n_misses(scoreparams* context, uint32_t n_misses);
 
 void score_params_n_katu(scoreparams* context, uint32_t n_katu);
@@ -125,6 +136,8 @@ void score_params_n_katu(scoreparams* context, uint32_t n_katu);
 void score_params_passed_objects(scoreparams* context, uint32_t passed_objects);
 
 void score_params_clock_rate(scoreparams* context, double clock_rate);
+
+void debug_result(const calculateresult* res);
 
 
 #ifdef __cplusplus

@@ -34,6 +34,9 @@ namespace RosuPP
         [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "calculator_calculate")]
         public static extern CalculateResult calculator_calculate(IntPtr context, IntPtr score_params);
 
+        [DllImport(NativeLib, CallingConvention = CallingConvention.Cdecl, EntryPoint = "calculator_scorePos")]
+        public static extern Optionf64 calculator_scorePos(IntPtr context, CalculateResult res);
+
         /// Destroys the given instance.
         ///
         /// # Safety
@@ -295,6 +298,11 @@ namespace RosuPP
         public CalculateResult Calculate(IntPtr score_params)
         {
             return Rosu.calculator_calculate(_context, score_params);
+        }
+
+        public Optionf64 ScorePos(CalculateResult res)
+        {
+            return Rosu.calculator_scorePos(_context, res);
         }
 
         public IntPtr Context => _context;
