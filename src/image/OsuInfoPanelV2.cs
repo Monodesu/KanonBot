@@ -436,7 +436,7 @@ namespace KanonBot.image
                     SubBp5thBPppMainColor = Color.ParseHex("#ff7bac");
                     footerColor = Color.ParseHex("#7f7f7f");
                     SubBpInfoSplitColor = Color.ParseHex("#656b6d");
-                    ModeIconColor = Color.White;
+                    ModeIconColor = Color.ParseHex("#7f7f7f");
                     SubBp2ndModeColor = Color.White;
                     SubBp3rdModeColor = Color.White;
                     SubBp4thModeColor = Color.White;
@@ -521,7 +521,7 @@ namespace KanonBot.image
                     ModIconBrightness = 0.6f;
                     ScoreModeIconBrightness = 0.6f;
 
-                    ModeIconColor = Color.White;
+                    ModeIconColor = Color.ParseHex("#e6e6e6");
                     SubBp2ndModeColor = Color.White;
                     SubBp3rdModeColor = Color.White;
                     SubBp4thModeColor = Color.White;

@@ -104,6 +104,7 @@ namespace KanonBot.functions.osu
                         return;
                     }
                     await Database.Client.SetOsuUserPermissionByOid(long.Parse(cmd), "restricted");
+                    await target.reply($"restricted");
                     return;
                 case 2:
                     if (await Database.Client.GetUsers(cmd) == null)
@@ -112,6 +113,7 @@ namespace KanonBot.functions.osu
                         return;
                     }
                     await Database.Client.SetOsuUserPermissionByEmail(cmd, "restricted");
+                    await target.reply($"restricted");
                     return;
                 default:
                     return;

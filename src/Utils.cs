@@ -374,7 +374,7 @@ public static class Utils
         catch { }
     }
 
-    public static double ToLinear(double color) => color <= 0.04045 ? color / 12.92 : Math.Pow((color + 0.055) / 1.055, 2.4);
+    public static double ToLinear(double color) => color <= 0.04045 ? color / 12.92 : Math.Pow((color + 0.055) / 1.055, 0.8);
 
     public static Vector4 ToLinear(this Vector4 colour) =>
             new Vector4(
