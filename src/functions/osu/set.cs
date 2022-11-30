@@ -526,6 +526,7 @@ namespace KanonBot.functions.osubot
 
             #region Colors
             Color UsernameColor = new(),
+                  ModeIconColor = new(),
                   RankColor = new(),
                   CountryRankColor = new(),
                   RankLineChartColor = new(),
@@ -559,6 +560,7 @@ namespace KanonBot.functions.osubot
                   MainBPRankColor = new(),
                   MainBPppMainColor = new(),
                   MainBPppTitleColor = new(),
+                  SubBp2ndModeColor = new(),
                   SubBp2ndBPTitleColor = new(),
                   SubBp2ndBPVersionColor = new(),
                   SubBp2ndBPBIDColor = new(),
@@ -566,6 +568,7 @@ namespace KanonBot.functions.osubot
                   SubBp2ndBPAccColor = new(),
                   SubBp2ndBPRankColor = new(),
                   SubBp2ndBPppMainColor = new(),
+                  SubBp3rdModeColor = new(),
                   SubBp3rdBPTitleColor = new(),
                   SubBp3rdBPVersionColor = new(),
                   SubBp3rdBPBIDColor = new(),
@@ -573,6 +576,7 @@ namespace KanonBot.functions.osubot
                   SubBp3rdBPAccColor = new(),
                   SubBp3rdBPRankColor = new(),
                   SubBp3rdBPppMainColor = new(),
+                  SubBp4thModeColor = new(),
                   SubBp4thBPTitleColor = new(),
                   SubBp4thBPVersionColor = new(),
                   SubBp4thBPBIDColor = new(),
@@ -580,6 +584,7 @@ namespace KanonBot.functions.osubot
                   SubBp4thBPAccColor = new(),
                   SubBp4thBPRankColor = new(),
                   SubBp4thBPppMainColor = new(),
+                  SubBp5thModeColor = new(),
                   SubBp5thBPTitleColor = new(),
                   SubBp5thBPVersionColor = new(),
                   SubBp5thBPBIDColor = new(),
@@ -596,13 +601,16 @@ namespace KanonBot.functions.osubot
                   MainBPImgBrightness = 1.0f,
                   CountryFlagBrightness = 1.0f,
                   ModeCaptionBrightness = 1.0f,
-                  ModIconBrightness = 1.0f;
+                  ModIconBrightness = 1.0f,
+                  ScoreModeIconBrightness = 1.0f;
+
+            bool FixedScoreModeIconColor = false;
             #endregion
             string[] argstemp;
             try
             {
                 argstemp = cmd.Split("\n");
-                if (argstemp.Length < 71)
+                if (argstemp.Length < 78)
                     throw new ArgumentException("颜色参数缺失或错误");
             }
             catch
@@ -618,6 +626,9 @@ namespace KanonBot.functions.osubot
                     {
                         case "UsernameColor":
                             UsernameColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "ModeIconColor":
+                            ModeIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;
                         case "RankColor":
                             RankColor = Color.ParseHex(arg.Split(":")[1].Trim());
@@ -718,6 +729,9 @@ namespace KanonBot.functions.osubot
                         case "MainBPppTitleColor":
                             MainBPppTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;
+                        case "SubBp2ndModeColor":
+                            SubBp2ndModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
                         case "SubBp2ndBPTitleColor":
                             SubBp2ndBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;
@@ -738,6 +752,9 @@ namespace KanonBot.functions.osubot
                             break;
                         case "SubBp2ndBPppMainColor":
                             SubBp2ndBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "SubBp3rdModeColor":
+                            SubBp3rdModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;
                         case "SubBp3rdBPTitleColor":
                             SubBp3rdBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
@@ -760,6 +777,9 @@ namespace KanonBot.functions.osubot
                         case "SubBp3rdBPppMainColor":
                             SubBp3rdBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;
+                        case "SubBp4thModeColor":
+                            SubBp4thModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
                         case "SubBp4thBPTitleColor":
                             SubBp4thBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;
@@ -780,6 +800,9 @@ namespace KanonBot.functions.osubot
                             break;
                         case "SubBp4thBPppMainColor":
                             SubBp4thBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "SubBp5thModeColor":
+                            SubBp5thModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;
                         case "SubBp5thBPTitleColor":
                             SubBp5thBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
@@ -808,6 +831,9 @@ namespace KanonBot.functions.osubot
                         case "footerColor":
                             footerColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;
+                        case "FixedScoreModeIconColor":
+                            FixedScoreModeIconColor = bool.Parse($"{arg.Split(":")[1].Trim()}");
+                            break;
                         case "SideImgBrightness":
                             SideImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                             break;
@@ -828,6 +854,11 @@ namespace KanonBot.functions.osubot
                             break;
                         case "ModIconBrightness":
                             ModIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
+                            break;
+                        case "ScoreModeIconBrightness":
+                            ScoreModeIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
+                            break;
+                        default:
                             break;
                     }
                     //检查通过，写入数据库

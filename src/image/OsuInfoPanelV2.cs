@@ -9,8 +9,10 @@ using Flurl;
 using Flurl.Http;
 using KanonBot.API;
 using KanonBot.functions.osu.rosupp;
+using KanonBot.functions.osubot;
 using KanonBot.Image;
 using KanonBot.LegacyImage;
+using MySqlX.XDevAPI.Relational;
 using Serilog;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
@@ -35,8 +37,9 @@ namespace KanonBot.image
         {
             var ColorMode = data.InfoPanelV2_Mode;
 
-            #region Colors
+            #region Colors_config
             Color UsernameColor = new(),
+                  ModeIconColor = new(),
                   RankColor = new(),
                   CountryRankColor = new(),
                   RankLineChartColor = new(),
@@ -70,6 +73,7 @@ namespace KanonBot.image
                   MainBPRankColor = new(),
                   MainBPppMainColor = new(),
                   MainBPppTitleColor = new(),
+                  SubBp2ndModeColor = new(),
                   SubBp2ndBPTitleColor = new(),
                   SubBp2ndBPVersionColor = new(),
                   SubBp2ndBPBIDColor = new(),
@@ -77,6 +81,7 @@ namespace KanonBot.image
                   SubBp2ndBPAccColor = new(),
                   SubBp2ndBPRankColor = new(),
                   SubBp2ndBPppMainColor = new(),
+                  SubBp3rdModeColor = new(),
                   SubBp3rdBPTitleColor = new(),
                   SubBp3rdBPVersionColor = new(),
                   SubBp3rdBPBIDColor = new(),
@@ -84,6 +89,7 @@ namespace KanonBot.image
                   SubBp3rdBPAccColor = new(),
                   SubBp3rdBPRankColor = new(),
                   SubBp3rdBPppMainColor = new(),
+                  SubBp4thModeColor = new(),
                   SubBp4thBPTitleColor = new(),
                   SubBp4thBPVersionColor = new(),
                   SubBp4thBPBIDColor = new(),
@@ -91,6 +97,7 @@ namespace KanonBot.image
                   SubBp4thBPAccColor = new(),
                   SubBp4thBPRankColor = new(),
                   SubBp4thBPppMainColor = new(),
+                  SubBp5thModeColor = new(),
                   SubBp5thBPTitleColor = new(),
                   SubBp5thBPVersionColor = new(),
                   SubBp5thBPBIDColor = new(),
@@ -107,8 +114,10 @@ namespace KanonBot.image
                   MainBPImgBrightness = 1.0f,
                   CountryFlagBrightness = 1.0f,
                   ModeCaptionBrightness = 1.0f,
-                  ModIconBrightness = 1.0f;
+                  ModIconBrightness = 1.0f,
+                  ScoreModeIconBrightness = 1.0f;
 
+            bool FixedScoreModeIconColor = false;
             #endregion
             //配色方案 0=用户自定义 1=模板light 2=模板dark 3...4...5...
             //本来应该做个class的 算了 懒了 就这样吧 复制粘贴没什么不好的
@@ -124,6 +133,9 @@ namespace KanonBot.image
                         {
                             case "UsernameColor":
                                 UsernameColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "ModeIconColor":
+                                ModeIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
                             case "RankColor":
                                 RankColor = Color.ParseHex(arg.Split(":")[1].Trim());
@@ -224,6 +236,9 @@ namespace KanonBot.image
                             case "MainBPppTitleColor":
                                 MainBPppTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
+                            case "SubBp2ndModeColor":
+                                SubBp2ndModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
                             case "SubBp2ndBPTitleColor":
                                 SubBp2ndBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
@@ -244,6 +259,9 @@ namespace KanonBot.image
                                 break;
                             case "SubBp2ndBPppMainColor":
                                 SubBp2ndBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp3rdModeColor":
+                                SubBp3rdModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
                             case "SubBp3rdBPTitleColor":
                                 SubBp3rdBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
@@ -266,6 +284,9 @@ namespace KanonBot.image
                             case "SubBp3rdBPppMainColor":
                                 SubBp3rdBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
+                            case "SubBp4thModeColor":
+                                SubBp4thModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
                             case "SubBp4thBPTitleColor":
                                 SubBp4thBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
@@ -286,6 +307,9 @@ namespace KanonBot.image
                                 break;
                             case "SubBp4thBPppMainColor":
                                 SubBp4thBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "SubBp5thModeColor":
+                                SubBp5thModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
                             case "SubBp5thBPTitleColor":
                                 SubBp5thBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
@@ -314,6 +338,9 @@ namespace KanonBot.image
                             case "footerColor":
                                 footerColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
+                            case "FixedScoreModeIconColor":
+                                FixedScoreModeIconColor = bool.Parse($"{arg.Split(":")[1].Trim()}");
+                                break;
                             case "SideImgBrightness":
                                 SideImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
                                 break;
@@ -334,6 +361,11 @@ namespace KanonBot.image
                                 break;
                             case "ModIconBrightness":
                                 ModIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
+                                break;
+                            case "ScoreModeIconBrightness":
+                                ScoreModeIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
+                                break;
+                            default:
                                 break;
                         }
                     }
@@ -404,6 +436,12 @@ namespace KanonBot.image
                     SubBp5thBPppMainColor = Color.ParseHex("#ff7bac");
                     footerColor = Color.ParseHex("#7f7f7f");
                     SubBpInfoSplitColor = Color.ParseHex("#656b6d");
+                    ModeIconColor = Color.White;
+                    SubBp2ndModeColor = Color.White;
+                    SubBp3rdModeColor = Color.White;
+                    SubBp4thModeColor = Color.White;
+                    SubBp5thModeColor = Color.White;
+                    FixedScoreModeIconColor = false;
                     //do not change brightness;
                     break;
                 #endregion
@@ -481,6 +519,14 @@ namespace KanonBot.image
                     CountryFlagBrightness = 0.6f;
                     ModeCaptionBrightness = 0.6f;
                     ModIconBrightness = 0.6f;
+                    ScoreModeIconBrightness = 0.6f;
+
+                    ModeIconColor = Color.White;
+                    SubBp2ndModeColor = Color.White;
+                    SubBp3rdModeColor = Color.White;
+                    SubBp4thModeColor = Color.White;
+                    SubBp5thModeColor = Color.White;
+                    FixedScoreModeIconColor = false;
                     break;
                     #endregion
             }
@@ -951,6 +997,7 @@ namespace KanonBot.image
                 //2nd~5th version and acc and bid and shdklahdksadkjkcna5hoacsporjasldjlksakdlsa
                 textOptions.Font = new Font(TorusRegular, 40);
                 var otherbp_mods_pos_y = 1853;
+                var score_mode_iconpos_y = 1853;
                 for (int i = 1; i < 5; ++i)
                 {
                     Color splitC = new(),
@@ -958,7 +1005,8 @@ namespace KanonBot.image
                           bidC = new(),
                           starC = new(),
                           accC = new(),
-                          rankC = new();
+                          rankC = new(),
+                          modeC = new();
                     splitC = SubBpInfoSplitColor;
                     switch (i)
                     {
@@ -968,6 +1016,7 @@ namespace KanonBot.image
                             starC = SubBp2ndBPStarsColor;
                             accC = SubBp2ndBPAccColor;
                             rankC = SubBp2ndBPRankColor;
+                            modeC = SubBp2ndModeColor;
                             break;
                         case 2:
                             versionC = SubBp3rdBPVersionColor;
@@ -975,6 +1024,7 @@ namespace KanonBot.image
                             starC = SubBp3rdBPStarsColor;
                             accC = SubBp3rdBPAccColor;
                             rankC = SubBp3rdBPRankColor;
+                            modeC = SubBp3rdModeColor;
                             break;
                         case 3:
                             versionC = SubBp4thBPVersionColor;
@@ -982,6 +1032,7 @@ namespace KanonBot.image
                             starC = SubBp4thBPStarsColor;
                             accC = SubBp4thBPAccColor;
                             rankC = SubBp4thBPRankColor;
+                            modeC = SubBp4thModeColor;
                             break;
                         case 4:
                             versionC = SubBp5thBPVersionColor;
@@ -989,6 +1040,7 @@ namespace KanonBot.image
                             starC = SubBp5thBPStarsColor;
                             accC = SubBp5thBPAccColor;
                             rankC = SubBp5thBPRankColor;
+                            modeC = SubBp5thModeColor;
                             break;
                         default:
                             break;
@@ -1060,6 +1112,40 @@ namespace KanonBot.image
                         }
                     }
                     otherbp_mods_pos_y += 186;
+
+                    //mode_icon
+                    Img osuscoremode_icon = Img.Load(await Utils.LoadFile2Byte($"./work/panelv2/icons/mode_icon/score/{data.userInfo.PlayMode.ToStr()}.png")).CloneAs<Rgba32>();
+                    osuscoremode_icon.Mutate(x => x.Resize(92,92));
+                    if (FixedScoreModeIconColor)
+                    {
+                        //固定
+                        osuscoremode_icon.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                        {
+                            for (int p = 0; p < row.Length; p++)
+                            {
+                                row[p].X = ((Vector4)modeC).X;
+                                row[p].Y = ((Vector4)modeC).Y;
+                                row[p].Z = ((Vector4)modeC).Z;
+                            }
+                        }));
+                    }
+                    else
+                    {
+                        //随难度渐变
+                        modeC = Utils.OsuDifficultyColorCalculate(ppinfo1.ppInfo.star);
+                        osuscoremode_icon.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                        {
+                            for (int p = 0; p < row.Length; p++)
+                            {
+                                row[p].X = ((Vector4)modeC).X;
+                                row[p].Y = ((Vector4)modeC).Y;
+                                row[p].Z = ((Vector4)modeC).Z;
+                            }
+                        }));
+
+                    }
+                    info.Mutate(x => x.DrawImage(osuscoremode_icon, new Point(1558, score_mode_iconpos_y), 1));
+                    score_mode_iconpos_y += 186;
                 }
 
                 //all pp
@@ -1281,11 +1367,45 @@ namespace KanonBot.image
                 info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
             }
 
+            //osu!mode
+            Img osuprofilemode_icon = Img.Load(await Utils.LoadFile2Byte($"./work/panelv2/icons/mode_icon/profile/{data.userInfo.PlayMode.ToStr()}.png")).CloneAs<Rgba32>();
+            var osuprofilemode_text = "";
+            switch (data.userInfo.PlayMode)
+            {
+                case OSU.Enums.Mode.OSU:
+                    osuprofilemode_text = "osu!standard";
+                    break;
+                case OSU.Enums.Mode.Taiko:
+                    osuprofilemode_text = "osu!taiko";
+                    break;
+                case OSU.Enums.Mode.Fruits:
+                    osuprofilemode_text = "osu!catch";
+                    break;
+                case OSU.Enums.Mode.Mania:
+                    osuprofilemode_text = "osu!mania";
+                    break;
+            }
+            textOptions.Font = new Font(TorusRegular, 55);
+            textOptions.HorizontalAlignment = HorizontalAlignment.Left;
+            var osuprofilemode_text_measure = TextMeasurer.Measure(osuprofilemode_text, textOptions);
+            Img osuprofilemode = new Image<Rgba32>((int)(70.0f + osuprofilemode_text_measure.Width), 102); //804x102(80?)
+            osuprofilemode_icon.Mutate(x => x.Resize(60, 60));
+            osuprofilemode.Mutate(x => x.DrawImage(osuprofilemode_icon, new Point(0, 21), 1));
+            textOptions.Origin = new PointF(70, 48);
+            osuprofilemode.Mutate(x => x.DrawText(drawOptions, textOptions, osuprofilemode_text, new SolidBrush(footerColor), null));
+            osuprofilemode.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+            {
+                for (int p = 0; p < row.Length; p++)
+                {
+                    //X、Y、Z和W字段分别映射 RGBA 通道。
+                    row[p].X = ((Vector4)ModeIconColor).X;
+                    row[p].Y = ((Vector4)ModeIconColor).Y;
+                    row[p].Z = ((Vector4)ModeIconColor).Z;
+                }
+            }));
 
-
-
-
-
+            var osuprofilemode_x_pos = 1531 + (804 / 2) - (osuprofilemode.Width / 2);
+            info.Mutate(x => x.DrawImage(osuprofilemode, new Point(osuprofilemode_x_pos, 293), 1));
 
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!test info!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;

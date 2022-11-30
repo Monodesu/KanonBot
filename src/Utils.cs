@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using KanonBot.API;
@@ -7,6 +8,7 @@ using Kook;
 using LanguageExt;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1.Crmf;
+using SixLabors.ImageSharp.ColorSpaces;
 using static KanonBot.LegacyImage.Draw;
 
 namespace KanonBot;
@@ -369,5 +371,128 @@ public static class Utils
         }
         catch { }
     }
+
+
+
+    public static SixLabors.ImageSharp.Color OsuDifficultyColorCalculate(double star)
+    {
+        int i;
+        float f, a, b, c;
+        float h, s, v;
+        //Easy    0.0 - 1.99 H=201 S=69% B=100%
+        //Normal  2.0 - 2.69 H=105 S=69% B=100%
+        //Hard    2.7 - 3.99 H=58  S=63% B=96%
+        //Insane  4.0 - 5.29 H=349 S=69% B=100%
+        //Expert  5.3 - 6.49 H=307 S=65% B=78%
+        //Expert+ 6.5 - 7.99 H=241 S=55% B=87%
+        //Expert+ 8.0 - ?    H=241 S+=?  B-=?
+        Console.WriteLine(star);
+        if (star <= 1.99)
+        {
+            //easy
+            h = 201f - (201f * (float)star / 1.99f);
+            s = 0.69f;
+            v = 1.00f;
+        }
+        else if (star <= 2.69)
+        {
+
+            //Normal
+            h = 105f - (105f * (float)star / 2.69f);
+            s = 0.69f;
+            v = 1.00f;
+        }
+        else if (star <= 3.99)
+        {
+            //Hard
+            h = 58f - (58f * (float)star / 3.99f);
+            if (h < 0) h += 360f;
+            s = 0.63f;
+            v = 0.96f;
+        }
+        else if (star <= 5.29)
+        {
+            //Insane
+            h = 349f - (349f * (float)star / 5.29f);
+            s = 0.69f;
+            v = 1.00f;
+        }
+        else if (star <= 6.49)
+        {
+            //Expert
+            h = 307f - (307f * (float)star / 6.49f);
+            s = 0.65f;
+            v = 0.78f;
+        }
+        else if (star <= 7.99)
+        {
+            //Expert+
+            h = 241f - (241f * (float)star / 7.99f);
+            s = 0.55f;
+            v = 0.87f;
+        }
+        else
+        {
+            //Expert++
+            h = 241f;
+            s = 0.45f - ((float)star / 9.00f * 0.87f);
+            v = 0.87f;
+        }
+
+        int r, g, blue;
+        if (h >= 360)
+            h = 0;
+        if (s == 0)
+        {
+            r = (int)(v * 255);
+            g = (int)(v * 255);
+            blue = (int)(v * 255);
+        }
+        else
+        {
+            h /= 60.0f;
+            i = (int)Math.Floor(h);
+            f = h - i;
+            a = v * (1 - s);
+            b = v * (1 - s * f);
+            c = v * (1 - s * (1 - f));
+            switch (i)
+            {
+                case 0:
+                    r = (int)(v * 255);
+                    g = (int)(c * 255);
+                    blue = (int)(a * 255);
+                    break;
+                case 1:
+                    r = (int)(b * 255);
+                    g = (int)(v * 255);
+                    blue = (int)(a * 255);
+                    break;
+                case 2:
+                    r = (int)(a * 255);
+                    g = (int)(v * 255);
+                    blue = (int)(c * 255);
+                    break;
+                case 3:
+                    r = (int)(a * 255);
+                    g = (int)(b * 255);
+                    blue = (int)(v * 255);
+                    break;
+                case 4:
+                    r = (int)(c * 255);
+                    g = (int)(a * 255);
+                    blue = (int)(v * 255);
+                    break;
+                default:
+                    r = (int)(v * 255);
+                    g = (int)(a * 255);
+                    blue = (int)(b * 255);
+                    break;
+            }
+        }
+
+        return SixLabors.ImageSharp.Color.FromRgb((byte)r, (byte)g, (byte)blue);
+    }
+
 }
 

@@ -7,6 +7,12 @@
 		<Nullable>enable</Nullable>
 		<TieredPGO>true</TieredPGO>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <LangVersion>preview</LangVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <LangVersion>preview</LangVersion>
+	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Costura.Fody" Version="5.7.0">
 		  <PrivateAssets>all</PrivateAssets>
