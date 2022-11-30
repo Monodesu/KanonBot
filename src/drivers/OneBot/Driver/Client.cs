@@ -105,7 +105,8 @@ public partial class OneBot
                             var target = new Target
                             {
                                 platform = Platform.OneBot,
-                                account = this.selfID,
+                                sender = obj.UserId.ToString(),
+                                selfAccount = this.selfID,
                                 msg = Message.Parse(obj.MessageList),
                                 raw = obj,
                                 socket = this

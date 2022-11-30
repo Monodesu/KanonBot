@@ -178,10 +178,10 @@ namespace KanonBot.functions.osu
                             stream.TryGetBuffer(out ArraySegment<byte> buffer);
                             msg.image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64);
                         }
-                        target.reply(msg);
+                        await target.reply(msg);
                         return;
                     }
-                    target.reply("暂时没有待审核的内容。");
+                    await target.reply("暂时没有待审核的内容。");
                     return;
                 case 0:
                     //approve all
@@ -196,10 +196,10 @@ namespace KanonBot.functions.osu
                             @$"{file}",
                             @$".\work\legacy\v1_infopanel\{file[file.LastIndexOf("\\")..]}");
                         }
-                        target.reply("approved.");
+                        await target.reply("approved.");
                         return;
                     }
-                    target.reply("暂时没有待审核的内容。");
+                    await target.reply("暂时没有待审核的内容。");
                     return;
                 case 1:
                     //approve
@@ -210,24 +210,24 @@ namespace KanonBot.functions.osu
                         File.Move(
                             @$".\work\legacy\v1_infopanel\verify\{cmd}.png",
                             @$".\work\legacy\v1_infopanel\{cmd}.png");
-                        target.reply("approved.");
+                        await target.reply("approved.");
                         return;
                     }
-                    target.reply("指定内容不存在，请重新检查。");
+                    await target.reply("指定内容不存在，请重新检查。");
                     return;
                 case 2:
                     //reject
                     if (File.Exists(@$".\work\legacy\v1_infopanel\verify\{cmd}.png"))
                     {
                         File.Delete(@$".\work\legacy\v1_infopanel\verify\{cmd}.png");
-                        target.reply("rejected.");
+                        await target.reply("rejected.");
                         return;
                     }
-                    target.reply("要审核的内容不存在，请重新检查。");
+                    await target.reply("要审核的内容不存在，请重新检查。");
                     return;
                 default:
                     //do nothing
-                    target.reply("无效的指令，请重新检查。");
+                    await target.reply("无效的指令，请重新检查。");
                     return;
             }
         }
@@ -251,10 +251,10 @@ namespace KanonBot.functions.osu
                             stream.TryGetBuffer(out ArraySegment<byte> buffer);
                             msg.image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64);
                         }
-                        target.reply(msg);
+                        await target.reply(msg);
                         return;
                     }
-                    target.reply("暂时没有待审核的内容。");
+                    await target.reply("暂时没有待审核的内容。");
                     return;
                 case 0:
                     //approve all
@@ -269,10 +269,10 @@ namespace KanonBot.functions.osu
                             @$"{file}",
                             @$".\work\panelv2\user_customimg\{file[file.LastIndexOf("\\")..]}");
                         }
-                        target.reply("approved.");
+                        await target.reply("approved.");
                         return;
                     }
-                    target.reply("暂时没有待审核的内容。");
+                    await target.reply("暂时没有待审核的内容。");
                     return;
                 case 1:
                     //approve
@@ -283,24 +283,24 @@ namespace KanonBot.functions.osu
                         File.Move(
                             @$".\work\panelv2\user_customimg\verify\{cmd}.png",
                             @$".\work\panelv2\user_customimg\{cmd}.png");
-                        target.reply("approved.");
+                        await target.reply("approved.");
                         return;
                     }
-                    target.reply("指定内容不存在，请重新检查。");
+                    await target.reply("指定内容不存在，请重新检查。");
                     return;
                 case 2:
                     //reject
                     if (File.Exists(@$".\work\panelv2\user_customimg\verify\{cmd}.png"))
                     {
                         File.Delete(@$".\work\panelv2\user_customimg\verify\{cmd}.png");
-                        target.reply("rejected.");
+                        await target.reply("rejected.");
                         return;
                     }
-                    target.reply("要审核的内容不存在，请重新检查。");
+                    await target.reply("要审核的内容不存在，请重新检查。");
                     return;
                 default:
                     //do nothing
-                    target.reply("无效的指令，请重新检查。");
+                    await target.reply("无效的指令，请重新检查。");
                     return;
             }
         }
@@ -324,10 +324,10 @@ namespace KanonBot.functions.osu
                             stream.TryGetBuffer(out ArraySegment<byte> buffer);
                             msg.image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64);
                         }
-                        target.reply(msg);
+                        await target.reply(msg);
                         return;
                     }
-                    target.reply("暂时没有待审核的内容。");
+                    await target.reply("暂时没有待审核的内容。");
                     return;
                 case 0:
                     //approve all
@@ -342,10 +342,10 @@ namespace KanonBot.functions.osu
                             @$"{x}",
                             @$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}");
                         }
-                        target.reply("approved.");
+                        await target.reply("approved.");
                         return;
                     }
-                    target.reply("暂时没有待审核的内容。");
+                    await target.reply("暂时没有待审核的内容。");
                     return;
                 case 1:
                     //approve
@@ -356,24 +356,24 @@ namespace KanonBot.functions.osu
                         File.Move(
                             @$".\work\panelv2\user_customimg\verify\{cmd}.png",
                             @$".\work\panelv2\user_customimg\{cmd}.png");
-                        target.reply("approved.");
+                        await target.reply("approved.");
                         return;
                     }
-                    target.reply("指定内容不存在，请重新检查。");
+                    await target.reply("指定内容不存在，请重新检查。");
                     return;
                 case 2:
                     //reject
                     if (File.Exists(@$".\work\panelv2\user_customimg\verify\{cmd}.png"))
                     {
                         File.Delete(@$".\work\panelv2\user_customimg\verify\{cmd}.png");
-                        target.reply("rejected.");
+                        await target.reply("rejected.");
                         return;
                     }
-                    target.reply("要审核的内容不存在，请重新检查。");
+                    await target.reply("要审核的内容不存在，请重新检查。");
                     return;
                 default:
                     //do nothing
-                    target.reply("无效的指令，请重新检查。");
+                    await target.reply("无效的指令，请重新检查。");
                     return;
             }
         }
@@ -398,10 +398,10 @@ namespace KanonBot.functions.osu
                             stream.TryGetBuffer(out ArraySegment<byte> buffer);
                             msg.image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64);
                         }
-                        target.reply(msg);
+                        await target.reply(msg);
                         return;
                     }
-                    target.reply("暂时没有待审核的内容。");
+                    await target.reply("暂时没有待审核的内容。");
                     return;
                 case 0:
                     //approve all
@@ -416,10 +416,10 @@ namespace KanonBot.functions.osu
                             @$"{x}",
                             @$".\work\legacy\v1_cover\custom\{x[x.LastIndexOf("\\")..]}");
                         }
-                        target.reply("approved.");
+                        await target.reply("approved.");
                         return;
                     }
-                    target.reply("暂时没有待审核的内容。");
+                    await target.reply("暂时没有待审核的内容。");
                     return;
                 case 1:
                     //approve
@@ -430,24 +430,24 @@ namespace KanonBot.functions.osu
                         File.Move(
                             @$".\work\legacy\v1_cover\custom\verify\{cmd}.png",
                             @$".\work\legacy\v1_cover\custom\{cmd}.png");
-                        target.reply("approved.");
+                        await target.reply("approved.");
                         return;
                     }
-                    target.reply("指定内容不存在，请重新检查。");
+                    await target.reply("指定内容不存在，请重新检查。");
                     return;
                 case 2:
                     //reject
                     if (File.Exists(@$".\work\legacy\v1_cover\custom\verify\{cmd}.png"))
                     {
                         File.Delete(@$".\work\legacy\v1_cover\custom\verify\{cmd}.png");
-                        target.reply("rejected.");
+                        await target.reply("rejected.");
                         return;
                     }
-                    target.reply("要审核的内容不存在，请重新检查。");
+                    await target.reply("要审核的内容不存在，请重新检查。");
                     return;
                 default:
                     //do nothing
-                    target.reply("无效的指令，请重新检查。");
+                    await target.reply("无效的指令，请重新检查。");
                     return;
             }
         }

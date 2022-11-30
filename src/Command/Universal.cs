@@ -3,6 +3,7 @@ using KanonBot.Drivers;
 using KanonBot.functions;
 using KanonBot.functions.osu;
 using KanonBot.functions.osubot;
+using LanguageExt;
 using Serilog;
 
 namespace KanonBot.command_parser
@@ -11,14 +12,24 @@ namespace KanonBot.command_parser
     {
         public static async Task Parser(Target target)
         {
+            // 解析之前先确认是否有等待的消息
+            foreach (var (t, cw) in Target.Waiters.Value)
+            {
+                if (t.platform == target.platform && t.sender == target.sender) {
+                    await cw.WriteAsync(target);
+                    return;
+                }
+            }
+
             string? cmd = null;
             var msg = target.msg;
-            var isAtSelf = false;
-            if (msg.StartsWith(new Message.AtSegment(target.account!, target.platform)))
-            {
-                isAtSelf = true;
-                msg = Message.Chain.FromList(msg.ToList().Slice(1, msg.Length()));
-            }
+
+            // var isAtSelf = false;
+            // if (msg.StartsWith(new Message.AtSegment(target.selfAccount!, target.platform)))
+            // {
+            //     isAtSelf = true;
+            //     msg = Message.Chain.FromList(msg.ToList().Slice(1, msg.Length()));
+            // }
 
 
             if (msg.StartsWith("!") || msg.StartsWith("/") || msg.StartsWith("！"))
@@ -88,11 +99,11 @@ namespace KanonBot.command_parser
                 }
                 catch (Flurl.Http.FlurlHttpTimeoutException)
                 {
-                    target.reply("API访问超时，请稍后重试吧");
+                    await target.reply("API访问超时，请稍后重试吧");
                 }
                 catch (Flurl.Http.FlurlHttpException ex)
                 {
-                    target.reply("网络出现错误！错误已上报");
+                    await target.reply("网络出现错误！错误已上报");
                     var rtmp =
                         $"Target Message: {target.msg}\n" +
                         $"Exception: {ex}\n";
@@ -112,7 +123,7 @@ namespace KanonBot.command_parser
                 }
                 catch (Exception ex)
                 {
-                    target.reply("出现了未知错误，错误内容已自动上报");
+                    await target.reply("出现了未知错误，错误内容已自动上报");
                     var rtmp =
                         $"Target Message: {target.msg}\n" +
                         $"Exception: {ex}\n";

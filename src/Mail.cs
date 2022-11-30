@@ -12,7 +12,7 @@ public static class Mail
     public class MailStruct
     {
         public required Arr<String> MailTo; //收件人，可添加多个
-        public Arr<String> MailCC = Arr.empty<String>(); //抄送人，不建议添加
+        public Arr<String> MailCC = Empty; //抄送人，不建议添加
         public required string Subject; //标题
         public required string Body; //正文
         public required bool IsBodyHtml;
@@ -20,8 +20,9 @@ public static class Mail
     public static void Send(MailStruct ms)
     {
         MailMessage message = new();
-        if (ms.MailTo.Length == 0) return; foreach (string s in ms.MailTo) { message.To.Add(s); } //设置收件人
-        if (ms.MailCC.Length > 0) foreach (string s in ms.MailCC) { message.CC.Add(s); } //设置发件人
+        if (ms.MailTo.Length == 0) return;
+        ms.MailTo.Iter(s => message.To.Add(s)); //设置收件人
+        ms.MailCC.Iter(s => message.CC.Add(s)); //设置发件人
         message.From = new MailAddress(config.mail.userName); //设置发件人
         message.Subject = ms.Subject;
         message.Body = ms.Body;

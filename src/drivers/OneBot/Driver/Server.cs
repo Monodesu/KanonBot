@@ -1,17 +1,17 @@
-using System.Net.Sockets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
+using System.Net.Sockets;
 using System.Net.WebSockets;
+using System.Threading;
+using System.Threading.Tasks;
 using Fleck;
+using KanonBot;
+using KanonBot.Event;
 using KanonBot.Message;
 using KanonBot.Serializer;
-using KanonBot.Event;
 using Newtonsoft.Json;
 using Serilog;
-using KanonBot;
 
 namespace KanonBot.Drivers;
 public partial class OneBot
@@ -193,7 +193,8 @@ public partial class OneBot
                             var target = new Target
                             {
                                 platform = Platform.OneBot,
-                                account = socket.selfID,
+                                sender = obj.UserId.ToString(),
+                                selfAccount = socket.selfID,
                                 msg = Message.Parse(obj.MessageList),
                                 raw = obj,
                                 socket = socket

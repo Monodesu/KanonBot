@@ -62,11 +62,11 @@ drivers.append(
         //    case OneBot.Models.GroupMessage g:
         //        if (g.GroupId == config.onebot!.managementGroup)
         //        {
-        //            target.reply(target.msg);
+        //            await target.reply(target.msg);
         //        }
         //        break;
         //    case OneBot.Models.PrivateMessage p:
-        //        target.reply(target.msg);
+        //        await target.reply(target.msg);
         //        break;
         //}
         //var res = api.SendGroupMessage(xxxxx, target.msg);
@@ -108,7 +108,7 @@ drivers.append(
         //     MessageReference = new() { MessageId = messageData.ID }
         // }.Build(target.msg)).Result;
         // Log.Information("→ 发送消息ID {@0}", res);
-        // target.reply(target.msg);
+        // await target.reply(target.msg);
         try
         {
             await Universal.Parser(target);
@@ -116,12 +116,12 @@ drivers.append(
         catch (Flurl.Http.FlurlHttpException ex)
         {
             Log.Error("请求 API 时发生异常，{0}", ex);
-            target.reply("请求 API 时发生异常");
+            await target.reply("请求 API 时发生异常");
         }
         catch (Exception ex)
         {
             Log.Error("发生未知错误，{0}", ex);
-            target.reply("发生未知错误");
+            await target.reply("发生未知错误");
         }
     })
     .onEvent((client, e) =>

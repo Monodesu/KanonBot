@@ -87,7 +87,7 @@ namespace KanonBot.functions.osu
 
         public static async Task SuDailyUpdateAsync(Target target)
         {
-            target.reply("已手动开始数据更新，稍后会发送结果。");
+            await target.reply("已手动开始数据更新，稍后会发送结果。");
             var (count, span) = await GeneralUpdate.UpdateUsers();
             var Text = "共用时";
             if (span.Hours > 0) Text += $" {span.Hours} 小时";
@@ -95,11 +95,11 @@ namespace KanonBot.functions.osu
             Text += $" {span.Seconds} 秒";
             try
             {
-                target.reply($"数据更新完成，一共更新了 {count} 个用户\n{Text}");
+                await target.reply($"数据更新完成，一共更新了 {count} 个用户\n{Text}");
             }
             catch
             {
-                target.reply($"数据更新完成\n{Text}");
+                await target.reply($"数据更新完成\n{Text}");
             }
         }
 

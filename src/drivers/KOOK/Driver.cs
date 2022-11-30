@@ -93,7 +93,8 @@ public partial class Kook : ISocket, IDriver
             this.msgAction?.Invoke(new Target()
             {
                 platform = Platform.KOOK,
-                account = this.selfID,
+                sender = message.Author.Id.ToString(),
+                selfAccount = this.selfID,
                 msg = Message.Parse(message),
                 raw = message,
                 socket = this

@@ -95,7 +95,8 @@ public partial class Guild : ISocket, IDriver
                 var MessageData = (obj.Data as JObject)?.ToObject<Models.MessageData>();
                 this.msgAction?.Invoke(new Target() {
                     platform = Platform.Guild,
-                    account = this.selfID,
+                    sender = MessageData!.Author.ID,
+                    selfAccount = this.selfID,
                     msg = Message.Parse(MessageData!),
                     raw = MessageData,
                     socket = this
@@ -126,9 +127,9 @@ public partial class Guild : ISocket, IDriver
                 break;
             case Enums.OperationCode.Hello:
                 var heartbeatInterval = (obj.Data as JObject)!["heartbeat_interval"]!.Value<int>();
-                
+
                 SetHeartBeatTicker(heartbeatInterval);  // 设置心跳定时器
-                
+
                 this.Send(this.SessionId switch {
                     null => Json.Serialize(new Models.PayloadBase<Models.IdentityData> {    // 鉴权
                     Operation = Enums.OperationCode.Identify,
@@ -160,7 +161,7 @@ public partial class Guild : ISocket, IDriver
             default:
                 break;
         }
-        
+
     }
 
     void SetHeartBeatTicker(int interval)

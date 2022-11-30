@@ -29,8 +29,8 @@ namespace KanonBot.functions.osubot
             Database.Model.User? DBUser;
             DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
             if (DBUser == null)
-            // { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-            { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
             string rootCmd, childCmd = "";
             try
             {
@@ -50,7 +50,7 @@ namespace KanonBot.functions.osubot
                 case "list":
                     await List(target, AccInfo); return;
                 default:
-                    target.reply("!badge set/info/list");
+                    await target.reply("!badge set/info/list");
                     return;
             }
         }
@@ -138,13 +138,13 @@ namespace KanonBot.functions.osubot
             {
                 if (badgeNum < 1)
                 {
-                    target.reply("你提供的badge id不正确，请重新检查。");
+                    await target.reply("你提供的badge id不正确，请重新检查。");
                 }
 
                 var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
                 if (userinfo!.owned_badge_ids == null)
                 {
-                    target.reply("你还没有牌子呢..."); return;
+                    await target.reply("你还没有牌子呢..."); return;
                 }
 
                 //获取已拥有的牌子
@@ -179,14 +179,14 @@ namespace KanonBot.functions.osubot
                 {
                     if (x == badgeNum.ToString())
                     {
-                        target.reply($"你现在的主显badge已经是 {x} 了！"); return;
+                        await target.reply($"你现在的主显badge已经是 {x} 了！"); return;
                     }
                 }
 
                 //检查用户是否拥有此badge
                 if (owned_badges.Count < badgeNum && badgeNum > 0)
                 {
-                    target.reply($"你好像没有编号为 {badgeNum} 的badge呢..."); return;
+                    await target.reply($"你好像没有编号为 {badgeNum} 的badge呢..."); return;
                 }
 
                 //设置badge
@@ -196,17 +196,17 @@ namespace KanonBot.functions.osubot
                 if (badgeNum > 0)
                 {
                     if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), owned_badges[badgeNum - 1]))
-                        target.reply($"设置成功");
+                        await target.reply($"设置成功");
                     else
-                        target.reply($"因数据库原因设置失败，请稍后再试。");
+                        await target.reply($"因数据库原因设置失败，请稍后再试。");
                     return;
                 }
                 else
                 {
                     if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), "-1"))
-                        target.reply($"设置成功，已关闭badge显示。");
+                        await target.reply($"设置成功，已关闭badge显示。");
                     else
-                        target.reply($"因数据库原因设置失败，请稍后再试。");
+                        await target.reply($"因数据库原因设置失败，请稍后再试。");
                     return;
                 }
                 //}
@@ -217,15 +217,15 @@ namespace KanonBot.functions.osubot
                 //        settemp1 += x + ",";
                 //    settemp1 += owned_badges[badgeNum - 1];
                 //    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), settemp1))
-                //        target.reply($"设置成功");
+                //        await target.reply($"设置成功");
                 //    else
-                //        target.reply($"因数据库原因设置失败，请稍后再试。");
+                //        await target.reply($"因数据库原因设置失败，请稍后再试。");
                 //    return;
                 //}
             }
             else
             {
-                target.reply("你提供的badge id不正确，请重新检查。");
+                await target.reply("你提供的badge id不正确，请重新检查。");
             }
         }
         private static async Task Info(Target target, string cmd, AccInfo accinfo)
@@ -234,13 +234,13 @@ namespace KanonBot.functions.osubot
             {
                 if (badgeNum < 1)
                 {
-                    target.reply("你提供的badge id不正确，请重新检查。");
+                    await target.reply("你提供的badge id不正确，请重新检查。");
                 }
 
                 var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
                 if (userinfo!.owned_badge_ids == null)
                 {
-                    target.reply("你还没有牌子呢..."); return;
+                    await target.reply("你还没有牌子呢..."); return;
                 }
 
                 //获取已拥有的牌子
@@ -259,20 +259,20 @@ namespace KanonBot.functions.osubot
                 //检查用户是否拥有此badge
                 if (owned_badges.Count < badgeNum)
                 {
-                    target.reply($"你好像没有编号为 {badgeNum} 的badge呢..."); return;
+                    await target.reply($"你好像没有编号为 {badgeNum} 的badge呢..."); return;
                 }
 
 
                 //获取badge信息
                 var badgeinfo = await Database.Client.GetBadgeInfo(owned_badges[badgeNum - 1]);
-                target.reply($"badge信息:\n" +
+                await target.reply($"badge信息:\n" +
                     $"名称: {badgeinfo!.name}({badgeinfo.id})\n" +
                     $"中文名称: {badgeinfo.name_chinese}\n" +
                     $"描述: {badgeinfo.description}");
             }
             else
             {
-                target.reply("你提供的badge id不正确，请重新检查。");
+                await target.reply("你提供的badge id不正确，请重新检查。");
             }
         }
         private static async Task List(Target target, AccInfo accinfo)
@@ -280,7 +280,7 @@ namespace KanonBot.functions.osubot
             var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
             if (userinfo!.owned_badge_ids == null)
             {
-                target.reply("你还没有牌子呢..."); return;
+                await target.reply("你还没有牌子呢..."); return;
             }
 
             //获取已拥有的牌子
@@ -303,7 +303,7 @@ namespace KanonBot.functions.osubot
                 var badgeinfo = await Database.Client.GetBadgeInfo(owned_badges[i]);
                 msg += $"\n{i + 1}:{badgeinfo!.name_chinese} ({badgeinfo.name})";
             }
-            target.reply(msg);
+            await target.reply(msg);
         }
 
         private static async Task SudoCreate(Target target, string cmd)
@@ -313,14 +313,14 @@ namespace KanonBot.functions.osubot
             var args = cmd.Split("#");
             if (args.Length < 4)
             {
-                target.reply("缺少参数。[!badge sudo create IMG_URL#英文名称#中文名称#详细信息]");
+                await target.reply("缺少参数。[!badge sudo create IMG_URL#英文名称#中文名称#详细信息]");
                 return;
             }
             //检查URL
             var img_url = args[0].Trim();
             if (!Utils.IsUrl(img_url))
             {
-                target.reply("提供的IMG_URL不正确。[!badge sudo create IMG_URL#英文名称#中文名称#详细信息]");
+                await target.reply("提供的IMG_URL不正确。[!badge sudo create IMG_URL#英文名称#中文名称#详细信息]");
                 return;
             }
             //检查badge图片是否符合要求规范 https://desu.life/test/test_badge.png
@@ -331,7 +331,7 @@ namespace KanonBot.functions.osubot
             Img source = Img.Load(filepath);
             if (source.Width / 21.5 != source.Height / 10)
             {
-                target.reply("badge尺寸不符合要求，应为 21.5 : 10（推荐为688*320），操作取消。");
+                await target.reply("badge尺寸不符合要求，应为 21.5 : 10（推荐为688*320），操作取消。");
                 return;
             }
             source.Mutate(x => x.Resize(688, 320));
@@ -340,7 +340,7 @@ namespace KanonBot.functions.osubot
             var db_badgeid = await Database.Client.InsertBadge(args[1], args[2], args[3]);
             source.Save($"./work/badges/{db_badgeid}.png");
             await source.SaveAsync($"./work/badges/{db_badgeid}.png", new PngEncoder());
-            target.reply($"图片成功上传，新的badgeID为{db_badgeid}");
+            await target.reply($"图片成功上传，新的badgeID为{db_badgeid}");
             source.Dispose();
             File.Delete(filepath);
         }
@@ -382,16 +382,16 @@ namespace KanonBot.functions.osubot
                         replymsg += $"检查email有效性失败，共有{failed_msg.Count}个email为无效email，详细信息如下：";
                         foreach (var x in failed_msg)
                             replymsg += $"\n{x}";
-                        target.reply(replymsg);
+                        await target.reply(replymsg);
                         return;
                     }
 
                     //检查badge是否合法以及是否存在
-                    if (!int.TryParse(badgeid, out _)) { target.reply("badgeid不正确，请重新检查。"); return; }
+                    if (!int.TryParse(badgeid, out _)) { await target.reply("badgeid不正确，请重新检查。"); return; }
                     badge = await Database.Client.GetBadgeInfo(badgeid);
-                    if (badge == null) { target.reply($"似乎没有badgeid为 {badgeid} 的badge呢。"); return; }
+                    if (badge == null) { await target.reply($"似乎没有badgeid为 {badgeid} 的badge呢。"); return; }
 
-                    target.reply($"开始徽章添加任务。");
+                    await target.reply($"开始徽章添加任务。");
                     //添加badge
                     failed_msg = new();
                     foreach (var x in users)
@@ -449,7 +449,7 @@ namespace KanonBot.functions.osubot
                         foreach (var x in failed_msg)
                             replymsg += $"\n{x}";
                     }
-                    target.reply(replymsg);
+                    await target.reply(replymsg);
                     #endregion
                     break;
                 case 1:
@@ -465,16 +465,16 @@ namespace KanonBot.functions.osubot
                         replymsg += $"检查osu!uid有效性失败，共有{failed_msg.Count}个uid为无效uid，详细信息如下：";
                         foreach (var x in failed_msg)
                             replymsg += $"\n{x}";
-                        target.reply(replymsg);
+                        await target.reply(replymsg);
                         return;
                     }
 
                     //检查badge是否合法以及是否存在
-                    if (!int.TryParse(badgeid, out _)) { target.reply("badgeid不正确，请重新检查。"); return; }
+                    if (!int.TryParse(badgeid, out _)) { await target.reply("badgeid不正确，请重新检查。"); return; }
                     badge = await Database.Client.GetBadgeInfo(badgeid);
-                    if (badge == null) { target.reply($"似乎没有badgeid为 {badgeid} 的badge呢。"); return; }
+                    if (badge == null) { await target.reply($"似乎没有badgeid为 {badgeid} 的badge呢。"); return; }
 
-                    target.reply($"开始徽章添加任务。");
+                    await target.reply($"开始徽章添加任务。");
                     //添加badge
                     failed_msg = new();
                     foreach (var x in users)
@@ -535,7 +535,7 @@ namespace KanonBot.functions.osubot
                         foreach (var x in failed_msg)
                             replymsg += $"\n{x}";
                     }
-                    target.reply(replymsg);
+                    await target.reply(replymsg);
                     break;
                 #endregion
                 default:

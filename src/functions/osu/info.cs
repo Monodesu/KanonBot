@@ -28,13 +28,13 @@ namespace KanonBot.functions.osubot
                 var AccInfo = Accounts.GetAccInfo(target);
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
-                // { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-                { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
+                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
                 // 验证账号信息
                 var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
                 DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
-                { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
                 mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
@@ -57,7 +57,7 @@ namespace KanonBot.functions.osubot
                 else
                 {
                     // 直接取消查询，简化流程
-                    target.reply("猫猫没有找到此用户。");
+                    await target.reply("猫猫没有找到此用户。");
                     return;
                 }
             }
@@ -67,9 +67,9 @@ namespace KanonBot.functions.osubot
             if (tempOsuInfo == null)
             {
                 if (DBOsuInfo != null)
-                    target.reply("被办了。");
+                    await target.reply("被办了。");
                 else
-                    target.reply("猫猫没有找到此用户。");
+                    await target.reply("猫猫没有找到此用户。");
                 // 中断查询
                 return;
             }
@@ -183,7 +183,7 @@ namespace KanonBot.functions.osubot
             }
 
             stream.TryGetBuffer(out ArraySegment<byte> buffer);
-            target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+            await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
             if (DBOsuInfo != null) await Seasonalpass.Update(tempOsuInfo!.Id, DBOsuInfo!.osu_mode!, tempOsuInfo.Statistics.TotalHits);
         }
     }

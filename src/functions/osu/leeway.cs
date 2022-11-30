@@ -20,21 +20,21 @@ namespace KanonBot.functions.osubot
 
             // 解析模式
             command.osu_mode ??= OSU.Enums.Mode.OSU;
-            if (command.osu_mode is not OSU.Enums.Mode.OSU) { target.reply("Leeway仅支持osu!std模式。"); return; }
+            if (command.osu_mode is not OSU.Enums.Mode.OSU) { await target.reply("Leeway仅支持osu!std模式。"); return; }
 
             // 验证账户
             var AccInfo = Accounts.GetAccInfo(target);
             Database.Model.User? DBUser;
             DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
             if (DBUser == null)
-            // { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-            { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
             // 验证osu信息
             var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
             DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
             if (DBOsuInfo == null)
-            { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
             // 验证osu信息
             OnlineOsuInfo = await OSU.GetUser(DBOsuInfo.osu_uid);
@@ -50,18 +50,18 @@ namespace KanonBot.functions.osubot
             // 验证osu信息
             if (OnlineOsuInfo == null)
             {
-                //if (is_bounded) { target.reply("被办了。"); return; }
-                //target.reply("猫猫没有找到此用户。"); return;
-                target.reply("被办了。"); return;
+                //if (is_bounded) { await target.reply("被办了。"); return; }
+                //await target.reply("猫猫没有找到此用户。"); return;
+                await target.reply("被办了。"); return;
             }
 
             long bid;
             if (command.order_number == 0) // 检查玩家是否指定bid
             {
                 var scoreInfos = await OSU.GetUserScores(OnlineOsuInfo.Id, OSU.Enums.UserScoreType.Recent, command.osu_mode ?? OSU.Enums.Mode.OSU, 1, command.order_number - 1, true);
-                if (scoreInfos == null) {target.reply("计算成绩时出错。"); return;};    // 正常是找不到玩家，但是上面有验证，这里做保险
+                if (scoreInfos == null) {await target.reply("计算成绩时出错。"); return;};    // 正常是找不到玩家，但是上面有验证，这里做保险
                 if (scoreInfos!.Length > 0) { bid = scoreInfos[0].Beatmap!.BeatmapId; }
-                else { target.reply("猫猫找不到你最近游玩的成绩。"); return; }
+                else { await target.reply("猫猫找不到你最近游玩的成绩。"); return; }
             }
             else
             {
@@ -74,13 +74,13 @@ namespace KanonBot.functions.osubot
             var scoreData = await OSU.GetUserBeatmapScore(OnlineOsuInfo.Id, bid, empty_mods, command.osu_mode ?? OSU.Enums.Mode.OSU);
             if (scoreData == null)
             {
-                target.reply("猫猫找不到你的成绩。"); return;
+                await target.reply("猫猫找不到你的成绩。"); return;
             }
             else
             {
                 score = scoreData.Score.Scores;
             }
-            if (scoreData.Score.Mode is not OSU.Enums.Mode.OSU) { target.reply("Leeway仅支持osu!std模式。"); return; } // 检查谱面是否是std
+            if (scoreData.Score.Mode is not OSU.Enums.Mode.OSU) { await target.reply("Leeway仅支持osu!std模式。"); return; } // 检查谱面是否是std
 
 
             // LeewayCalculator
@@ -96,7 +96,7 @@ namespace KanonBot.functions.osubot
             {
                 // 加载失败
                 File.Delete($"./work/beatmap/{bid}.osu");
-                target.reply("无法获取铺面信息。"); return;
+                await target.reply("无法获取铺面信息。"); return;
             }
 
             Leeway_Calculator lc = new(); // 实例化
@@ -160,7 +160,7 @@ namespace KanonBot.functions.osubot
             {
                 str += "\n该难度没有转盘";
             }
-            target.reply(new Chain().msg(str));
+            await target.reply(new Chain().msg(str));
         }
     }
 }

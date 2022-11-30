@@ -1,7 +1,10 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using KanonBot.API;
+using Kook;
+using LanguageExt;
 using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1.Crmf;
 using static KanonBot.LegacyImage.Draw;
@@ -10,6 +13,14 @@ namespace KanonBot;
 
 public static class Utils
 {
+    public static async Task<Option<T>> TimeOut<T>(this Task<T> task, TimeSpan delay)
+    {
+        var timeOutTask = Task.Delay(delay); // 设定超时任务
+        var doing = await Task.WhenAny(task, timeOutTask); // 返回任何一个完成的任务
+        if (doing == timeOutTask)// 如果超时任务先完成了 就返回none
+            return None;
+        return Some<T>(await task);
+    }
     public static int TryGetConsoleWidth() { try { return Console.WindowWidth; } catch { return 80; } } // 获取失败返回80
     public static string? GetObjectDescription(Object value)
     {

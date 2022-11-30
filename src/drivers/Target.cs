@@ -1,35 +1,56 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Channels;
 using System.Threading.Tasks;
-using Msg = KanonBot.Message;
+using LanguageExt;
 using Serilog;
+using static KanonBot.Utils;
 using libKook = Kook;
+using Msg = KanonBot.Message;
 
 namespace KanonBot.Drivers;
 // 消息target封装
 // 暂时还不知道怎么写
 public class Target
 {
-    public Msg.Chain msg { get; set; } = new();
+    public static Atom<List<(Target, ChannelWriter<Target>)>> Waiters { get; set; } = Atom<List<(Target, ChannelWriter<Target>)>>(new());
+    async public Task<Option<Target>> prompt(TimeSpan timeout)
+    {
+        var channel = Channel.CreateBounded<Target>(1);
+        Waiters.Swap(l =>
+        {
+            l.Add((this, channel.Writer));
+            return l;
+        });
+        var ret = await channel.Reader.ReadAsync().AsTask().TimeOut(timeout);
+        Waiters.Swap(l =>
+        {
+            l.Remove((this, channel.Writer));
+            return l;
+        });
+        return ret;
+    }
+    public required Msg.Chain msg { get; init; }
 
-    // 这里的account是一个字符串，可以是qq号，discord号，等等
-    // 之后将会自动解析成猫猫独有的账户类型以统一管理
-    public Platform platform { get; set; }
-    public string? account { get; set; }
+    // account和sender为用户ID字符串，可以是qq号，khl号，等等
+    public required string? selfAccount { get; init; }
+    public required string? sender { get; init; }
+    public required Platform platform { get; init; }
 
     // 原平台消息结构
-    public object? raw { get; set; }
+    public object? raw { get; init; }
 
     // 原平台接口
-    public ISocket? socket { get; set; }
+    public required ISocket socket { get; init; }
 
-    public bool reply(string m)
+
+    public Task<bool> reply(string m)
     {
         return this.reply(new Msg.Chain().msg(m));
     }
 
-    public bool reply(Msg.Chain msgChain)
+    async public Task<bool> reply(Msg.Chain msgChain)
     {
         switch (this.socket!)
         {
@@ -37,7 +58,7 @@ public class Target
                 var rawMessage = (this.raw as libKook.WebSocket.SocketMessage);
                 try
                 {
-                    s.api.SendChannelMessage(rawMessage!.Channel.Id.ToString(), msgChain, rawMessage.Id).Wait();
+                    await s.api.SendChannelMessage(rawMessage!.Channel.Id.ToString(), msgChain, rawMessage.Id);
                 }
                 catch (Exception ex) { Log.Warning("发送KOOK消息失败 ↓\n{ex}", ex); return false; }
                 break;
@@ -45,10 +66,11 @@ public class Target
                 var GuildMessageData = (this.raw as Guild.Models.MessageData)!;
                 try
                 {
-                    s.api.SendMessage(GuildMessageData.ChannelID, new Guild.Models.SendMessageData() {
+                    await s.api.SendMessage(GuildMessageData.ChannelID, new Guild.Models.SendMessageData()
+                    {
                         MessageId = GuildMessageData.ID,
                         MessageReference = new() { MessageId = GuildMessageData.ID }
-                    }.Build(msgChain)).Wait();
+                    }.Build(msgChain));
                 }
                 catch (Exception ex) { Log.Warning("发送QQ频道消息失败 ↓\n{ex}", ex); return false; }
                 break;
@@ -97,5 +119,5 @@ public class Target
         }
         return true;
     }
-    
+
 }

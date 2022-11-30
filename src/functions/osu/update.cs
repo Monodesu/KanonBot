@@ -26,13 +26,13 @@ namespace KanonBot.functions.osubot
                 var AccInfo = Accounts.GetAccInfo(target);
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
-                // { target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-                { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
+                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
                 // 验证账号信息
                 var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
                 DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
-                { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
                 mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
@@ -55,7 +55,7 @@ namespace KanonBot.functions.osubot
                 else
                 {
                     // 直接取消查询，简化流程
-                    target.reply("猫猫没有找到此用户。");
+                    await target.reply("猫猫没有找到此用户。");
                     return;
                 }
             }
@@ -65,20 +65,20 @@ namespace KanonBot.functions.osubot
             if (OnlineOsuInfo == null)
             {
                 if (DBOsuInfo != null)
-                    target.reply("被办了。");
+                    await target.reply("被办了。");
                 else
-                    target.reply("猫猫没有找到此用户。");
+                    await target.reply("猫猫没有找到此用户。");
                 // 中断查询
                 return;
             }
             OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
-            target.reply("少女祈祷中...");
+            await target.reply("少女祈祷中...");
             //try { File.Delete($"./work/v1_cover/{OnlineOsuInfo!.Id}.png"); } catch { }
             try { File.Delete($"./work/avatar/osu!web/{OnlineOsuInfo!.Id}.png"); } catch { }
             try { await Seasonalpass.Update(OnlineOsuInfo!.Id, DBOsuInfo!.osu_mode!, OnlineOsuInfo.Statistics.TotalHits); } catch { }
-            target.reply("主要数据已更新完毕，pp+数据正在后台更新，请稍后使用info功能查看结果。");
+            await target.reply("主要数据已更新完毕，pp+数据正在后台更新，请稍后使用info功能查看结果。");
 
             try { await Database.Client.UpdateOsuPPlusData((await API.OSU.TryGetUserPlusData(OnlineOsuInfo!))!.User, OnlineOsuInfo!.Id); }
             catch { }//更新pp+失败，不返回信息
