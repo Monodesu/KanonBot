@@ -92,7 +92,7 @@ public class Leeway_Calculator
 
     public List<string> GetBeatmapHitObjects(string beatmap)
     {
-        var line = beatmap.Split("\n\r".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+        var line = beatmap.Split("\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
         var hitObjects = new List<string>();
         for (var i = 0; i < line.Length; i++)
         {
@@ -329,7 +329,7 @@ public class Leeway_Calculator
 
     public int CalculateDrainTime(string beatmap, int startTime, int endTime)
     {
-        var line = beatmap.Split("\n\r".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+        var line = beatmap.Split("\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
         var breakPeriods = new List<int>();
         for (var i = 0; i < line.Length; i++)
         {
@@ -351,7 +351,7 @@ public class Leeway_Calculator
 
     public List<double[]> GetTimingPoints(string beatmap)
     {
-        var line = beatmap.Split("\n\r".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+        var line = beatmap.Split("\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
         var timingPoints = new List<double[]>();
         for (var i = 0; i < line.Length; i++)
         {

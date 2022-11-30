@@ -18,7 +18,7 @@ public partial class Kook
         public async static Task<List<Models.MessageCreate>> Build(API api, Chain msgChain)
         {
             var msglist = new List<Models.MessageCreate>();
-            foreach (var seg in msgChain.ToList())
+            foreach (var seg in msgChain.Iter())
             {
                 var req = new Models.MessageCreate();
                 switch (seg)

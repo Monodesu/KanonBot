@@ -12,7 +12,7 @@ public partial class OneBot
         public static List<Models.Segment> Build(Chain msgChain)
         {
             var ListSegment = new List<Models.Segment>();
-            foreach (var msg in msgChain.ToList())
+            foreach (var msg in msgChain.Iter())
             {
                 ListSegment.Add(
                     msg switch {

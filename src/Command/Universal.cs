@@ -3,6 +3,7 @@ using KanonBot.Drivers;
 using KanonBot.functions;
 using KanonBot.functions.osu;
 using KanonBot.functions.osubot;
+using KanonBot.Message;
 using LanguageExt;
 using Serilog;
 
@@ -29,6 +30,13 @@ namespace KanonBot.command_parser
             // {
             //     isAtSelf = true;
             //     msg = Message.Chain.FromList(msg.ToList().Slice(1, msg.Length()));
+            // }
+
+            // var seg = msg.Find<ImageSegment>();
+            // if (seg != null) {
+            //     if (seg.t is ImageSegment.Type.Url) {
+            //         var imageUrl = seg.value;
+            //     }
             // }
 
 

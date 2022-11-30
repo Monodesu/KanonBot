@@ -18,7 +18,7 @@ public partial class Guild
         public static Models.SendMessageData Build(Models.SendMessageData data, Chain msgChain)
         {
             var content = String.Empty;
-            foreach (var msg in msgChain.ToList())
+            foreach (var msg in msgChain.Iter())
             {
                 var tmp = msg switch {
                     TextSegment text => Utils.GuildEscape(text.value),

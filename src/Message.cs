@@ -1,8 +1,8 @@
-using System.IO;
 using System;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
+using System.IO;
 using KanonBot.Drivers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace KanonBot.Message;
 
@@ -138,9 +138,9 @@ public class Chain
         return this;
     }
 
-    public List<IMsgSegment> ToList()
+    public IEnumerable<IMsgSegment> Iter()
     {
-        return this.msgList;
+        return this.msgList.AsEnumerable();
     }
 
 
@@ -158,7 +158,7 @@ public class Chain
     {
         return this.Build();
     }
-    
+
     public int Length() => this.msgList.Count;
     public bool StartsWith(string s)
     {
@@ -174,4 +174,7 @@ public class Chain
         else
             return this.msgList[0] is AtSegment t && t.value == at.value && t.platform == at.platform;
     }
+
+    public T? Find<T>() where T : class, IMsgSegment =>
+        this.msgList.Find(t => t is T) as T;
 }

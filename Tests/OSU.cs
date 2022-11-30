@@ -1,13 +1,13 @@
-using API = KanonBot.API;
-using static KanonBot.API.OSUExtensions;
+using System.Runtime.InteropServices;
 using KanonBot;
 using KanonBot.API;
+using KanonBot.functions.osu.rosupp;
 using KanonBot.LegacyImage;
 using KanonBot.Serializer;
-using KanonBot.functions.osu.rosupp;
 using RosuPP;
 using SixLabors.ImageSharp.Formats.Png;
-using System.Runtime.InteropServices;
+using static KanonBot.API.OSUExtensions;
+using API = KanonBot.API;
 
 namespace Tests;
 
@@ -68,12 +68,12 @@ public class OSU
     [Fact]
     public void ModesTest()
     {
-        Assert.Equal("taiko", API.OSU.Enums.Mode.Taiko.ToModeStr());
-        Assert.Equal(3, API.OSU.Enums.Mode.Mania.ToModeNum());
-        Assert.Equal(API.OSU.Enums.Mode.OSU, API.OSU.Enums.ParseMode("osu"));
-        Assert.Equal(API.OSU.Enums.Mode.Fruits, API.OSU.Enums.ParseMode(2));
-        Assert.Null(API.OSU.Enums.ParseMode("xasfasf"));
-        Assert.Null(API.OSU.Enums.ParseMode(100));
+        Assert.Equal("taiko", API.OSU.Enums.Mode.Taiko.ToStr());
+        Assert.Equal(3, API.OSU.Enums.Mode.Mania.ToNum());
+        Assert.Equal(API.OSU.Enums.Mode.OSU, API.OSU.Enums.String2Mode("osu"));
+        Assert.Equal(API.OSU.Enums.Mode.Fruits, API.OSU.Enums.Int2Mode(2));
+        Assert.Null(API.OSU.Enums.String2Mode("xasfasf"));
+        Assert.Null(API.OSU.Enums.Int2Mode(100));
     }
 
     [Fact]

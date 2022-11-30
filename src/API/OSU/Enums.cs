@@ -71,7 +71,7 @@ namespace KanonBot.API
                 };
             }
 
-            public static Mode? Mode2Int(int value)
+            public static Mode? Int2Mode(int value)
             {
                 return value switch
                 {
