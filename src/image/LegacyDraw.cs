@@ -141,7 +141,7 @@ namespace KanonBot.LegacyImage
 
             Img flags = Img.Load(await Utils.LoadFile2Byte($"./work/flags/{data.userInfo.Country.Code}.png"));
             info.Mutate(x => x.DrawImage(flags, new Point(272, 212), 1));
-            Img modeicon = Img.Load(await Utils.LoadFile2Byte($"./work/legacy/mode_icon/{data.userInfo.PlayMode.ToModeStr()}.png"));
+            Img modeicon = Img.Load(await Utils.LoadFile2Byte($"./work/legacy/mode_icon/{data.userInfo.PlayMode.ToStr()}.png"));
             modeicon.Mutate(x => x.Resize(64, 64));
             info.Mutate(x => x.DrawImage(modeicon, new Point(1125, 10), 1));
 

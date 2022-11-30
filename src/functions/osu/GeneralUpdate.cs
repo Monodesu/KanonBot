@@ -17,7 +17,7 @@ namespace KanonBot.functions.osu
         private static readonly CronDaemon daemon = new CronDaemon();
         public static void DailyUpdate()
         {
-            // *    *    *    *    *  
+            // *    *    *    *    *
             // ┬    ┬    ┬    ┬    ┬
             // │    │    │    │    │
             // │    │    │    │    │
@@ -89,9 +89,9 @@ namespace KanonBot.functions.osu
                     playtime = (int)userInfo.Statistics.PlayTime,
                     country_rank = (int)userInfo.Statistics.CountryRank,
                     global_rank = (int)userInfo.Statistics.GlobalRank,
-                    gamemode = mode.ToModeStr()
+                    gamemode = mode.ToStr()
                 };
-                await Seasonalpass.Update(userInfo!.Id, mode.ToModeStr(), userInfo.Statistics.TotalHits);
+                await Seasonalpass.Update(userInfo!.Id, mode.ToStr(), userInfo.Statistics.TotalHits);
                 await Database.Client.InsertOsuUserData(rec, false);
             }
         }

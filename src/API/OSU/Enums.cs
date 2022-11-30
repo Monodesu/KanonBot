@@ -19,16 +19,16 @@ namespace KanonBot.API
 {
     public static class OSUExtensions
     {
-        public static string ToScoreTypeStr(this OSU.Enums.UserScoreType type)
+        public static string ToStr(this OSU.Enums.UserScoreType type)
         {
             return Utils.GetObjectDescription(type)!;
         }
-        public static string ToModeStr(this OSU.Enums.Mode mode)
+        public static string ToStr(this OSU.Enums.Mode mode)
         {
             return Utils.GetObjectDescription(mode)!;
         }
 
-        public static int ToModeNum(this OSU.Enums.Mode mode)
+        public static int ToNum(this OSU.Enums.Mode mode)
         {
             return mode switch
             {
@@ -46,7 +46,7 @@ namespace KanonBot.API
         public class Enums
         {
             // 方法部分
-            public static string ParseMode(Mode mode)
+            public static string Mode2String(Mode mode)
             {
                 return mode switch
                 {
@@ -58,7 +58,7 @@ namespace KanonBot.API
                 };
             }
 
-            public static Mode? ParseMode(string? value)
+            public static Mode? String2Mode(string? value)
             {
                 value = value?.ToLower();    // 大写字符转小写
                 return value switch
@@ -71,7 +71,7 @@ namespace KanonBot.API
                 };
             }
 
-            public static Mode? ParseMode(int value)
+            public static Mode? Mode2Int(int value)
             {
                 return value switch
                 {

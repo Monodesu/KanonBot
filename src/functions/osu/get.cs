@@ -80,7 +80,7 @@ namespace KanonBot.functions.osubot
                 if (DBOsuInfo == null)
                 { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
-                mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
@@ -93,7 +93,7 @@ namespace KanonBot.functions.osubot
                     if (DBOsuInfo != null)
                     {
                         DBUser = await Accounts.GetAccountByOsuUid(tempOsuInfo.Id);
-                        mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;
+                        mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
                     }
                     mode ??= tempOsuInfo.PlayMode;
                     osuID = tempOsuInfo.Id;
@@ -123,7 +123,7 @@ namespace KanonBot.functions.osubot
             // 计算bonuspp
             if (OnlineOsuInfo!.Statistics.PP == 0)
             {
-                target.reply($"你最近还没有玩过{OnlineOsuInfo.PlayMode.ToModeStr()}模式呢。。");
+                target.reply($"你最近还没有玩过{OnlineOsuInfo.PlayMode.ToStr()}模式呢。。");
                 return;
             }
             // 因为上面确定过模式，这里就直接用userdata里的mode了
@@ -181,7 +181,7 @@ namespace KanonBot.functions.osubot
                 bounsPP = 0.0;
                 rankedScores = 0;
             }
-            var str = $"{OnlineOsuInfo.Username} ({OnlineOsuInfo.PlayMode.ToModeStr()})\n" +
+            var str = $"{OnlineOsuInfo.Username} ({OnlineOsuInfo.PlayMode.ToStr()})\n" +
                 $"总PP：{OnlineOsuInfo.Statistics.PP.ToString("0.##")}pp\n" +
                 $"原始PP：{scorePP.ToString("0.##")}pp\n" +
                 $"Bonus PP：{bounsPP.ToString("0.##")}pp\n" +
@@ -216,7 +216,7 @@ namespace KanonBot.functions.osubot
                 if (DBOsuInfo == null)
                 { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
-                mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
@@ -229,7 +229,7 @@ namespace KanonBot.functions.osubot
                     if (DBOsuInfo != null)
                     {
                         DBUser = await Accounts.GetAccountByOsuUid(tempOsuInfo.Id);
-                        mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;
+                        mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
                     }
                     mode ??= tempOsuInfo.PlayMode;
                     osuID = tempOsuInfo.Id;
@@ -372,7 +372,7 @@ namespace KanonBot.functions.osubot
                 if (DBOsuInfo == null)
                 { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
-                mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
@@ -385,7 +385,7 @@ namespace KanonBot.functions.osubot
                     if (DBOsuInfo != null)
                     {
                         DBUser = await Accounts.GetAccountByOsuUid(tempOsuInfo.Id);
-                        mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;
+                        mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
                     }
                     mode ??= tempOsuInfo.PlayMode;
                     osuID = tempOsuInfo.Id;
@@ -507,7 +507,7 @@ namespace KanonBot.functions.osubot
                 if (DBOsuInfo == null)
                 { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
-                mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
@@ -520,7 +520,7 @@ namespace KanonBot.functions.osubot
                     if (DBOsuInfo != null)
                     {
                         DBUser = await Accounts.GetAccountByOsuUid(tempOsuInfo.Id);
-                        mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;
+                        mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
                     }
                     mode ??= tempOsuInfo.PlayMode;
                     osuID = tempOsuInfo.Id;
@@ -564,7 +564,7 @@ namespace KanonBot.functions.osubot
                 totalPP += item.PP;
             }
             var last = allBP.Length;
-            var str = $"{OnlineOsuInfo.Username} 在 {OnlineOsuInfo.PlayMode.ToModeStr()} 模式中:"
+            var str = $"{OnlineOsuInfo.Username} 在 {OnlineOsuInfo.PlayMode.ToStr()} 模式中:"
             + $"\n你的 bp1 有 {allBP[0].PP:0.##}pp"
             + $"\n你的 bp2 有 {allBP[1].PP:0.##}pp"
             + $"\n..."
@@ -602,7 +602,7 @@ namespace KanonBot.functions.osubot
                 if (DBOsuInfo == null)
                 { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
-                mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
@@ -615,7 +615,7 @@ namespace KanonBot.functions.osubot
                     if (DBOsuInfo != null)
                     {
                         DBUser = await Accounts.GetAccountByOsuUid(tempOsuInfo.Id);
-                        mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;
+                        mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
                     }
                     mode ??= tempOsuInfo.PlayMode;
                     osuID = tempOsuInfo.Id;
@@ -659,13 +659,13 @@ namespace KanonBot.functions.osubot
             if (str == "")
             {
                 if (cmd == "")
-                    target.reply($"你今天在 {OnlineOsuInfo.PlayMode.ToModeStr()} 模式上还没有新bp呢。。");
+                    target.reply($"你今天在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上还没有新bp呢。。");
                 else
-                    target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToModeStr()} 模式上还没有新bp呢。。");
+                    target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上还没有新bp呢。。");
             }
             else
             {
-                target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToModeStr()} 模式上新增的BP:" + str);
+                target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上新增的BP:" + str);
             }
         }
 

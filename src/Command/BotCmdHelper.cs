@@ -79,7 +79,7 @@ namespace KanonBot
                     if (arg2 != "")
                         try
                         {
-                            param.osu_mode = OSU.Enums.ParseMode(int.Parse(arg2[1..]));
+                            param.osu_mode = OSU.Enums.Mode2Int(int.Parse(arg2[1..]));
                         }
                         catch { param.osu_mode = null; }
                     if (arg3 == "") param.order_number = 0;
@@ -110,7 +110,7 @@ namespace KanonBot
                     else { param.self_query = true; }
                     if (arg2 != "") try
                         {
-                            param.osu_mode = OSU.Enums.ParseMode(
+                            param.osu_mode = OSU.Enums.Mode2Int(
                         int.Parse(arg2[1..]));
                         }
                         catch { param.osu_mode = null; }
@@ -124,7 +124,7 @@ namespace KanonBot
                     param.osu_username = arg1;
                     if (arg2 != "") try
                         {
-                            param.osu_mode = OSU.Enums.ParseMode(
+                            param.osu_mode = OSU.Enums.Mode2Int(
                         int.Parse(arg2[1..]));
                         }
                         catch { param.osu_mode = null; }
@@ -151,7 +151,7 @@ namespace KanonBot
                     param.osu_username = arg3;
                     if (arg2 != "") try
                         {
-                            param.osu_mode = OSU.Enums.ParseMode(
+                            param.osu_mode = OSU.Enums.Mode2Int(
                         int.Parse(arg2[1..]));
                         }
                         catch { param.osu_mode = null; }
@@ -185,7 +185,7 @@ namespace KanonBot
                     }
                     if (arg2 != "") try
                         {
-                            param.osu_mode = OSU.Enums.ParseMode(
+                            param.osu_mode = OSU.Enums.Mode2Int(
                         int.Parse(arg2[1..]));
                         }
                         catch { param.osu_mode = null; }

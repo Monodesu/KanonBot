@@ -282,7 +282,7 @@ public class Client
         var result = await db.Updateable<Model.UserOSU>()
             .SetColumns(it => new Model.UserOSU()
             {
-                osu_mode = API.OSU.Enums.ParseMode(mode),
+                osu_mode = API.OSU.Enums.Mode2String(mode),
             })
             .Where(it => it.osu_uid == osu_uid)
             .ExecuteCommandHasChangeAsync();
@@ -297,7 +297,7 @@ public class Client
         var ui = new API.OSU.Models.User();
         if (days <= 0)
         {
-            data = await db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate, OrderByType.Desc).FirstAsync(it => it.uid == oid && it.gamemode == API.OSU.Enums.ParseMode(mode));
+            data = await db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate, OrderByType.Desc).FirstAsync(it => it.uid == oid && it.gamemode == API.OSU.Enums.Mode2String(mode));
         }
         else
         {
@@ -310,10 +310,10 @@ public class Client
             {
                 return (-1, null);
             }
-            data = await db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate, OrderByType.Desc).FirstAsync(it => it.uid == oid && it.gamemode == API.OSU.Enums.ParseMode(mode) && it.lastupdate <= date);
+            data = await db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate, OrderByType.Desc).FirstAsync(it => it.uid == oid && it.gamemode == API.OSU.Enums.Mode2String(mode) && it.lastupdate <= date);
             if (data == null)
             {
-                data = await db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate).FirstAsync(it => it.uid == oid && it.gamemode == API.OSU.Enums.ParseMode(mode));
+                data = await db.Queryable<OsuArchivedRec>().OrderBy(it => it.lastupdate).FirstAsync(it => it.uid == oid && it.gamemode == API.OSU.Enums.Mode2String(mode));
             }
         }
         if (data == null) return (-1, null);

@@ -36,7 +36,7 @@ namespace KanonBot.functions.osubot
                 if (DBOsuInfo == null)
                 { target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
-                mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
@@ -49,7 +49,7 @@ namespace KanonBot.functions.osubot
                     if (DBOsuInfo != null)
                     {
                         DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
-                        mode ??= OSU.Enums.ParseMode(DBOsuInfo.osu_mode)!.Value;
+                        mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
                     }
                     mode ??= OnlineOsuInfo.PlayMode;
                     osuID = OnlineOsuInfo.Id;

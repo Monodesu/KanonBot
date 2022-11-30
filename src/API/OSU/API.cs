@@ -99,13 +99,13 @@ namespace KanonBot.API
         async public static Task<Models.Score[]?> GetUserScores(long userId, Enums.UserScoreType scoreType = Enums.UserScoreType.Best, Enums.Mode mode = Enums.Mode.OSU, int limit = 1, int offset = 0, bool includeFails = true)
         {
             var res = await http()
-                .AppendPathSegments(new object[] { "users", userId, "scores", scoreType.ToScoreTypeStr() })
+                .AppendPathSegments(new object[] { "users", userId, "scores", scoreType.ToStr() })
                 .SetQueryParams(new
                 {
                     include_fails = includeFails ? 1 : 0,
                     limit = limit,
                     offset = offset,
-                    mode = mode.ToModeStr()
+                    mode = mode.ToStr()
                 })
                 .GetAsync();
 
@@ -121,7 +121,7 @@ namespace KanonBot.API
         {
             var req = http()
                 .AppendPathSegments(new object[] { "beatmaps", bid, "scores", "users", UserId })
-                .SetQueryParam("mode", mode.ToModeStr());
+                .SetQueryParam("mode", mode.ToStr());
 
             req.SetQueryParam("mods[]", mods);
             var res = await req.GetAsync();
@@ -138,7 +138,7 @@ namespace KanonBot.API
         {
             var res = await http()
                 .AppendPathSegments(new object[] { "beatmaps", bid, "scores", "users", UserId, "all" })
-                .SetQueryParam("mode", mode.ToModeStr())
+                .SetQueryParam("mode", mode.ToStr())
                 .GetAsync();
 
             if (res.StatusCode == 404)
@@ -150,7 +150,7 @@ namespace KanonBot.API
         // 通过osuv1 api osu uid获取用户信息
         async public static Task<List<Models.UserV1>?> GetUserWithV1API(long userId, Enums.Mode mode = Enums.Mode.OSU)
         {
-            var url = $"{EndPointV1}get_user?k={config.osu!.v1key}&u={userId}&m={mode.ToModeNum()}";
+            var url = $"{EndPointV1}get_user?k={config.osu!.v1key}&u={userId}&m={mode.ToNum()}";
             try
             {
                 var str = await url.GetStringAsync();
@@ -167,7 +167,7 @@ namespace KanonBot.API
         async public static Task<Models.User?> GetUser(long userId, Enums.Mode mode = Enums.Mode.OSU)
         {
             var res = await http()
-                .AppendPathSegments(new object[] { "users", userId, mode.ToModeStr() })
+                .AppendPathSegments(new object[] { "users", userId, mode.ToStr() })
                 .GetAsync();
 
             if (res.StatusCode == 404)
@@ -181,7 +181,7 @@ namespace KanonBot.API
                     Log.Debug(ex.Message);
                     Log.Debug(res.ResponseMessage.Content.ToString() ?? "");
                     Log.Debug(res.GetStringAsync().Result.ToString());
-                    
+
                     return null;
                 }
         }
@@ -190,7 +190,7 @@ namespace KanonBot.API
         async public static Task<Models.User?> GetUser(string userName, Enums.Mode mode = Enums.Mode.OSU)
         {
             var res = await http()
-                .AppendPathSegments(new object[] { "users", userName, mode.ToModeStr() })
+                .AppendPathSegments(new object[] { "users", userName, mode.ToStr() })
                 .SetQueryParam("key", "username")
                 .GetAsync();
 
@@ -206,7 +206,7 @@ namespace KanonBot.API
             JObject j = new()
             {
                 { "mods", new JArray(mods) },
-                { "ruleset", mode.ToModeStr() },
+                { "ruleset", mode.ToStr() },
             };
 
             var res = await http()
@@ -298,7 +298,7 @@ namespace KanonBot.API
             data.Performances = res["user_performances"]!["total"]!.ToObject<Models.PPlusData.UserPerformances[]>();
             return data;
         }
-        
+
         async public static Task<Models.PPlusData?> TryGetUserPlusData(OSU.Models.User user)
         {
             try
@@ -313,7 +313,7 @@ namespace KanonBot.API
                 }
                 catch (System.Exception)
                 {
-                    
+
                     return null;
                 }
             }

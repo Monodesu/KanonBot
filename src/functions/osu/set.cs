@@ -170,7 +170,7 @@ namespace KanonBot.functions.osubot
 
             cmd = cmd.ToLower().Trim();
 
-            var mode = OSU.Enums.ParseMode(cmd);
+            var mode = OSU.Enums.String2Mode(cmd);
             if (mode == null)
             {
                 target.reply("提供的模式不正确，请重新确认 (osu/taiko/fruits/mania)");
