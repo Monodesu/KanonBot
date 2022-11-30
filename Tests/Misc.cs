@@ -47,6 +47,11 @@ public class Misc
     public void UtilsTest()
     {
         Assert.Equal("osu", Utils.GetObjectDescription(API.OSU.Enums.Mode.OSU));
+        Output.WriteLine(Utils.ForStarDifficulty(1.25).ToString());
+        Output.WriteLine(Utils.ForStarDifficulty(2).ToString());
+        Output.WriteLine(Utils.ForStarDifficulty(2.5).ToString());
+        Output.WriteLine(Utils.ForStarDifficulty(3).ToString());
+        Output.WriteLine(Utils.ForStarDifficulty(3.5).ToString());
     }
 
     [Fact]

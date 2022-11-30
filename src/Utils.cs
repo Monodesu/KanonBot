@@ -374,7 +374,7 @@ public static class Utils
         catch { }
     }
 
-    public static double ToLinear(double color) => color <= 0.04045 ? color / 12.92 : Math.Pow((color + 0.055) / 1.055, 2.5);
+    public static double ToLinear(double color) => color <= 0.04045 ? color / 12.92 : Math.Pow((color + 0.055) / 1.055, 2.4);
 
     public static Vector4 ToLinear(this Vector4 colour) =>
             new Vector4(
@@ -390,16 +390,16 @@ public static class Utils
                 (byte)(colour.W * 255)
             );
 
-    public static Color ValueAt(double time, Vector4 startColour, Vector4 endColour, double startTime, double endTime)
+    public static Vector4 ValueAt(double time, Vector4 startColour, Vector4 endColour, double startTime, double endTime)
     {
         if (startColour == endColour)
-            return startColour.ToColor();
+            return startColour;
 
         double current = time - startTime;
         double duration = endTime - startTime;
 
         if (duration == 0 || current == 0)
-            return startColour.ToColor();
+            return startColour;
 
         var startLinear = startColour.ToLinear();
         var endLinear = endColour.ToLinear();
@@ -410,15 +410,15 @@ public static class Utils
             startLinear.X + t * (endLinear.X - startLinear.X),
             startLinear.Y + t * (endLinear.Y - startLinear.Y),
             startLinear.Z + t * (endLinear.Z - startLinear.Z),
-            startLinear.W + t * (endLinear.W - startLinear.W))
-            .ToColor();
+            startLinear.W + t * (endLinear.W - startLinear.W)
+        );
     }
 
 
-    public static Color SampleFromLinearGradient(IReadOnlyList<(float position, Vector4 colour)> gradient, float point)
+    public static Vector4 SampleFromLinearGradient(IReadOnlyList<(float position, Vector4 colour)> gradient, float point)
     {
         if (point < gradient[0].position)
-            return gradient[0].colour.ToColor();
+            return gradient[0].colour;
 
         for (int i = 0; i < gradient.Count - 1; i++)
         {
@@ -431,146 +431,23 @@ public static class Utils
             return ValueAt(point, startStop.colour, endStop.colour, startStop.position, endStop.position);
         }
 
-        return gradient[^1].colour.ToColor();
+        return gradient[^1].colour;
     }
 
     static public Color ForStarDifficulty(double starDifficulty) => SampleFromLinearGradient(new[]
-        {
-            (0.1f, Rgba32.ParseHex("#aaaaaa").ToVector4()),
-            (0.1f, Rgba32.ParseHex("#4290fb").ToVector4()),
-            (1.25f, Rgba32.ParseHex("#4fc0ff").ToVector4()),
-            (2.0f, Rgba32.ParseHex("#4fffd5").ToVector4()),
-            (2.5f, Rgba32.ParseHex("#7cff4f").ToVector4()),
-            (3.3f, Rgba32.ParseHex("#f6f05c").ToVector4()),
-            (4.2f, Rgba32.ParseHex("#ff8068").ToVector4()),
-            (4.9f, Rgba32.ParseHex("#ff4e6f").ToVector4()),
-            (5.8f, Rgba32.ParseHex("#c645b8").ToVector4()),
-            (6.7f, Rgba32.ParseHex("#6563de").ToVector4()),
-            (7.7f, Rgba32.ParseHex("#18158e").ToVector4()),
-            (9.0f, Rgba32.ParseHex("#000000").ToVector4()),
-        }, (float)Math.Round(starDifficulty, 2, MidpointRounding.AwayFromZero));
-
-
-
-    public static Color OsuDifficultyColorCalculate(double star)
     {
-        int i;
-        float f, a, b, c;
-        float h, s, v;
-        //Easy    0.0 - 1.99 H=201 S=69% B=100%
-        //Normal  2.0 - 2.69 H=105 S=69% B=100%
-        //Hard    2.7 - 3.99 H=58  S=63% B=96%
-        //Insane  4.0 - 5.29 H=349 S=69% B=100%
-        //Expert  5.3 - 6.49 H=307 S=65% B=78%
-        //Expert+ 6.5 - 7.99 H=241 S=55% B=87%
-        //Expert+ 8.0 - ?    H=241 S+=?  B-=?
-        Console.WriteLine(star);
-        if (star <= 1.99)
-        {
-            //easy
-            h = 201f - (201f * (float)star / 1.99f);
-            s = 0.69f;
-            v = 1.00f;
-        }
-        else if (star <= 2.69)
-        {
-
-            //Normal
-            h = 105f - (105f * (float)star / 2.69f);
-            s = 0.69f;
-            v = 1.00f;
-        }
-        else if (star <= 3.99)
-        {
-            //Hard
-            h = 58f - (58f * (float)star / 3.99f);
-            if (h < 0) h += 360f;
-            s = 0.63f;
-            v = 0.96f;
-        }
-        else if (star <= 5.29)
-        {
-            //Insane
-            h = 349f - (349f * (float)star / 5.29f);
-            s = 0.69f;
-            v = 1.00f;
-        }
-        else if (star <= 6.49)
-        {
-            //Expert
-            h = 307f - (307f * (float)star / 6.49f);
-            s = 0.65f;
-            v = 0.78f;
-        }
-        else if (star <= 7.99)
-        {
-            //Expert+
-            h = 241f - (241f * (float)star / 7.99f);
-            s = 0.55f;
-            v = 0.87f;
-        }
-        else
-        {
-            //Expert++
-            h = 241f;
-            s = 0.45f - ((float)star / 9.00f * 0.87f);
-            v = 0.87f;
-        }
-
-        int r, g, blue;
-        if (h >= 360)
-            h = 0;
-        if (s == 0)
-        {
-            r = (int)(v * 255);
-            g = (int)(v * 255);
-            blue = (int)(v * 255);
-        }
-        else
-        {
-            h /= 60.0f;
-            i = (int)Math.Floor(h);
-            f = h - i;
-            a = v * (1 - s);
-            b = v * (1 - s * f);
-            c = v * (1 - s * (1 - f));
-            switch (i)
-            {
-                case 0:
-                    r = (int)(v * 255);
-                    g = (int)(c * 255);
-                    blue = (int)(a * 255);
-                    break;
-                case 1:
-                    r = (int)(b * 255);
-                    g = (int)(v * 255);
-                    blue = (int)(a * 255);
-                    break;
-                case 2:
-                    r = (int)(a * 255);
-                    g = (int)(v * 255);
-                    blue = (int)(c * 255);
-                    break;
-                case 3:
-                    r = (int)(a * 255);
-                    g = (int)(b * 255);
-                    blue = (int)(v * 255);
-                    break;
-                case 4:
-                    r = (int)(c * 255);
-                    g = (int)(a * 255);
-                    blue = (int)(v * 255);
-                    break;
-                default:
-                    r = (int)(v * 255);
-                    g = (int)(a * 255);
-                    blue = (int)(b * 255);
-                    break;
-            }
-        }
-
-        return SixLabors.ImageSharp.Color.FromRgb((byte)r, (byte)g, (byte)blue);
-    }
-
+        (0.1f, Rgba32.ParseHex("#aaaaaa").ToVector4()),
+        (0.1f, Rgba32.ParseHex("#4290fb").ToVector4()),
+        (1.25f, Rgba32.ParseHex("#4fc0ff").ToVector4()),
+        (2.0f, Rgba32.ParseHex("#4fffd5").ToVector4()),
+        (2.5f, Rgba32.ParseHex("#7cff4f").ToVector4()),
+        (3.3f, Rgba32.ParseHex("#f6f05c").ToVector4()),
+        (4.2f, Rgba32.ParseHex("#ff8068").ToVector4()),
+        (4.9f, Rgba32.ParseHex("#ff4e6f").ToVector4()),
+        (5.8f, Rgba32.ParseHex("#c645b8").ToVector4()),
+        (6.7f, Rgba32.ParseHex("#6563de").ToVector4()),
+        (7.7f, Rgba32.ParseHex("#18158e").ToVector4()),
+        (9.0f, Rgba32.ParseHex("#000000").ToVector4()),
+    }, (float)Math.Round(starDifficulty, 2, MidpointRounding.AwayFromZero)).ToColor();
 }
 
