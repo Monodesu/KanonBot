@@ -1132,7 +1132,7 @@ namespace KanonBot.image
                     else
                     {
                         //随难度渐变
-                        modeC = Utils.OsuDifficultyColorCalculate(ppinfo1.ppInfo.star);
+                        modeC = Utils.ForStarDifficulty(ppinfo1.ppInfo.star);
                         osuscoremode_icon.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
                         {
                             for (int p = 0; p < row.Length; p++)

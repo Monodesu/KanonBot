@@ -2,7 +2,7 @@ use crate::*;
 use interoptopus::{
     ffi_service, ffi_service_ctor, ffi_service_method, ffi_type, patterns::option::FFIOption,
 };
-use rosu_pp::{AnyPP, GameMode};
+use rosu_pp::AnyPP;
 
 #[ffi_type(opaque)]
 #[repr(C)]
@@ -99,14 +99,7 @@ impl ScoreParams {
         } = self;
 
         if let Some(mode) = mode.into_option() {
-            let mode = match mode {
-                Mode::Osu => GameMode::Osu,
-                Mode::Taiko => GameMode::Taiko,
-                Mode::Catch => GameMode::Catch,
-                Mode::Mania => GameMode::Mania,
-            };
-
-            calculator = calculator.mode(mode);
+            calculator = calculator.mode(mode.into());
         }
 
         if let Some(n300) = n300.into_option() {

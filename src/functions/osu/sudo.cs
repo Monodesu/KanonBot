@@ -41,6 +41,9 @@ namespace KanonBot.functions.osu
                 {
                     switch (x)
                     {
+                        case "restricted":
+                            permissions_flag = -3;
+                            break;
                         case "banned":
                             permissions_flag = -1;
                             break;

@@ -35,6 +35,9 @@ namespace KanonBot.functions.osu
                 {
                     switch (x)
                     {
+                        case "restricted":
+                            permissions_flag = -3;
+                            break;
                         case "banned":
                             permissions_flag = -1;
                             break;
@@ -56,11 +59,6 @@ namespace KanonBot.functions.osu
                     }
 
                 }
-                foreach (var x in permissions)
-                {
-                    Console.WriteLine(x);
-                }
-                Console.WriteLine(permissions + "\n" + permissions_flag);
 
                 if (permissions_flag != 3) return; //权限不够不处理
 
@@ -77,12 +75,47 @@ namespace KanonBot.functions.osu
                 switch (rootCmd.ToLower())
                 {
                     case "updateall":
-                        await SuDailyUpdateAsync(target); return;
+                        await SuDailyUpdateAsync(target);
+                        return;
+                    case "restrict_user_byoid":
+                        await RestriceUser(target, childCmd, 1);
+                        return;
+                    case "restrict_user_byemail":
+                        await RestriceUser(target, childCmd, 2);
+                        return;
                     default:
                         return;
                 }
             }
             catch { }//直接忽略
+        }
+
+
+        public static async Task RestriceUser(Target target, string cmd, int bywhat) //1=byoid 2=byemail
+        {
+            //SetOsuUserPermissionByOid
+            switch (bywhat)
+            {
+                case 1:
+                    if (await Database.Client.GetUserByOsuUID(long.Parse(cmd)) == null)
+                    {
+
+                        await target.reply($"该用户未注册desu.life账户或osu!账户不存在，请重新确认");
+                        return;
+                    }
+                    await Database.Client.SetOsuUserPermissionByOid(long.Parse(cmd), "restricted");
+                    return;
+                case 2:
+                    if (await Database.Client.GetUsers(cmd) == null)
+                    {
+                        await target.reply($"该用户未注册desu.life账户，请重新确认");
+                        return;
+                    }
+                    await Database.Client.SetOsuUserPermissionByEmail(cmd, "restricted");
+                    return;
+                default:
+                    return;
+            }
         }
 
         public static async Task SuDailyUpdateAsync(Target target)

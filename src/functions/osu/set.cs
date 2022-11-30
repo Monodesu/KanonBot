@@ -28,6 +28,15 @@ namespace KanonBot.functions.osubot
 {
     public class Setter
     {
+        public static async Task<bool> RestrictedDetect(Target target, string permissions)
+        {
+            if(permissions == "restricted")
+            {
+                await target.reply("账户已被限制。");
+                return false;
+            }
+            return true;
+        }
         public static async Task Execute(Target target, string cmd)
         {
             string rootCmd, childCmd = "";
@@ -201,6 +210,9 @@ namespace KanonBot.functions.osubot
             if (DBOsuInfo == null)
             { await target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
+            //权限检测
+            if (!await RestrictedDetect(target, DBUser.permissions!)) return;
+
             cmd = cmd.Trim();
             if (!Utils.IsUrl(cmd))
             {
@@ -282,6 +294,9 @@ namespace KanonBot.functions.osubot
             var DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
             if (DBOsuInfo == null)
             { await target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
+
+            //权限检测
+            if (!await RestrictedDetect(target, DBUser.permissions!)) return;
 
             cmd = cmd.Trim();
             if (!Utils.IsUrl(cmd))
@@ -366,6 +381,9 @@ namespace KanonBot.functions.osubot
             if (DBOsuInfo == null)
             { await target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
+            //权限检测
+            if (!await RestrictedDetect(target, DBUser.permissions!)) return;
+
             cmd = cmd.Trim();
             if (!Utils.IsUrl(cmd))
             {
@@ -443,6 +461,9 @@ namespace KanonBot.functions.osubot
             var DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
             if (DBOsuInfo == null)
             { await target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
+
+            //权限检测
+            if (!await RestrictedDetect(target, DBUser.permissions!)) return;
 
             cmd = cmd.Trim();
             if (!Utils.IsUrl(cmd))
@@ -523,6 +544,8 @@ namespace KanonBot.functions.osubot
             if (DBOsuInfo == null)
             { await target.reply("您还没有绑定osu账户，请使用!set osu 您的osu用户名来绑定您的osu账户。"); return; }
 
+            //权限检测
+            if (!await RestrictedDetect(target, DBUser.permissions!)) return;
 
             #region Colors
             Color UsernameColor = new(),

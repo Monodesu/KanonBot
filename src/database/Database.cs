@@ -1,6 +1,7 @@
 #pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable IDE0044 // 添加只读修饰符
 using KanonBot.Drivers;
+using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Ocsp;
 using Serilog;
 using SqlSugar;
@@ -399,6 +400,31 @@ public class Client
                 InfoPanelV2_CustomMode = cmd,
             })
             .Where(it => it.osu_uid == osu_uid)
+            .ExecuteCommandHasChangeAsync();
+        return result;
+    }
+
+    static public async Task<bool> SetOsuUserPermissionByOid(long osu_uid, string permission)
+    {
+        var DBUser = await GetUserByOsuUID(osu_uid);
+        var result = await GetInstance().Updateable<Model.User>()
+            .SetColumns(it => new Model.User()
+            {
+                permissions = permission
+            })
+            .Where(it => it.uid == DBUser.uid)
+            .ExecuteCommandHasChangeAsync();
+        return result;
+    }
+
+    static public async Task<bool> SetOsuUserPermissionByEmail(string email, string permission)
+    {
+        var result = await GetInstance().Updateable<Model.User>()
+            .SetColumns(it => new Model.User()
+            {
+                permissions = permission
+            })
+            .Where(it => it.email == email)
             .ExecuteCommandHasChangeAsync();
         return result;
     }

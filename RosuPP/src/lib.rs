@@ -1,4 +1,6 @@
-use interoptopus::{extra_type, ffi_type, pattern, Inventory, InventoryBuilder, ffi_function, function};
+use std::fmt::Debug;
+
+use interoptopus::{extra_type, ffi_type, pattern, Inventory, InventoryBuilder, ffi_function, function, callback};
 
 mod calculator;
 mod error;
@@ -8,6 +10,18 @@ use calculator::Calculator;
 use error::{FFIError, Error};
 use params::ScoreParams;
 use result::{CalculateResult, debug_result};
+use rosu_pp::GameMode;
+
+impl From<Mode> for GameMode {
+    fn from(value: Mode) -> Self {
+        match value {
+            Mode::Osu => GameMode::Osu,
+            Mode::Taiko => GameMode::Taiko,
+            Mode::Catch => GameMode::Catch,
+            Mode::Mania => GameMode::Mania,
+        }
+    }
+}
 
 #[ffi_type]
 #[repr(C)]
@@ -34,7 +48,6 @@ impl std::fmt::Display for Mode {
         f.write_fmt(format_args!("{}", self))
     }
 }
-
 
 // This will create a function `my_inventory` which can produce
 // an abstract FFI representation (called `Library`) for this crate.

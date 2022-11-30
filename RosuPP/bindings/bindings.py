@@ -11,8 +11,9 @@ def init_lib(path):
     c_lib = ctypes.cdll.LoadLibrary(path)
 
     c_lib.calculator_destroy.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
-    c_lib.calculator_new.argtypes = [ctypes.POINTER(ctypes.c_void_p), ctypes.POINTER(ctypes.c_char)]
+    c_lib.calculator_new.argtypes = [ctypes.POINTER(ctypes.c_void_p), Sliceu8]
     c_lib.calculator_calculate.argtypes = [ctypes.c_void_p, ERROR]
+    c_lib.calculator_scorePos.argtypes = [ctypes.c_void_p, CalculateResult]
     c_lib.score_params_destroy.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
     c_lib.score_params_new.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
     c_lib.score_params_mode.argtypes = [ctypes.c_void_p, ctypes.c_int]
@@ -22,15 +23,16 @@ def init_lib(path):
     c_lib.score_params_n100.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
     c_lib.score_params_n50.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
     c_lib.score_params_combo.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
-    c_lib.score_params_score.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
     c_lib.score_params_n_misses.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
     c_lib.score_params_n_katu.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
     c_lib.score_params_passed_objects.argtypes = [ctypes.c_void_p, ctypes.c_uint32]
     c_lib.score_params_clock_rate.argtypes = [ctypes.c_void_p, ctypes.c_double]
+    c_lib.debug_result.argtypes = [ctypes.POINTER(CalculateResult)]
 
     c_lib.calculator_destroy.restype = ctypes.c_int
     c_lib.calculator_new.restype = ctypes.c_int
     c_lib.calculator_calculate.restype = CalculateResult
+    c_lib.calculator_scorePos.restype = Optionf64
     c_lib.score_params_destroy.restype = ctypes.c_int
     c_lib.score_params_new.restype = ctypes.c_int
 
@@ -39,6 +41,9 @@ def init_lib(path):
     c_lib.score_params_destroy.errcheck = lambda rval, _fptr, _args: _errcheck(rval, 0)
     c_lib.score_params_new.errcheck = lambda rval, _fptr, _args: _errcheck(rval, 0)
 
+
+def debug_result(res: ctypes.POINTER(CalculateResult)):
+    return c_lib.debug_result(res)
 
 
 
@@ -96,7 +101,9 @@ class FFIError:
     Ok = 0
     Null = 100
     Panic = 200
-    Fail = 300
+    ParseError = 300
+    InvalidString = 400
+    Unknown = 1000
 
 
 class Optionf64(ctypes.Structure):
@@ -153,7 +160,7 @@ class CalculateResult(ctypes.Structure):
 
     # These fields represent the underlying C data layout
     _fields_ = [
-        ("mode", ctypes.c_uint8),
+        ("mode", ctypes.c_int),
         ("stars", ctypes.c_double),
         ("pp", ctypes.c_double),
         ("ppAcc", Optionf64),
@@ -161,6 +168,7 @@ class CalculateResult(ctypes.Structure):
         ("ppFlashlight", Optionf64),
         ("ppSpeed", Optionf64),
         ("ppStrain", Optionf64),
+        ("ppDifficulty", Optionf64),
         ("nFruits", Optionu32),
         ("nDroplets", Optionu32),
         ("nTinyDroplets", Optionu32),
@@ -180,9 +188,10 @@ class CalculateResult(ctypes.Structure):
         ("nSliders", Optionu32),
         ("nSpinners", Optionu32),
         ("maxCombo", Optionu32),
+        ("EffectiveMissCount", Optionf64),
     ]
 
-    def __init__(self, mode: int = None, stars: float = None, pp: float = None, ppAcc: Optionf64 = None, ppAim: Optionf64 = None, ppFlashlight: Optionf64 = None, ppSpeed: Optionf64 = None, ppStrain: Optionf64 = None, nFruits: Optionu32 = None, nDroplets: Optionu32 = None, nTinyDroplets: Optionu32 = None, aimStrain: Optionf64 = None, speedStrain: Optionf64 = None, flashlightRating: Optionf64 = None, sliderFactor: Optionf64 = None, ar: float = None, cs: float = None, hp: float = None, od: float = None, bpm: float = None, clockRate: float = None, timePreempt: Optionf64 = None, greatHitWindow: Optionf64 = None, nCircles: Optionu32 = None, nSliders: Optionu32 = None, nSpinners: Optionu32 = None, maxCombo: Optionu32 = None):
+    def __init__(self, mode: ctypes.c_int = None, stars: float = None, pp: float = None, ppAcc: Optionf64 = None, ppAim: Optionf64 = None, ppFlashlight: Optionf64 = None, ppSpeed: Optionf64 = None, ppStrain: Optionf64 = None, ppDifficulty: Optionf64 = None, nFruits: Optionu32 = None, nDroplets: Optionu32 = None, nTinyDroplets: Optionu32 = None, aimStrain: Optionf64 = None, speedStrain: Optionf64 = None, flashlightRating: Optionf64 = None, sliderFactor: Optionf64 = None, ar: float = None, cs: float = None, hp: float = None, od: float = None, bpm: float = None, clockRate: float = None, timePreempt: Optionf64 = None, greatHitWindow: Optionf64 = None, nCircles: Optionu32 = None, nSliders: Optionu32 = None, nSpinners: Optionu32 = None, maxCombo: Optionu32 = None, EffectiveMissCount: Optionf64 = None):
         if mode is not None:
             self.mode = mode
         if stars is not None:
@@ -199,6 +208,8 @@ class CalculateResult(ctypes.Structure):
             self.ppSpeed = ppSpeed
         if ppStrain is not None:
             self.ppStrain = ppStrain
+        if ppDifficulty is not None:
+            self.ppDifficulty = ppDifficulty
         if nFruits is not None:
             self.nFruits = nFruits
         if nDroplets is not None:
@@ -237,13 +248,15 @@ class CalculateResult(ctypes.Structure):
             self.nSpinners = nSpinners
         if maxCombo is not None:
             self.maxCombo = maxCombo
+        if EffectiveMissCount is not None:
+            self.EffectiveMissCount = EffectiveMissCount
 
     @property
-    def mode(self) -> int:
+    def mode(self) -> ctypes.c_int:
         return ctypes.Structure.__get__(self, "mode")
 
     @mode.setter
-    def mode(self, value: int):
+    def mode(self, value: ctypes.c_int):
         return ctypes.Structure.__set__(self, "mode", value)
 
     @property
@@ -301,6 +314,14 @@ class CalculateResult(ctypes.Structure):
     @ppStrain.setter
     def ppStrain(self, value: Optionf64):
         return ctypes.Structure.__set__(self, "ppStrain", value)
+
+    @property
+    def ppDifficulty(self) -> Optionf64:
+        return ctypes.Structure.__get__(self, "ppDifficulty")
+
+    @ppDifficulty.setter
+    def ppDifficulty(self, value: Optionf64):
+        return ctypes.Structure.__set__(self, "ppDifficulty", value)
 
     @property
     def nFruits(self) -> Optionu32:
@@ -454,6 +475,71 @@ class CalculateResult(ctypes.Structure):
     def maxCombo(self, value: Optionu32):
         return ctypes.Structure.__set__(self, "maxCombo", value)
 
+    @property
+    def EffectiveMissCount(self) -> Optionf64:
+        return ctypes.Structure.__get__(self, "EffectiveMissCount")
+
+    @EffectiveMissCount.setter
+    def EffectiveMissCount(self, value: Optionf64):
+        return ctypes.Structure.__set__(self, "EffectiveMissCount", value)
+
+
+class Sliceu8(ctypes.Structure):
+    # These fields represent the underlying C data layout
+    _fields_ = [
+        ("data", ctypes.POINTER(ctypes.c_uint8)),
+        ("len", ctypes.c_uint64),
+    ]
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, i) -> int:
+        if i < 0:
+            index = self.len+i
+        else:
+            index = i
+
+        if index >= self.len:
+            raise IndexError("Index out of range")
+
+        return self.data[index]
+
+    def copied(self) -> Sliceu8:
+        """Returns a shallow, owned copy of the underlying slice.
+
+        The returned object owns the immediate data, but not the targets of any contained
+        pointers. In other words, if your struct contains any pointers the returned object
+        may only be used as long as these pointers are valid. If the struct did not contain
+        any pointers the returned object is valid indefinitely."""
+        array = (ctypes.c_uint8 * len(self))()
+        ctypes.memmove(array, self.data, len(self) * ctypes.sizeof(ctypes.c_uint8))
+        rval = Sliceu8(data=ctypes.cast(array, ctypes.POINTER(ctypes.c_uint8)), len=len(self))
+        rval.owned = array  # Store array in returned slice to prevent memory deallocation
+        return rval
+
+    def __iter__(self) -> typing.Iterable[ctypes.c_uint8]:
+        return _Iter(self)
+
+    def iter(self) -> typing.Iterable[ctypes.c_uint8]:
+        """Convenience method returning a value iterator."""
+        return iter(self)
+
+    def first(self) -> int:
+        """Returns the first element of this slice."""
+        return self[0]
+
+    def last(self) -> int:
+        """Returns the last element of this slice."""
+        return self[len(self)-1]
+
+    def bytearray(self):
+        """Returns a bytearray with the content of this slice."""
+        rval = bytearray(len(self))
+        for i in range(len(self)):
+            rval[i] = self[i]
+        return rval
+
 
 
 
@@ -473,12 +559,13 @@ class Calculator:
         return self._ctx
 
     @staticmethod
-    def new(beatmap_path: str) -> Calculator:
+    def new(beatmap_data: Sliceu8 | ctypes.Array[ctypes.c_uint8]) -> Calculator:
         """"""
         ctx = ctypes.c_void_p()
-        if not hasattr(beatmap_path, "__ctypes_from_outparam__"):
-            beatmap_path = ctypes.cast(beatmap_path, ctypes.POINTER(ctypes.c_char))
-        c_lib.calculator_new(ctx, beatmap_path)
+        if hasattr(beatmap_data, "_length_") and getattr(beatmap_data, "_type_", "") == ctypes.c_uint8:
+            beatmap_data = Sliceu8(data=ctypes.cast(beatmap_data, ctypes.POINTER(ctypes.c_uint8)), len=len(beatmap_data))
+
+        c_lib.calculator_new(ctx, beatmap_data)
         self = Calculator(Calculator.__api_lock, ctx)
         return self
 
@@ -487,6 +574,10 @@ class Calculator:
     def calculate(self, score_params) -> CalculateResult:
         """"""
         return c_lib.calculator_calculate(self._ctx, score_params)
+
+    def scorePos(self, res: CalculateResult) -> Optionf64:
+        """"""
+        return c_lib.calculator_scorePos(self._ctx, res)
 
 
 
@@ -538,10 +629,6 @@ class ScoreParams:
     def combo(self, combo: int):
         """"""
         return c_lib.score_params_combo(self._ctx, combo)
-
-    def score(self, score: int):
-        """"""
-        return c_lib.score_params_score(self._ctx, score)
 
     def n_misses(self, n_misses: int):
         """"""
