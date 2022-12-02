@@ -951,24 +951,24 @@ namespace KanonBot.functions.osubot
                         default:
                             break;
                     }
-                    //检查通过，写入数据库
-                    try
-                    {
-                        await Database.Client.UpdateInfoPanelV2CustomCmd(DBOsuInfo.osu_uid, cmd.Trim());
-                        await target.reply($"已成功设置，您或许还需要将osuinfopanelv2colormode改为0才可生效。");
-                        return;
-                    }
-                    catch
-                    {
-                        await target.reply($"设置失败，请稍后重试或联系管理员。");
-                        return;
-                    }
                 }
                 catch
                 {
                     await target.reply($"在解析{arg}时出错了，请重新检查此参数");
                     return;
                 }
+            }
+            //检查通过，写入数据库
+            try
+            {
+                await Database.Client.UpdateInfoPanelV2CustomCmd(DBOsuInfo.osu_uid, cmd.Trim());
+                await target.reply($"已成功设置，您或许还需要将osuinfopanelv2colormode改为0才可生效。");
+                return;
+            }
+            catch
+            {
+                await target.reply($"设置失败，请稍后重试或联系管理员。");
+                return;
             }
         }
 
