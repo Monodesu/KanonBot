@@ -744,8 +744,8 @@ namespace KanonBot.API
                 public long UnrankedBeatmapsetCount { get; set; }
 
                 // 搞不懂为啥这里ppy要给两个rankhistory
-                // [JsonProperty("rankHistory")]
-                // public RankHistory RankHistory { get; set; }
+                [JsonProperty("rankHistory")]
+                public RankHistory RankHistory { get; set; }
 
                 // [JsonProperty("rank_history")]
                 // public RankHistory UserRankHistory { get; set; }

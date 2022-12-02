@@ -605,6 +605,10 @@ namespace KanonBot.functions.osubot
                   CountryRankColor = new(),
                   RankLineChartColor = new(),
                   RankLineChartTextColor = new(),
+                  RankLineChartDotColor = new(),
+                  RankLineChartDotStrokeColor = new(),
+                  RankLineChartDashColor = new(),
+                  RankLineChartDateTextColor = new(),
                   ppMainColor = new(),
                   ppProgressBarColorTextColor = new(),
                   ppProgressBarColor = new(),
@@ -684,7 +688,7 @@ namespace KanonBot.functions.osubot
             try
             {
                 argstemp = cmd.Split("\n");
-                if (argstemp.Length < 78)
+                if (argstemp.Length < 82)
                     throw new ArgumentException("颜色参数缺失或错误");
             }
             catch
@@ -715,6 +719,18 @@ namespace KanonBot.functions.osubot
                             break;
                         case "RankLineChartTextColor":
                             RankLineChartTextColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "RankLineChartDotColor":
+                            RankLineChartDotColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "RankLineChartDotStrokeColor":
+                            RankLineChartDotStrokeColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "RankLineChartDashColor":
+                            RankLineChartDashColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "RankLineChartDateTextColor":
+                            RankLineChartDateTextColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;
                         case "ppMainColor":
                             ppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());

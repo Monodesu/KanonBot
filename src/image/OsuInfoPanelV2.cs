@@ -25,10 +25,12 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SqlSugar;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static KanonBot.functions.osu.rosupp.PerformanceCalculator;
 using static KanonBot.LegacyImage.Draw;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
+using System.Collections.Generic;
 
 namespace KanonBot.image
 {
@@ -45,6 +47,10 @@ namespace KanonBot.image
                   CountryRankColor = new(),
                   RankLineChartColor = new(),
                   RankLineChartTextColor = new(),
+                  RankLineChartDotColor = new(),
+                  RankLineChartDotStrokeColor = new(),
+                  RankLineChartDashColor = new(),
+                  RankLineChartDateTextColor = new(),
                   ppMainColor = new(),
                   ppProgressBarColorTextColor = new(),
                   ppProgressBarColor = new(),
@@ -155,6 +161,18 @@ namespace KanonBot.image
                                 break;
                             case "RankLineChartTextColor":
                                 RankLineChartTextColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "RankLineChartDotColor":
+                                RankLineChartDotColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "RankLineChartDotStrokeColor":
+                                RankLineChartDotStrokeColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "RankLineChartDashColor":
+                                RankLineChartDashColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "RankLineChartDateTextColor":
+                                RankLineChartDateTextColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
                             case "ppMainColor":
                                 ppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
@@ -386,8 +404,12 @@ namespace KanonBot.image
                     UsernameColor = Color.ParseHex("#4d4d4d");
                     RankColor = Color.ParseHex("#5872df");
                     CountryRankColor = Color.ParseHex("#5872df");
-                    RankLineChartColor = Color.ParseHex("#FFFFFF");
-                    RankLineChartTextColor = Color.ParseHex("#FFFFFF");
+                    RankLineChartColor = Color.ParseHex("#80caea");
+                    RankLineChartTextColor = Color.ParseHex("#80caea");
+                    RankLineChartDotColor = Color.ParseHex("#80caea");
+                    RankLineChartDotStrokeColor = Color.ParseHex("#eff1f3");
+                    RankLineChartDashColor = Color.ParseHex("#dbe1e4");
+                    RankLineChartDateTextColor = Color.ParseHex("#666666");
                     ppMainColor = Color.ParseHex("#e36a79");
                     ppProgressBarColorTextColor = Color.ParseHex("#d84356");
                     ppProgressBarColor = Color.ParseHex("#f7bebe");
@@ -461,8 +483,12 @@ namespace KanonBot.image
                     UsernameColor = Color.ParseHex("#e6e6e6");
                     RankColor = Color.ParseHex("#5872DF");
                     CountryRankColor = Color.ParseHex("#5872DF");
-                    RankLineChartColor = Color.ParseHex("#FFFFFF");
-                    RankLineChartTextColor = Color.ParseHex("#FFFFFF");
+                    RankLineChartColor = Color.ParseHex("#2784ac");
+                    RankLineChartTextColor = Color.ParseHex("#2784ac");
+                    RankLineChartDotColor = Color.ParseHex("#2784ac");
+                    RankLineChartDotStrokeColor = Color.ParseHex("#b2b5b7");
+                    RankLineChartDashColor = Color.ParseHex("#e6e6e6");
+                    RankLineChartDateTextColor = Color.ParseHex("#e6e6e6");
                     ppMainColor = Color.ParseHex("#e36a79");
                     ppProgressBarColorTextColor = Color.ParseHex("#FF7BAC");
                     ppProgressBarColor = Color.ParseHex("#5D3B3A");
@@ -1490,26 +1516,130 @@ namespace KanonBot.image
             var osuprofilemode_x_pos = 1531 + (804 / 2) - (osuprofilemode.Width / 2);
             info.Mutate(x => x.DrawImage(osuprofilemode, new Point(osuprofilemode_x_pos, 293), 1));
 
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!test info!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //osu!rankChart
+            try
+            {
+                var RankHistory = data.userInfo.RankHistory.Data.Take(8).Reverse().ToArray();
+                var rankChart = DrawLineChart(714, 240, 7, RankHistory, RankLineChartColor, RankLineChartTextColor, RankLineChartDashColor,
+                    RankLineChartDotColor, RankLineChartDotStrokeColor, true, 7f, 5f);
+                info.Mutate(x => x.DrawImage(rankChart, new Point(1576, 694), 1));
+            }
+            catch
+            {
+                long[] RankHistory = { 0, 0, 0, 0, 0, 0, 0, 0 };
+                var rankChart = DrawLineChart(714, 240, 7, RankHistory, RankLineChartColor, RankLineChartTextColor, RankLineChartDashColor,
+                    RankLineChartDotColor, RankLineChartDotStrokeColor, true, 7f, 5f);
+                info.Mutate(x => x.DrawImage(rankChart, new Point(1576, 694), 1));
+            }
+            //date
+            var DateXPos = 2227;
+            var DateValue = DateTime.Now;
             textOptions.HorizontalAlignment = HorizontalAlignment.Center;
+            textOptions.Font = new Font(TorusRegular, 34);
+            for (int i = 0; i < 7; i++)
+            {
+                textOptions.Origin = new PointF(DateXPos, 960);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions,
+                        $"{DateValue.Month}.{DateValue.Day}", new SolidBrush(RankLineChartDateTextColor), null));
+                DateXPos -= 100;
+                DateValue = DateValue.AddDays(-1);
+            }
+
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!test info!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             textOptions.Font = new Font(TorusRegular, 40);
             textOptions.Origin = new PointF(2000, 2582);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, "this is a test version and does not represent the final quality", new SolidBrush(footerColor), null));
 
-
-
-
-
-
-
-
-
-
-
-
             //resize to 1920x?
             info.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(1920, 0), Mode = ResizeMode.Max }));
             return info;
+        }
+
+
+        //RawData[0]不绘制，仅仅为了适配InfoPanelV2的差异文本输出，其它方法调用的时候保持第一个数据为0 DataCount一定为RawData.Length-1
+        public static Img DrawLineChart(int Width, int Height,
+            int DataCount, long[] RawData, Color ChartLineColor, Color ChartTextColor, Color DashColor, Color DotColor, Color DotStrokeColor,
+            bool DrawDiff, float dotThickness, float LineThickness)
+        {
+            Img image = new Image<Rgba32>(Width, Height);
+
+            List<int> xPos = new();
+            List<int> yPos = new();
+
+            //计算x坐标
+            var xPosEach = (Width - 10) / DataCount;
+            for (int i = 0; i < DataCount; i++)
+                xPos.Add(50 + xPosEach * i);
+
+            //计算y坐标
+            long[] Data = RawData.Take(7).Reverse().ToArray();
+
+            var yPosMax = Data.Max();
+            var yPosMin = Data.Min();
+
+            for (int i = 0; i < DataCount; i++)
+            {
+                yPos.Add(((int)(((double)Height - 80.00) * ((double)(Data[i] - yPosMin) / (double)(yPosMax - yPosMin)))) + 50);
+            }
+
+            //绘制虚线
+            for (int i = 0; i < DataCount; i++)
+            {
+                PointF[] p = {
+                new Point(xPos[i], yPos[i]),
+                new Point(xPos[i], Height + 20)
+                };
+                IPen pen = Pens.Dash(DashColor, 3f);
+                image.Mutate(x => x.DrawLines(pen, p));
+            }
+
+            //绘制线
+            for (int i = 0; i < DataCount - 1; i++)
+            {
+                PointF[] p = {
+                new Point(xPos[i], yPos[i]),
+                new Point(xPos[i + 1], yPos[i + 1])
+                };
+                image.Mutate(x => x.DrawLines(ChartLineColor, LineThickness, p));
+            }
+
+            //绘制点
+            for (int i = 0; i < DataCount; i++)
+                image.Mutate(x => x.Fill(DotStrokeColor, new EllipsePolygon(new Point(xPos[i], yPos[i]), dotThickness / 4 * 5)));
+            for (int i = 0; i < DataCount; i++)
+                image.Mutate(x => x.Fill(DotColor, new EllipsePolygon(new Point(xPos[i], yPos[i]), dotThickness)));
+
+
+
+
+
+
+            //绘制差异数值
+            if (DrawDiff)
+            {
+                var textOptions = new TextOptions(new Font(TorusSemiBold, 120))
+                {
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                };
+                var drawOptions = new DrawingOptions
+                {
+                    GraphicsOptions = new GraphicsOptions
+                    {
+                        Antialias = true
+                    }
+                };
+
+                textOptions.Font = new Font(TorusRegular, 40);
+                Data = RawData.Reverse().ToArray();
+                for (int i = 0; i < DataCount; i++)
+                {
+                    textOptions.Origin = new PointF(xPos[i], yPos[i] - 34);
+                    image.Mutate(x => x.DrawText(drawOptions, textOptions,
+                      ((Data[i + 1] - Data[i]) * -1).ToString(), new SolidBrush(ChartTextColor), null));
+                }
+            }
+            return image;
         }
     }
 }
