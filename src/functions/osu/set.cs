@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Numerics;
 using Flurl;
 using Flurl.Http;
 using Flurl.Util;
@@ -30,7 +31,7 @@ namespace KanonBot.functions.osubot
     {
         public static async Task<bool> RestrictedDetect(Target target, string permissions)
         {
-            if(permissions == "restricted")
+            if (permissions == "restricted")
             {
                 await target.reply("账户已被限制。");
                 return false;
@@ -430,12 +431,62 @@ namespace KanonBot.functions.osubot
             try
             {
                 var temppic = Img.Load(imagePath, out IImageFormat format).CloneAs<Rgba32>();
-                //检测上传的infopanel尺寸是否正确
-                if (temppic.Height != 2640 && temppic.Width != 4000 && format.DefaultMimeType.Trim().ToLower()[..3] != "png")
+                //检测上传的infopanel尺寸、开孔是否正确
+                bool isok = true;
+                string errormsg = "上传的图像不符合infopanel的条件，请重新上传。\n";
+                if (temppic.Height != 2640)
+                {
+                    errormsg += $"图像宽为{temppic.Height}px，要求为2640px\n";
+                    isok = false;
+                }
+                if (temppic.Width != 4000)
+                {
+                    errormsg += $"图像长为{temppic.Width}px，要求为4000px\n";
+                    isok = false;
+                }
+                if (format.DefaultMimeType.Trim()[(format.DefaultMimeType.Trim().IndexOf("/") + 1)..] != "png")
+                {
+                    errormsg += $"图像编码为{format.DefaultMimeType.Trim()[(format.DefaultMimeType.Trim().IndexOf("/") + 1)..]}，要求为png\n";
+                    isok = false;
+                }
+                //检测开孔
+                if (isok) temppic.ProcessPixelRows(x =>
+                {
+                    //pp
+                    Span<Rgba32> row = x.GetRowSpan(445);
+                    if (row[3100].A > 250)
+                    {
+                        errormsg += $"pp进度条区域被非透明颜色填充，要求保持透明\n";
+                        isok = false;
+                    }
+                    //acc
+                    row = x.GetRowSpan(645);
+                    if (row[3100].A > 250)
+                    {
+                        errormsg += $"acc进度条区域被非透明颜色填充，要求保持透明\n";
+                        isok = false;
+                    }
+                    //level
+                    row = x.GetRowSpan(600);
+                    if (row[3910].A > 250)
+                    {
+                        errormsg += $"level进度条区域被非透明颜色填充，要求保持透明\n";
+                        isok = false;
+                    }
+                    //bpimg
+                    row = x.GetRowSpan(1650);
+                    if (row[1800].A > 250)
+                    {
+                        errormsg += $"mainbp图片区域被非透明颜色填充，要求保持透明\n";
+                        isok = false;
+                    }
+                });
+
+                if (!isok)
                 {
                     temppic.Dispose();
                     File.Delete(imagePath);
-                    await target.reply("上传的图像不符合infopanel的条件，请重新上传。");
+                    await target.reply(errormsg);
                     return;
                 }
                 temppic.Save($"./work/panelv2/user_infopanel/verify/{DBOsuInfo.osu_uid}.png", new PngEncoder());
@@ -512,7 +563,7 @@ namespace KanonBot.functions.osubot
             {
                 var temppic = Img.Load(imagePath, out IImageFormat format).CloneAs<Rgba32>();
                 //检测上传的infopanel尺寸是否正确
-                if (temppic.Height != 857 && temppic.Width != 1200 && format.DefaultMimeType.Trim().ToLower()[..3] != "png")
+                if (temppic.Height != 857 && temppic.Width != 1200 && format.DefaultMimeType.Trim()[(format.DefaultMimeType.Trim().IndexOf("/") + 1)..] != "png")
                 {
                     temppic.Dispose();
                     File.Delete(imagePath);
