@@ -10,6 +10,7 @@ public class Model
     public class OsuStandardBeatmapTechData
     {
         public long bid { get; set; }
+        public int total { get; set; }
         public int aim { get; set; }
         public int speed { get; set; }
         public int acc { get; set; }

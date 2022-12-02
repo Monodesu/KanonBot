@@ -433,7 +433,7 @@ public class Client
         return result;
     }
 
-    public static async Task<bool> InsertOsuStandardBeatmapTechData(long bid, int acc, int speed, int aim, string[] mods)
+    public static async Task<bool> InsertOsuStandardBeatmapTechData(long bid, int total, int acc, int speed, int aim, string[] mods)
     {
         var modstring = "";
         if (mods.Length > 0)
@@ -451,6 +451,7 @@ public class Client
             OsuStandardBeatmapTechData t = new()
             {
                 bid = bid,
+                total = total,
                 acc = acc,
                 speed = speed,
                 aim = aim,

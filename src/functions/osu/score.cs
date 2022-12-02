@@ -97,7 +97,7 @@ namespace KanonBot.functions.osubot
                     //rosupp
                     var data = await PerformanceCalculator.CalculatePanelData(scoreData.Score);
                     if (scoreData.Score.Beatmap.Status == OSU.Enums.Status.ranked || scoreData.Score.Beatmap.Status == OSU.Enums.Status.approved)
-                        await Database.Client.InsertOsuStandardBeatmapTechData(scoreData.Score.Beatmap.BeatmapId,
+                        await Database.Client.InsertOsuStandardBeatmapTechData(scoreData.Score.Beatmap.BeatmapId, (int)data.ppInfo.ppStats![0].total,
                             (int)data.ppInfo.ppStats![0].acc!, (int)data.ppInfo.ppStats![0].speed!, (int)data.ppInfo.ppStats![0].aim!,
                                 scoreData.Score.Mods);
                     //osu-tools
