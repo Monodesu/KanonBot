@@ -54,7 +54,6 @@ namespace KanonBot.LegacyImage
         public static FontFamily TorusSemiBold = fonts.Add("./work/fonts/Torus-SemiBold.ttf");
         public static FontFamily avenirLTStdMedium = fonts.Add("./work/fonts/AvenirLTStd-Medium.ttf");
 
-        //customBannerStatus 0=没有自定义banner 1=在猫猫上设置了自定义banner
         public static async Task<Img> DrawInfo(UserPanelData data, bool isBonded = false, bool isDataOfDayAvaiavle = true, bool eventmode = false)
         {
             var info = new Image<Rgba32>(1200, 857);

@@ -92,10 +92,14 @@ namespace KanonBot.functions.osubot
 
             try
             {
-                if(scoreData.Score.Mode == OSU.Enums.Mode.OSU)
+                if (scoreData.Score.Mode == OSU.Enums.Mode.OSU)
                 {
                     //rosupp
                     var data = await PerformanceCalculator.CalculatePanelData(scoreData.Score);
+                    if (scoreData.Score.Beatmap.Status == OSU.Enums.Status.ranked || scoreData.Score.Beatmap.Status == OSU.Enums.Status.approved)
+                        await Database.Client.InsertOsuStandardBeatmapTechData(scoreData.Score.Beatmap.BeatmapId,
+                            (int)data.ppInfo.ppStats![0].acc!, (int)data.ppInfo.ppStats![0].speed!, (int)data.ppInfo.ppStats![0].aim!,
+                                scoreData.Score.Mods);
                     //osu-tools
                     // var data = await KanonBot.osutools.Calculator.CalculateAsync(scoreData.Score);
                     // 绘制

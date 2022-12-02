@@ -3,10 +3,14 @@
 using KanonBot.Drivers;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Ocsp;
+using Polly.Caching;
+using RosuPP;
 using Serilog;
 using SqlSugar;
 using System.Runtime.ConstrainedExecution;
+using System.Security.Cryptography;
 using Tomlyn.Model;
+using static KanonBot.API.OSU.Enums;
 using static KanonBot.API.OSU.Models;
 using static KanonBot.Database.Model;
 
@@ -427,5 +431,36 @@ public class Client
             .Where(it => it.email == email)
             .ExecuteCommandHasChangeAsync();
         return result;
+    }
+
+    public static async Task<bool> InsertOsuStandardBeatmapTechData(long bid, int acc, int speed, int aim, string[] mods)
+    {
+        var modstring = "";
+        if (mods.Length > 0)
+        {
+            foreach (var x in mods)
+                modstring += x + ",";
+            modstring = modstring[..^1];
+        }
+
+        //查找谱面对应的mod数据是否存在
+        var db_info = await GetInstance().Queryable<OsuStandardBeatmapTechData>().Where(it => it.bid == bid).Where(it => it.mod == modstring).ToListAsync();
+        if (db_info.Count == 0)
+        {
+            //不存在再执行添加
+            OsuStandardBeatmapTechData t = new()
+            {
+                bid = bid,
+                acc = acc,
+                speed = speed,
+                aim = aim,
+                mod = modstring
+            };
+            try { await GetInstance().Insertable(t).ExecuteReturnIdentityAsync(); return true; } catch { return false; }
+        }
+        else
+        {
+            return true;
+        }
     }
 }

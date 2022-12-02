@@ -6,7 +6,15 @@ namespace KanonBot.Database;
 
 public class Model
 {
-
+    [SugarTable("osu_standard_beatmap_tech_data")]
+    public class OsuStandardBeatmapTechData
+    {
+        public long bid { get; set; }
+        public int aim { get; set; }
+        public int speed { get; set; }
+        public int acc { get; set; }
+        public string? mod { get; set; }
+    }
     [SugarTable("osu_seasonalpass_2022_s4")]
     public class OSUSeasonalPass
     {
