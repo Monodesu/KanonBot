@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use interoptopus::{extra_type, ffi_type, pattern, Inventory, InventoryBuilder, ffi_function, function, callback};
+use interoptopus::{extra_type, ffi_type, pattern, Inventory, InventoryBuilder, ffi_function, function};
 
 mod calculator;
 mod error;

@@ -157,7 +157,7 @@ namespace KanonBot.image
             bool CountryRankDiffIconColorAlpha
         )
         {
-            public static InfoCustom DarkDefault =>
+            public static readonly InfoCustom DarkDefault =
                 new(
                     UsernameColor: Color.ParseHex("#e6e6e6"),
                     RankColor: Color.ParseHex("#5872DF"),
@@ -275,7 +275,7 @@ namespace KanonBot.image
                     accDiffIconColorAlpha: false,
                     CountryRankDiffIconColorAlpha: false
                 );
-            public static InfoCustom LightDefault =>
+            public static readonly InfoCustom LightDefault =
                 new(
                     UsernameColor: Color.ParseHex("#4d4d4d"),
                     RankColor: Color.ParseHex("#5872df"),
@@ -1167,7 +1167,7 @@ namespace KanonBot.image
             else
                 panelPath = ColorMode switch
                 {
-                   UserPanelData.CustomMode.Custom => "./work/panelv2/infov2-dark.png",
+                    UserPanelData.CustomMode.Custom => "./work/panelv2/infov2-dark.png",
                     UserPanelData.CustomMode.Light => "./work/panelv2/infov2-light.png",
                     UserPanelData.CustomMode.Dark => "./work/panelv2/infov2-dark.png",
                     _ => throw new ArgumentOutOfRangeException("未知的颜色模式"),
