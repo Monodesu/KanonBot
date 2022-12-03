@@ -603,6 +603,10 @@ namespace KanonBot.functions.osubot
                   ModeIconColor = new(),
                   RankColor = new(),
                   CountryRankColor = new(),
+
+                  CountryRankDiffColor = new(),
+                  CountryRankDiffIconColor = new(),
+
                   RankLineChartColor = new(),
                   RankLineChartTextColor = new(),
                   RankLineChartDotColor = new(),
@@ -610,10 +614,18 @@ namespace KanonBot.functions.osubot
                   RankLineChartDashColor = new(),
                   RankLineChartDateTextColor = new(),
                   ppMainColor = new(),
+
+                  ppDiffColor = new(),
+                  ppDiffIconColor = new(),
+
                   ppProgressBarColorTextColor = new(),
                   ppProgressBarColor = new(),
                   ppProgressBarBackgroundColor = new(),
                   accMainColor = new(),
+
+                  accDiffColor = new(),
+                  accDiffIconColor = new(),
+
                   accProgressBarColorTextColor = new(),
                   accProgressBarColor = new(),
                   accProgressBarBackgroundColor = new(),
@@ -626,6 +638,16 @@ namespace KanonBot.functions.osubot
                   Details_TotalHitsColor = new(),
                   Details_PlayCountColor = new(),
                   Details_RankedScoreColor = new(),
+
+                  DetailsDiff_PlayTimeColor = new(),
+                  DetailsDiff_TotalHitsColor = new(),
+                  DetailsDiff_PlayCountColor = new(),
+                  DetailsDiff_RankedScoreColor = new(),
+                  DetailsDiff_PlayTimeIconColor = new(),
+                  DetailsDiff_TotalHitsIconColor = new(),
+                  DetailsDiff_PlayCountIconColor = new(),
+                  DetailsDiff_RankedScoreIconColor = new(),
+
                   LevelTitleColor = new(),
                   LevelProgressBarColor = new(),
                   LevelProgressBarBackgroundColor = new(),
@@ -680,15 +702,21 @@ namespace KanonBot.functions.osubot
                   CountryFlagBrightness = 1.0f,
                   ModeCaptionBrightness = 1.0f,
                   ModIconBrightness = 1.0f,
-                  ScoreModeIconBrightness = 1.0f;
+                  ScoreModeIconBrightness = 1.0f,
+                  OsuSupporterIconBrightness = 1.0f;
 
+            float CountryFlagAlpha = 1.0f,
+                  OsuSupporterIconAlpha = 1.0f,
+                  BadgeAlpha = 1.0f,
+                  AvatarAlpha = 1.0f,
+                  ModIconAlpha = 1.0f;
             bool FixedScoreModeIconColor = false;
             #endregion
             string[] argstemp;
             try
             {
                 argstemp = cmd.Split("\n");
-                if (argstemp.Length < 82)
+                if (argstemp.Length < 102)
                     throw new ArgumentException("颜色参数缺失或错误");
             }
             catch
@@ -702,6 +730,66 @@ namespace KanonBot.functions.osubot
                 {
                     switch (arg.Split(":")[0].Trim())
                     {
+                        case "DetailsDiff_PlayTimeColor":
+                            DetailsDiff_PlayTimeColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "DetailsDiff_PlayTimeIconColor":
+                            DetailsDiff_PlayTimeIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "DetailsDiff_TotalHitsColor":
+                            DetailsDiff_TotalHitsColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "DetailsDiff_TotalHitsIconColor":
+                            DetailsDiff_TotalHitsIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "DetailsDiff_PlayCountColor":
+                            DetailsDiff_PlayCountColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "DetailsDiff_PlayCountIconColor":
+                            DetailsDiff_PlayCountIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "DetailsDiff_RankedScoreColor":
+                            DetailsDiff_RankedScoreColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "DetailsDiff_RankedScoreIconColor":
+                            DetailsDiff_RankedScoreIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "ppDiffColor":
+                            ppDiffColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "ppDiffIconColor":
+                            ppDiffIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "accDiffColor":
+                            accDiffColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "accDiffIconColor":
+                            accDiffIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "CountryRankDiffColor":
+                            CountryRankDiffColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "CountryRankDiffIconColor":
+                            CountryRankDiffIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                            break;
+                        case "OsuSupporterIconBrightness":
+                            OsuSupporterIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
+                            break;
+                        case "CountryFlagAlpha":
+                            CountryFlagAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
+                            break;
+                        case "OsuSupporterIconAlpha":
+                            OsuSupporterIconAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
+                            break;
+                        case "BadgeAlpha":
+                            BadgeAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
+                            break;
+                        case "AvatarAlpha":
+                            AvatarAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
+                            break;
+                        case "ModIconAlpha":
+                            ModIconAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
+                            break;
                         case "UsernameColor":
                             UsernameColor = Color.ParseHex(arg.Split(":")[1].Trim());
                             break;

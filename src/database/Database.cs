@@ -343,6 +343,7 @@ public class Client
         ui.Statistics.Level.Progress = data.level_percent;
         ui.Statistics.PP = data.performance_point;
         ui.PlayMode = mode;
+        ui.Statistics.PlayTime = data.playtime;
         //ui.daysBefore = (t - data.lastupdate).Days;
         return ((DateTime.Today - data.lastupdate).Days, ui);
     }

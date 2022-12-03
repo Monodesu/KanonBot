@@ -31,6 +31,7 @@ using static KanonBot.LegacyImage.Draw;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 using System.Collections.Generic;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace KanonBot.image
 {
@@ -45,6 +46,8 @@ namespace KanonBot.image
                   ModeIconColor = new(),
                   RankColor = new(),
                   CountryRankColor = new(),
+                  CountryRankDiffColor = new(),
+                  CountryRankDiffIconColor = new(),
                   RankLineChartColor = new(),
                   RankLineChartTextColor = new(),
                   RankLineChartDotColor = new(),
@@ -52,10 +55,14 @@ namespace KanonBot.image
                   RankLineChartDashColor = new(),
                   RankLineChartDateTextColor = new(),
                   ppMainColor = new(),
+                  ppDiffColor = new(),
+                  ppDiffIconColor = new(),
                   ppProgressBarColorTextColor = new(),
                   ppProgressBarColor = new(),
                   ppProgressBarBackgroundColor = new(),
                   accMainColor = new(),
+                  accDiffColor = new(),
+                  accDiffIconColor = new(),
                   accProgressBarColorTextColor = new(),
                   accProgressBarColor = new(),
                   accProgressBarBackgroundColor = new(),
@@ -68,6 +75,14 @@ namespace KanonBot.image
                   Details_TotalHitsColor = new(),
                   Details_PlayCountColor = new(),
                   Details_RankedScoreColor = new(),
+                  DetailsDiff_PlayTimeColor = new(),
+                  DetailsDiff_TotalHitsColor = new(),
+                  DetailsDiff_PlayCountColor = new(),
+                  DetailsDiff_RankedScoreColor = new(),
+                  DetailsDiff_PlayTimeIconColor = new(),
+                  DetailsDiff_TotalHitsIconColor = new(),
+                  DetailsDiff_PlayCountIconColor = new(),
+                  DetailsDiff_RankedScoreIconColor = new(),
                   LevelTitleColor = new(),
                   LevelProgressBarColor = new(),
                   LevelProgressBarBackgroundColor = new(),
@@ -122,14 +137,28 @@ namespace KanonBot.image
                   CountryFlagBrightness = 1.0f,
                   ModeCaptionBrightness = 1.0f,
                   ModIconBrightness = 1.0f,
-                  ScoreModeIconBrightness = 1.0f;
+                  ScoreModeIconBrightness = 1.0f,
+                  OsuSupporterIconBrightness = 1.0f;
+
+            float CountryFlagAlpha = 1.0f,
+                  OsuSupporterIconAlpha = 1.0f,
+                  BadgeAlpha = 1.0f,
+                  AvatarAlpha = 1.0f,
+                  ModIconAlpha = 1.0f;
 
             bool FixedScoreModeIconColor = false;
             bool ModeIconAlpha = false,
                  Score1ModeIconAlpha = false,
                  Score2ModeIconAlpha = false,
                  Score3ModeIconAlpha = false,
-                 Score4ModeIconAlpha = false;
+                 Score4ModeIconAlpha = false,
+                 DetailsPlaytimeIconAlpha = false,
+                 DetailsTotalHitIconAlpha = false,
+                 DetailsPlayCountIconAlpha = false,
+                 DetailsRankedScoreIconAlpha = false,
+                 ppDiffIconColorAlpha = false,
+                 accDiffIconColorAlpha = false,
+                 CountryRankDiffIconColorAlpha = false;
             #endregion
             //配色方案 0=用户自定义 1=模板light 2=模板dark 3...4...5...
             //本来应该做个class的 算了 懒了 就这样吧 复制粘贴没什么不好的
@@ -143,6 +172,75 @@ namespace KanonBot.image
                     {
                         switch (arg.Split(":")[0].Trim())
                         {
+                            case "DetailsDiff_PlayTimeColor":
+                                DetailsDiff_PlayTimeColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "DetailsDiff_PlayTimeIconColor":
+                                DetailsDiff_PlayTimeIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                if (arg.Split(":")[1].Trim().ToLower().Length > 7) DetailsPlaytimeIconAlpha = true;
+                                break;
+                            case "DetailsDiff_TotalHitsColor":
+                                DetailsDiff_TotalHitsColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "DetailsDiff_TotalHitsIconColor":
+                                DetailsDiff_TotalHitsIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                if (arg.Split(":")[1].Trim().ToLower().Length > 7) DetailsTotalHitIconAlpha = true;
+                                break;
+                            case "DetailsDiff_PlayCountColor":
+                                DetailsDiff_PlayCountColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "DetailsDiff_PlayCountIconColor":
+                                DetailsDiff_PlayCountIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                if (arg.Split(":")[1].Trim().ToLower().Length > 7) DetailsPlayCountIconAlpha = true;
+                                break;
+                            case "DetailsDiff_RankedScoreColor":
+                                DetailsDiff_RankedScoreColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "DetailsDiff_RankedScoreIconColor":
+                                DetailsDiff_RankedScoreIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                if (arg.Split(":")[1].Trim().ToLower().Length > 7) DetailsRankedScoreIconAlpha = true;
+                                break;
+                            case "ppDiffColor":
+                                ppDiffColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "ppDiffIconColor":
+                                ppDiffIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                if (arg.Split(":")[1].Trim().ToLower().Length > 7) ppDiffIconColorAlpha = true;
+                                break;
+                            case "accDiffColor":
+                                accDiffColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "accDiffIconColor":
+                                accDiffIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                if (arg.Split(":")[1].Trim().ToLower().Length > 7) accDiffIconColorAlpha = true;
+                                break;
+                            case "CountryRankDiffColor":
+                                CountryRankDiffColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                break;
+                            case "CountryRankDiffIconColor":
+                                CountryRankDiffIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
+                                if (arg.Split(":")[1].Trim().ToLower().Length > 7) CountryRankDiffIconColorAlpha = true;
+                                break;
+                            case "OsuSupporterIconBrightness":
+                                OsuSupporterIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
+                                break;
+                            case "CountryFlagAlpha":
+                                CountryFlagAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
+                                break;
+                            case "OsuSupporterIconAlpha":
+                                OsuSupporterIconAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
+                                break;
+                            case "BadgeAlpha":
+                                BadgeAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
+                                break;
+                            case "AvatarAlpha":
+                                AvatarAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
+                                break;
+                            case "ModIconAlpha":
+                                ModIconAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
+                                break;
+
+                            ////
                             case "UsernameColor":
                                 UsernameColor = Color.ParseHex(arg.Split(":")[1].Trim());
                                 break;
@@ -475,6 +573,20 @@ namespace KanonBot.image
                     SubBp4thModeColor = Color.White;
                     SubBp5thModeColor = Color.White;
                     FixedScoreModeIconColor = false;
+                    DetailsDiff_PlayTimeColor = Color.ParseHex("#6cac9c");
+                    DetailsDiff_PlayTimeIconColor = Color.ParseHex("#6cac9c");
+                    DetailsDiff_TotalHitsColor = Color.ParseHex("#6cac9c");
+                    DetailsDiff_TotalHitsIconColor = Color.ParseHex("#6cac9c");
+                    DetailsDiff_PlayCountColor = Color.ParseHex("#5872df");
+                    DetailsDiff_PlayCountIconColor = Color.ParseHex("#5872df");
+                    DetailsDiff_RankedScoreColor = Color.ParseHex("#3a4d78");
+                    DetailsDiff_RankedScoreIconColor = Color.ParseHex("#3a4d78");
+                    ppDiffColor = Color.ParseHex("#e36a79");
+                    ppDiffIconColor = Color.ParseHex("#e36a79");
+                    accDiffColor = Color.ParseHex("#6cac9c");
+                    accDiffIconColor = Color.ParseHex("#6cac9c");
+                    CountryRankDiffColor = Color.ParseHex("#808080");
+                    CountryRankDiffIconColor = Color.ParseHex("#3a4d78");
                     //do not change brightness;
                     break;
                 #endregion
@@ -557,6 +669,7 @@ namespace KanonBot.image
                     ModeCaptionBrightness = 0.6f;
                     ModIconBrightness = 0.6f;
                     ScoreModeIconBrightness = 0.6f;
+                    OsuSupporterIconBrightness = 0.6f;
 
                     ModeIconColor = Color.ParseHex("#e6e6e6");
                     SubBp2ndModeColor = Color.White;
@@ -564,6 +677,22 @@ namespace KanonBot.image
                     SubBp4thModeColor = Color.White;
                     SubBp5thModeColor = Color.White;
                     FixedScoreModeIconColor = false;
+
+                    DetailsDiff_PlayTimeColor = Color.ParseHex("#6cac9c");
+                    DetailsDiff_PlayTimeIconColor = Color.ParseHex("#6cac9c");
+                    DetailsDiff_TotalHitsColor = Color.ParseHex("#6cac9c");
+                    DetailsDiff_TotalHitsIconColor = Color.ParseHex("#6cac9c");
+                    DetailsDiff_PlayCountColor = Color.ParseHex("#5872df");
+                    DetailsDiff_PlayCountIconColor = Color.ParseHex("#5872df");
+                    DetailsDiff_RankedScoreColor = Color.ParseHex("#3a4d78");
+                    DetailsDiff_RankedScoreIconColor = Color.ParseHex("#3a4d78");
+                    ppDiffColor = Color.ParseHex("#e36a79");
+                    ppDiffIconColor = Color.ParseHex("#e36a79");
+                    accDiffColor = Color.ParseHex("#6cac9c");
+                    accDiffIconColor = Color.ParseHex("#6cac9c");
+                    CountryRankDiffColor = Color.ParseHex("#e6e6e6");
+                    CountryRankDiffIconColor = Color.ParseHex("#3a4d78");
+
                     break;
                     #endregion
             }
@@ -826,6 +955,11 @@ namespace KanonBot.image
             // 亮度
             avatar.Mutate(x => x.Brightness(AvatarBrightness));
             avatar.Mutate(x => x.Resize(200, 200).RoundCorner(new Size(200, 200), 25));
+            avatar.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+            {
+                for (int p = 0; p < row.Length; p++)
+                    if (row[p].W > 0.2f) row[p].W = AvatarAlpha;
+            }));
             info.Mutate(x => x.DrawImage(avatar, new Point(1531, 72), 1));
 
 
@@ -837,25 +971,112 @@ namespace KanonBot.image
             textOptions.Font = new Font(TorusRegular, 60);
             textOptions.Origin = new PointF(1972, 481);
             textOptions.VerticalAlignment = VerticalAlignment.Center;
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("#{0:N0}", data.userInfo.Statistics.GlobalRank), new SolidBrush(RankColor), null));
+            info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.GlobalRank), new SolidBrush(RankColor), null));
 
             //country_flag
             Img flags = Img.Load(await Utils.LoadFile2Byte($"./work/flags/{data.userInfo.Country.Code}.png"));
             flags.Mutate(x => x.Resize(100, 67).Brightness(CountryFlagBrightness));
+            flags.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+            {
+                for (int p = 0; p < row.Length; p++)
+                    if (row[p].W > 0.2f) row[p].W = CountryFlagAlpha;
+            }));
             info.Mutate(x => x.DrawImage(flags, new Point(1577, 600), 1));
 
             //country_rank
+            textOptions.HorizontalAlignment = HorizontalAlignment.Left;
             textOptions.Origin = new PointF(1687, 629);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("#{0:N0}", data.userInfo.Statistics.CountryRank), new SolidBrush(CountryRankColor), null));
+            if (isBonded)
+            {
+                if (Math.Abs(data.userInfo.Statistics.CountryRank - data.prevUserInfo!.Statistics.CountryRank) >= 1)
+                {
+                    textOptions.HorizontalAlignment = HorizontalAlignment.Right;
+                    textOptions.Origin = new PointF(2250, 629);
+                    textOptions.Font = new Font(TorusRegular, 44);
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}",
+                        Math.Abs(data.userInfo.Statistics.CountryRank - data.prevUserInfo!.Statistics.CountryRank)), new SolidBrush(CountryRankDiffColor), null));
+                    Img cr_indicator_icon_increase = Img.Load(await Utils.LoadFile2Byte($"./work/panelv2/icons/indicator.png")).CloneAs<Rgba32>();
+                    cr_indicator_icon_increase.Mutate(x => x.Resize(36, 36));
+                    if ((data.userInfo.Statistics.CountryRank - data.prevUserInfo!.Statistics.CountryRank) > 0)
+                        cr_indicator_icon_increase.Mutate(x => x.Rotate(180));
+                    cr_indicator_icon_increase.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                    {
+                        for (int p = 0; p < row.Length; p++)
+                        {
+                            row[p].X = ((Vector4)CountryRankDiffIconColor).X;
+                            row[p].Y = ((Vector4)CountryRankDiffIconColor).Y;
+                            row[p].Z = ((Vector4)CountryRankDiffIconColor).Z;
+                            if (CountryRankDiffIconColorAlpha) if (row[p].W > 0.2f) row[p].W = row[p].W * ((Vector4)CountryRankDiffIconColor).W;
+                        }
+                    }));
+                    info.Mutate(x => x.DrawImage(cr_indicator_icon_increase, new Point(2255, 616), 1));
+                }
+            }
 
             //pp
+            textOptions.HorizontalAlignment = HorizontalAlignment.Left;
             textOptions.Origin = new PointF(3120, 350);
+            textOptions.Font = new Font(TorusRegular, 60);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.PP), new SolidBrush(ppMainColor), null));
+            if (isBonded)
+            {
+                if (Math.Abs(data.userInfo.Statistics.PP - data.prevUserInfo!.Statistics.PP) >= 1.0)
+                {
+                    textOptions.HorizontalAlignment = HorizontalAlignment.Right;
+                    textOptions.Origin = new PointF(3735, 350);
+                    textOptions.Font = new Font(TorusRegular, 40);
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}",
+                        Math.Abs(data.userInfo.Statistics.PP - data.prevUserInfo!.Statistics.PP)), new SolidBrush(ppDiffColor), null));
+                    Img pp_indicator_icon_increase = Img.Load(await Utils.LoadFile2Byte($"./work/panelv2/icons/indicator.png")).CloneAs<Rgba32>();
+                    pp_indicator_icon_increase.Mutate(x => x.Resize(36, 36));
+                    if ((data.userInfo.Statistics.PP - data.prevUserInfo!.Statistics.PP) < 0)
+                        pp_indicator_icon_increase.Mutate(x => x.Rotate(180));
+                    pp_indicator_icon_increase.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                    {
+                        for (int p = 0; p < row.Length; p++)
+                        {
+                            row[p].X = ((Vector4)ppDiffIconColor).X;
+                            row[p].Y = ((Vector4)ppDiffIconColor).Y;
+                            row[p].Z = ((Vector4)ppDiffIconColor).Z;
+                            if (ppDiffIconColorAlpha) if (row[p].W > 0.2f) row[p].W = row[p].W * ((Vector4)ppDiffIconColor).W;
+                        }
+                    }));
+                    info.Mutate(x => x.DrawImage(pp_indicator_icon_increase, new Point(3740, 335), 1));
+                }
+            }
 
             //acc
+            textOptions.HorizontalAlignment = HorizontalAlignment.Left;
             textOptions.Origin = new PointF(3120, 551);
+            textOptions.Font = new Font(TorusRegular, 60);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0.##}%", data.userInfo.Statistics.HitAccuracy), new SolidBrush(accMainColor), null));
-
+            if (isBonded)
+            {
+                if (Math.Abs(data.userInfo.Statistics.HitAccuracy - data.prevUserInfo!.Statistics.HitAccuracy) >= 0.01)
+                {
+                    textOptions.HorizontalAlignment = HorizontalAlignment.Right;
+                    textOptions.Origin = new PointF(3735, 551);
+                    textOptions.Font = new Font(TorusRegular, 40);
+                    info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:0.##}%",
+                        data.userInfo.Statistics.HitAccuracy - data.prevUserInfo!.Statistics.HitAccuracy), new SolidBrush(accDiffColor), null));
+                    Img acc_indicator_icon_increase = Img.Load(await Utils.LoadFile2Byte($"./work/panelv2/icons/indicator.png")).CloneAs<Rgba32>();
+                    acc_indicator_icon_increase.Mutate(x => x.Resize(36, 36));
+                    if ((data.userInfo.Statistics.HitAccuracy - data.prevUserInfo!.Statistics.HitAccuracy) < 0.0)
+                        acc_indicator_icon_increase.Mutate(x => x.Rotate(180));
+                    acc_indicator_icon_increase.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                    {
+                        for (int p = 0; p < row.Length; p++)
+                        {
+                            row[p].X = ((Vector4)accDiffIconColor).X;
+                            row[p].Y = ((Vector4)accDiffIconColor).Y;
+                            row[p].Z = ((Vector4)accDiffIconColor).Z;
+                            if (accDiffIconColorAlpha) if (row[p].W > 0.2f) row[p].W = row[p].W * ((Vector4)accDiffIconColor).W;
+                        }
+                    }));
+                    info.Mutate(x => x.DrawImage(acc_indicator_icon_increase, new Point(3740, 536), 1));
+                }
+            }
             //ppsub
             textOptions.HorizontalAlignment = HorizontalAlignment.Right;
             textOptions.Font = new Font(TorusRegular, 40);
@@ -913,6 +1134,88 @@ namespace KanonBot.image
             //ranked scores
             textOptions.Origin = new PointF(3420, 1217);
             info.Mutate(x => x.DrawText(drawOptions, textOptions, string.Format("{0:N0}", data.userInfo.Statistics.RankedScore), new SolidBrush(Details_RankedScoreColor), null));
+
+            //details diff
+            if (isBonded)
+            {
+                textOptions.Font = new Font(TorusRegular, 36);
+                Img indicator_icon_increase = Img.Load(await Utils.LoadFile2Byte($"./work/panelv2/icons/indicator.png")).CloneAs<Rgba32>();
+                indicator_icon_increase.Mutate(x => x.Resize(42, 42));
+                //Img indicator_icon_decrease = Img.Load(await Utils.LoadFile2Byte($"./work/panelv2/icons/indicator.png")).CloneAs<Rgba32>();
+                //indicator_icon_decrease.Mutate(x => x.Resize(42, 42).Rotate(180));
+                var text = "";
+                //play time
+                textOptions.Origin = new PointF(1705, 1265);
+                text = Utils.Duration2StringWithoutSec(data.userInfo.Statistics.PlayTime - data.prevUserInfo!.Statistics.PlayTime);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, text, new SolidBrush(DetailsDiff_PlayTimeColor), null));
+                var m = TextMeasurer.Measure(text, textOptions);
+                indicator_icon_increase.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                {
+                    for (int p = 0; p < row.Length; p++)
+                    {
+                        row[p].X = ((Vector4)DetailsDiff_PlayTimeIconColor).X;
+                        row[p].Y = ((Vector4)DetailsDiff_PlayTimeIconColor).Y;
+                        row[p].Z = ((Vector4)DetailsDiff_PlayTimeIconColor).Z;
+                        if (DetailsPlaytimeIconAlpha) if (row[p].W > 0.2f) row[p].W = row[p].W * ((Vector4)DetailsDiff_PlayTimeIconColor).W;
+                    }
+                }));
+                info.Mutate(x => x.DrawImage(indicator_icon_increase, new Point(1705 + (int)m.Width + 10, 1247), 1));
+
+                //total hits
+                textOptions.Origin = new PointF(2285, 1265);
+                text = string.Format("{0:N0}", data.userInfo.Statistics.TotalHits - data.prevUserInfo!.Statistics.TotalHits);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, text, new SolidBrush(DetailsDiff_TotalHitsColor), null));
+                m = TextMeasurer.Measure(text, textOptions);
+                indicator_icon_increase.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                {
+                    for (int p = 0; p < row.Length; p++)
+                    {
+                        row[p].X = ((Vector4)DetailsDiff_TotalHitsIconColor).X;
+                        row[p].Y = ((Vector4)DetailsDiff_TotalHitsIconColor).Y;
+                        row[p].Z = ((Vector4)DetailsDiff_TotalHitsIconColor).Z;
+                        if (DetailsTotalHitIconAlpha) if (row[p].W > 0.2f) row[p].W = row[p].W * ((Vector4)DetailsDiff_TotalHitsIconColor).W;
+                    }
+                }));
+                info.Mutate(x => x.DrawImage(indicator_icon_increase, new Point(2285 + (int)m.Width + 10, 1247), 1));
+
+                //play count
+                textOptions.Origin = new PointF(2853, 1265);
+                text = string.Format("{0:N0}", data.userInfo.Statistics.PlayCount - data.prevUserInfo!.Statistics.PlayCount);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, text, new SolidBrush(DetailsDiff_PlayCountColor), null));
+                m = TextMeasurer.Measure(text, textOptions);
+                indicator_icon_increase.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                {
+                    for (int p = 0; p < row.Length; p++)
+                    {
+                        row[p].X = ((Vector4)DetailsDiff_PlayCountIconColor).X;
+                        row[p].Y = ((Vector4)DetailsDiff_PlayCountIconColor).Y;
+                        row[p].Z = ((Vector4)DetailsDiff_PlayCountIconColor).Z;
+                        if (DetailsPlayCountIconAlpha) if (row[p].W > 0.2f) row[p].W = row[p].W * ((Vector4)DetailsDiff_PlayCountIconColor).W;
+                    }
+                }));
+                info.Mutate(x => x.DrawImage(indicator_icon_increase, new Point(2853 + (int)m.Width + 10, 1247), 1));
+
+                //ranked scores
+                textOptions.Origin = new PointF(3420, 1265);
+                text = string.Format("{0:N0}", data.userInfo.Statistics.RankedScore - data.prevUserInfo!.Statistics.RankedScore);
+                info.Mutate(x => x.DrawText(drawOptions, textOptions, text, new SolidBrush(DetailsDiff_RankedScoreColor), null));
+                m = TextMeasurer.Measure(text, textOptions);
+                indicator_icon_increase.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                {
+                    for (int p = 0; p < row.Length; p++)
+                    {
+                        row[p].X = ((Vector4)DetailsDiff_RankedScoreIconColor).X;
+                        row[p].Y = ((Vector4)DetailsDiff_RankedScoreIconColor).Y;
+                        row[p].Z = ((Vector4)DetailsDiff_RankedScoreIconColor).Z;
+                        if (DetailsRankedScoreIconAlpha) if (row[p].W > 0.2f) row[p].W = row[p].W * ((Vector4)DetailsDiff_RankedScoreIconColor).W;
+                    }
+                }));
+                info.Mutate(x => x.DrawImage(indicator_icon_increase, new Point(3420 + (int)m.Width + 10, 1247), 1));
+            }
+
+
+
+
 
             if (allBP.Length > 5)
             {
@@ -1144,6 +1447,11 @@ namespace KanonBot.image
                         {
                             Img modicon = Img.Load(await Utils.LoadFile2Byte($"./work/mods_v2/2x/{x}.png"));
                             modicon.Mutate(x => x.Resize(90, 90).Brightness(ModIconBrightness));
+                            modicon.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                            {
+                                for (int p = 0; p < row.Length; p++)
+                                    if (row[p].W > 0.2f) row[p].W = ModIconAlpha;
+                            }));
                             info.Mutate(x => x.DrawImage(modicon, new Point(otherbp_mods_pos_x, otherbp_mods_pos_y), 1));
                             otherbp_mods_pos_x += 105;
                         }
@@ -1472,6 +1780,12 @@ namespace KanonBot.image
                     badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png")).CloneAs<Rgba32>();
                 }
                 badge.Mutate(x => x.Resize(236, 110).Brightness(BadgeBrightness).RoundCorner(new Size(236, 110), 20));
+
+                badge.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                {
+                    for (int p = 0; p < row.Length; p++)
+                        if (row[p].W > 0.2f) row[p].W = BadgeAlpha;
+                }));
                 info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
             }
 
