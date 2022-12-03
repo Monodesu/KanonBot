@@ -146,7 +146,9 @@ namespace KanonBot.image
                   AvatarAlpha = 1.0f,
                   ModIconAlpha = 1.0f;
 
-            bool FixedScoreModeIconColor = false;
+            bool FixedScoreModeIconColor = false,
+                 DisplaySupporterStatus = true;
+
             bool ModeIconAlpha = false,
                  Score1ModeIconAlpha = false,
                  Score2ModeIconAlpha = false,
@@ -467,6 +469,9 @@ namespace KanonBot.image
                                 break;
                             case "FixedScoreModeIconColor":
                                 FixedScoreModeIconColor = bool.Parse($"{arg.Split(":")[1].Trim()}");
+                                break;
+                            case "DisplaySupporterStatus":
+                                DisplaySupporterStatus = bool.Parse($"{arg.Split(":")[1].Trim()}");
                                 break;
                             case "SideImgBrightness":
                                 SideImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
@@ -1786,8 +1791,25 @@ namespace KanonBot.image
                     for (int p = 0; p < row.Length; p++)
                         if (row[p].W > 0.2f) row[p].W = BadgeAlpha;
                 }));
-                info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
+                if (data.userInfo.IsSupporter && DisplaySupporterStatus)
+                    info.Mutate(x => x.DrawImage(badge, new Point(3420, 93), 1));
+                else
+                    info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
             }
+
+            //osu!supporter
+            if (data.userInfo.IsSupporter && DisplaySupporterStatus)
+            {
+                Img temp = Img.Load(await Utils.LoadFile2Byte($"./work/panelv2/icons/supporter.png")).CloneAs<Rgba32>();
+                temp.Mutate(x => x.Resize(110, 110).Brightness(OsuSupporterIconBrightness));
+                temp.Mutate(x => x.ProcessPixelRowsAsVector4(row =>
+                {
+                    for (int p = 0; p < row.Length; p++)
+                        if (row[p].W > 0.2f) row[p].W = OsuSupporterIconAlpha;
+                }));
+                info.Mutate(x => x.DrawImage(temp, new Point(3692, 93), 1));
+            }
+
 
             //osu!mode
             Img osuprofilemode_icon = Img.Load(await Utils.LoadFile2Byte($"./work/panelv2/icons/mode_icon/profile/{data.userInfo.PlayMode.ToStr()}.png")).CloneAs<Rgba32>();
@@ -1860,9 +1882,9 @@ namespace KanonBot.image
             }
 
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!test info!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            textOptions.Font = new Font(TorusRegular, 40);
-            textOptions.Origin = new PointF(2000, 2582);
-            info.Mutate(x => x.DrawText(drawOptions, textOptions, "this is a test version and does not represent the final quality", new SolidBrush(footerColor), null));
+            //textOptions.Font = new Font(TorusRegular, 40);
+            //textOptions.Origin = new PointF(2000, 2582);
+            //info.Mutate(x => x.DrawText(drawOptions, textOptions, "this is a test version and does not represent the final quality", new SolidBrush(footerColor), null));
 
             //resize to 1920x?
             info.Mutate(x => x.Resize(new ResizeOptions() { Size = new Size(1920, 0), Mode = ResizeMode.Max }));

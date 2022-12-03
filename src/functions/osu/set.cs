@@ -710,13 +710,14 @@ namespace KanonBot.functions.osubot
                   BadgeAlpha = 1.0f,
                   AvatarAlpha = 1.0f,
                   ModIconAlpha = 1.0f;
-            bool FixedScoreModeIconColor = false;
+            bool FixedScoreModeIconColor = false, 
+                 DisplaySupporterStatus = true;
             #endregion
             string[] argstemp;
             try
             {
                 argstemp = cmd.Split("\n");
-                if (argstemp.Length < 102)
+                if (argstemp.Length < 103)
                     throw new ArgumentException("颜色参数缺失或错误");
             }
             catch
@@ -1011,6 +1012,9 @@ namespace KanonBot.functions.osubot
                             break;
                         case "FixedScoreModeIconColor":
                             FixedScoreModeIconColor = bool.Parse($"{arg.Split(":")[1].Trim()}");
+                            break;
+                        case "DisplaySupporterStatus":
+                            DisplaySupporterStatus = bool.Parse($"{arg.Split(":")[1].Trim()}");
                             break;
                         case "SideImgBrightness":
                             SideImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
