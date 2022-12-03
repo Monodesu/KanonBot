@@ -150,7 +150,7 @@ public class Client
             uid = kanon_uid,
             osu_uid = osu_uid,
             osu_mode = "osu",
-            customInfoEngineVer = 1,
+            customInfoEngineVer = 2,
             InfoPanelV2_Mode = 1
 
         };
