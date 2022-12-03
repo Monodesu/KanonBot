@@ -30,8 +30,14 @@ namespace KanonBot.LegacyImage
             public string? customPanel;
             public int daysBefore = 0;
             public int badgeId = -1;
-            public int InfoPanelV2_Mode = 0; //0=light 1=dark
+            public CustomMode customMode = CustomMode.Dark; //0=custom 1=light 2=dark
             public string ColorConfigRaw;
+            public enum CustomMode
+            {
+                Custom = 0,
+                Light = 1,
+                Dark = 2
+            }
         }
 
         public class ScorePanelData

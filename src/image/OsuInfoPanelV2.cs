@@ -35,737 +35,854 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace KanonBot.image
 {
+    //配色方案 0=用户自定义 1=模板light 2=模板dark 3...4...5...
+    //本来应该做个class的 算了 懒了 就这样吧 复制粘贴没什么不好的
     public static class OsuInfoPanelV2
     {
-        public class InfoV2Colors {
+        public record struct InfoCustom(
+            Color UsernameColor,
+            Color ModeIconColor,
+            Color RankColor,
+            Color CountryRankColor,
+            Color CountryRankDiffColor,
+            Color CountryRankDiffIconColor,
+            Color RankLineChartColor,
+            Color RankLineChartTextColor,
+            Color RankLineChartDotColor,
+            Color RankLineChartDotStrokeColor,
+            Color RankLineChartDashColor,
+            Color RankLineChartDateTextColor,
+            Color ppMainColor,
+            Color ppDiffColor,
+            Color ppDiffIconColor,
+            Color ppProgressBarColorTextColor,
+            Color ppProgressBarColor,
+            Color ppProgressBarBackgroundColor,
+            Color accMainColor,
+            Color accDiffColor,
+            Color accDiffIconColor,
+            Color accProgressBarColorTextColor,
+            Color accProgressBarColor,
+            Color accProgressBarBackgroundColor,
+            Color GradeStatisticsColor_XH,
+            Color GradeStatisticsColor_X,
+            Color GradeStatisticsColor_SH,
+            Color GradeStatisticsColor_S,
+            Color GradeStatisticsColor_A,
+            Color Details_PlayTimeColor,
+            Color Details_TotalHitsColor,
+            Color Details_PlayCountColor,
+            Color Details_RankedScoreColor,
+            Color DetailsDiff_PlayTimeColor,
+            Color DetailsDiff_TotalHitsColor,
+            Color DetailsDiff_PlayCountColor,
+            Color DetailsDiff_RankedScoreColor,
+            Color DetailsDiff_PlayTimeIconColor,
+            Color DetailsDiff_TotalHitsIconColor,
+            Color DetailsDiff_PlayCountIconColor,
+            Color DetailsDiff_RankedScoreIconColor,
+            Color LevelTitleColor,
+            Color LevelProgressBarColor,
+            Color LevelProgressBarBackgroundColor,
+            Color MainBPTitleColor,
+            Color MainBPArtistColor,
+            Color MainBPMapperColor,
+            Color MainBPBIDColor,
+            Color MainBPStarsColor,
+            Color MainBPAccColor,
+            Color MainBPRankColor,
+            Color MainBPppMainColor,
+            Color MainBPppTitleColor,
+            Color SubBp2ndModeColor,
+            Color SubBp2ndBPTitleColor,
+            Color SubBp2ndBPVersionColor,
+            Color SubBp2ndBPBIDColor,
+            Color SubBp2ndBPStarsColor,
+            Color SubBp2ndBPAccColor,
+            Color SubBp2ndBPRankColor,
+            Color SubBp2ndBPppMainColor,
+            Color SubBp3rdModeColor,
+            Color SubBp3rdBPTitleColor,
+            Color SubBp3rdBPVersionColor,
+            Color SubBp3rdBPBIDColor,
+            Color SubBp3rdBPStarsColor,
+            Color SubBp3rdBPAccColor,
+            Color SubBp3rdBPRankColor,
+            Color SubBp3rdBPppMainColor,
+            Color SubBp4thModeColor,
+            Color SubBp4thBPTitleColor,
+            Color SubBp4thBPVersionColor,
+            Color SubBp4thBPBIDColor,
+            Color SubBp4thBPStarsColor,
+            Color SubBp4thBPAccColor,
+            Color SubBp4thBPRankColor,
+            Color SubBp4thBPppMainColor,
+            Color SubBp5thModeColor,
+            Color SubBp5thBPTitleColor,
+            Color SubBp5thBPVersionColor,
+            Color SubBp5thBPBIDColor,
+            Color SubBp5thBPStarsColor,
+            Color SubBp5thBPAccColor,
+            Color SubBp5thBPRankColor,
+            Color SubBp5thBPppMainColor,
+            Color footerColor,
+            Color SubBpInfoSplitColor,
+            float SideImgBrightness,
+            float AvatarBrightness,
+            float BadgeBrightness,
+            float MainBPImgBrightness,
+            float CountryFlagBrightness,
+            float ModeCaptionBrightness,
+            float ModIconBrightness,
+            float ScoreModeIconBrightness,
+            float OsuSupporterIconBrightness,
+            float CountryFlagAlpha,
+            float OsuSupporterIconAlpha,
+            float BadgeAlpha,
+            float AvatarAlpha,
+            float ModIconAlpha,
+            bool FixedScoreModeIconColor,
+            bool DisplaySupporterStatus,
+            bool ModeIconAlpha,
+            bool Score1ModeIconAlpha,
+            bool Score2ModeIconAlpha,
+            bool Score3ModeIconAlpha,
+            bool Score4ModeIconAlpha,
+            bool DetailsPlaytimeIconAlpha,
+            bool DetailsTotalHitIconAlpha,
+            bool DetailsPlayCountIconAlpha,
+            bool DetailsRankedScoreIconAlpha,
+            bool ppDiffIconColorAlpha,
+            bool accDiffIconColorAlpha,
+            bool CountryRankDiffIconColorAlpha
+        )
+        {
+            public static InfoCustom DarkDefault =>
+                new(
+                    UsernameColor: Color.ParseHex("#e6e6e6"),
+                    RankColor: Color.ParseHex("#5872DF"),
+                    CountryRankColor: Color.ParseHex("#5872DF"),
+                    RankLineChartColor: Color.ParseHex("#2784ac"),
+                    RankLineChartTextColor: Color.ParseHex("#2784ac"),
+                    RankLineChartDotColor: Color.ParseHex("#2784ac"),
+                    RankLineChartDotStrokeColor: Color.ParseHex("#b2b5b7"),
+                    RankLineChartDashColor: Color.ParseHex("#e6e6e6"),
+                    RankLineChartDateTextColor: Color.ParseHex("#e6e6e6"),
+                    ppMainColor: Color.ParseHex("#e36a79"),
+                    ppProgressBarColorTextColor: Color.ParseHex("#FF7BAC"),
+                    ppProgressBarColor: Color.ParseHex("#5D3B3A"),
+                    ppProgressBarBackgroundColor: Color.ParseHex("#44312F"),
+                    accMainColor: Color.ParseHex("#6cac9c"),
+                    accProgressBarColorTextColor: Color.ParseHex("#00DE75"),
+                    accProgressBarColor: Color.ParseHex("#294B32"),
+                    accProgressBarBackgroundColor: Color.ParseHex("#243829"),
+                    GradeStatisticsColor_XH: Color.ParseHex("#6C91E0"),
+                    GradeStatisticsColor_X: Color.ParseHex("#6C91E0"),
+                    GradeStatisticsColor_SH: Color.ParseHex("#6C91E0"),
+                    GradeStatisticsColor_S: Color.ParseHex("#6C91E0"),
+                    GradeStatisticsColor_A: Color.ParseHex("#6C91E0"),
+                    Details_PlayTimeColor: Color.ParseHex("#e6e6e6"),
+                    Details_TotalHitsColor: Color.ParseHex("#e6e6e6"),
+                    Details_PlayCountColor: Color.ParseHex("#e6e6e6"),
+                    Details_RankedScoreColor: Color.ParseHex("#e6e6e6"),
+                    LevelTitleColor: Color.ParseHex("#e6e6e6"),
+                    LevelProgressBarColor: Color.ParseHex("#85485F"),
+                    LevelProgressBarBackgroundColor: Color.ParseHex("#000000"),
+                    MainBPTitleColor: Color.ParseHex("#e6e6e6"),
+                    MainBPArtistColor: Color.ParseHex("#e6e6e6"),
+                    MainBPMapperColor: Color.ParseHex("#e6e6e6"),
+                    MainBPBIDColor: Color.ParseHex("#e6e6e6"),
+                    MainBPStarsColor: Color.ParseHex("#e6e6e6"),
+                    MainBPAccColor: Color.ParseHex("#e6e6e6"),
+                    MainBPRankColor: Color.ParseHex("#e6e6e6"),
+                    MainBPppMainColor: Color.ParseHex("#5979bd"),
+                    MainBPppTitleColor: Color.ParseHex("#e6e6e6"),
+                    SubBp2ndBPTitleColor: Color.ParseHex("#e6e6e6"),
+                    SubBp2ndBPVersionColor: Color.ParseHex("#e6e6e6"),
+                    SubBp2ndBPBIDColor: Color.ParseHex("#e6e6e6"),
+                    SubBp2ndBPStarsColor: Color.ParseHex("#e6e6e6"),
+                    SubBp2ndBPAccColor: Color.ParseHex("#ffcd22"),
+                    SubBp2ndBPRankColor: Color.ParseHex("#e6e6e6"),
+                    SubBp2ndBPppMainColor: Color.ParseHex("#e36a79"),
+                    SubBp3rdBPTitleColor: Color.ParseHex("#e6e6e6"),
+                    SubBp3rdBPVersionColor: Color.ParseHex("#e6e6e6"),
+                    SubBp3rdBPBIDColor: Color.ParseHex("#e6e6e6"),
+                    SubBp3rdBPStarsColor: Color.ParseHex("#e6e6e6"),
+                    SubBp3rdBPAccColor: Color.ParseHex("#ffcd22"),
+                    SubBp3rdBPRankColor: Color.ParseHex("#e6e6e6"),
+                    SubBp3rdBPppMainColor: Color.ParseHex("#e36a79"),
+                    SubBp4thBPTitleColor: Color.ParseHex("#e6e6e6"),
+                    SubBp4thBPVersionColor: Color.ParseHex("#e6e6e6"),
+                    SubBp4thBPBIDColor: Color.ParseHex("#e6e6e6"),
+                    SubBp4thBPStarsColor: Color.ParseHex("#e6e6e6"),
+                    SubBp4thBPAccColor: Color.ParseHex("#ffcd22"),
+                    SubBp4thBPRankColor: Color.ParseHex("#e6e6e6"),
+                    SubBp4thBPppMainColor: Color.ParseHex("#e36a79"),
+                    SubBp5thBPTitleColor: Color.ParseHex("#e6e6e6"),
+                    SubBp5thBPVersionColor: Color.ParseHex("#e6e6e6"),
+                    SubBp5thBPBIDColor: Color.ParseHex("#e6e6e6"),
+                    SubBp5thBPStarsColor: Color.ParseHex("#e6e6e6"),
+                    SubBp5thBPAccColor: Color.ParseHex("#ffcd22"),
+                    SubBp5thBPRankColor: Color.ParseHex("#e6e6e6"),
+                    SubBp5thBPppMainColor: Color.ParseHex("#e36a79"),
+                    footerColor: Color.ParseHex("#e6e6e6"),
+                    SubBpInfoSplitColor: Color.ParseHex("#e6e6e6"),
+                    ModeIconColor: Color.ParseHex("#e6e6e6"),
+                    SubBp2ndModeColor: Color.White,
+                    SubBp3rdModeColor: Color.White,
+                    SubBp4thModeColor: Color.White,
+                    SubBp5thModeColor: Color.White,
+                    DetailsDiff_PlayTimeColor: Color.ParseHex("#e36a79"),
+                    DetailsDiff_PlayTimeIconColor: Color.ParseHex("#e36a79"),
+                    DetailsDiff_TotalHitsColor: Color.ParseHex("#6cac9c"),
+                    DetailsDiff_TotalHitsIconColor: Color.ParseHex("#6cac9c"),
+                    DetailsDiff_PlayCountColor: Color.ParseHex("#5872df"),
+                    DetailsDiff_PlayCountIconColor: Color.ParseHex("#5872df"),
+                    DetailsDiff_RankedScoreColor: Color.ParseHex("#3a4d78"),
+                    DetailsDiff_RankedScoreIconColor: Color.ParseHex("#3a4d78"),
+                    ppDiffColor: Color.ParseHex("#e36a79"),
+                    ppDiffIconColor: Color.ParseHex("#e36a79"),
+                    accDiffColor: Color.ParseHex("#6cac9c"),
+                    accDiffIconColor: Color.ParseHex("#6cac9c"),
+                    CountryRankDiffColor: Color.ParseHex("#e6e6e6"),
+                    CountryRankDiffIconColor: Color.ParseHex("#3a4d78"),
+                    SideImgBrightness: 0.6f,
+                    AvatarBrightness: 0.6f,
+                    BadgeBrightness: 0.6f,
+                    MainBPImgBrightness: 0.6f,
+                    CountryFlagBrightness: 0.6f,
+                    ModeCaptionBrightness: 0.6f,
+                    ModIconBrightness: 0.6f,
+                    ScoreModeIconBrightness: 0.6f,
+                    OsuSupporterIconBrightness: 0.6f,
+                    CountryFlagAlpha: 1.0f,
+                    OsuSupporterIconAlpha: 1.0f,
+                    BadgeAlpha: 1.0f,
+                    AvatarAlpha: 1.0f,
+                    ModIconAlpha: 1.0f,
+                    FixedScoreModeIconColor: false,
+                    DisplaySupporterStatus: true,
+                    ModeIconAlpha: false,
+                    Score1ModeIconAlpha: false,
+                    Score2ModeIconAlpha: false,
+                    Score3ModeIconAlpha: false,
+                    Score4ModeIconAlpha: false,
+                    DetailsPlaytimeIconAlpha: false,
+                    DetailsTotalHitIconAlpha: false,
+                    DetailsPlayCountIconAlpha: false,
+                    DetailsRankedScoreIconAlpha: false,
+                    ppDiffIconColorAlpha: false,
+                    accDiffIconColorAlpha: false,
+                    CountryRankDiffIconColorAlpha: false
+                );
+            public static InfoCustom LightDefault =>
+                new(
+                    UsernameColor: Color.ParseHex("#4d4d4d"),
+                    RankColor: Color.ParseHex("#5872df"),
+                    CountryRankColor: Color.ParseHex("#5872df"),
+                    RankLineChartColor: Color.ParseHex("#80caea"),
+                    RankLineChartTextColor: Color.ParseHex("#80caea"),
+                    RankLineChartDotColor: Color.ParseHex("#80caea"),
+                    RankLineChartDotStrokeColor: Color.ParseHex("#eff1f3"),
+                    RankLineChartDashColor: Color.ParseHex("#dbe1e4"),
+                    RankLineChartDateTextColor: Color.ParseHex("#666666"),
+                    ppMainColor: Color.ParseHex("#e36a79"),
+                    ppProgressBarColorTextColor: Color.ParseHex("#d84356"),
+                    ppProgressBarColor: Color.ParseHex("#f7bebe"),
+                    ppProgressBarBackgroundColor: Color.ParseHex("#fddcd7"),
+                    accMainColor: Color.ParseHex("#6cac9c"),
+                    accProgressBarColorTextColor: Color.ParseHex("#006837"),
+                    accProgressBarColor: Color.ParseHex("#a4d8b1"),
+                    accProgressBarBackgroundColor: Color.ParseHex("#c3e7cb"),
+                    GradeStatisticsColor_XH: Color.ParseHex("#3a4d78"),
+                    GradeStatisticsColor_X: Color.ParseHex("#3a4d78"),
+                    GradeStatisticsColor_SH: Color.ParseHex("#3a4d78"),
+                    GradeStatisticsColor_S: Color.ParseHex("#3a4d78"),
+                    GradeStatisticsColor_A: Color.ParseHex("#3a4d78"),
+                    Details_PlayTimeColor: Color.ParseHex("#7f7f7f"),
+                    Details_TotalHitsColor: Color.ParseHex("#7f7f7f"),
+                    Details_PlayCountColor: Color.ParseHex("#7f7f7f"),
+                    Details_RankedScoreColor: Color.ParseHex("#7f7f7f"),
+                    LevelTitleColor: Color.ParseHex("#656b6d"),
+                    LevelProgressBarColor: Color.ParseHex("#f3b6cd"),
+                    LevelProgressBarBackgroundColor: Color.ParseHex("#e6e6e6"),
+                    MainBPTitleColor: Color.ParseHex("#656b6d"),
+                    MainBPArtistColor: Color.ParseHex("#656b6d"),
+                    MainBPMapperColor: Color.ParseHex("#656b6d"),
+                    MainBPBIDColor: Color.ParseHex("#656b6d"),
+                    MainBPStarsColor: Color.ParseHex("#656b6d"),
+                    MainBPAccColor: Color.ParseHex("#656b6d"),
+                    MainBPRankColor: Color.ParseHex("#656b6d"),
+                    MainBPppMainColor: Color.ParseHex("#364a75"),
+                    MainBPppTitleColor: Color.ParseHex("#656b6d"),
+                    SubBp2ndBPTitleColor: Color.ParseHex("#656b6d"),
+                    SubBp2ndBPVersionColor: Color.ParseHex("#656b6d"),
+                    SubBp2ndBPBIDColor: Color.ParseHex("#656b6d"),
+                    SubBp2ndBPStarsColor: Color.ParseHex("#656b6d"),
+                    SubBp2ndBPAccColor: Color.ParseHex("#ffcd22"),
+                    SubBp2ndBPRankColor: Color.ParseHex("#656b6d"),
+                    SubBp2ndBPppMainColor: Color.ParseHex("#ff7bac"),
+                    SubBp3rdBPTitleColor: Color.ParseHex("#656b6d"),
+                    SubBp3rdBPVersionColor: Color.ParseHex("#656b6d"),
+                    SubBp3rdBPBIDColor: Color.ParseHex("#656b6d"),
+                    SubBp3rdBPStarsColor: Color.ParseHex("#656b6d"),
+                    SubBp3rdBPAccColor: Color.ParseHex("#ffcd22"),
+                    SubBp3rdBPRankColor: Color.ParseHex("#656b6d"),
+                    SubBp3rdBPppMainColor: Color.ParseHex("#ff7bac"),
+                    SubBp4thBPTitleColor: Color.ParseHex("#656b6d"),
+                    SubBp4thBPVersionColor: Color.ParseHex("#656b6d"),
+                    SubBp4thBPBIDColor: Color.ParseHex("#656b6d"),
+                    SubBp4thBPStarsColor: Color.ParseHex("#656b6d"),
+                    SubBp4thBPAccColor: Color.ParseHex("#ffcd22"),
+                    SubBp4thBPRankColor: Color.ParseHex("#656b6d"),
+                    SubBp4thBPppMainColor: Color.ParseHex("#ff7bac"),
+                    SubBp5thBPTitleColor: Color.ParseHex("#656b6d"),
+                    SubBp5thBPVersionColor: Color.ParseHex("#656b6d"),
+                    SubBp5thBPBIDColor: Color.ParseHex("#656b6d"),
+                    SubBp5thBPStarsColor: Color.ParseHex("#656b6d"),
+                    SubBp5thBPAccColor: Color.ParseHex("#ffcd22"),
+                    SubBp5thBPRankColor: Color.ParseHex("#656b6d"),
+                    SubBp5thBPppMainColor: Color.ParseHex("#ff7bac"),
+                    footerColor: Color.ParseHex("#7f7f7f"),
+                    SubBpInfoSplitColor: Color.ParseHex("#656b6d"),
+                    ModeIconColor: Color.ParseHex("#7f7f7f"),
+                    SubBp2ndModeColor: Color.White,
+                    SubBp3rdModeColor: Color.White,
+                    SubBp4thModeColor: Color.White,
+                    SubBp5thModeColor: Color.White,
+                    DetailsDiff_PlayTimeColor: Color.ParseHex("#e36a79"),
+                    DetailsDiff_PlayTimeIconColor: Color.ParseHex("#e36a79"),
+                    DetailsDiff_TotalHitsColor: Color.ParseHex("#6cac9c"),
+                    DetailsDiff_TotalHitsIconColor: Color.ParseHex("#6cac9c"),
+                    DetailsDiff_PlayCountColor: Color.ParseHex("#5872df"),
+                    DetailsDiff_PlayCountIconColor: Color.ParseHex("#5872df"),
+                    DetailsDiff_RankedScoreColor: Color.ParseHex("#3a4d78"),
+                    DetailsDiff_RankedScoreIconColor: Color.ParseHex("#3a4d78"),
+                    ppDiffColor: Color.ParseHex("#e36a79"),
+                    ppDiffIconColor: Color.ParseHex("#e36a79"),
+                    accDiffColor: Color.ParseHex("#6cac9c"),
+                    accDiffIconColor: Color.ParseHex("#6cac9c"),
+                    CountryRankDiffColor: Color.ParseHex("#808080"),
+                    CountryRankDiffIconColor: Color.ParseHex("#3a4d78"),
+                    SideImgBrightness: 1.0f,
+                    AvatarBrightness: 1.0f,
+                    BadgeBrightness: 1.0f,
+                    MainBPImgBrightness: 1.0f,
+                    CountryFlagBrightness: 1.0f,
+                    ModeCaptionBrightness: 1.0f,
+                    ModIconBrightness: 1.0f,
+                    ScoreModeIconBrightness: 1.0f,
+                    OsuSupporterIconBrightness: 1.0f,
+                    CountryFlagAlpha: 1.0f,
+                    OsuSupporterIconAlpha: 1.0f,
+                    BadgeAlpha: 1.0f,
+                    AvatarAlpha: 1.0f,
+                    ModIconAlpha: 1.0f,
+                    FixedScoreModeIconColor: false,
+                    DisplaySupporterStatus: true,
+                    ModeIconAlpha: false,
+                    Score1ModeIconAlpha: false,
+                    Score2ModeIconAlpha: false,
+                    Score3ModeIconAlpha: false,
+                    Score4ModeIconAlpha: false,
+                    DetailsPlaytimeIconAlpha: false,
+                    DetailsTotalHitIconAlpha: false,
+                    DetailsPlayCountIconAlpha: false,
+                    DetailsRankedScoreIconAlpha: false,
+                    ppDiffIconColorAlpha: false,
+                    accDiffIconColorAlpha: false,
+                    CountryRankDiffIconColorAlpha: false
+                );
 
+            public static InfoCustom ParseColors(string raw, Option<InfoCustom> opOption)
+            {
+                var options = opOption.IfNone(InfoCustom.LightDefault);
+                raw.Split('\n')
+                    .Map(arg => arg.Split(":").Map(s => s.Trim()).ToArray())
+                    .Iter(arg =>
+                    {
+                        if (arg.Length != 2)
+                            throw new ArgumentException("未知的格式");
+                        switch (arg[0])
+                        {
+                            case "DetailsDiff_PlayTimeColor":
+                                options.DetailsDiff_PlayTimeColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "DetailsDiff_PlayTimeIconColor":
+                                options.DetailsDiff_PlayTimeIconColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                    options.DetailsPlaytimeIconAlpha = true;
+                                break;
+                            case "DetailsDiff_TotalHitsColor":
+                                options.DetailsDiff_TotalHitsColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "DetailsDiff_TotalHitsIconColor":
+                                options.DetailsDiff_TotalHitsIconColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                    options.DetailsTotalHitIconAlpha = true;
+                                break;
+                            case "DetailsDiff_PlayCountColor":
+                                options.DetailsDiff_PlayCountColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "DetailsDiff_PlayCountIconColor":
+                                options.DetailsDiff_PlayCountIconColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                    options.DetailsPlayCountIconAlpha = true;
+                                break;
+                            case "DetailsDiff_RankedScoreColor":
+                                options.DetailsDiff_RankedScoreColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "DetailsDiff_RankedScoreIconColor":
+                                options.DetailsDiff_RankedScoreIconColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                    options.DetailsRankedScoreIconAlpha = true;
+                                break;
+                            case "ppDiffColor":
+                                options.ppDiffColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "ppDiffIconColor":
+                                options.ppDiffIconColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                    options.ppDiffIconColorAlpha = true;
+                                break;
+                            case "accDiffColor":
+                                options.accDiffColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "accDiffIconColor":
+                                options.accDiffIconColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                    options.accDiffIconColorAlpha = true;
+                                break;
+                            case "CountryRankDiffColor":
+                                options.CountryRankDiffColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "CountryRankDiffIconColor":
+                                options.CountryRankDiffIconColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                    options.CountryRankDiffIconColorAlpha = true;
+                                break;
+                            case "OsuSupporterIconBrightness":
+                                options.OsuSupporterIconBrightness = float.Parse($"{arg[1]}");
+                                break;
+                            case "CountryFlagAlpha":
+                                options.CountryFlagAlpha = float.Parse($"{arg[1]}");
+                                break;
+                            case "OsuSupporterIconAlpha":
+                                options.OsuSupporterIconAlpha = float.Parse($"{arg[1]}");
+                                break;
+                            case "BadgeAlpha":
+                                options.BadgeAlpha = float.Parse($"{arg[1]}");
+                                break;
+                            case "AvatarAlpha":
+                                options.AvatarAlpha = float.Parse($"{arg[1]}");
+                                break;
+                            case "ModIconAlpha":
+                                options.ModIconAlpha = float.Parse($"{arg[1]}");
+                                break;
+                            case "UsernameColor":
+                                options.UsernameColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "ModeIconColor":
+                                options.ModeIconColor = Color.ParseHex(arg[1]);
+                                if (arg[1].ToLower().Length > 7)
+                                {
+                                    options.ModeIconAlpha = true;
+                                }
+                                break;
+                            case "RankColor":
+                                options.RankColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "CountryRankColor":
+                                options.CountryRankColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "RankLineChartColor":
+                                options.RankLineChartColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "RankLineChartTextColor":
+                                options.RankLineChartTextColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "RankLineChartDotColor":
+                                options.RankLineChartDotColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "RankLineChartDotStrokeColor":
+                                options.RankLineChartDotStrokeColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "RankLineChartDashColor":
+                                options.RankLineChartDashColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "RankLineChartDateTextColor":
+                                options.RankLineChartDateTextColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "ppMainColor":
+                                options.ppMainColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "ppProgressBarColorTextColor":
+                                options.ppProgressBarColorTextColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "ppProgressBarColor":
+                                options.ppProgressBarColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "ppProgressBarBackgroundColor":
+                                options.ppProgressBarBackgroundColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "accMainColor":
+                                options.accMainColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "accProgressBarColorTextColor":
+                                options.accProgressBarColorTextColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "accProgressBarColor":
+                                options.accProgressBarColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "accProgressBarBackgroundColor":
+                                options.accProgressBarBackgroundColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "GradeStatisticsColor_XH":
+                                options.GradeStatisticsColor_XH = Color.ParseHex(arg[1]);
+                                break;
+                            case "GradeStatisticsColor_X":
+                                options.GradeStatisticsColor_X = Color.ParseHex(arg[1]);
+                                break;
+                            case "GradeStatisticsColor_SH":
+                                options.GradeStatisticsColor_SH = Color.ParseHex(arg[1]);
+                                break;
+                            case "GradeStatisticsColor_S":
+                                options.GradeStatisticsColor_S = Color.ParseHex(arg[1]);
+                                break;
+                            case "GradeStatisticsColor_A":
+                                options.GradeStatisticsColor_A = Color.ParseHex(arg[1]);
+                                break;
+                            case "Details_PlayTimeColor":
+                                options.Details_PlayTimeColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "Details_TotalHitsColor":
+                                options.Details_TotalHitsColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "Details_PlayCountColor":
+                                options.Details_PlayCountColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "Details_RankedScoreColor":
+                                options.Details_RankedScoreColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "LevelTitleColor":
+                                options.LevelTitleColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "LevelProgressBarColor":
+                                options.LevelProgressBarColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "LevelProgressBarBackgroundColor":
+                                options.LevelProgressBarBackgroundColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "MainBPTitleColor":
+                                options.MainBPTitleColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "MainBPArtistColor":
+                                options.MainBPArtistColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "MainBPMapperColor":
+                                options.MainBPMapperColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "MainBPBIDColor":
+                                options.MainBPBIDColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "MainBPStarsColor":
+                                options.MainBPStarsColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "MainBPAccColor":
+                                options.MainBPAccColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "MainBPRankColor":
+                                options.MainBPRankColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "MainBPppMainColor":
+                                options.MainBPppMainColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "MainBPppTitleColor":
+                                options.MainBPppTitleColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp2ndModeColor":
+                                options.SubBp2ndModeColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                {
+                                    options.Score1ModeIconAlpha = true;
+                                }
+                                break;
+                            case "SubBp2ndBPTitleColor":
+                                options.SubBp2ndBPTitleColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp2ndBPVersionColor":
+                                options.SubBp2ndBPVersionColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp2ndBPBIDColor":
+                                options.SubBp2ndBPBIDColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp2ndBPStarsColor":
+                                options.SubBp2ndBPStarsColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp2ndBPAccColor":
+                                options.SubBp2ndBPAccColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp2ndBPRankColor":
+                                options.SubBp2ndBPRankColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp2ndBPppMainColor":
+                                options.SubBp2ndBPppMainColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp3rdModeColor":
+                                options.SubBp3rdModeColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                {
+                                    options.Score2ModeIconAlpha = true;
+                                }
+                                break;
+                            case "SubBp3rdBPTitleColor":
+                                options.SubBp3rdBPTitleColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp3rdBPVersionColor":
+                                options.SubBp3rdBPVersionColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp3rdBPBIDColor":
+                                options.SubBp3rdBPBIDColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp3rdBPStarsColor":
+                                options.SubBp3rdBPStarsColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp3rdBPAccColor":
+                                options.SubBp3rdBPAccColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp3rdBPRankColor":
+                                options.SubBp3rdBPRankColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp3rdBPppMainColor":
+                                options.SubBp3rdBPppMainColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp4thModeColor":
+                                options.SubBp4thModeColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                {
+                                    options.Score3ModeIconAlpha = true;
+                                }
+                                break;
+                            case "SubBp4thBPTitleColor":
+                                options.SubBp4thBPTitleColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp4thBPVersionColor":
+                                options.SubBp4thBPVersionColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp4thBPBIDColor":
+                                options.SubBp4thBPBIDColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp4thBPStarsColor":
+                                options.SubBp4thBPStarsColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp4thBPAccColor":
+                                options.SubBp4thBPAccColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp4thBPRankColor":
+                                options.SubBp4thBPRankColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp4thBPppMainColor":
+                                options.SubBp4thBPppMainColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp5thModeColor":
+                                options.SubBp5thModeColor = Color.ParseHex(arg[1]);
+                                if (arg[1].Length > 7)
+                                {
+                                    options.Score4ModeIconAlpha = true;
+                                }
+                                break;
+                            case "SubBp5thBPTitleColor":
+                                options.SubBp5thBPTitleColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp5thBPVersionColor":
+                                options.SubBp5thBPVersionColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp5thBPBIDColor":
+                                options.SubBp5thBPBIDColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp5thBPStarsColor":
+                                options.SubBp5thBPStarsColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp5thBPAccColor":
+                                options.SubBp5thBPAccColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp5thBPRankColor":
+                                options.SubBp5thBPRankColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBp5thBPppMainColor":
+                                options.SubBp5thBPppMainColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "SubBpInfoSplitColor":
+                                options.SubBpInfoSplitColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "footerColor":
+                                options.footerColor = Color.ParseHex(arg[1]);
+                                break;
+                            case "FixedScoreModeIconColor":
+                                options.FixedScoreModeIconColor = bool.Parse(arg[1]);
+                                break;
+                            case "DisplaySupporterStatus":
+                                options.DisplaySupporterStatus = bool.Parse(arg[1]);
+                                break;
+                            case "SideImgBrightness":
+                                options.SideImgBrightness = float.Parse(arg[1]);
+                                break;
+                            case "AvatarBrightness":
+                                options.AvatarBrightness = float.Parse(arg[1]);
+                                break;
+                            case "BadgeBrightness":
+                                options.BadgeBrightness = float.Parse(arg[1]);
+                                break;
+                            case "MainBPImgBrightness":
+                                options.MainBPImgBrightness = float.Parse(arg[1]);
+                                break;
+                            case "CountryFlagBrightness":
+                                options.CountryFlagBrightness = float.Parse(arg[1]);
+                                break;
+                            case "ModeCaptionBrightness":
+                                options.ModeCaptionBrightness = float.Parse(arg[1]);
+                                break;
+                            case "ModIconBrightness":
+                                options.ModIconBrightness = float.Parse(arg[1]);
+                                break;
+                            case "ScoreModeIconBrightness":
+                                options.ScoreModeIconBrightness = float.Parse(arg[1]);
+                                break;
+                            default:
+                                throw new Exception("错误参数: " + arg[0]);
+                        }
+                    });
+                return options;
+            }
         }
-        
+
         public static async Task<Img> Draw(
             UserPanelData data,
+            InfoCustom v2Options,
             bool isBonded = false,
             bool isDataOfDayAvaiavle = true,
             bool eventmode = false
         )
         {
-            var ColorMode = data.InfoPanelV2_Mode;
+            var ColorMode = data.customMode;
+            (
+                Color UsernameColor,
+                Color ModeIconColor,
+                Color RankColor,
+                Color CountryRankColor,
+                Color CountryRankDiffColor,
+                Color CountryRankDiffIconColor,
+                Color RankLineChartColor,
+                Color RankLineChartTextColor,
+                Color RankLineChartDotColor,
+                Color RankLineChartDotStrokeColor,
+                Color RankLineChartDashColor,
+                Color RankLineChartDateTextColor,
+                Color ppMainColor,
+                Color ppDiffColor,
+                Color ppDiffIconColor,
+                Color ppProgressBarColorTextColor,
+                Color ppProgressBarColor,
+                Color ppProgressBarBackgroundColor,
+                Color accMainColor,
+                Color accDiffColor,
+                Color accDiffIconColor,
+                Color accProgressBarColorTextColor,
+                Color accProgressBarColor,
+                Color accProgressBarBackgroundColor,
+                Color GradeStatisticsColor_XH,
+                Color GradeStatisticsColor_X,
+                Color GradeStatisticsColor_SH,
+                Color GradeStatisticsColor_S,
+                Color GradeStatisticsColor_A,
+                Color Details_PlayTimeColor,
+                Color Details_TotalHitsColor,
+                Color Details_PlayCountColor,
+                Color Details_RankedScoreColor,
+                Color DetailsDiff_PlayTimeColor,
+                Color DetailsDiff_TotalHitsColor,
+                Color DetailsDiff_PlayCountColor,
+                Color DetailsDiff_RankedScoreColor,
+                Color DetailsDiff_PlayTimeIconColor,
+                Color DetailsDiff_TotalHitsIconColor,
+                Color DetailsDiff_PlayCountIconColor,
+                Color DetailsDiff_RankedScoreIconColor,
+                Color LevelTitleColor,
+                Color LevelProgressBarColor,
+                Color LevelProgressBarBackgroundColor,
+                Color MainBPTitleColor,
+                Color MainBPArtistColor,
+                Color MainBPMapperColor,
+                Color MainBPBIDColor,
+                Color MainBPStarsColor,
+                Color MainBPAccColor,
+                Color MainBPRankColor,
+                Color MainBPppMainColor,
+                Color MainBPppTitleColor,
+                Color SubBp2ndModeColor,
+                Color SubBp2ndBPTitleColor,
+                Color SubBp2ndBPVersionColor,
+                Color SubBp2ndBPBIDColor,
+                Color SubBp2ndBPStarsColor,
+                Color SubBp2ndBPAccColor,
+                Color SubBp2ndBPRankColor,
+                Color SubBp2ndBPppMainColor,
+                Color SubBp3rdModeColor,
+                Color SubBp3rdBPTitleColor,
+                Color SubBp3rdBPVersionColor,
+                Color SubBp3rdBPBIDColor,
+                Color SubBp3rdBPStarsColor,
+                Color SubBp3rdBPAccColor,
+                Color SubBp3rdBPRankColor,
+                Color SubBp3rdBPppMainColor,
+                Color SubBp4thModeColor,
+                Color SubBp4thBPTitleColor,
+                Color SubBp4thBPVersionColor,
+                Color SubBp4thBPBIDColor,
+                Color SubBp4thBPStarsColor,
+                Color SubBp4thBPAccColor,
+                Color SubBp4thBPRankColor,
+                Color SubBp4thBPppMainColor,
+                Color SubBp5thModeColor,
+                Color SubBp5thBPTitleColor,
+                Color SubBp5thBPVersionColor,
+                Color SubBp5thBPBIDColor,
+                Color SubBp5thBPStarsColor,
+                Color SubBp5thBPAccColor,
+                Color SubBp5thBPRankColor,
+                Color SubBp5thBPppMainColor,
+                Color footerColor,
+                Color SubBpInfoSplitColor,
+                float SideImgBrightness,
+                float AvatarBrightness,
+                float BadgeBrightness,
+                float MainBPImgBrightness,
+                float CountryFlagBrightness,
+                float ModeCaptionBrightness,
+                float ModIconBrightness,
+                float ScoreModeIconBrightness,
+                float OsuSupporterIconBrightness,
+                float CountryFlagAlpha,
+                float OsuSupporterIconAlpha,
+                float BadgeAlpha,
+                float AvatarAlpha,
+                float ModIconAlpha,
+                bool FixedScoreModeIconColor,
+                bool DisplaySupporterStatus,
+                bool ModeIconAlpha,
+                bool Score1ModeIconAlpha,
+                bool Score2ModeIconAlpha,
+                bool Score3ModeIconAlpha,
+                bool Score4ModeIconAlpha,
+                bool DetailsPlaytimeIconAlpha,
+                bool DetailsTotalHitIconAlpha,
+                bool DetailsPlayCountIconAlpha,
+                bool DetailsRankedScoreIconAlpha,
+                bool ppDiffIconColorAlpha,
+                bool accDiffIconColorAlpha,
+                bool CountryRankDiffIconColorAlpha
+            ) = v2Options;
 
-            #region Colors_config
-            Color UsernameColor = new(),
-                ModeIconColor = new(),
-                RankColor = new(),
-                CountryRankColor = new(),
-                CountryRankDiffColor = new(),
-                CountryRankDiffIconColor = new(),
-                RankLineChartColor = new(),
-                RankLineChartTextColor = new(),
-                RankLineChartDotColor = new(),
-                RankLineChartDotStrokeColor = new(),
-                RankLineChartDashColor = new(),
-                RankLineChartDateTextColor = new(),
-                ppMainColor = new(),
-                ppDiffColor = new(),
-                ppDiffIconColor = new(),
-                ppProgressBarColorTextColor = new(),
-                ppProgressBarColor = new(),
-                ppProgressBarBackgroundColor = new(),
-                accMainColor = new(),
-                accDiffColor = new(),
-                accDiffIconColor = new(),
-                accProgressBarColorTextColor = new(),
-                accProgressBarColor = new(),
-                accProgressBarBackgroundColor = new(),
-                GradeStatisticsColor_XH = new(),
-                GradeStatisticsColor_X = new(),
-                GradeStatisticsColor_SH = new(),
-                GradeStatisticsColor_S = new(),
-                GradeStatisticsColor_A = new(),
-                Details_PlayTimeColor = new(),
-                Details_TotalHitsColor = new(),
-                Details_PlayCountColor = new(),
-                Details_RankedScoreColor = new(),
-                DetailsDiff_PlayTimeColor = new(),
-                DetailsDiff_TotalHitsColor = new(),
-                DetailsDiff_PlayCountColor = new(),
-                DetailsDiff_RankedScoreColor = new(),
-                DetailsDiff_PlayTimeIconColor = new(),
-                DetailsDiff_TotalHitsIconColor = new(),
-                DetailsDiff_PlayCountIconColor = new(),
-                DetailsDiff_RankedScoreIconColor = new(),
-                LevelTitleColor = new(),
-                LevelProgressBarColor = new(),
-                LevelProgressBarBackgroundColor = new(),
-                MainBPTitleColor = new(),
-                MainBPArtistColor = new(),
-                MainBPMapperColor = new(),
-                MainBPBIDColor = new(),
-                MainBPStarsColor = new(),
-                MainBPAccColor = new(),
-                MainBPRankColor = new(),
-                MainBPppMainColor = new(),
-                MainBPppTitleColor = new(),
-                SubBp2ndModeColor = new(),
-                SubBp2ndBPTitleColor = new(),
-                SubBp2ndBPVersionColor = new(),
-                SubBp2ndBPBIDColor = new(),
-                SubBp2ndBPStarsColor = new(),
-                SubBp2ndBPAccColor = new(),
-                SubBp2ndBPRankColor = new(),
-                SubBp2ndBPppMainColor = new(),
-                SubBp3rdModeColor = new(),
-                SubBp3rdBPTitleColor = new(),
-                SubBp3rdBPVersionColor = new(),
-                SubBp3rdBPBIDColor = new(),
-                SubBp3rdBPStarsColor = new(),
-                SubBp3rdBPAccColor = new(),
-                SubBp3rdBPRankColor = new(),
-                SubBp3rdBPppMainColor = new(),
-                SubBp4thModeColor = new(),
-                SubBp4thBPTitleColor = new(),
-                SubBp4thBPVersionColor = new(),
-                SubBp4thBPBIDColor = new(),
-                SubBp4thBPStarsColor = new(),
-                SubBp4thBPAccColor = new(),
-                SubBp4thBPRankColor = new(),
-                SubBp4thBPppMainColor = new(),
-                SubBp5thModeColor = new(),
-                SubBp5thBPTitleColor = new(),
-                SubBp5thBPVersionColor = new(),
-                SubBp5thBPBIDColor = new(),
-                SubBp5thBPStarsColor = new(),
-                SubBp5thBPAccColor = new(),
-                SubBp5thBPRankColor = new(),
-                SubBp5thBPppMainColor = new(),
-                footerColor = new(),
-                SubBpInfoSplitColor = new();
-
-            float SideImgBrightness = 1.0f,
-                AvatarBrightness = 1.0f,
-                BadgeBrightness = 1.0f,
-                MainBPImgBrightness = 1.0f,
-                CountryFlagBrightness = 1.0f,
-                ModeCaptionBrightness = 1.0f,
-                ModIconBrightness = 1.0f,
-                ScoreModeIconBrightness = 1.0f,
-                OsuSupporterIconBrightness = 1.0f;
-
-            float CountryFlagAlpha = 1.0f,
-                OsuSupporterIconAlpha = 1.0f,
-                BadgeAlpha = 1.0f,
-                AvatarAlpha = 1.0f,
-                ModIconAlpha = 1.0f;
-
-            bool FixedScoreModeIconColor = false,
-                DisplaySupporterStatus = true;
-
-            bool ModeIconAlpha = false,
-                Score1ModeIconAlpha = false,
-                Score2ModeIconAlpha = false,
-                Score3ModeIconAlpha = false,
-                Score4ModeIconAlpha = false,
-                DetailsPlaytimeIconAlpha = false,
-                DetailsTotalHitIconAlpha = false,
-                DetailsPlayCountIconAlpha = false,
-                DetailsRankedScoreIconAlpha = false,
-                ppDiffIconColorAlpha = false,
-                accDiffIconColorAlpha = false,
-                CountryRankDiffIconColorAlpha = false;
-            #endregion
-            //配色方案 0=用户自定义 1=模板light 2=模板dark 3...4...5...
-            //本来应该做个class的 算了 懒了 就这样吧 复制粘贴没什么不好的
-            switch (ColorMode)
-            {
-                case 0:
-                    //custom
-                    //解析
-                    var argstemp = data.ColorConfigRaw.Split("\n");
-                    foreach (string arg in argstemp)
-                    {
-                        switch (arg.Split(":")[0].Trim())
-                        {
-                            case "DetailsDiff_PlayTimeColor":
-                                DetailsDiff_PlayTimeColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "DetailsDiff_PlayTimeIconColor":
-                                DetailsDiff_PlayTimeIconColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                    DetailsPlaytimeIconAlpha = true;
-                                break;
-                            case "DetailsDiff_TotalHitsColor":
-                                DetailsDiff_TotalHitsColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "DetailsDiff_TotalHitsIconColor":
-                                DetailsDiff_TotalHitsIconColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                    DetailsTotalHitIconAlpha = true;
-                                break;
-                            case "DetailsDiff_PlayCountColor":
-                                DetailsDiff_PlayCountColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "DetailsDiff_PlayCountIconColor":
-                                DetailsDiff_PlayCountIconColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                    DetailsPlayCountIconAlpha = true;
-                                break;
-                            case "DetailsDiff_RankedScoreColor":
-                                DetailsDiff_RankedScoreColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "DetailsDiff_RankedScoreIconColor":
-                                DetailsDiff_RankedScoreIconColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                    DetailsRankedScoreIconAlpha = true;
-                                break;
-                            case "ppDiffColor":
-                                ppDiffColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "ppDiffIconColor":
-                                ppDiffIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                    ppDiffIconColorAlpha = true;
-                                break;
-                            case "accDiffColor":
-                                accDiffColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "accDiffIconColor":
-                                accDiffIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                    accDiffIconColorAlpha = true;
-                                break;
-                            case "CountryRankDiffColor":
-                                CountryRankDiffColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "CountryRankDiffIconColor":
-                                CountryRankDiffIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                    CountryRankDiffIconColorAlpha = true;
-                                break;
-                            case "OsuSupporterIconBrightness":
-                                OsuSupporterIconBrightness = float.Parse(
-                                    $"{arg.Split(":")[1].Trim()}"
-                                );
-                                break;
-                            case "CountryFlagAlpha":
-                                CountryFlagAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "OsuSupporterIconAlpha":
-                                OsuSupporterIconAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "BadgeAlpha":
-                                BadgeAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "AvatarAlpha":
-                                AvatarAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "ModIconAlpha":
-                                ModIconAlpha = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-
-                            ////
-                            case "UsernameColor":
-                                UsernameColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "ModeIconColor":
-                                ModeIconColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                {
-                                    ModeIconAlpha = true;
-                                }
-                                break;
-                            case "RankColor":
-                                RankColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "CountryRankColor":
-                                CountryRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "RankLineChartColor":
-                                RankLineChartColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "RankLineChartTextColor":
-                                RankLineChartTextColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "RankLineChartDotColor":
-                                RankLineChartDotColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "RankLineChartDotStrokeColor":
-                                RankLineChartDotStrokeColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "RankLineChartDashColor":
-                                RankLineChartDashColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "RankLineChartDateTextColor":
-                                RankLineChartDateTextColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "ppMainColor":
-                                ppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "ppProgressBarColorTextColor":
-                                ppProgressBarColorTextColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "ppProgressBarColor":
-                                ppProgressBarColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "ppProgressBarBackgroundColor":
-                                ppProgressBarBackgroundColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "accMainColor":
-                                accMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "accProgressBarColorTextColor":
-                                accProgressBarColorTextColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "accProgressBarColor":
-                                accProgressBarColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "accProgressBarBackgroundColor":
-                                accProgressBarBackgroundColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "GradeStatisticsColor_XH":
-                                GradeStatisticsColor_XH = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "GradeStatisticsColor_X":
-                                GradeStatisticsColor_X = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "GradeStatisticsColor_SH":
-                                GradeStatisticsColor_SH = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "GradeStatisticsColor_S":
-                                GradeStatisticsColor_S = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "GradeStatisticsColor_A":
-                                GradeStatisticsColor_A = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "Details_PlayTimeColor":
-                                Details_PlayTimeColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "Details_TotalHitsColor":
-                                Details_TotalHitsColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "Details_PlayCountColor":
-                                Details_PlayCountColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "Details_RankedScoreColor":
-                                Details_RankedScoreColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "LevelTitleColor":
-                                LevelTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "LevelProgressBarColor":
-                                LevelProgressBarColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "LevelProgressBarBackgroundColor":
-                                LevelProgressBarBackgroundColor = Color.ParseHex(
-                                    arg.Split(":")[1].Trim()
-                                );
-                                break;
-                            case "MainBPTitleColor":
-                                MainBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "MainBPArtistColor":
-                                MainBPArtistColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "MainBPMapperColor":
-                                MainBPMapperColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "MainBPBIDColor":
-                                MainBPBIDColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "MainBPStarsColor":
-                                MainBPStarsColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "MainBPAccColor":
-                                MainBPAccColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "MainBPRankColor":
-                                MainBPRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "MainBPppMainColor":
-                                MainBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "MainBPppTitleColor":
-                                MainBPppTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp2ndModeColor":
-                                SubBp2ndModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                {
-                                    Score1ModeIconAlpha = true;
-                                }
-                                break;
-                            case "SubBp2ndBPTitleColor":
-                                SubBp2ndBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp2ndBPVersionColor":
-                                SubBp2ndBPVersionColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp2ndBPBIDColor":
-                                SubBp2ndBPBIDColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp2ndBPStarsColor":
-                                SubBp2ndBPStarsColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp2ndBPAccColor":
-                                SubBp2ndBPAccColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp2ndBPRankColor":
-                                SubBp2ndBPRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp2ndBPppMainColor":
-                                SubBp2ndBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp3rdModeColor":
-                                SubBp3rdModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                {
-                                    Score2ModeIconAlpha = true;
-                                }
-                                break;
-                            case "SubBp3rdBPTitleColor":
-                                SubBp3rdBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp3rdBPVersionColor":
-                                SubBp3rdBPVersionColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp3rdBPBIDColor":
-                                SubBp3rdBPBIDColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp3rdBPStarsColor":
-                                SubBp3rdBPStarsColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp3rdBPAccColor":
-                                SubBp3rdBPAccColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp3rdBPRankColor":
-                                SubBp3rdBPRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp3rdBPppMainColor":
-                                SubBp3rdBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp4thModeColor":
-                                SubBp4thModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                {
-                                    Score3ModeIconAlpha = true;
-                                }
-                                break;
-                            case "SubBp4thBPTitleColor":
-                                SubBp4thBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp4thBPVersionColor":
-                                SubBp4thBPVersionColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp4thBPBIDColor":
-                                SubBp4thBPBIDColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp4thBPStarsColor":
-                                SubBp4thBPStarsColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp4thBPAccColor":
-                                SubBp4thBPAccColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp4thBPRankColor":
-                                SubBp4thBPRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp4thBPppMainColor":
-                                SubBp4thBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp5thModeColor":
-                                SubBp5thModeColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                if (arg.Split(":")[1].Trim().ToLower().Length > 7)
-                                {
-                                    Score4ModeIconAlpha = true;
-                                }
-                                break;
-                            case "SubBp5thBPTitleColor":
-                                SubBp5thBPTitleColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp5thBPVersionColor":
-                                SubBp5thBPVersionColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp5thBPBIDColor":
-                                SubBp5thBPBIDColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp5thBPStarsColor":
-                                SubBp5thBPStarsColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp5thBPAccColor":
-                                SubBp5thBPAccColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp5thBPRankColor":
-                                SubBp5thBPRankColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBp5thBPppMainColor":
-                                SubBp5thBPppMainColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "SubBpInfoSplitColor":
-                                SubBpInfoSplitColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "footerColor":
-                                footerColor = Color.ParseHex(arg.Split(":")[1].Trim());
-                                break;
-                            case "FixedScoreModeIconColor":
-                                FixedScoreModeIconColor = bool.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "DisplaySupporterStatus":
-                                DisplaySupporterStatus = bool.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "SideImgBrightness":
-                                SideImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "AvatarBrightness":
-                                AvatarBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "BadgeBrightness":
-                                BadgeBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "MainBPImgBrightness":
-                                MainBPImgBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "CountryFlagBrightness":
-                                CountryFlagBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "ModeCaptionBrightness":
-                                ModeCaptionBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "ModIconBrightness":
-                                ModIconBrightness = float.Parse($"{arg.Split(":")[1].Trim()}");
-                                break;
-                            case "ScoreModeIconBrightness":
-                                ScoreModeIconBrightness = float.Parse(
-                                    $"{arg.Split(":")[1].Trim()}"
-                                );
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    break;
-                case 1:
-                    #region LightMode
-                    UsernameColor = Color.ParseHex("#4d4d4d");
-                    RankColor = Color.ParseHex("#5872df");
-                    CountryRankColor = Color.ParseHex("#5872df");
-                    RankLineChartColor = Color.ParseHex("#80caea");
-                    RankLineChartTextColor = Color.ParseHex("#80caea");
-                    RankLineChartDotColor = Color.ParseHex("#80caea");
-                    RankLineChartDotStrokeColor = Color.ParseHex("#eff1f3");
-                    RankLineChartDashColor = Color.ParseHex("#dbe1e4");
-                    RankLineChartDateTextColor = Color.ParseHex("#666666");
-                    ppMainColor = Color.ParseHex("#e36a79");
-                    ppProgressBarColorTextColor = Color.ParseHex("#d84356");
-                    ppProgressBarColor = Color.ParseHex("#f7bebe");
-                    ppProgressBarBackgroundColor = Color.ParseHex("#fddcd7");
-                    accMainColor = Color.ParseHex("#6cac9c");
-                    accProgressBarColorTextColor = Color.ParseHex("#006837");
-                    accProgressBarColor = Color.ParseHex("#a4d8b1");
-                    accProgressBarBackgroundColor = Color.ParseHex("#c3e7cb");
-                    GradeStatisticsColor_XH = Color.ParseHex("#3a4d78");
-                    GradeStatisticsColor_X = Color.ParseHex("#3a4d78");
-                    GradeStatisticsColor_SH = Color.ParseHex("#3a4d78");
-                    GradeStatisticsColor_S = Color.ParseHex("#3a4d78");
-                    GradeStatisticsColor_A = Color.ParseHex("#3a4d78");
-                    Details_PlayTimeColor = Color.ParseHex("#7f7f7f");
-                    Details_TotalHitsColor = Color.ParseHex("#7f7f7f");
-                    Details_PlayCountColor = Color.ParseHex("#7f7f7f");
-                    Details_RankedScoreColor = Color.ParseHex("#7f7f7f");
-                    LevelTitleColor = Color.ParseHex("#656b6d");
-                    LevelProgressBarColor = Color.ParseHex("#f3b6cd");
-                    LevelProgressBarBackgroundColor = Color.ParseHex("#e6e6e6");
-                    MainBPTitleColor = Color.ParseHex("#656b6d");
-                    MainBPArtistColor = Color.ParseHex("#656b6d");
-                    MainBPMapperColor = Color.ParseHex("#656b6d");
-                    MainBPBIDColor = Color.ParseHex("#656b6d");
-                    MainBPStarsColor = Color.ParseHex("#656b6d");
-                    MainBPAccColor = Color.ParseHex("#656b6d");
-                    MainBPRankColor = Color.ParseHex("#656b6d");
-                    MainBPppMainColor = Color.ParseHex("#364a75");
-                    MainBPppTitleColor = Color.ParseHex("#656b6d");
-                    SubBp2ndBPTitleColor = Color.ParseHex("#656b6d");
-                    SubBp2ndBPVersionColor = Color.ParseHex("#656b6d");
-                    SubBp2ndBPBIDColor = Color.ParseHex("#656b6d");
-                    SubBp2ndBPStarsColor = Color.ParseHex("#656b6d");
-                    SubBp2ndBPAccColor = Color.ParseHex("#ffcd22");
-                    SubBp2ndBPRankColor = Color.ParseHex("#656b6d");
-                    SubBp2ndBPppMainColor = Color.ParseHex("#ff7bac");
-                    SubBp3rdBPTitleColor = Color.ParseHex("#656b6d");
-                    SubBp3rdBPVersionColor = Color.ParseHex("#656b6d");
-                    SubBp3rdBPBIDColor = Color.ParseHex("#656b6d");
-                    SubBp3rdBPStarsColor = Color.ParseHex("#656b6d");
-                    SubBp3rdBPAccColor = Color.ParseHex("#ffcd22");
-                    SubBp3rdBPRankColor = Color.ParseHex("#656b6d");
-                    SubBp3rdBPppMainColor = Color.ParseHex("#ff7bac");
-                    SubBp4thBPTitleColor = Color.ParseHex("#656b6d");
-                    SubBp4thBPVersionColor = Color.ParseHex("#656b6d");
-                    SubBp4thBPBIDColor = Color.ParseHex("#656b6d");
-                    SubBp4thBPStarsColor = Color.ParseHex("#656b6d");
-                    SubBp4thBPAccColor = Color.ParseHex("#ffcd22");
-                    SubBp4thBPRankColor = Color.ParseHex("#656b6d");
-                    SubBp4thBPppMainColor = Color.ParseHex("#ff7bac");
-                    SubBp5thBPTitleColor = Color.ParseHex("#656b6d");
-                    SubBp5thBPVersionColor = Color.ParseHex("#656b6d");
-                    SubBp5thBPBIDColor = Color.ParseHex("#656b6d");
-                    SubBp5thBPStarsColor = Color.ParseHex("#656b6d");
-                    SubBp5thBPAccColor = Color.ParseHex("#ffcd22");
-                    SubBp5thBPRankColor = Color.ParseHex("#656b6d");
-                    SubBp5thBPppMainColor = Color.ParseHex("#ff7bac");
-                    footerColor = Color.ParseHex("#7f7f7f");
-                    SubBpInfoSplitColor = Color.ParseHex("#656b6d");
-                    ModeIconColor = Color.ParseHex("#7f7f7f");
-                    SubBp2ndModeColor = Color.White;
-                    SubBp3rdModeColor = Color.White;
-                    SubBp4thModeColor = Color.White;
-                    SubBp5thModeColor = Color.White;
-                    FixedScoreModeIconColor = false;
-                    DetailsDiff_PlayTimeColor = Color.ParseHex("#e36a79");
-                    DetailsDiff_PlayTimeIconColor = Color.ParseHex("#e36a79");
-                    DetailsDiff_TotalHitsColor = Color.ParseHex("#6cac9c");
-                    DetailsDiff_TotalHitsIconColor = Color.ParseHex("#6cac9c");
-                    DetailsDiff_PlayCountColor = Color.ParseHex("#5872df");
-                    DetailsDiff_PlayCountIconColor = Color.ParseHex("#5872df");
-                    DetailsDiff_RankedScoreColor = Color.ParseHex("#3a4d78");
-                    DetailsDiff_RankedScoreIconColor = Color.ParseHex("#3a4d78");
-                    ppDiffColor = Color.ParseHex("#e36a79");
-                    ppDiffIconColor = Color.ParseHex("#e36a79");
-                    accDiffColor = Color.ParseHex("#6cac9c");
-                    accDiffIconColor = Color.ParseHex("#6cac9c");
-                    CountryRankDiffColor = Color.ParseHex("#808080");
-                    CountryRankDiffIconColor = Color.ParseHex("#3a4d78");
-                    //do not change brightness;
-                    break;
-                #endregion
-                case 2:
-                    #region DarkMode
-                    UsernameColor = Color.ParseHex("#e6e6e6");
-                    RankColor = Color.ParseHex("#5872DF");
-                    CountryRankColor = Color.ParseHex("#5872DF");
-                    RankLineChartColor = Color.ParseHex("#2784ac");
-                    RankLineChartTextColor = Color.ParseHex("#2784ac");
-                    RankLineChartDotColor = Color.ParseHex("#2784ac");
-                    RankLineChartDotStrokeColor = Color.ParseHex("#b2b5b7");
-                    RankLineChartDashColor = Color.ParseHex("#e6e6e6");
-                    RankLineChartDateTextColor = Color.ParseHex("#e6e6e6");
-                    ppMainColor = Color.ParseHex("#e36a79");
-                    ppProgressBarColorTextColor = Color.ParseHex("#FF7BAC");
-                    ppProgressBarColor = Color.ParseHex("#5D3B3A");
-                    ppProgressBarBackgroundColor = Color.ParseHex("#44312F");
-                    accMainColor = Color.ParseHex("#6cac9c");
-                    accProgressBarColorTextColor = Color.ParseHex("#00DE75");
-                    accProgressBarColor = Color.ParseHex("#294B32");
-                    accProgressBarBackgroundColor = Color.ParseHex("#243829");
-                    GradeStatisticsColor_XH = Color.ParseHex("#6C91E0");
-                    GradeStatisticsColor_X = Color.ParseHex("#6C91E0");
-                    GradeStatisticsColor_SH = Color.ParseHex("#6C91E0");
-                    GradeStatisticsColor_S = Color.ParseHex("#6C91E0");
-                    GradeStatisticsColor_A = Color.ParseHex("#6C91E0");
-                    Details_PlayTimeColor = Color.ParseHex("#e6e6e6");
-                    Details_TotalHitsColor = Color.ParseHex("#e6e6e6");
-                    Details_PlayCountColor = Color.ParseHex("#e6e6e6");
-                    Details_RankedScoreColor = Color.ParseHex("#e6e6e6");
-                    LevelTitleColor = Color.ParseHex("#e6e6e6");
-                    LevelProgressBarColor = Color.ParseHex("#85485F");
-                    LevelProgressBarBackgroundColor = Color.ParseHex("#000000");
-                    MainBPTitleColor = Color.ParseHex("#e6e6e6");
-                    MainBPArtistColor = Color.ParseHex("#e6e6e6");
-                    MainBPMapperColor = Color.ParseHex("#e6e6e6");
-                    MainBPBIDColor = Color.ParseHex("#e6e6e6");
-                    MainBPStarsColor = Color.ParseHex("#e6e6e6");
-                    MainBPAccColor = Color.ParseHex("#e6e6e6");
-                    MainBPRankColor = Color.ParseHex("#e6e6e6");
-                    MainBPppMainColor = Color.ParseHex("#5979bd");
-                    MainBPppTitleColor = Color.ParseHex("#e6e6e6");
-                    SubBp2ndBPTitleColor = Color.ParseHex("#e6e6e6");
-                    SubBp2ndBPVersionColor = Color.ParseHex("#e6e6e6");
-                    SubBp2ndBPBIDColor = Color.ParseHex("#e6e6e6");
-                    SubBp2ndBPStarsColor = Color.ParseHex("#e6e6e6");
-                    SubBp2ndBPAccColor = Color.ParseHex("#ffcd22");
-                    SubBp2ndBPRankColor = Color.ParseHex("#e6e6e6");
-                    SubBp2ndBPppMainColor = Color.ParseHex("#e36a79");
-                    SubBp3rdBPTitleColor = Color.ParseHex("#e6e6e6");
-                    SubBp3rdBPVersionColor = Color.ParseHex("#e6e6e6");
-                    SubBp3rdBPBIDColor = Color.ParseHex("#e6e6e6");
-                    SubBp3rdBPStarsColor = Color.ParseHex("#e6e6e6");
-                    SubBp3rdBPAccColor = Color.ParseHex("#ffcd22");
-                    SubBp3rdBPRankColor = Color.ParseHex("#e6e6e6");
-                    SubBp3rdBPppMainColor = Color.ParseHex("#e36a79");
-                    SubBp4thBPTitleColor = Color.ParseHex("#e6e6e6");
-                    SubBp4thBPVersionColor = Color.ParseHex("#e6e6e6");
-                    SubBp4thBPBIDColor = Color.ParseHex("#e6e6e6");
-                    SubBp4thBPStarsColor = Color.ParseHex("#e6e6e6");
-                    SubBp4thBPAccColor = Color.ParseHex("#ffcd22");
-                    SubBp4thBPRankColor = Color.ParseHex("#e6e6e6");
-                    SubBp4thBPppMainColor = Color.ParseHex("#e36a79");
-                    SubBp5thBPTitleColor = Color.ParseHex("#e6e6e6");
-                    SubBp5thBPVersionColor = Color.ParseHex("#e6e6e6");
-                    SubBp5thBPBIDColor = Color.ParseHex("#e6e6e6");
-                    SubBp5thBPStarsColor = Color.ParseHex("#e6e6e6");
-                    SubBp5thBPAccColor = Color.ParseHex("#ffcd22");
-                    SubBp5thBPRankColor = Color.ParseHex("#e6e6e6");
-                    SubBp5thBPppMainColor = Color.ParseHex("#e36a79");
-                    footerColor = Color.ParseHex("#e6e6e6");
-                    SubBpInfoSplitColor = Color.ParseHex("#e6e6e6");
-                    //change brightness
-                    SideImgBrightness = 0.6f;
-                    AvatarBrightness = 0.6f;
-                    BadgeBrightness = 0.6f;
-                    MainBPImgBrightness = 0.6f;
-                    CountryFlagBrightness = 0.6f;
-                    ModeCaptionBrightness = 0.6f;
-                    ModIconBrightness = 0.6f;
-                    ScoreModeIconBrightness = 0.6f;
-                    OsuSupporterIconBrightness = 0.6f;
-
-                    ModeIconColor = Color.ParseHex("#e6e6e6");
-                    SubBp2ndModeColor = Color.White;
-                    SubBp3rdModeColor = Color.White;
-                    SubBp4thModeColor = Color.White;
-                    SubBp5thModeColor = Color.White;
-                    FixedScoreModeIconColor = false;
-
-                    DetailsDiff_PlayTimeColor = Color.ParseHex("#e36a79");
-                    DetailsDiff_PlayTimeIconColor = Color.ParseHex("#e36a79");
-                    DetailsDiff_TotalHitsColor = Color.ParseHex("#6cac9c");
-                    DetailsDiff_TotalHitsIconColor = Color.ParseHex("#6cac9c");
-                    DetailsDiff_PlayCountColor = Color.ParseHex("#5872df");
-                    DetailsDiff_PlayCountIconColor = Color.ParseHex("#5872df");
-                    DetailsDiff_RankedScoreColor = Color.ParseHex("#3a4d78");
-                    DetailsDiff_RankedScoreIconColor = Color.ParseHex("#3a4d78");
-                    ppDiffColor = Color.ParseHex("#e36a79");
-                    ppDiffIconColor = Color.ParseHex("#e36a79");
-                    accDiffColor = Color.ParseHex("#6cac9c");
-                    accDiffIconColor = Color.ParseHex("#6cac9c");
-                    CountryRankDiffColor = Color.ParseHex("#e6e6e6");
-                    CountryRankDiffIconColor = Color.ParseHex("#3a4d78");
-
-                    break;
-                    #endregion
-            }
             var info = new Image<Rgba32>(4000, 2640);
             //获取全部bp
             var allBP = await OSU.GetUserScores(
@@ -795,10 +912,10 @@ namespace KanonBot.image
             else
                 sidePicPath = ColorMode switch
                 {
-                    0 => "./work/panelv2/infov2-dark-customimg.png",
-                    1 => "./work/panelv2/infov2-light-customimg.png",
-                    2 => "./work/panelv2/infov2-dark-customimg.png",
-                    _ => throw new Exception(),
+                    UserPanelData.CustomMode.Custom => "./work/panelv2/infov2-dark-customimg.png",
+                    UserPanelData.CustomMode.Light => "./work/panelv2/infov2-light-customimg.png",
+                    UserPanelData.CustomMode.Dark => "./work/panelv2/infov2-dark-customimg.png",
+                    _ => throw new ArgumentOutOfRangeException("未知的自定义模式")
                 };
             sidePic = Img.Load(await Utils.LoadFile2Byte(sidePicPath)).CloneAs<Rgba32>(); // 读取
             sidePic.Mutate(x => x.Brightness(SideImgBrightness));
@@ -1006,14 +1123,14 @@ namespace KanonBot.image
                 bp1bg = new Image<Rgba32>(355, 200);
                 switch (ColorMode)
                 {
-                    case 0:
+                    case UserPanelData.CustomMode.Custom:
                         bp1bg.Mutate(x => x.Fill(Color.White));
                         break;
-                    case 1:
+                    case UserPanelData.CustomMode.Light:
                         //light
                         //do nothing
                         break;
-                    case 2:
+                    case UserPanelData.CustomMode.Dark:
                         //dark
                         bp1bg.Mutate(x => x.Fill(Color.White));
                         break;
@@ -1050,10 +1167,10 @@ namespace KanonBot.image
             else
                 panelPath = ColorMode switch
                 {
-                    0 => "./work/panelv2/infov2-light.png",
-                    1 => "./work/panelv2/infov2-light.png",
-                    2 => "./work/panelv2/infov2-dark.png",
-                    _ => throw new Exception(),
+                   UserPanelData.CustomMode.Custom => "./work/panelv2/infov2-dark.png",
+                    UserPanelData.CustomMode.Light => "./work/panelv2/infov2-light.png",
+                    UserPanelData.CustomMode.Dark => "./work/panelv2/infov2-dark.png",
+                    _ => throw new ArgumentOutOfRangeException("未知的颜色模式"),
                 };
             panel = Img.Load(await Utils.LoadFile2Byte(panelPath)).CloneAs<Rgba32>(); // 读取
             info.Mutate(x => x.DrawImage(panel, new Point(0, 0), 1));
