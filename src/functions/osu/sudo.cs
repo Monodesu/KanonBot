@@ -213,9 +213,7 @@ namespace KanonBot.functions.osu
                         msg.msg("以下v1 info panel需要审核");
                         foreach (var file in files)
                         {
-                            msg.msg(
-                                $"\n{file[(file.LastIndexOf("\\") + 1)..][..file[(file.LastIndexOf("\\") + 1)..].IndexOf(".")]}\n"
-                            );
+                            msg.msg($"\n{Path.GetFileName(file)}\n");
                             var stream = new MemoryStream();
                             await SixLabors.ImageSharp.Image
                                 .Load(file)
@@ -239,18 +237,10 @@ namespace KanonBot.functions.osu
                     {
                         foreach (var file in filesall)
                         {
-                            if (
-                                File.Exists(
-                                    @$".\work\legacy\v1_infopanel\{file[file.LastIndexOf("\\")..]}"
-                                )
-                            )
-                                File.Delete(
-                                    @$".\work\legacy\v1_infopanel\{file[file.LastIndexOf("\\")..]}"
-                                );
-                            File.Move(
-                                @$"{file}",
-                                @$".\work\legacy\v1_infopanel\{file[file.LastIndexOf("\\")..]}"
-                            );
+                            var destpath = @".\work\legacy\v1_infopanel\" + Path.GetFileName(file);
+                            if (File.Exists(destpath))
+                                File.Delete(destpath);
+                            File.Move(file, destpath);
                         }
                         await target.reply("approved.");
                         return;
@@ -326,12 +316,11 @@ namespace KanonBot.functions.osu
                     {
                         foreach (var file in filesall)
                         {
-                            if (File.Exists(file))
-                                File.Delete(file);
-                            File.Move(
-                                @$"{file}",
-                                @$".\work\panelv2\user_customimg\{file[file.LastIndexOf("\\")..]}"
-                            );
+                            var destpath =
+                                @".\work\panelv2\user_infopanel\" + Path.GetFileName(file);
+                            if (File.Exists(destpath))
+                                File.Delete(destpath);
+                            File.Move(file, destpath);
                         }
                         await target.reply("approved.");
                         return;
@@ -345,8 +334,8 @@ namespace KanonBot.functions.osu
                         if (File.Exists(@$".\work\panelv2\user_infopanel\{cmd}.png"))
                             File.Delete(@$".\work\panelv2\user_infopanel\{cmd}.png");
                         File.Move(
-                            @$".\work\panelv2\user_customimg\verify\{cmd}.png",
-                            @$".\work\panelv2\user_customimg\{cmd}.png"
+                            @$".\work\panelv2\user_infopanel\verify\{cmd}.png",
+                            @$".\work\panelv2\user_infopanel\{cmd}.png"
                         );
                         await target.reply("approved.");
                         return;
@@ -383,9 +372,7 @@ namespace KanonBot.functions.osu
                         msg.msg("以下v2 info image需要审核");
                         foreach (var x in files)
                         {
-                            msg.msg(
-                                $"\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\n"
-                            );
+                            msg.msg($"\n{Path.GetFileName(x)}\n");
                             var stream = new MemoryStream();
                             await SixLabors.ImageSharp.Image
                                 .Load(x)
@@ -409,18 +396,10 @@ namespace KanonBot.functions.osu
                     {
                         foreach (var x in filesall)
                         {
-                            if (
-                                File.Exists(
-                                    @$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}"
-                                )
-                            )
-                                File.Delete(
-                                    @$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}"
-                                );
-                            File.Move(
-                                @$"{x}",
-                                @$".\work\panelv2\user_customimg\{x[x.LastIndexOf("\\")..]}"
-                            );
+                            var destpath = @".\work\panelv2\user_customimg\" + Path.GetFileName(x);
+                            if (File.Exists(destpath))
+                                File.Delete(destpath);
+                            File.Move(x, destpath);
                         }
                         await target.reply("approved.");
                         return;
@@ -472,9 +451,7 @@ namespace KanonBot.functions.osu
                         msg.msg("以下v1 info image需要审核");
                         foreach (var x in files)
                         {
-                            msg.msg(
-                                $"\n{x[(x.LastIndexOf("\\") + 1)..][..x[(x.LastIndexOf("\\") + 1)..].IndexOf(".")]}\n"
-                            );
+                            msg.msg($"\n{Path.GetFileName(x)}\n");
                             var stream = new MemoryStream();
                             await SixLabors.ImageSharp.Image
                                 .Load(x)
@@ -498,18 +475,10 @@ namespace KanonBot.functions.osu
                     {
                         foreach (var x in filesall)
                         {
-                            if (
-                                File.Exists(
-                                    @$".\work\legacy\v1_cover\custom\{x[x.LastIndexOf("\\")..]}"
-                                )
-                            )
-                                File.Delete(
-                                    @$".\work\legacy\v1_cover\custom\{x[x.LastIndexOf("\\")..]}"
-                                );
-                            File.Move(
-                                @$"{x}",
-                                @$".\work\legacy\v1_cover\custom\{x[x.LastIndexOf("\\")..]}"
-                            );
+                            var destpath = @".\work\legacy\v1_cover\custom\" + Path.GetFileName(x);
+                            if (File.Exists(destpath))
+                                File.Delete(destpath);
+                            File.Move(x, destpath);
                         }
                         await target.reply("approved.");
                         return;
