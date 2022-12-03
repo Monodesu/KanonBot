@@ -158,34 +158,24 @@ namespace KanonBot.functions.osubot
             cmd = cmd.ToLower().Trim();
             if (int.TryParse(cmd, out _))
             {
-                try
+                var t = int.Parse(cmd);
+                if (t < 0 || t > 2)
                 {
-                    var t = int.Parse(cmd);
-                    if (t < 0 || t > 2)
+                    await target.reply("配色方案号码不正确。(0=custom、1=light、2=dark)");
+                    return;
+                }
+                if (t == 0)
+                    if (string.IsNullOrEmpty(DBOsuInfo.InfoPanelV2_CustomMode))
                     {
-                        await target.reply("配色方案号码不正确。(0=custom、1=light、2=dark)");
+                        await target.reply("请先设置自定义配色方案后再将此配置项更改为custom。");
                         return;
                     }
-                    if (t == 0)
-                        if (
-                            DBOsuInfo.InfoPanelV2_CustomMode == null
-                            || DBOsuInfo.InfoPanelV2_CustomMode == ""
-                        )
-                        {
-                            await target.reply("请先设置自定义配色方案后再将此配置项更改为custom。");
-                            return;
-                        }
-                    await Database.Client.SetOsuInfoPanelV2ColorMode(DBOsuInfo.osu_uid, t);
-                    await target.reply("成功设置配色方案。");
-                }
-                catch
-                {
-                    await target.reply("发生了错误，无法设置配色方案，请联系管理员。");
-                }
+                await Database.Client.SetOsuInfoPanelV2ColorMode(DBOsuInfo.osu_uid, t);
+                await target.reply("成功设置配色方案。");
             }
             else
             {
-                await target.reply("配色方案号码不正确。(0=light、1=dark)");
+                await target.reply("配色方案号码不正确。(0=custom、1=light、2=dark)");
             }
         }
 
@@ -740,13 +730,13 @@ namespace KanonBot.functions.osubot
             if (string.IsNullOrEmpty(tmp))
             {
                 await target.reply(
-                    "请输入正确的配置。!set osuinfopanelv2color [配置]\n具体配置格式可以在 info.desu.life 查询到。"
+                    "请输入正确的配置。\nset osuinfopanelv2color [配置]\n具体格式可以在 https://info.desu.life/?page_id=407 查询到。"
                 );
                 return;
             }
             if (Try(() => image.OsuInfoPanelV2.InfoCustom.ParseColors(tmp, None)).IsFail())
             {
-                await target.reply("配置不正确，请检查后重试。!set osuinfopanelv2customcolorvalue [颜色值]");
+                await target.reply("配置不正确，请检查后重试。\n!set osuinfopanelv2customcolorvalue [配置]");
                 return;
             }
 
