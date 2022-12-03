@@ -578,8 +578,8 @@ namespace KanonBot.image
                     SubBp4thModeColor = Color.White;
                     SubBp5thModeColor = Color.White;
                     FixedScoreModeIconColor = false;
-                    DetailsDiff_PlayTimeColor = Color.ParseHex("#6cac9c");
-                    DetailsDiff_PlayTimeIconColor = Color.ParseHex("#6cac9c");
+                    DetailsDiff_PlayTimeColor = Color.ParseHex("#e36a79");
+                    DetailsDiff_PlayTimeIconColor = Color.ParseHex("#e36a79");
                     DetailsDiff_TotalHitsColor = Color.ParseHex("#6cac9c");
                     DetailsDiff_TotalHitsIconColor = Color.ParseHex("#6cac9c");
                     DetailsDiff_PlayCountColor = Color.ParseHex("#5872df");
@@ -683,8 +683,8 @@ namespace KanonBot.image
                     SubBp5thModeColor = Color.White;
                     FixedScoreModeIconColor = false;
 
-                    DetailsDiff_PlayTimeColor = Color.ParseHex("#6cac9c");
-                    DetailsDiff_PlayTimeIconColor = Color.ParseHex("#6cac9c");
+                    DetailsDiff_PlayTimeColor = Color.ParseHex("#e36a79");
+                    DetailsDiff_PlayTimeIconColor = Color.ParseHex("#e36a79");
                     DetailsDiff_TotalHitsColor = Color.ParseHex("#6cac9c");
                     DetailsDiff_TotalHitsIconColor = Color.ParseHex("#6cac9c");
                     DetailsDiff_PlayCountColor = Color.ParseHex("#5872df");
