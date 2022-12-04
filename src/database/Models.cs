@@ -53,7 +53,7 @@ public class Model
         [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
         public long osu_uid { get; set; }
         public string? osu_mode { get; set; }
-        public int customInfoEngineVer { get; set; } // 0=legacy 1=current
+        public int customInfoEngineVer { get; set; } // 1=v1 2=v2
         public string? InfoPanelV2_CustomMode { get; set; }
         public int InfoPanelV2_Mode { get; set; }
     }

@@ -31,7 +31,7 @@ public class Client
             $"user={config.database.user};" +
             $"password={config.database.password};charset=utf8mb4",
 
-            DbType = SqlSugar.DbType.MySql,
+            DbType = SqlSugar.DbType.MySqlConnector,
             IsAutoCloseConnection = true
         });
 
