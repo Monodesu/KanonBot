@@ -78,8 +78,9 @@ public class Client
         switch (platform)
         {
             case Platform.OneBot:
+                var qid = long.Parse(uid);
                 var li1 = await db.User
-                    .Where(it => it.qq_id == long.Parse(uid))
+                    .Where(it => it.qq_id == qid)
                     .Select(it => it.uid)
                     .ToListAsync();
                 if (li1.Count > 0)
