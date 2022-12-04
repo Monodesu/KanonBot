@@ -20,22 +20,18 @@ public class Client
 {
     private static Config.Base config = Config.inner!;
 
-    static private SqlSugarClient GetInstance()
+    static SqlSugarScope scope = new SqlSugarScope(new ConnectionConfig()
     {
-        // 暂时只有Mysql
-        var db = new SqlSugarClient(new ConnectionConfig()
-        {
             ConnectionString = $"server={config.database.host};" +
             $"port={config.database.port};" +
             $"database={config.database.db};" +
             $"user={config.database.user};" +
-            $"password={config.database.password};charset=utf8mb4",
+            $"password={config.database.password};CharSet=utf8mb4;SslMode=none",
 
-            DbType = SqlSugar.DbType.MySqlConnector,
+            DbType = SqlSugar.DbType.MySql,
             IsAutoCloseConnection = true
-        });
-
-
+    },
+    db => {
         // 添加Sql打印事件
         db.Aop.OnLogExecuting = (sql, pars) =>
         {
@@ -43,7 +39,13 @@ public class Client
         };
 
         db.Ado.CommandTimeOut = 30;
+    }
+    );
 
+    static private SqlSugarScope GetInstance()
+    {
+        // 暂时只有Mysql
+        var db = scope;
         return db;
     }
 

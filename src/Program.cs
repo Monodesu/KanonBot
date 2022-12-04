@@ -16,6 +16,7 @@ using Newtonsoft.Json.Linq;
 using Msg = KanonBot.Message;
 
 
+
 #region 初始化
 Console.WriteLine("---KanonBot---");
 var configPath = "config.toml";
@@ -33,6 +34,16 @@ FlurlHttp.GlobalSettings.Redirects.MaxAutoRedirects = 10;
 FlurlHttp.GlobalSettings.Redirects.ForwardAuthorizationHeader = true;
 FlurlHttp.GlobalSettings.Redirects.AllowSecureToInsecure = true;
 var config = Config.inner!;
+
+
+var myins = new MySql.Data.MySqlClient.MySqlConnection($"server={config.database.host};" +
+            $"port={config.database.port};" +
+            $"database={config.database.db};" +
+            $"user={config.database.user};" +
+            $"password={config.database.password};CharSet=utf8mb4;SslMode=none");
+
+myins.Open();
+myins.Close();
 
 var log = new LoggerConfiguration()
                 .WriteTo.Async(a => a.Console())
