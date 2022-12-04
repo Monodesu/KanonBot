@@ -30,6 +30,7 @@ public partial class OneBot
         }
         private Models.CQResponse Send(Models.CQRequest req)
         {
+            this.CallbackList.Add(req.Echo, new RetCallback());
             this.CallbackList[req.Echo] = new RetCallback();    // 创建回调
             this.socket.Send(req);                              // 发送
             this.CallbackList[req.Echo].ResetEvent.WaitOne();   // 等待回调
