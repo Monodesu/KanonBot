@@ -19,7 +19,6 @@ using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SqlSugar;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static KanonBot.LegacyImage.Draw;
 using Img = SixLabors.ImageSharp.Image;

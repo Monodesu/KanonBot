@@ -7,7 +7,6 @@ using KanonBot.API;
 using Kook;
 using LanguageExt;
 using Newtonsoft.Json.Linq;
-using Org.BouncyCastle.Asn1.Crmf;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using static KanonBot.LegacyImage.Draw;

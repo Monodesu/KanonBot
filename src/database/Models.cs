@@ -1,14 +1,35 @@
 ﻿#pragma warning disable IDE0044 // 添加只读修饰符
 #pragma warning disable IDE1006 // 命名样式
-using SqlSugar;
+using System;
+using LinqToDB;
+using LinqToDB.Configuration;
+using LinqToDB.Mapping;
 
 namespace KanonBot.Database;
 
 public class Model
 {
-    [SugarTable("osu_standard_beatmap_tech_data")]
+    public class DB : LinqToDB.Data.DataConnection
+    {
+        public DB(LinqToDBConnectionOptions options) : base(options)
+        {
+        }
+
+        public ITable<OsuStandardBeatmapTechData>  OsuStandardBeatmapTechData  => this.GetTable<OsuStandardBeatmapTechData>();
+        public ITable<OSUSeasonalPass> OSUSeasonalPass => this.GetTable<OSUSeasonalPass>();
+        public ITable<User> User => this.GetTable<User>();
+        public ITable<UserOSU> UserOSU => this.GetTable<UserOSU>();
+        public ITable<OsuArchivedRec> OsuArchivedRec => this.GetTable<OsuArchivedRec>();
+        public ITable<OsuPPlus> OsuPPlus => this.GetTable<OsuPPlus>();
+        public ITable<BadgeList> BadgeList => this.GetTable<BadgeList>();
+        public ITable<MailVerify> MailVerify => this.GetTable<MailVerify>();
+
+    // ... other tables ...
+    }
+    [Table("osu_standard_beatmap_tech_data")]
     public class OsuStandardBeatmapTechData
     {
+        [PrimaryKey]
         public long bid { get; set; }
         public int total { get; set; }
         public int aim { get; set; }
@@ -16,21 +37,22 @@ public class Model
         public int acc { get; set; }
         public string? mod { get; set; }
     }
-    [SugarTable("osu_seasonalpass_2022_s4")]
+    [Table("osu_seasonalpass_2022_s4")]
     public class OSUSeasonalPass
     {
+        [PrimaryKey]
         public long uid { get; set; }
         public string? mode { get; set; }
         public long tth { get; set; }
         public long inittth { get; set; }
     }
 
-    [SugarTable("users")]
+    [Table("users")]
     public class User
     {
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+        [PrimaryKey, Identity]
         public long uid { get; set; }
-        [SugarColumn(IsPrimaryKey = true)]
+        [PrimaryKey]
         public string? email { get; set; }
         public string? passwd { get; set; }
         public long qq_id { get; set; }
@@ -45,12 +67,12 @@ public class Model
         public string? owned_badge_ids { get; set; }
     }
 
-    [SugarTable("users_osu")]
+    [Table("users_osu")]
     public class UserOSU
     {
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
+        [PrimaryKey]
         public long uid { get; set; }
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
+        [PrimaryKey]
         public long osu_uid { get; set; }
         public string? osu_mode { get; set; }
         public int customInfoEngineVer { get; set; } // 1=v1 2=v2
@@ -58,10 +80,10 @@ public class Model
         public int InfoPanelV2_Mode { get; set; }
     }
 
-    [SugarTable("osu_archived_record")]
+    [Table("osu_archived_record")]
     public class OsuArchivedRec
     {
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
+        [PrimaryKey]
         public int uid { get; set; }
         public int play_count { get; set; }
         public long ranked_score { get; set; }
@@ -79,16 +101,16 @@ public class Model
         public int playtime { get; set; }
         public int country_rank { get; set; }
         public int global_rank { get; set; }
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
+        [PrimaryKey]
         public string? gamemode { get; set; }
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
+        [PrimaryKey]
         public DateTimeOffset lastupdate { get; set; }
     }
 
-    [SugarTable("osu_performancepointplus_record")]
+    [Table("osu_performancepointplus_record")]
     public class OsuPPlus
     {
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = false)]
+        [PrimaryKey]
         public long uid { get; set; }
         public double pp { get; set; }
         public double jump { get; set; }
@@ -99,16 +121,16 @@ public class Model
         public double sta { get; set; }
     }
 
-    [SugarTable("badge_list")]
+    [Table("badge_list")]
     public class BadgeList
     {
-        [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+        [PrimaryKey, Identity]
         public int id { get; set; }
         public string? name { get; set; }
         public string? name_chinese { get; set; }
         public string? description { get; set; }
     }
-    [SugarTable("mail_verify")]
+    [Table("mail_verify")]
     public class MailVerify
     {
         public string? mailAddr { get; set; }

@@ -4,7 +4,6 @@ using Flurl;
 using Flurl.Http;
 using Flurl.Util;
 using JetBrains.Annotations;
-using K4os.Hash.xxHash;
 using KanonBot.API;
 using KanonBot.Drivers;
 using KanonBot.Message;
