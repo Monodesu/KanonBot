@@ -72,40 +72,31 @@ namespace KanonBot.functions.osubot
             if (scores == null) { await target.reply("查询成绩时出错。"); return; }
             if (scores!.Length > 0)
             {
-                try
+                if (scores![0].Mode == OSU.Enums.Mode.OSU)
                 {
-                    if (scores![0].Mode == OSU.Enums.Mode.OSU)
-                    {
-                        //osu-tools
-                        var data = await PerformanceCalculator.CalculatePanelData(scores![0]);
-                        if (scores[0].Beatmap!.Status == OSU.Enums.Status.ranked || scores[0].Beatmap!.Status == OSU.Enums.Status.approved)
-                            await Database.Client.InsertOsuStandardBeatmapTechData(scores[0].Beatmap!.BeatmapId, (int)data.ppInfo.ppStats![0].total,
-                                (int)data.ppInfo.ppStats![0].acc!, (int)data.ppInfo.ppStats![0].speed!, (int)data.ppInfo.ppStats![0].aim!,
-                                scores[0].Mods);
-                        // 绘制
-                        var stream = new MemoryStream();
-                        var img = await LegacyImage.Draw.DrawScore(data);
-                        await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-                        stream.TryGetBuffer(out ArraySegment<byte> buffer);
-                        await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
-                    }
-                    else
-                    {
-                        //rosupp
-                        var data = await PerformanceCalculator.CalculatePanelData(scores![0]);
-                        // 绘制
-                        var stream = new MemoryStream();
-                        var img = await LegacyImage.Draw.DrawScore(data);
-                        await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-                        stream.TryGetBuffer(out ArraySegment<byte> buffer);
-                        await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
-                    }
-
+                    //osu-tools
+                    var data = await PerformanceCalculator.CalculatePanelData(scores![0]);
+                    if (scores[0].Beatmap!.Status == OSU.Enums.Status.ranked || scores[0].Beatmap!.Status == OSU.Enums.Status.approved)
+                        await Database.Client.InsertOsuStandardBeatmapTechData(scores[0].Beatmap!.BeatmapId, (int)data.ppInfo.ppStats![0].total,
+                            (int)data.ppInfo.ppStats![0].acc!, (int)data.ppInfo.ppStats![0].speed!, (int)data.ppInfo.ppStats![0].aim!,
+                            scores[0].Mods);
+                    // 绘制
+                    var stream = new MemoryStream();
+                    var img = await LegacyImage.Draw.DrawScore(data);
+                    await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+                    stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                    await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
                 }
-                catch
+                else
                 {
-                    await target.reply("计算成绩时出错。");
-                    return;
+                    //rosupp
+                    var data = await PerformanceCalculator.CalculatePanelData(scores![0]);
+                    // 绘制
+                    var stream = new MemoryStream();
+                    var img = await LegacyImage.Draw.DrawScore(data);
+                    await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+                    stream.TryGetBuffer(out ArraySegment<byte> buffer);
+                    await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
                 }
             }
             else { await target.reply("猫猫找不到该BP。"); return; }

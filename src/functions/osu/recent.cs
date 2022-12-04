@@ -73,8 +73,6 @@ namespace KanonBot.functions.osubot
             if (scoreInfos == null) { await target.reply("查询成绩时出错。"); return; };    // 正常是找不到玩家，但是上面有验证，这里做保险
             if (scoreInfos!.Length > 0)
             {
-                try
-                {
                     if (scoreInfos[0].Mode == OSU.Enums.Mode.OSU)
                     {
                         //osu-tools
@@ -101,11 +99,7 @@ namespace KanonBot.functions.osubot
                         stream.TryGetBuffer(out ArraySegment<byte> buffer);
                         await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
                     }
-                }
-                catch
-                {
-                    await target.reply("计算成绩时出错。"); return;
-                }
+
             }
             else { await target.reply("猫猫找不到该玩家最近游玩的成绩。"); return; }
 

@@ -90,8 +90,6 @@ namespace KanonBot.functions.osubot
             var beatmapSetInfo = await OSU.GetBeatmap(scoreData!.Score.Beatmap!.BeatmapId);
             scoreData.Score.Beatmapset = beatmapSetInfo!.Beatmapset;
 
-            try
-            {
                 if (scoreData.Score.Mode == OSU.Enums.Mode.OSU)
                 {
                     //rosupp
@@ -121,11 +119,6 @@ namespace KanonBot.functions.osubot
                     await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
                 }
 
-            }
-            catch
-            {
-                await target.reply("计算成绩时出错。"); return;
-            }
         }
     }
 
