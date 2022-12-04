@@ -123,7 +123,8 @@ public class Client
         switch (platform)
         {
             case Platform.OneBot:
-                var li1 = await db.User.Where(it => it.qq_id == long.Parse(UID)).ToListAsync();
+                var qid = long.Parse(UID);
+                var li1 = await db.User.Where(it => it.qq_id == qid).ToListAsync();
                 if (li1.Count > 0)
                     return li1[0];
                 return null;
