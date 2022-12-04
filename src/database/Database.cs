@@ -1,6 +1,7 @@
 #pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable IDE0044 // 添加只读修饰符
 using KanonBot.Drivers;
+using MySqlConnector;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Ocsp;
 using Polly.Caching;
@@ -22,13 +23,17 @@ public class Client
 
     static SqlSugarScope scope = new SqlSugarScope(new ConnectionConfig()
     {
-            ConnectionString = $"server={config.database.host};" +
-            $"port={config.database.port};" +
-            $"database={config.database.db};" +
-            $"user={config.database.user};" +
-            $"password={config.database.password};CharSet=utf8mb4;SslMode=none",
+            ConnectionString = new MySqlConnectionStringBuilder
+            {
+                Server = config.database.host,
+                Port = (uint)config.database.port,
+                UserID = config.database.user,
+                Password = config.database.password,
+                Database = config.database.db,
+                CharacterSet = "utf8mb4",
+            }.ConnectionString,
 
-            DbType = SqlSugar.DbType.MySql,
+            DbType = SqlSugar.DbType.MySqlConnector,
             IsAutoCloseConnection = true
     },
     db => {

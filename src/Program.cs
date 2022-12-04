@@ -14,6 +14,7 @@ using KanonBot.Serializer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Msg = KanonBot.Message;
+using MySqlConnector;
 
 
 
@@ -35,15 +36,18 @@ FlurlHttp.GlobalSettings.Redirects.ForwardAuthorizationHeader = true;
 FlurlHttp.GlobalSettings.Redirects.AllowSecureToInsecure = true;
 var config = Config.inner!;
 
+var builder = new MySqlConnectionStringBuilder
+{
+	Server = config.database.host,
+    Port = (uint)config.database.port,
+	UserID = config.database.user,
+	Password = config.database.password,
+	Database = config.database.db,
+    CharacterSet = "utf8mb4",
+};
 
-var myins = new MySql.Data.MySqlClient.MySqlConnection($"server={config.database.host};" +
-            $"port={config.database.port};" +
-            $"database={config.database.db};" +
-            $"user={config.database.user};" +
-            $"password={config.database.password};CharSet=utf8mb4;SslMode=none");
-
-myins.Open();
-myins.Close();
+using var connection = new MySqlConnection(builder.ConnectionString);
+await connection.OpenAsync();
 
 var log = new LoggerConfiguration()
                 .WriteTo.Async(a => a.Console())
