@@ -42,7 +42,7 @@ namespace KanonBot.functions
             bool is_append = false;
             Database.Model.User dbuser = new();
 
-            if (is_regd) dbuser = await Database.Client.GetUsers(mailAddr);
+            if (is_regd) dbuser = await Database.Client.GetUser(mailAddr);
             switch (target.platform) //获取用户ID及平台信息 平台： qq qguild khl discord 四个
             {
                 case Platform.Guild:

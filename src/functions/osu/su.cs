@@ -107,7 +107,7 @@ namespace KanonBot.functions.osu
                     await target.reply($"restricted");
                     return;
                 case 2:
-                    if (await Database.Client.GetUsers(cmd) == null)
+                    if (await Database.Client.GetUser(cmd) == null)
                     {
                         await target.reply($"该用户未注册desu.life账户，请重新确认");
                         return;

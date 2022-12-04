@@ -111,10 +111,10 @@ public class Client
         }
     }
 
-    static public async Task<Model.User> GetUsers(string mailAddr)
+    static public async Task<Model.User?> GetUser(string mailAddr)
     {
         using var db = GetInstance();
-        return await db.User.Where(it => it.email == mailAddr).FirstAsync();
+        return await db.User.Where(it => it.email == mailAddr).FirstOrDefaultAsync();
     }
 
     static public async Task<Model.User?> GetUsersByUID(string UID, Platform platform)
@@ -155,19 +155,19 @@ public class Client
         {
             return null;
         }
-        return await db.User.Where(it => it.uid == user.uid).FirstAsync();
+        return await db.User.Where(it => it.uid == user.uid).FirstOrDefaultAsync();
     }
 
     static public async Task<Model.UserOSU?> GetOsuUser(long osu_uid)
     {
         using var db = GetInstance();
-        return await db.UserOSU.Where(it => it.osu_uid == osu_uid).FirstAsync();
+        return await db.UserOSU.Where(it => it.osu_uid == osu_uid).FirstOrDefaultAsync();
     }
 
     static public async Task<Model.UserOSU?> GetOsuUserByUID(long kanon_uid)
     {
         using var db = GetInstance();
-        return await db.UserOSU.Where(it => it.uid == kanon_uid).FirstAsync();
+        return await db.UserOSU.Where(it => it.uid == kanon_uid).FirstOrDefaultAsync();
     }
 
     static public async Task<bool> InsertOsuUser(
@@ -199,7 +199,7 @@ public class Client
     static public async Task<API.OSU.Models.PPlusData.UserData?> GetOsuPPlusData(long osu_uid)
     {
         using var db = GetInstance();
-        var data = await db.OsuPPlus.FirstAsync(it => it.uid == osu_uid && it.pp != 0);
+        var data = await db.OsuPPlus.FirstOrDefaultAsync(it => it.uid == osu_uid && it.pp != 0);
         if (data != null)
         {
             var realData = new API.OSU.Models.PPlusData.UserData();
@@ -225,7 +225,7 @@ public class Client
     )
     {
         using var db = GetInstance();
-        var data = await db.OsuPPlus.FirstAsync(it => it.uid == osu_uid);
+        var data = await db.OsuPPlus.FirstOrDefaultAsync(it => it.uid == osu_uid);
         var result = await db.InsertOrReplaceAsync(
             new Model.OsuPPlus()
             {
@@ -245,7 +245,7 @@ public class Client
     static public async Task<bool> SetDisplayedBadge(string userid, string displayed_ids)
     {
         using var db = GetInstance();
-        var data = await db.User.FirstAsync(it => it.uid == long.Parse(userid));
+        var data = await db.User.FirstOrDefaultAsync(it => it.uid == long.Parse(userid));
         var res = await db.User
             .Where(it => it.uid == long.Parse(userid))
             .Set(it => it.displayed_badge_ids, displayed_ids)
@@ -260,13 +260,13 @@ public class Client
         return await db
             .BadgeList
             .Where(it => it.id == int.Parse(badgeid))
-            .FirstAsync();
+            .FirstOrDefaultAsync();
     }
 
     static public async Task<bool> SetOwnedBadge(string email, string owned_ids)
     {
         using var db = GetInstance();
-        var data = await db.User.FirstAsync(it => it.email == email);
+        var data = await db.User.FirstOrDefaultAsync(it => it.email == email);
         data.owned_badge_ids = owned_ids;
         var res = await db.UpdateAsync(data);
         return res > -1;
@@ -283,7 +283,7 @@ public class Client
         var userinfo = await db
             .User
             .Where(it => it.uid == user.uid)
-            .FirstAsync();
+            .FirstOrDefaultAsync();
         userinfo.owned_badge_ids = owned_ids;
         var res = await db.UpdateAsync(userinfo);
         return res > -1;
@@ -330,7 +330,7 @@ public class Client
                 where p.uid == oid && p.gamemode == API.OSU.Enums.Mode2String(mode)
                 orderby p.lastupdate descending
                 select p;
-            data = await q.FirstAsync();
+            data = await q.FirstOrDefaultAsync();
         }
         else
         {
@@ -347,14 +347,14 @@ public class Client
                 where p.uid == oid && p.gamemode == API.OSU.Enums.Mode2String(mode) && p.lastupdate <= date
                 orderby p.lastupdate descending
                 select p;
-            data = await q.FirstAsync();
+            data = await q.FirstOrDefaultAsync();
             if (data == null)
             {
                 var tq = from p in db.OsuArchivedRec
                     where p.uid == oid && p.gamemode == API.OSU.Enums.Mode2String(mode)
                     orderby p.lastupdate
                     select p;
-                    data = await tq.FirstAsync();
+                    data = await tq.FirstOrDefaultAsync();
             }
         }
         if (data == null)

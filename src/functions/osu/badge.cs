@@ -396,7 +396,7 @@ namespace KanonBot.functions.osubot
                     foreach (var x in users)
                     {
                         skip = false;
-                        var userInfo = await Database.Client.GetUsers(x);
+                        var userInfo = await Database.Client.GetUser(x);
                         if (userInfo == null)
                             failed_msg.Add($"desu.life用户 {x} 未注册desu.life账户或email未绑定，请重新确认");
                         else
