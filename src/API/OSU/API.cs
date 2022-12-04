@@ -8,7 +8,6 @@ using Flurl;
 using Flurl.Http;
 using System.Security.Cryptography;
 using static KanonBot.API.OSU.Models;
-using SqlSugar.Extensions;
 using KanonBot.functions.osu.rosupp;
 using KanonBot.Serializer;
 
