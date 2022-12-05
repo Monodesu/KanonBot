@@ -157,6 +157,7 @@ namespace KanonBot.functions.osubot
             {
                 //使用bp mod
                 mods = randBP.Mods.ToList();
+
                 bool isDiffReductionMod = false,
                     ez = false,
                     ht = false,
@@ -194,6 +195,8 @@ namespace KanonBot.functions.osubot
                     }
                     else
                     {
+                        for (int i = 0; i < mods.Count; i++)
+                            if (mods[i].ToUpper() == "NC") mods[i] = "DT";
                         foreach (var xx in mods)
                             data.RemoveAll(x => !x.mod!.Contains(xx));
                         if (!ez)
@@ -244,6 +247,8 @@ namespace KanonBot.functions.osubot
 
                 if (data.Count > 0)
                 {
+                    for (int i = 0; i < mods.Count; i++)
+                        if (mods[i].ToUpper() == "NC") mods[i] = "DT";
                     foreach (var xx in mods)
                         data.RemoveAll(x => !x.mod!.Contains(xx));
                     if (!ez)

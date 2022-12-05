@@ -496,8 +496,15 @@ public class Client
         {
             foreach (var x in mods)
             {
-                modstring += x + ",";
-                if (x.ToLower() == "pf" || x.ToLower() == "sd" || x.ToLower() == "ap" || x.ToLower() == "rx" || x.ToLower() == "v2")
+                if (x == "NC")
+                {
+                    modstring += "DT,";
+                }
+                else
+                {
+                    modstring += x + ",";
+                }
+                if (x == "PF" || x == "SD" || x == "AP" || x == "RX" || x.ToLower() == "v2")
                     return true; //不保存以上mod
             }
             modstring = modstring[..^1];
