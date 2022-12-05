@@ -79,11 +79,10 @@ namespace KanonBot.functions.osubot
                 data.u1Name = user2.Username;
                 data.u1 = d2;
 
-                var stream = new MemoryStream();
-                var img = await LegacyImage.Draw.DrawPPVS(data);
+                using var stream = new MemoryStream();
+                using var img = await LegacyImage.Draw.DrawPPVS(data);
                 await img.SaveAsync(stream, new JpegEncoder());
-                stream.TryGetBuffer(out ArraySegment<byte> buffer);
-                await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+                await target.reply(new Chain().image(Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length), ImageSegment.Type.Base64));
             } else if (cmds.Length == 2) {
                 if (cmds[0].Length == 0 || cmds[1].Length == 0)
                 {
@@ -141,11 +140,10 @@ namespace KanonBot.functions.osubot
                 data.u1 = d2;
 
 
-                var stream = new MemoryStream();
-                var img = await LegacyImage.Draw.DrawPPVS(data);
+                using var stream = new MemoryStream();
+                using var img = await LegacyImage.Draw.DrawPPVS(data);
                 await img.SaveAsync(stream, new JpegEncoder());
-                stream.TryGetBuffer(out ArraySegment<byte> buffer);
-                await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
+                await target.reply(new Chain().image(Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length), ImageSegment.Type.Base64));
             } else {
                 await target.reply("!ppvs 用户1#用户2/!ppvs 要对比的用户");
             }

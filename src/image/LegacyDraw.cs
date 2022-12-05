@@ -32,6 +32,7 @@ namespace KanonBot.LegacyImage
             public int badgeId = -1;
             public CustomMode customMode = CustomMode.Dark; //0=custom 1=light 2=dark
             public string ColorConfigRaw;
+
             public enum CustomMode
             {
                 Custom = 0,
@@ -78,7 +79,7 @@ namespace KanonBot.LegacyImage
             var panelPath = "./work/legacy/default-info-v1.png";
             if (File.Exists($"./work/legacy/v1_infopanel/{data.userInfo.Id}.png"))
                 panelPath = $"./work/legacy/v1_infopanel/{data.userInfo.Id}.png";
-            Img panel = Img.Load(await Utils.LoadFile2Byte(panelPath));
+            using var panel = await Img.LoadAsync(panelPath);
             // cover
             var coverPath = $"./work/legacy/v1_cover/custom/{data.userInfo.Id}.png";
             if (!File.Exists(coverPath))
@@ -100,7 +101,7 @@ namespace KanonBot.LegacyImage
                     }
                 }
             }
-            Img cover = Img.Load(await Utils.LoadFile2Byte(coverPath));
+            using var cover = await Img.LoadAsync(coverPath);
             var resizeOptions = new ResizeOptions
             {
                 Size = new Size(1200, 350),
@@ -115,28 +116,25 @@ namespace KanonBot.LegacyImage
 
             //avatar
             var avatarPath = $"./work/avatar/{data.userInfo.Id}.png";
-            Img avatar;
-            try
-            {
-                avatar = Img.Load(await Utils.LoadFile2Byte(avatarPath)).CloneAs<Rgba32>(); // 读取
-            }
-            catch
-            {
-                try
+            using var avatar = await TryAsync(ReadImageRgba(avatarPath))
+                .IfFail(async () =>
                 {
-                    avatarPath = await data.userInfo.AvatarUrl.DownloadFileAsync(
-                        "./work/avatar/",
-                        $"{data.userInfo.Id}.png"
-                    );
-                }
-                catch (Exception ex)
-                {
-                    var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
-                    Log.Error(msg);
-                    throw; // 下载失败直接抛出error
-                }
-                avatar = Img.Load(await Utils.LoadFile2Byte(avatarPath)).CloneAs<Rgba32>(); // 下载后再读取
-            }
+                    try
+                    {
+                        avatarPath = await data.userInfo.AvatarUrl.DownloadFileAsync(
+                            "./work/avatar/",
+                            $"{data.userInfo.Id}.png"
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
+                        Log.Error(msg);
+                        throw; // 下载失败直接抛出error
+                    }
+                    return await ReadImageRgba(avatarPath); // 下载后再读取
+                });
+
             avatar.Mutate(x => x.Resize(190, 190).RoundCorner(new Size(190, 190), 40));
             info.Mutate(x => x.DrawImage(avatar, new Point(39, 55), 1));
 
@@ -145,9 +143,7 @@ namespace KanonBot.LegacyImage
             {
                 try
                 {
-                    Img badge = Img.Load(
-                        await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png")
-                    );
+                    using var badge = await Img.LoadAsync($"./work/badges/{data.badgeId}.png");
                     badge.Mutate(x => x.Resize(86, 40).RoundCorner(new Size(86, 40), 5));
                     info.Mutate(x => x.DrawImage(badge, new Point(272, 152), 1));
                 }
@@ -160,14 +156,10 @@ namespace KanonBot.LegacyImage
                 GraphicsOptions = new GraphicsOptions { Antialias = true }
             };
 
-            Img flags = Img.Load(
-                await Utils.LoadFile2Byte($"./work/flags/{data.userInfo.Country.Code}.png")
-            );
+            using var flags = await Img.LoadAsync($"./work/flags/{data.userInfo.Country.Code}.png");
             info.Mutate(x => x.DrawImage(flags, new Point(272, 212), 1));
-            Img modeicon = Img.Load(
-                await Utils.LoadFile2Byte(
-                    $"./work/legacy/mode_icon/{data.userInfo.PlayMode.ToStr()}.png"
-                )
+            using var modeicon = await Img.LoadAsync(
+                $"./work/legacy/mode_icon/{data.userInfo.PlayMode.ToStr()}.png"
             );
             modeicon.Mutate(x => x.Resize(64, 64));
             info.Mutate(x => x.DrawImage(modeicon, new Point(1125, 10), 1));
@@ -175,7 +167,7 @@ namespace KanonBot.LegacyImage
             // pp+
             if (data.userInfo.PlayMode is OSU.Enums.Mode.OSU)
             {
-                Img ppdataPanel = Img.Load(await Utils.LoadFile2Byte("./work/legacy/pp+-v1.png"));
+                using var ppdataPanel = await Img.LoadAsync("./work/legacy/pp+-v1.png");
                 info.Mutate(x => x.DrawImage(ppdataPanel, new Point(0, 0), 1));
                 Hexagram.HexagramInfo hi =
                     new()
@@ -210,7 +202,7 @@ namespace KanonBot.LegacyImage
                 var x_offset = new int[6] { 372, 330, 122, 52, 128, 317 }; // pp+数据的x轴坐标
                 var multi = new double[6] { 14.1, 69.7, 1.92, 19.8, 0.588, 3.06 };
                 var exp = new double[6] { 0.769, 0.596, 0.953, 0.8, 1.175, 0.993 };
-                var pppImg = Hexagram.Draw(ppd, multi, exp, hi);
+                using var pppImg = Hexagram.Draw(ppd, multi, exp, hi);
                 info.Mutate(x => x.DrawImage(pppImg, new Point(132, 626), 1));
                 var f = new Font(Exo2Regular, 18);
                 var pppto = new TextOptions(f)
@@ -239,9 +231,7 @@ namespace KanonBot.LegacyImage
             }
             else
             {
-                Img ppdataPanel = Img.Load(
-                    await Utils.LoadFile2Byte("./work/legacy/nopp+info-v1.png")
-                );
+                using var ppdataPanel = await Img.LoadAsync("./work/legacy/nopp+info-v1.png");
                 info.Mutate(x => x.DrawImage(ppdataPanel, new Point(0, 0), 1));
             }
 
@@ -502,7 +492,7 @@ namespace KanonBot.LegacyImage
             );
             try
             {
-                var levelRoundrect = new Image<Rgba32>(4 * levelper, 7);
+                using var levelRoundrect = new Image<Rgba32>(4 * levelper, 7);
                 levelRoundrect.Mutate(
                     x => x.Fill(Color.ParseHex("#FF66AB")).RoundCorner(new Size(4 * levelper, 7), 5)
                 );
@@ -642,6 +632,7 @@ namespace KanonBot.LegacyImage
         public static async Task<Img> DrawScore(ScorePanelData data)
         {
             var ppInfo = data.ppInfo;
+            var score = await Img.LoadAsync("work/legacy/v2_scorepanel/default-score-v2.png");
             // 先下载必要文件
             var bgPath = $"./work/background/{data.scoreInfo.Beatmap!.BeatmapId}.png";
             if (!File.Exists(bgPath))
@@ -662,62 +653,41 @@ namespace KanonBot.LegacyImage
             }
 
             var avatarPath = $"./work/avatar/{data.scoreInfo.UserId}.png";
-            Img avatar;
-            try
-            {
-                avatar = Img.Load(await Utils.LoadFile2Byte(avatarPath)).CloneAs<Rgba32>(); // 读取
-            }
-            catch
-            {
-                try
+            using var avatar = await TryAsync(ReadImageRgba(avatarPath))
+                .IfFail(async () =>
                 {
-                    avatarPath = await data.scoreInfo.User!.AvatarUrl.DownloadFileAsync(
-                        "./work/avatar/",
-                        $"{data.scoreInfo.UserId}.png"
-                    );
-                }
-                catch (Exception ex)
-                {
-                    var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
-                    Log.Error(msg);
-                    throw;
-                }
-                avatar = Img.Load(await Utils.LoadFile2Byte(avatarPath)).CloneAs<Rgba32>(); // 下载后再读取
-            }
+                    try
+                    {
+                        avatarPath = await data.scoreInfo.User!.AvatarUrl.DownloadFileAsync(
+                            "./work/avatar/",
+                            $"{data.scoreInfo.UserId}.png"
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
+                        Log.Error(msg);
+                        throw;
+                    }
+                    return await ReadImageRgba(avatarPath); // 下载后再读取
+                });
 
-            var score = Img.Load(
-                await Utils.LoadFile2Byte("work/legacy/v2_scorepanel/default-score-v2.png")
-            );
 
-            Img panel;
-            if (data.scoreInfo.Mode is OSU.Enums.Mode.Fruits)
-                panel = Img.Load(
-                    await Utils.LoadFile2Byte(
-                        "work/legacy/v2_scorepanel/default-score-v2-fruits.png"
-                    )
-                );
-            else if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania)
-                panel = Img.Load(
-                    await Utils.LoadFile2Byte(
-                        "work/legacy/v2_scorepanel/default-score-v2-mania.png"
-                    )
-                );
-            else
-                panel = Img.Load(
-                    await Utils.LoadFile2Byte("work/legacy/v2_scorepanel/default-score-v2.png")
-                );
+            using var panel = data.scoreInfo.Mode switch
+            {
+                OSU.Enums.Mode.Fruits
+                    => await Img.LoadAsync("work/legacy/v2_scorepanel/default-score-v2-fruits.png"),
+                OSU.Enums.Mode.Mania
+                    => await Img.LoadAsync("work/legacy/v2_scorepanel/default-score-v2-mania.png"),
+                _ => await Img.LoadAsync("work/legacy/v2_scorepanel/default-score-v2.png")
+            };
+
             // bg
-            Img bg;
-            try
-            {
-                bg = Img.Load(bgPath).CloneAs<Rgba32>();
-            }
-            catch
-            {
-                bg = Img.Load(await Utils.LoadFile2Byte("./work/legacy/load-failed-img.png"));
-            }
-            var smallBg = bg.Clone(x => x.RoundCorner(new Size(433, 296), 20));
-            Img backBlack = new Image<Rgba32>(1950 - 2, 1088);
+            using var bg = await TryAsync(ReadImageRgba(bgPath!))
+                .IfFail(await Img.LoadAsync<Rgba32>("./work/legacy/load-failed-img.png"));
+
+            using var smallBg = bg.Clone(x => x.RoundCorner(new Size(433, 296), 20));
+            using var backBlack = new Image<Rgba32>(1950 - 2, 1088);
             backBlack.Mutate(
                 x => x.BackgroundColor(Color.Black).RoundCorner(new Size(1950 - 2, 1088), 20)
             );
@@ -792,7 +762,7 @@ namespace KanonBot.LegacyImage
             {
                 temp = ringFile[5];
             }
-            var diffCircle = Img.Load(await Utils.LoadFile2Byte("./work/icons/" + temp));
+            using var diffCircle = await Img.LoadAsync("./work/icons/" + temp);
             diffCircle.Mutate(x => x.Resize(65, 65));
             score.Mutate(x => x.DrawImage(diffCircle, new Point(512, 257), 1));
             // beatmap_status
@@ -800,7 +770,7 @@ namespace KanonBot.LegacyImage
                 score.Mutate(
                     async x =>
                         x.DrawImage(
-                            Img.Load(await Utils.LoadFile2Byte("./work/icons/ranked.png")),
+                            await Img.LoadAsync("./work/icons/ranked.png"),
                             new Point(415, 16),
                             1
                         )
@@ -809,7 +779,7 @@ namespace KanonBot.LegacyImage
                 score.Mutate(
                     async x =>
                         x.DrawImage(
-                            Img.Load(await Utils.LoadFile2Byte("./work/icons/approved.png")),
+                            await Img.LoadAsync("./work/icons/approved.png"),
                             new Point(415, 16),
                             1
                         )
@@ -818,7 +788,7 @@ namespace KanonBot.LegacyImage
                 score.Mutate(
                     async x =>
                         x.DrawImage(
-                            Img.Load(await Utils.LoadFile2Byte("./work/icons/loved.png")),
+                            await Img.LoadAsync("./work/icons/loved.png"),
                             new Point(415, 16),
                             1
                         )
@@ -828,24 +798,21 @@ namespace KanonBot.LegacyImage
             var modp = 0;
             foreach (var mod in mods)
             {
-                Img modPic;
                 try
                 {
-                    modPic = Img.Load(await Utils.LoadFile2Byte($"./work/mods/{mod}.png"));
+                    using var modPic = await Img.LoadAsync($"./work/mods/{mod}.png");
+                    modPic.Mutate(x => x.Resize(200, 61));
+                    score.Mutate(x => x.DrawImage(modPic, new Point((modp * 160) + 440, 440), 1));
+                    modp += 1;
                 }
                 catch
                 {
                     continue;
                 }
-                modPic.Mutate(x => x.Resize(200, 61));
-                score.Mutate(x => x.DrawImage(modPic, new Point((modp * 160) + 440, 440), 1));
-                modp += 1;
             }
             // rankings
             var ranking = data.scoreInfo.Passed ? data.scoreInfo.Rank : "F";
-            var rankPic = Img.Load(
-                await Utils.LoadFile2Byte($"./work/ranking/ranking-{ranking}.png")
-            );
+            using var rankPic = await Img.LoadAsync($"./work/ranking/ranking-{ranking}.png");
             score.Mutate(x => x.DrawImage(rankPic, new Point(913, 874), 1));
             // text part (文字部分)
             var font = new Font(TorusRegular, 60);
@@ -1515,7 +1482,7 @@ namespace KanonBot.LegacyImage
                         null
                     )
             );
-            var acchue = new Image<Rgba32>(1950 - 2, 1088);
+            using var acchue = new Image<Rgba32>(1950 - 2, 1088);
             var hue = acc < 60 ? 260f : (acc - 60) * 2 + 280f;
             textOptions.Origin = new PointF(360, 963);
             acchue.Mutate(
@@ -1594,7 +1561,7 @@ namespace KanonBot.LegacyImage
                                 null
                             )
                     );
-                    var combohue = new Image<Rgba32>(1950 - 2, 1088);
+                    using var combohue = new Image<Rgba32>(1950 - 2, 1088);
                     hue = (((float)combo / (float)maxCombo) * 100) + 260;
                     textOptions.Origin = new PointF(1588, 963);
                     combohue.Mutate(
@@ -1668,7 +1635,7 @@ namespace KanonBot.LegacyImage
 
         public static async Task<Img> DrawPPVS(PPVSPanelData data)
         {
-            var ppvsImg = Img.Load(await Utils.LoadFile2Byte("work/legacy/ppvs.png"));
+            var ppvsImg = await Img.LoadAsync("work/legacy/ppvs.png");
             Hexagram.HexagramInfo hi =
                 new()
                 {
@@ -1892,7 +1859,7 @@ namespace KanonBot.LegacyImage
                     )
             );
 
-            Img title = Img.Load(await Utils.LoadFile2Byte($"work/legacy/ppvs_title.png"));
+            using var title = await Img.LoadAsync($"work/legacy/ppvs_title.png");
             ppvsImg.Mutate(x => x.DrawImage(title, new Point(0, 0), 1));
 
             return ppvsImg;
@@ -1909,21 +1876,16 @@ namespace KanonBot.LegacyImage
             };
             var m = TextMeasurer.Measure(str, textOptions);
 
-            using (
-                var img = new Image<Rgba32>((int)(m.Width + fontSize), (int)(m.Height + fontSize))
-            )
+            var img = new Image<Rgba32>((int)(m.Width + fontSize), (int)(m.Height + fontSize));
+            img.Mutate(x => x.Fill(Color.White));
+            var drawOptions = new DrawingOptions
             {
-                img.Mutate(x => x.Fill(Color.White));
-                var drawOptions = new DrawingOptions
-                {
-                    GraphicsOptions = new GraphicsOptions { Antialias = true }
-                };
-                img.Mutate(
-                    x =>
-                        x.DrawText(drawOptions, textOptions, str, new SolidBrush(Color.Black), null)
-                );
-                return img;
-            }
+                GraphicsOptions = new GraphicsOptions { Antialias = true }
+            };
+            img.Mutate(
+                x => x.DrawText(drawOptions, textOptions, str, new SolidBrush(Color.Black), null)
+            );
+            return img;
         }
 
         #region Hexagram

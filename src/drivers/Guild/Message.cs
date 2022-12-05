@@ -37,9 +37,9 @@ public partial class Guild
 
                 if (msg is ImageSegment image) {
                     data.ImageUrl = image.t switch {
-                        ImageSegment.Type.Base64 => Ali.PutFile(Utils.Byte2Stream(Convert.FromBase64String(image.value)), "jpg", true),
+                        ImageSegment.Type.Base64 => Ali.PutFile(Convert.FromBase64String(image.value), "jpg", true),
                         ImageSegment.Type.Url => image.value,
-                        ImageSegment.Type.File => Ali.PutFile(Utils.LoadFile2ReadStream(image.value), "jpg", true),
+                        ImageSegment.Type.File => Ali.PutFile(Utils.LoadFile2Byte(image.value).Result, "jpg", true),
                         _ => throw new ArgumentException("不支持的图片类型")
                     };
                 }

@@ -9,10 +9,12 @@ using libKook = Kook;
 using Kook.WebSocket;
 
 namespace KanonBot.Drivers;
+
 public partial class Kook
 {
     static readonly string AtPattern = @"\(met\)(.*?)\(met\)";
     static readonly string AtAdminPattern = @"\(rol\)(.*?)\(rol\)";
+
     public class Message
     {
         public async static Task<List<Models.MessageCreate>> Build(API api, Chain msgChain)
@@ -28,12 +30,18 @@ public partial class Kook
                         switch (s.t)
                         {
                             case ImageSegment.Type.Base64:
-                                var _s = Utils.Byte2Stream(Convert.FromBase64String(s.value));
-                                req.Content = await api.CreateAsset(_s);
+                                using (
+                                    var _s = Utils.Byte2Stream(Convert.FromBase64String(s.value))
+                                )
+                                {
+                                    req.Content = await api.CreateAsset(_s);
+                                }
                                 break;
                             case ImageSegment.Type.File:
-                                var __s = Utils.LoadFile2ReadStream(s.value);
-                                req.Content = await api.CreateAsset(__s);
+                                using (var __s = Utils.LoadFile2ReadStream(s.value))
+                                {
+                                    req.Content = await api.CreateAsset(__s);
+                                }
                                 break;
                             case ImageSegment.Type.Url:
                                 req.Content = s.value;
@@ -116,20 +124,22 @@ public partial class Kook
                     chain.Add(new TextSegment(Utils.KOOKUnEscape(x)));
             };
             var pos = 0;
-            segList.OrderBy(x => x.m.Index).ToList().ForEach(x =>
-            {
-                if (pos < x.m.Index)
+            segList
+                .OrderBy(x => x.m.Index)
+                .ToList()
+                .ForEach(x =>
                 {
-                    AddText(MessageData.Content.Substring(pos, x.m.Index - pos));
-                }
-                chain.Add(x.seg);
-                pos = x.m.Index + x.m.Length;
-            });
+                    if (pos < x.m.Index)
+                    {
+                        AddText(MessageData.Content.Substring(pos, x.m.Index - pos));
+                    }
+                    chain.Add(x.seg);
+                    pos = x.m.Index + x.m.Length;
+                });
             if (pos < MessageData.Content.Length)
                 AddText(MessageData.Content.Substring(pos));
 
             return chain;
         }
-
     }
 }

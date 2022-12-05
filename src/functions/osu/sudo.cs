@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Flurl.Util;
 using KanonBot.Drivers;
@@ -214,14 +214,13 @@ namespace KanonBot.functions.osu
                         foreach (var file in files)
                         {
                             msg.msg($"\n{Path.GetFileName(file)}\n");
-                            var stream = new MemoryStream();
+                            using var stream = new MemoryStream();
                             await SixLabors.ImageSharp.Image
                                 .Load(file)
                                 .CloneAs<Rgba32>()
                                 .SaveAsync(stream, new PngEncoder());
-                            stream.TryGetBuffer(out ArraySegment<byte> buffer);
                             msg.image(
-                                Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length),
+                                Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
                                 ImageSegment.Type.Base64
                             );
                         }
@@ -293,14 +292,13 @@ namespace KanonBot.functions.osu
                         foreach (var file in files)
                         {
                             msg.msg($"\n{Path.GetFileName(file)}\n");
-                            var stream = new MemoryStream();
+                            using var stream = new MemoryStream();
                             await SixLabors.ImageSharp.Image
                                 .Load(file)
                                 .CloneAs<Rgba32>()
                                 .SaveAsync(stream, new PngEncoder());
-                            stream.TryGetBuffer(out ArraySegment<byte> buffer);
                             msg.image(
-                                Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length),
+                                Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
                                 ImageSegment.Type.Base64
                             );
                         }
@@ -373,14 +371,13 @@ namespace KanonBot.functions.osu
                         foreach (var x in files)
                         {
                             msg.msg($"\n{Path.GetFileName(x)}\n");
-                            var stream = new MemoryStream();
+                            using var stream = new MemoryStream();
                             await SixLabors.ImageSharp.Image
                                 .Load(x)
                                 .CloneAs<Rgba32>()
                                 .SaveAsync(stream, new PngEncoder());
-                            stream.TryGetBuffer(out ArraySegment<byte> buffer);
                             msg.image(
-                                Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length),
+                                Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
                                 ImageSegment.Type.Base64
                             );
                         }
@@ -452,14 +449,13 @@ namespace KanonBot.functions.osu
                         foreach (var x in files)
                         {
                             msg.msg($"\n{Path.GetFileName(x)}\n");
-                            var stream = new MemoryStream();
+                            using var stream = new MemoryStream();
                             await SixLabors.ImageSharp.Image
                                 .Load(x)
                                 .CloneAs<Rgba32>()
                                 .SaveAsync(stream, new PngEncoder());
-                            stream.TryGetBuffer(out ArraySegment<byte> buffer);
                             msg.image(
-                                Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length),
+                                Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
                                 ImageSegment.Type.Base64
                             );
                         }

@@ -3,11 +3,13 @@ using KanonBot;
 using KanonBot.API;
 using KanonBot.functions.osu.rosupp;
 using KanonBot.LegacyImage;
+using KanonBot.DrawV2;
 using KanonBot.Serializer;
 using RosuPP;
 using SixLabors.ImageSharp.Formats.Png;
 using static KanonBot.API.OSUExtensions;
 using API = KanonBot.API;
+using Kook;
 
 namespace Tests;
 
@@ -44,6 +46,32 @@ public class OSU
         Output.WriteLine("cal data {0}", Json.Serialize(data.ppInfo));
         var img = Draw.DrawScore(data).Result;
         img.Save(new FileStream("./TestFiles/scoretest.png", FileMode.Create), new PngEncoder());
+    }
+
+    [Fact]
+    public void V2InfoPanelTest()
+    {
+        var osuinfo = API.OSU.GetUser(9037287, API.OSU.Enums.Mode.OSU).Result;
+        Draw.UserPanelData data = new();
+        data.userInfo = osuinfo!;
+        data.userInfo.PlayMode = API.OSU.Enums.Mode.OSU;
+        data.prevUserInfo = data.userInfo;
+        data.customMode = Draw.UserPanelData.CustomMode.Dark;
+        var allBP = API.OSU.GetUserScores(
+            data.userInfo.Id,
+            API.OSU.Enums.UserScoreType.Best,
+            data.userInfo.PlayMode,
+            100,
+            0
+        ).Result;
+        var img = OsuInfoPanelV2.Draw(
+            data,
+            allBP!,
+            OsuInfoPanelV2.InfoCustom.DarkDefault,
+            false,
+            false
+        ).Result;
+        img.Save(new FileStream("./TestFiles/info.png", FileMode.Create), new PngEncoder());
     }
 
     [Fact]

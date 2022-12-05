@@ -25,12 +25,18 @@ namespace KanonBot.functions.osubot
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
 
                 var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
                 DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
 
                 // 验证osu信息
                 command.osu_mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode);
@@ -49,8 +55,13 @@ namespace KanonBot.functions.osubot
             // 验证osu信息
             if (OnlineOsuInfo == null)
             {
-                if (is_bounded) { await target.reply("被办了。"); return; }
-                await target.reply("猫猫没有找到此用户。"); return;
+                if (is_bounded)
+                {
+                    await target.reply("被办了。");
+                    return;
+                }
+                await target.reply("猫猫没有找到此用户。");
+                return;
             }
 
             if (!is_bounded) // 未绑定用户回数据库查询找模式
@@ -68,62 +79,65 @@ namespace KanonBot.functions.osubot
             List<string> mods = new();
             try
             {
-                mods = Enumerable.Range(0, command.osu_mods.Length / 2)
-                    .Select(p =>
-                        new string(
-                            command.osu_mods
-                            .AsSpan()
-                            .Slice(p * 2, 2)
-                        ).ToUpper()
-                    ).ToList<string>();
+                mods = Enumerable
+                    .Range(0, command.osu_mods.Length / 2)
+                    .Select(p => new string(command.osu_mods.AsSpan().Slice(p * 2, 2)).ToUpper())
+                    .ToList<string>();
             }
             catch { }
 
             // 判断是否给定了bid
-            if (command.order_number == -1) { await target.reply("请提供谱面bid。"); return; }
+            if (command.order_number == -1)
+            {
+                await target.reply("请提供谱面bid。");
+                return;
+            }
 
+            var scoreData = await OSU.GetUserBeatmapScore(
+                OnlineOsuInfo.Id,
+                command.order_number,
+                mods.ToArray(),
+                command.osu_mode ?? OSU.Enums.Mode.OSU
+            );
 
-            var scoreData = await OSU.GetUserBeatmapScore(OnlineOsuInfo.Id, command.order_number, mods.ToArray(), command.osu_mode ?? OSU.Enums.Mode.OSU);
-
-            if (scoreData == null) { await target.reply("猫猫没有找到你的成绩"); return; }
+            if (scoreData == null)
+            {
+                await target.reply("猫猫没有找到你的成绩");
+                return;
+            }
             //ppy的getscore api不会返回beatmapsets信息，需要手动获取
             var beatmapSetInfo = await OSU.GetBeatmap(scoreData!.Score.Beatmap!.BeatmapId);
             scoreData.Score.Beatmapset = beatmapSetInfo!.Beatmapset;
 
-                if (scoreData.Score.Mode == OSU.Enums.Mode.OSU)
-                {
-                    //rosupp
-                    var data = await PerformanceCalculator.CalculatePanelData(scoreData.Score);
-                    if (scoreData.Score.Beatmap.Status == OSU.Enums.Status.ranked || scoreData.Score.Beatmap.Status == OSU.Enums.Status.approved)
-                        await Database.Client.InsertOsuStandardBeatmapTechData(scoreData.Score.Beatmap.BeatmapId, (int)data.ppInfo.ppStats![0].total,
-                            (int)data.ppInfo.ppStats![0].acc!, (int)data.ppInfo.ppStats![0].speed!, (int)data.ppInfo.ppStats![0].aim!,
-                                scoreData.Score.Mods);
-                    //osu-tools
-                    // var data = await KanonBot.osutools.Calculator.CalculateAsync(scoreData.Score);
-                    // 绘制
-                    var stream = new MemoryStream();
-                    var img = await LegacyImage.Draw.DrawScore(data);
-                    await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-                    stream.TryGetBuffer(out ArraySegment<byte> buffer);
-                    await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
-                }
-                else
-                {
-                    //rosupp
-                    var data = await PerformanceCalculator.CalculatePanelData(scoreData.Score);
-                    // 绘制
-                    var stream = new MemoryStream();
-                    var img = await LegacyImage.Draw.DrawScore(data);
-                    await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-                    stream.TryGetBuffer(out ArraySegment<byte> buffer);
-                    await target.reply(new Chain().image(Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length), ImageSegment.Type.Base64));
-                }
-
+            var data = await PerformanceCalculator.CalculatePanelData(scoreData.Score);
+            using var stream = new MemoryStream();
+            using var img = await LegacyImage.Draw.DrawScore(data);
+            await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
+            await target.reply(
+                new Chain().image(
+                    Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
+                    ImageSegment.Type.Base64
+                )
+            );
+            if (scoreData.Score.Mode == OSU.Enums.Mode.OSU)
+            {
+                //rosupp
+                if (
+                    scoreData.Score.Beatmap.Status == OSU.Enums.Status.ranked
+                    || scoreData.Score.Beatmap.Status == OSU.Enums.Status.approved
+                )
+                    await Database.Client.InsertOsuStandardBeatmapTechData(
+                        scoreData.Score.Beatmap.BeatmapId,
+                        (int)data.ppInfo.ppStats![0].total,
+                        (int)data.ppInfo.ppStats![0].acc!,
+                        (int)data.ppInfo.ppStats![0].speed!,
+                        (int)data.ppInfo.ppStats![0].aim!,
+                        scoreData.Score.Mods
+                    );
+                //osu-tools
+                // var data = await KanonBot.osutools.Calculator.CalculateAsync(scoreData.Score);
+                // 绘制
+            }
         }
     }
-
-
-
-
 }
-

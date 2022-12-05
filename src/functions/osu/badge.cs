@@ -327,7 +327,7 @@ namespace KanonBot.functions.osubot
             var randomstr = Utils.RandomStr(50);
             await img_url.DownloadFileAsync(@$".\work\tmp\", $"{randomstr}.png");
             var filepath = @$".\work\tmp\{randomstr}.png";
-            Img source = Img.Load(filepath);
+            using var source = await Img.LoadAsync(filepath);
             if (source.Width / 21.5 != source.Height / 10)
             {
                 await target.reply("badge尺寸不符合要求，应为 21.5 : 10（推荐为688*320），操作取消。");
@@ -340,7 +340,6 @@ namespace KanonBot.functions.osubot
             source.Save($"./work/badges/{db_badgeid}.png");
             await source.SaveAsync($"./work/badges/{db_badgeid}.png", new PngEncoder());
             await target.reply($"图片成功上传，新的badgeID为{db_badgeid}");
-            source.Dispose();
             File.Delete(filepath);
         }
         private static void SudoDelete(Target target, string cmd)

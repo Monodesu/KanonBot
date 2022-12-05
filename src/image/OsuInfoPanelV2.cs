@@ -28,7 +28,7 @@ using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 using System.Collections.Generic;
 
-namespace KanonBot.image
+namespace KanonBot.DrawV2
 {
     //配色方案 0=用户自定义 1=模板light 2=模板dark 3...4...5...
     //本来应该做个class的 算了 懒了 就这样吧 复制粘贴没什么不好的
@@ -753,9 +753,9 @@ namespace KanonBot.image
 
         public static async Task<Img> Draw(
             UserPanelData data,
+            OSU.Models.Score[] allBP,
             InfoCustom v2Options,
             bool isBonded = false,
-            bool isDataOfDayAvaiavle = true,
             bool eventmode = false
         )
         {
@@ -880,13 +880,6 @@ namespace KanonBot.image
 
             var info = new Image<Rgba32>(4000, 2640);
             //获取全部bp
-            var allBP = await OSU.GetUserScores(
-                data.userInfo.Id,
-                OSU.Enums.UserScoreType.Best,
-                data.userInfo.PlayMode,
-                100,
-                0
-            );
 
             //设定textOption/drawOption
             var textOptions = new TextOptions(new Font(TorusSemiBold, 120))
@@ -901,7 +894,6 @@ namespace KanonBot.image
 
             //自定义侧图
             string sidePicPath;
-            Img sidePic;
             if (File.Exists($"./work/panelv2/user_customimg/{data.userInfo.Id}.png"))
                 sidePicPath = $"./work/panelv2/user_customimg/{data.userInfo.Id}.png";
             else
@@ -912,13 +904,13 @@ namespace KanonBot.image
                     UserPanelData.CustomMode.Dark => "./work/panelv2/infov2-dark-customimg.png",
                     _ => throw new ArgumentOutOfRangeException("未知的自定义模式")
                 };
-            sidePic = Img.Load(await Utils.LoadFile2Byte(sidePicPath)).CloneAs<Rgba32>(); // 读取
+            using var sidePic = await ReadImageRgba(sidePicPath); // 读取
             sidePic.Mutate(x => x.Brightness(SideImgBrightness));
             info.Mutate(x => x.DrawImage(sidePic, new Point(90, 72), 1));
 
             //进度条 - 先绘制进度条，再覆盖面板
             //pp
-            Img pp_background = new Image<Rgba32>(1443, 68);
+            using var pp_background = new Image<Rgba32>(1443, 68);
             pp_background.Mutate(x => x.Fill(ppProgressBarBackgroundColor));
             pp_background.Mutate(x => x.RoundCorner_Parts(new Size(1443, 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(pp_background, new Point(2358, 410), 1));
@@ -1005,7 +997,7 @@ namespace KanonBot.image
             int pp_front_length = 1443 - (int)(1443.0 * (bounsPP / scorePP));
             if (pp_front_length < 1)
                 pp_front_length = 1443;
-            Img pp_front = new Image<Rgba32>(pp_front_length, 68);
+            using var pp_front = new Image<Rgba32>(pp_front_length, 68);
             pp_front.Mutate(x => x.Fill(ppProgressBarColor));
             pp_front.Mutate(
                 x => x.RoundCorner_Parts(new Size(pp_front_length, 68), 10, 10, 20, 20)
@@ -1013,7 +1005,7 @@ namespace KanonBot.image
             info.Mutate(x => x.DrawImage(pp_front, new Point(2358, 410), 1));
 
             //50&100
-            Img acc_background = new Image<Rgba32>(1443, 68);
+            using var acc_background = new Image<Rgba32>(1443, 68);
             acc_background.Mutate(x => x.Fill(accProgressBarBackgroundColor));
             acc_background.Mutate(x => x.RoundCorner_Parts(new Size(1443, 68), 10, 10, 20, 20));
             info.Mutate(x => x.DrawImage(acc_background, new Point(2358, 611), 1));
@@ -1022,7 +1014,7 @@ namespace KanonBot.image
             int acc_front_length = (int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0));
             if (acc_front_length < 1)
                 acc_front_length = 1443;
-            Img acc_300 = new Image<Rgba32>(acc_front_length, 68);
+            using var acc_300 = new Image<Rgba32>(acc_front_length, 68);
             acc_300.Mutate(x => x.Fill(accProgressBarColor));
             acc_300.Mutate(
                 x =>
@@ -1073,7 +1065,6 @@ namespace KanonBot.image
 
             //top score image 先绘制top bp图片再覆盖面板
             //download background image
-            Img bp1bg;
             if (allBP!.Length > 5)
             {
                 var bp1bgPath = $"./work/background/{allBP![0].Beatmap!.BeatmapId}.png";
@@ -1093,16 +1084,8 @@ namespace KanonBot.image
                         Log.Warning(msg);
                     }
                 }
-                try
-                {
-                    bp1bg = Img.Load(bp1bgPath).CloneAs<Rgba32>();
-                }
-                catch
-                {
-                    bp1bg = Img.Load(
-                        await Utils.LoadFile2Byte("./work/legacy/load-failed-img.png")
-                    );
-                }
+                using var bp1bg = await TryAsync(ReadImageRgba(bp1bgPath!))
+                    .IfFail(await ReadImageRgba("./work/legacy/load-failed-img.png"));
                 //bp1bg.Mutate(x => x.Resize(355, 200));
                 bp1bg.Mutate(
                     x =>
@@ -1115,7 +1098,7 @@ namespace KanonBot.image
             }
             else
             {
-                bp1bg = new Image<Rgba32>(355, 200);
+                using var bp1bg = new Image<Rgba32>(355, 200);
                 switch (ColorMode)
                 {
                     case UserPanelData.CustomMode.Custom:
@@ -1134,7 +1117,7 @@ namespace KanonBot.image
             }
 
             //level progress
-            Img levelprogress_background = new Image<Rgba32>(2312, 12);
+            using var levelprogress_background = new Image<Rgba32>(2312, 12);
             levelprogress_background.Mutate(x => x.Fill(LevelProgressBarBackgroundColor));
             //levelprogress_background.Mutate(x => x.RoundCorner(new Size(2312, 6), 4.5f));
             int levelprogressFrontPos = (int)(
@@ -1142,7 +1125,7 @@ namespace KanonBot.image
             );
             if (levelprogressFrontPos > 0)
             {
-                Img levelprogress_front = new Image<Rgba32>(levelprogressFrontPos, 6);
+                using var levelprogress_front = new Image<Rgba32>(levelprogressFrontPos, 6);
                 levelprogress_front.Mutate(x => x.Fill(LevelProgressBarColor));
                 levelprogress_front.Mutate(
                     x => x.RoundCorner(new Size(levelprogressFrontPos, 12), 8)
@@ -1156,7 +1139,6 @@ namespace KanonBot.image
 
             //用户面板/自定义面板
             string panelPath;
-            Img panel;
             if (File.Exists($"./work/panelv2/user_infopanel/{data.userInfo.Id}.png"))
                 panelPath = $"./work/panelv2/user_infopanel/{data.userInfo.Id}.png";
             else
@@ -1167,33 +1149,30 @@ namespace KanonBot.image
                     UserPanelData.CustomMode.Dark => "./work/panelv2/infov2-dark.png",
                     _ => throw new ArgumentOutOfRangeException("未知的颜色模式"),
                 };
-            panel = Img.Load(await Utils.LoadFile2Byte(panelPath)).CloneAs<Rgba32>(); // 读取
+            using var panel = await ReadImageRgba(panelPath); // 读取
             info.Mutate(x => x.DrawImage(panel, new Point(0, 0), 1));
 
             //avatar
             var avatarPath = $"./work/avatar/{data.userInfo.Id}.png";
-            Img avatar;
-            try
-            {
-                avatar = Img.Load(await Utils.LoadFile2Byte(avatarPath)).CloneAs<Rgba32>(); // 读取
-            }
-            catch
-            {
-                try
+            using var avatar = await TryAsync(ReadImageRgba(avatarPath))
+                .IfFail(async () =>
                 {
-                    avatarPath = await data.userInfo.AvatarUrl.DownloadFileAsync(
-                        "./work/avatar/",
-                        $"{data.userInfo.Id}.png"
-                    );
-                }
-                catch (Exception ex)
-                {
-                    var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
-                    Log.Error(msg);
-                    throw; // 下载失败直接抛出error
-                }
-                avatar = Img.Load(await Utils.LoadFile2Byte(avatarPath)).CloneAs<Rgba32>(); // 下载后再读取
-            }
+                    try
+                    {
+                        avatarPath = await data.userInfo.AvatarUrl.DownloadFileAsync(
+                            "./work/avatar/",
+                            $"{data.userInfo.Id}.png"
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
+                        Log.Error(msg);
+                        throw; // 下载失败直接抛出error
+                    }
+                    return await ReadImageRgba(avatarPath); // 下载后再读取
+                });
+
             // 亮度
             avatar.Mutate(x => x.Brightness(AvatarBrightness));
             avatar.Mutate(x => x.Resize(200, 200).RoundCorner(new Size(200, 200), 25));
@@ -1237,9 +1216,7 @@ namespace KanonBot.image
             );
 
             //country_flag
-            Img flags = Img.Load(
-                await Utils.LoadFile2Byte($"./work/flags/{data.userInfo.Country.Code}.png")
-            );
+            using var flags = await Img.LoadAsync($"./work/flags/{data.userInfo.Country.Code}.png");
             flags.Mutate(x => x.Resize(100, 67).Brightness(CountryFlagBrightness));
             flags.Mutate(
                 x =>
@@ -1293,10 +1270,9 @@ namespace KanonBot.image
                                 null
                             )
                     );
-                    Img cr_indicator_icon_increase = Img.Load(
-                            await Utils.LoadFile2Byte($"./work/panelv2/icons/indicator.png")
-                        )
-                        .CloneAs<Rgba32>();
+                    using var cr_indicator_icon_increase = await ReadImageRgba(
+                        $"./work/panelv2/icons/indicator.png"
+                    );
                     cr_indicator_icon_increase.Mutate(x => x.Resize(36, 36));
                     if (
                         (
@@ -1364,10 +1340,9 @@ namespace KanonBot.image
                                 null
                             )
                     );
-                    Img pp_indicator_icon_increase = Img.Load(
-                            await Utils.LoadFile2Byte($"./work/panelv2/icons/indicator.png")
-                        )
-                        .CloneAs<Rgba32>();
+                    using var pp_indicator_icon_increase = await ReadImageRgba(
+                        $"./work/panelv2/icons/indicator.png"
+                    );
                     pp_indicator_icon_increase.Mutate(x => x.Resize(36, 36));
                     if ((data.userInfo.Statistics.PP - data.prevUserInfo!.Statistics.PP) < 0)
                         pp_indicator_icon_increase.Mutate(x => x.Rotate(180));
@@ -1432,10 +1407,9 @@ namespace KanonBot.image
                                 null
                             )
                     );
-                    Img acc_indicator_icon_increase = Img.Load(
-                            await Utils.LoadFile2Byte($"./work/panelv2/icons/indicator.png")
-                        )
-                        .CloneAs<Rgba32>();
+                    using var acc_indicator_icon_increase = await ReadImageRgba(
+                        $"./work/panelv2/icons/indicator.png"
+                    );
                     acc_indicator_icon_increase.Mutate(x => x.Resize(36, 36));
                     if (
                         (
@@ -1653,12 +1627,11 @@ namespace KanonBot.image
             if (isBonded)
             {
                 textOptions.Font = new Font(TorusRegular, 36);
-                Img indicator_icon_increase = Img.Load(
-                        await Utils.LoadFile2Byte($"./work/panelv2/icons/indicator.png")
-                    )
-                    .CloneAs<Rgba32>();
+                using var indicator_icon_increase = await ReadImageRgba(
+                    $"./work/panelv2/icons/indicator.png"
+                );
                 indicator_icon_increase.Mutate(x => x.Resize(42, 42));
-                //Img indicator_icon_decrease = Img.Load(await Utils.LoadFile2Byte($"./work/panelv2/icons/indicator.png")).CloneAs<Rgba32>();
+                //Img indicator_icon_decrease = await ReadImageRgba($"./work/panelv2/icons/indicator.png");
                 //indicator_icon_decrease.Mutate(x => x.Resize(42, 42).Rotate(180));
                 var text = "";
                 //play time
@@ -2278,9 +2251,7 @@ namespace KanonBot.image
                         var otherbp_mods_pos_x = 2580;
                         foreach (var x in allBP![i].Mods)
                         {
-                            Img modicon = Img.Load(
-                                await Utils.LoadFile2Byte($"./work/mods_v2/2x/{x}.png")
-                            );
+                            using var modicon = await Img.LoadAsync($"./work/mods_v2/2x/{x}.png");
                             modicon.Mutate(x => x.Resize(90, 90).Brightness(ModIconBrightness));
                             modicon.Mutate(
                                 x =>
@@ -2305,12 +2276,9 @@ namespace KanonBot.image
                     otherbp_mods_pos_y += 186;
 
                     //mode_icon
-                    Img osuscoremode_icon = Img.Load(
-                            await Utils.LoadFile2Byte(
-                                $"./work/panelv2/icons/mode_icon/score/{data.userInfo.PlayMode.ToStr()}.png"
-                            )
-                        )
-                        .CloneAs<Rgba32>();
+                    using var osuscoremode_icon = await ReadImageRgba(
+                        $"./work/panelv2/icons/mode_icon/score/{data.userInfo.PlayMode.ToStr()}.png"
+                    );
                     osuscoremode_icon.Mutate(x => x.Resize(92, 92));
                     if (FixedScoreModeIconColor)
                     {
@@ -2790,12 +2758,9 @@ namespace KanonBot.image
                     otherbp_mods_pos_y += 186;
 
                     //mode_icon
-                    Img osuscoremode_icon = Img.Load(
-                            await Utils.LoadFile2Byte(
-                                $"./work/panelv2/icons/mode_icon/score/{data.userInfo.PlayMode.ToStr()}.png"
-                            )
-                        )
-                        .CloneAs<Rgba32>();
+                    using var osuscoremode_icon = await ReadImageRgba(
+                        $"./work/panelv2/icons/mode_icon/score/{data.userInfo.PlayMode.ToStr()}.png"
+                    );
                     osuscoremode_icon.Mutate(x => x.Resize(92, 92));
                     if (FixedScoreModeIconColor)
                     {
@@ -2950,20 +2915,15 @@ namespace KanonBot.image
             //badges
             if (data.badgeId != -1)
             {
-                Img badge;
-                badge = Img.Load(
-                        await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"),
-                        out IImageFormat format
-                    )
-                    .CloneAs<Rgba32>();
+                var (_badge, format) = await ReadImageRgbaWithFormat(
+                    $"./work/badges/{data.badgeId}.png"
+                );
+                using var badge = _badge;
                 //检测上传的infopanel尺寸是否正确
                 if (format.DefaultMimeType.Trim().ToLower()[..3] != "png")
                 {
-                    Img temp = badge;
                     File.Delete($"./work/badges/{data.badgeId}.png");
-                    temp.Save($"./work/badges/{data.badgeId}.png", new PngEncoder());
-                    badge = Img.Load(await Utils.LoadFile2Byte($"./work/badges/{data.badgeId}.png"))
-                        .CloneAs<Rgba32>();
+                    badge.Save($"./work/badges/{data.badgeId}.png", new PngEncoder());
                 }
                 badge.Mutate(
                     x =>
@@ -2990,10 +2950,7 @@ namespace KanonBot.image
             //osu!supporter
             if (data.userInfo.IsSupporter && DisplaySupporterStatus)
             {
-                Img temp = Img.Load(
-                        await Utils.LoadFile2Byte($"./work/panelv2/icons/supporter.png")
-                    )
-                    .CloneAs<Rgba32>();
+                using var temp = await ReadImageRgba($"./work/panelv2/icons/supporter.png");
                 temp.Mutate(x => x.Resize(110, 110).Brightness(OsuSupporterIconBrightness));
                 temp.Mutate(
                     x =>
@@ -3008,12 +2965,9 @@ namespace KanonBot.image
             }
 
             //osu!mode
-            Img osuprofilemode_icon = Img.Load(
-                    await Utils.LoadFile2Byte(
-                        $"./work/panelv2/icons/mode_icon/profile/{data.userInfo.PlayMode.ToStr()}.png"
-                    )
-                )
-                .CloneAs<Rgba32>();
+            using var osuprofilemode_icon = await ReadImageRgba(
+                $"./work/panelv2/icons/mode_icon/profile/{data.userInfo.PlayMode.ToStr()}.png"
+            );
             var osuprofilemode_text = "";
             switch (data.userInfo.PlayMode)
             {
@@ -3036,7 +2990,7 @@ namespace KanonBot.image
                 osuprofilemode_text,
                 textOptions
             );
-            Img osuprofilemode = new Image<Rgba32>(
+            using var osuprofilemode = new Image<Rgba32>(
                 (int)(70.0f + osuprofilemode_text_measure.Width),
                 102
             ); //804x102(80?)
@@ -3077,7 +3031,7 @@ namespace KanonBot.image
             try
             {
                 var RankHistory = data.userInfo.RankHistory.Data.Take(8).Reverse().ToArray();
-                var rankChart = DrawLineChart(
+                using var rankChart = DrawLineChart(
                     714,
                     240,
                     7,
@@ -3096,7 +3050,7 @@ namespace KanonBot.image
             catch
             {
                 long[] RankHistory = { 0, 0, 0, 0, 0, 0, 0, 0 };
-                var rankChart = DrawLineChart(
+                using var rankChart = DrawLineChart(
                     714,
                     240,
                     7,

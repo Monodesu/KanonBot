@@ -8,12 +8,13 @@ namespace KanonBot.API;
 public class Ali
 {
     private static Config.OSS config = Config.inner!.oss!;
-    public static string? PutFile(string key, Stream data)
+    public static string? PutFile(string key, byte[] data)
     {
+        var stream = Utils.Byte2Stream(data);
         var client = new OssClient(config.endPoint, config.accessKeyId!, config.accessKeySecret!);
         try
         {                
-            var res = client.PutObject(config.bucketName!, key, data);
+            var res = client.PutObject(config.bucketName!, key, stream);
             return config.url + key;
         }
         catch (OssException ex)
@@ -29,7 +30,7 @@ public class Ali
     }
 
     // ext 为文件扩展名，不带点
-    public static string? PutFile(Stream data, string ext, bool temp = true)
+    public static string? PutFile(byte[] data, string ext, bool temp = true)
     {
         if (temp)
             return PutFile($"temp-{Guid.NewGuid().ToString()[0..6]}.{ext}", data);

@@ -286,7 +286,7 @@ namespace KanonBot.functions.osubot
             try
             {
                 image = new Image<Rgba32>(1382, 2456);
-                var temppic = Img.Load(imagePath).CloneAs<Rgba32>();
+                var temppic = await ReadImageRgba(imagePath);
                 temppic.Mutate(
                     x =>
                         x.Resize(
@@ -396,7 +396,7 @@ namespace KanonBot.functions.osubot
             try
             {
                 image = new Image<Rgba32>(1200, 350);
-                var temppic = Img.Load(imagePath).CloneAs<Rgba32>();
+                var temppic = await ReadImageRgba(imagePath);
                 temppic.Mutate(
                     x =>
                         x.Resize(
@@ -504,18 +504,20 @@ namespace KanonBot.functions.osubot
             }
             try
             {
-                var temppic = Img.Load(imagePath, out IImageFormat format).CloneAs<Rgba32>();
+                
+                var (temppic, format) = await ReadImageRgbaWithFormat(imagePath);
+                using var pic = temppic;
                 //检测上传的infopanel尺寸、开孔是否正确
                 bool isok = true;
                 string errormsg = "上传的图像不符合infopanel的条件，请重新上传。\n";
-                if (temppic.Height != 2640)
+                if (pic.Height != 2640)
                 {
-                    errormsg += $"图像宽为{temppic.Height}px，要求为2640px\n";
+                    errormsg += $"图像宽为{pic.Height}px，要求为2640px\n";
                     isok = false;
                 }
-                if (temppic.Width != 4000)
+                if (pic.Width != 4000)
                 {
-                    errormsg += $"图像长为{temppic.Width}px，要求为4000px\n";
+                    errormsg += $"图像长为{pic.Width}px，要求为4000px\n";
                     isok = false;
                 }
                 if (
@@ -530,7 +532,7 @@ namespace KanonBot.functions.osubot
                 }
                 //检测开孔
                 if (isok)
-                    temppic.ProcessPixelRows(x =>
+                    pic.ProcessPixelRows(x =>
                     {
                         //pp
                         Span<Rgba32> row = x.GetRowSpan(445);
@@ -564,16 +566,14 @@ namespace KanonBot.functions.osubot
 
                 if (!isok)
                 {
-                    temppic.Dispose();
                     File.Delete(imagePath);
                     await target.reply(errormsg);
                     return;
                 }
-                temppic.Save(
+                pic.Save(
                     $"./work/panelv2/user_infopanel/verify/{DBOsuInfo.osu_uid}.png",
                     new PngEncoder()
                 );
-                temppic.Dispose();
                 File.Delete(imagePath);
                 await target.reply("已成功上传，请耐心等待审核。\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
                 Utils.SendMail(
@@ -662,7 +662,8 @@ namespace KanonBot.functions.osubot
             }
             try
             {
-                var temppic = Img.Load(imagePath, out IImageFormat format).CloneAs<Rgba32>();
+                var (temppic, format) = await ReadImageRgbaWithFormat(imagePath);
+                using var pic = temppic;
                 //检测上传的infopanel尺寸是否正确
                 if (
                     temppic.Height != 857
@@ -672,16 +673,14 @@ namespace KanonBot.functions.osubot
                     ] != "png"
                 )
                 {
-                    temppic.Dispose();
                     File.Delete(imagePath);
                     await target.reply("上传的图像不符合infopanel的条件，请重新上传。");
                     return;
                 }
-                temppic.Save(
+                pic.Save(
                     $"./work/legacy/v1_infopanel/verify/{DBOsuInfo.osu_uid}.png",
                     new PngEncoder()
                 );
-                temppic.Dispose();
                 File.Delete(imagePath);
                 await target.reply("已成功上传，请耐心等待审核。\n（*如长时间审核未通过则表示不符合规定，请重新上传或联系管理员）");
                 Utils.SendMail(
@@ -733,7 +732,7 @@ namespace KanonBot.functions.osubot
                 );
                 return;
             }
-            if (Try(() => image.OsuInfoPanelV2.InfoCustom.ParseColors(tmp, None)).IsFail())
+            if (Try(() => DrawV2.OsuInfoPanelV2.InfoCustom.ParseColors(tmp, None)).IsFail())
             {
                 await target.reply("配置不正确，请检查后重试。\n!set osuinfopanelv2customcolorvalue [配置]");
                 return;

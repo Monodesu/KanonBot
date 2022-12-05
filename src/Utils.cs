@@ -8,9 +8,11 @@ using Kook;
 using LanguageExt;
 using Newtonsoft.Json.Linq;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
 using static KanonBot.LegacyImage.Draw;
 using Color = SixLabors.ImageSharp.Color;
+using Img = SixLabors.ImageSharp.Image;
 
 namespace KanonBot;
 
@@ -62,7 +64,7 @@ public static class Utils
 
     public static Stream Byte2Stream(byte[] buffer)
     {
-        Stream stream = new MemoryStream(buffer);
+        var stream = new MemoryStream(buffer);
         //设置 stream 的 position 为流的开始
         stream.Seek(0, SeekOrigin.Begin);
         return stream;
@@ -81,13 +83,11 @@ public static class Utils
 
     public static async Task<byte[]> LoadFile2Byte(string filePath)
     {
-        using (var fs = LoadFile2ReadStream(filePath))
-        {
-            byte[] bt = new byte[fs.Length];
-            await fs.ReadAsync(bt, 0, bt.Length);
-            fs.Close();
-            return bt;
-        }
+        using var fs = LoadFile2ReadStream(filePath);
+        byte[] bt = new byte[fs.Length];
+        await fs.ReadAsync(bt, 0, bt.Length);
+        fs.Close();
+        return bt;
     }
 
     public static string GetDesc(object? value)
@@ -431,6 +431,20 @@ public static class Utils
         }
         catch { }
     }
+
+    async public static Task<Image<Rgba32>> ReadImageRgba(string path) {
+        using var img = await Img.LoadAsync(path);
+        return img.CloneAs<Rgba32>();
+    }
+
+    async public static Task<(Image<Rgba32>, IImageFormat)> ReadImageRgbaWithFormat(string path) {
+        using var s = Utils.LoadFile2ReadStream(path);
+        var (temppic, format) = await Img.LoadWithFormatAsync(s);
+        var pic = temppic.CloneAs<Rgba32>();
+        temppic.Dispose();
+        return (pic, format);
+    }
+
 
     public static double ToLinear(double color) =>
         color <= 0.04045 ? color / 12.92 : Math.Pow((color + 0.055) / 1.055, 0.8);

@@ -1,4 +1,4 @@
-using KanonBot.API;
+﻿using KanonBot.API;
 using KanonBot.Drivers;
 using KanonBot.functions.osu;
 using KanonBot.Message;
@@ -199,10 +199,7 @@ namespace KanonBot.functions.osubot
             var isDataOfDayAvaiavle = false;
             if (data.daysBefore > 0)
                 isDataOfDayAvaiavle = true;
-            var stream = new MemoryStream();
 
-            //info默认输出高质量图片？
-            SixLabors.ImageSharp.Image img;
             int custominfoengineVer = 2;
             if (DBOsuInfo != null)
             {
@@ -216,6 +213,9 @@ namespace KanonBot.functions.osubot
                 }
             }
 
+            using var stream = new MemoryStream();
+            //info默认输出高质量图片？
+            SixLabors.ImageSharp.Image img;
             switch (custominfoengineVer) //0=null 1=v1 2=v2
             {
                 case 1:
@@ -230,13 +230,21 @@ namespace KanonBot.functions.osubot
                 case 2:
                     var v2Options = data.customMode switch
                     {
-                        LegacyImage.Draw.UserPanelData.CustomMode.Custom => image.OsuInfoPanelV2.InfoCustom.ParseColors(data.ColorConfigRaw, None),
-                        LegacyImage.Draw.UserPanelData.CustomMode.Light => image.OsuInfoPanelV2.InfoCustom.LightDefault,
-                        LegacyImage.Draw.UserPanelData.CustomMode.Dark => image.OsuInfoPanelV2.InfoCustom.DarkDefault,
+                        LegacyImage.Draw.UserPanelData.CustomMode.Custom => DrawV2.OsuInfoPanelV2.InfoCustom.ParseColors(data.ColorConfigRaw, None),
+                        LegacyImage.Draw.UserPanelData.CustomMode.Light => DrawV2.OsuInfoPanelV2.InfoCustom.LightDefault,
+                        LegacyImage.Draw.UserPanelData.CustomMode.Dark => DrawV2.OsuInfoPanelV2.InfoCustom.DarkDefault,
                         _ => throw new ArgumentOutOfRangeException("未知的自定义模式")
                     };
-                    img = await image.OsuInfoPanelV2.Draw(
+                    var allBP = await OSU.GetUserScores(
+                        data.userInfo.Id,
+                        OSU.Enums.UserScoreType.Best,
+                        data.userInfo.PlayMode,
+                        100,
+                        0
+                    );
+                    img = await DrawV2.OsuInfoPanelV2.Draw(
                         data,
+                        allBP!,
                         v2Options,
                         DBOsuInfo != null,
                         isDataOfDayAvaiavle
@@ -246,11 +254,13 @@ namespace KanonBot.functions.osubot
                 default:
                     return;
             }
+            // 关闭流
+            img.Dispose();
 
-            stream.TryGetBuffer(out ArraySegment<byte> buffer);
+
             await target.reply(
                 new Chain().image(
-                    Convert.ToBase64String(buffer.Array!, 0, (int)stream.Length),
+                    Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
                     ImageSegment.Type.Base64
                 )
             );
