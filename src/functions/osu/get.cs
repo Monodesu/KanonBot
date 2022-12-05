@@ -69,6 +69,8 @@ namespace KanonBot.functions.osubot
 
         async private static Task BeatmapRecommend(Target target, string cmd)
         {
+            int normal_range = 30;
+            int NFEZHT_range = 100;
             //only osu!standard
             #region 验证
             long? osuID = null;
@@ -111,14 +113,7 @@ namespace KanonBot.functions.osubot
             OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
-            //是否获取NF谱面
-            bool AllowNF = false,
-                 AllowEZ = false;
-            cmd = cmd.ToLower().Trim();
-            if (cmd.Contains("nf"))
-                AllowNF = true;
-            if (cmd.Contains("ez"))
-                AllowEZ = true;
+
             //获取前50bp
             var allBP = await OSU.GetUserScores(
                         OnlineOsuInfo.Id,
@@ -137,6 +132,7 @@ namespace KanonBot.functions.osubot
                 await target.reply("打过的图太少了，多玩一玩再来寻求推荐吧~");
                 return;
             }
+
             //从数据库获取相似的谱面
             var randBP = allBP![new Random().Next(0, 49)];
             //get stars from rosupp
@@ -144,23 +140,125 @@ namespace KanonBot.functions.osubot
 
             var data = new List<Database.Model.OsuStandardBeatmapTechData>();
 
-            if (AllowNF || AllowEZ)
+
+            //解析mod
+            List<string> mods = new();
+            try
+            {
+                cmd = cmd.ToLower().Trim();
+                mods = Enumerable
+                    .Range(0, cmd.Length / 2)
+                    .Select(p => new string(cmd.AsSpan().Slice(p * 2, 2)).ToUpper())
+                    .ToList<string>();
+            }
+            catch { }
+
+            if (mods.Count == 0)
+            {
+                //使用bp mod
+                mods = randBP.Mods.ToList();
+                bool isDiffReductionMod = false,
+                    ez = false,
+                    ht = false,
+                    nf = false;
+                foreach (var x in mods)
+                {
+                    var xx = x.ToLower().Trim();
+                    if (xx == "nf")
+                    {
+                        isDiffReductionMod = true;
+                        nf = true;
+                    }
+                    if (xx == "ht")
+                    {
+                        isDiffReductionMod = true;
+                        ht = true;
+                    }
+                    if (xx == "ez")
+                    {
+                        isDiffReductionMod = true;
+                        ez = true;
+                    }
+                }
                 data = await Database.Client.GetOsuStandardBeatmapTechData(
                                        (int)ppinfo.ppInfo.ppStat.aim!,
                                        (int)ppinfo.ppInfo.ppStat.speed!,
                                        (int)ppinfo.ppInfo.ppStat.acc!,
-                                       200);
+                                       isDiffReductionMod ? NFEZHT_range : normal_range);
+                if (data.Count > 0)
+                {
+                    if (mods.Count == 0)
+                    {
+                        foreach (var x in mods)
+                            data.RemoveAll(x => x.mod != "");
+                    }
+                    else
+                    {
+                        foreach (var xx in mods)
+                            data.RemoveAll(x => !x.mod!.Contains(xx));
+                        if (!ez)
+                            data.RemoveAll(x => !x.mod!.Contains("EZ"));
+                        if (!nf)
+                            data.RemoveAll(x => !x.mod!.Contains("NF"));
+                        if (!ht)
+                            data.RemoveAll(x => !x.mod!.Contains("HT"));
+                    }
+                }
+                else
+                {
+                    await target.reply("猫猫没办法给你推荐谱面了，当前存入数据库的已经找不到合适的谱面推荐给你了...");
+                    return;
+                }
+            }
             else
+            {
+                bool isDiffReductionMod = false,
+                    ez = false,
+                    ht = false,
+                    nf = false;
+                foreach (var x in mods)
+                {
+                    var xx = x.ToLower().Trim();
+                    if (xx == "nf")
+                    {
+                        isDiffReductionMod = true;
+                        nf = true;
+                    }
+                    if (xx == "ht")
+                    {
+                        isDiffReductionMod = true;
+                        ht = true;
+                    }
+                    if (xx == "ez")
+                    {
+                        isDiffReductionMod = true;
+                        ez = true;
+                    }
+                }
+                //使用解析到的mod 如果是EZ/HT 需要适当把pprange放宽
                 data = await Database.Client.GetOsuStandardBeatmapTechData(
-                                           (int)ppinfo.ppInfo.ppStat.aim!,
-                                           (int)ppinfo.ppInfo.ppStat.speed!,
-                                           (int)ppinfo.ppInfo.ppStat.acc!,
-                                           30);
+                                       (int)ppinfo.ppInfo.ppStat.aim!,
+                                       (int)ppinfo.ppInfo.ppStat.speed!,
+                                       (int)ppinfo.ppInfo.ppStat.acc!,
+                                       isDiffReductionMod ? NFEZHT_range : normal_range);
 
-            //TODO 默认去除NF/HT/EZ这三个mod  用户指定mod
-
-
-
+                if (data.Count > 0)
+                {
+                    foreach (var xx in mods)
+                        data.RemoveAll(x => !x.mod!.Contains(xx));
+                    if (!ez)
+                        data.RemoveAll(x => !x.mod!.Contains("EZ"));
+                    if (!nf)
+                        data.RemoveAll(x => !x.mod!.Contains("NF"));
+                    if (!ht)
+                        data.RemoveAll(x => !x.mod!.Contains("HT"));
+                }
+                else
+                {
+                    await target.reply("猫猫没办法给你推荐谱面了，当前存入数据库的已经找不到合适的谱面推荐给你了...");
+                    return;
+                }
+            }
 
             //检查谱面列表长度
             if (data.Count == 0)
@@ -172,16 +270,16 @@ namespace KanonBot.functions.osubot
             //返回
             string msg = $"以下是猫猫给你推荐的谱面：\n";
             int beatmapindex = new Random().Next(0, data.Count - 1);
-            string mods = "";
+            string mod = "";
             if (data[beatmapindex].mod != "")
             {
                 if (data[beatmapindex].mod!.Contains(','))
                     foreach (var xx in data[beatmapindex].mod!.Split(","))
-                        mods += xx;
-                else mods += data[beatmapindex].mod!;
+                        mod += xx;
+                else mod += data[beatmapindex].mod!;
             }
-            else mods += "None";
-            msg += $"https://osu.ppy.sh/b/{data[beatmapindex].bid}\nStars:{data[beatmapindex].stars} PP:{data[beatmapindex].total} Mod:{mods}\n";
+            else mod += "None";
+            msg += $"https://osu.ppy.sh/b/{data[beatmapindex].bid}\nStars:{data[beatmapindex].stars.ToString("0.##*")}  Mod:{mod}  PP:{data[beatmapindex].total}\n";
             await target.reply(msg[..msg.LastIndexOf('\n')]);
         }
         async private static Task Bonuspp(Target target, string cmd)
