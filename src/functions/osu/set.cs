@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Numerics;
 using Flurl;
 using Flurl.Http;

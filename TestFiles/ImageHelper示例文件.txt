@@ -1,4 +1,4 @@
-﻿Image -n baseimage -p new --size 500x500
+Image -n baseimage -p new --size 500x500
 Image -n rawimg -p ./TestFiles/head.gif --size 100x100
 Draw -d baseimage -s rawimg -a 1 -p 0x0
 Round -n rawimg -s 100x100 -r 25

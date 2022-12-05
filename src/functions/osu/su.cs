@@ -1,4 +1,4 @@
-﻿using Flurl.Util;
+using Flurl.Util;
 using KanonBot.Drivers;
 using static KanonBot.functions.Accounts;
 

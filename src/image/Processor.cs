@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE0044 // 添加只读修饰符
+#pragma warning disable IDE0044 // 添加只读修饰符
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;

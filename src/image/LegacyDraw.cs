@@ -1,4 +1,4 @@
-﻿#pragma warning disable CS8618 // 非null 字段未初始化
+#pragma warning disable CS8618 // 非null 字段未初始化
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;

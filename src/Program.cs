@@ -1,4 +1,4 @@
-﻿global using Flurl;
+global using Flurl;
 global using Flurl.Http;
 global using LanguageExt;
 global using Serilog;

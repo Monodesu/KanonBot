@@ -1,4 +1,4 @@
-﻿#pragma warning disable CS8625 // 无法将 null 字面量转换为非 null 的引用类型。
+#pragma warning disable CS8625 // 无法将 null 字面量转换为非 null 的引用类型。
 using System.Net;
 using System.Net.Http.Headers;
 using Flurl;

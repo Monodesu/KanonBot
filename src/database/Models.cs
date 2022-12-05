@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE0044 // 添加只读修饰符
+#pragma warning disable IDE0044 // 添加只读修饰符
 #pragma warning disable IDE1006 // 命名样式
 using System;
 using LinqToDB;

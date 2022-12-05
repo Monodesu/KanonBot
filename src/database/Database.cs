@@ -1,5 +1,7 @@
 #pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable IDE0044 // 添加只读修饰符
+using System.Runtime.ConstrainedExecution;
+using System.Security.Cryptography;
 using KanonBot.Drivers;
 using LinqToDB;
 using LinqToDB.Configuration;
@@ -10,8 +12,6 @@ using Org.BouncyCastle.Ocsp;
 using Polly.Caching;
 using RosuPP;
 using Serilog;
-using System.Runtime.ConstrainedExecution;
-using System.Security.Cryptography;
 using Tomlyn.Model;
 using static KanonBot.API.OSU.Enums;
 using static KanonBot.API.OSU.Models;
@@ -257,10 +257,7 @@ public class Client
     static public async Task<Model.BadgeList?> GetBadgeInfo(string badgeid)
     {
         using var db = GetInstance();
-        return await db
-            .BadgeList
-            .Where(it => it.id == int.Parse(badgeid))
-            .FirstOrDefaultAsync();
+        return await db.BadgeList.Where(it => it.id == int.Parse(badgeid)).FirstOrDefaultAsync();
     }
 
     static public async Task<bool> SetOwnedBadge(string email, string owned_ids)
@@ -280,10 +277,7 @@ public class Client
             return false;
         }
         using var db = GetInstance();
-        var userinfo = await db
-            .User
-            .Where(it => it.uid == user.uid)
-            .FirstOrDefaultAsync();
+        var userinfo = await db.User.Where(it => it.uid == user.uid).FirstOrDefaultAsync();
         userinfo.owned_badge_ids = owned_ids;
         var res = await db.UpdateAsync(userinfo);
         return res > -1;
@@ -292,10 +286,7 @@ public class Client
     static public async Task<List<long>> GetOsuUserList()
     {
         using var db = GetInstance();
-        return await db
-            .UserOSU
-            .Select(it => it.osu_uid)
-            .ToListAsync();
+        return await db.UserOSU.Select(it => it.osu_uid).ToListAsync();
     }
 
     static public async Task<int> InsertOsuUserData(OsuArchivedRec rec, bool is_newuser)
@@ -310,7 +301,8 @@ public class Client
         using var db = GetInstance();
         var result = await db.UserOSU
             .Where(it => it.osu_uid == osu_uid)
-            .Set(it => it.osu_mode, API.OSU.Enums.Mode2String(mode)).UpdateAsync();
+            .Set(it => it.osu_mode, API.OSU.Enums.Mode2String(mode))
+            .UpdateAsync();
         return result > -1;
     }
 
@@ -326,7 +318,8 @@ public class Client
         var ui = new API.OSU.Models.User();
         if (days <= 0)
         {
-            var q = from p in db.OsuArchivedRec
+            var q =
+                from p in db.OsuArchivedRec
                 where p.uid == oid && p.gamemode == API.OSU.Enums.Mode2String(mode)
                 orderby p.lastupdate descending
                 select p;
@@ -343,18 +336,23 @@ public class Client
             {
                 return (-1, null);
             }
-            var q = from p in db.OsuArchivedRec
-                where p.uid == oid && p.gamemode == API.OSU.Enums.Mode2String(mode) && p.lastupdate <= date
+            var q =
+                from p in db.OsuArchivedRec
+                where
+                    p.uid == oid
+                    && p.gamemode == API.OSU.Enums.Mode2String(mode)
+                    && p.lastupdate <= date
                 orderby p.lastupdate descending
                 select p;
             data = await q.FirstOrDefaultAsync();
             if (data == null)
             {
-                var tq = from p in db.OsuArchivedRec
+                var tq =
+                    from p in db.OsuArchivedRec
                     where p.uid == oid && p.gamemode == API.OSU.Enums.Mode2String(mode)
                     orderby p.lastupdate
                     select p;
-                    data = await tq.FirstOrDefaultAsync();
+                data = await tq.FirstOrDefaultAsync();
             }
         }
         if (data == null)
@@ -403,32 +401,29 @@ public class Client
     {
         //检查数据库中有无信息
         using var db = GetInstance();
-        var db_info = await db
-            .OSUSeasonalPass
+        var db_info = await db.OSUSeasonalPass
             .Where(it => it.uid == oid)
             .Where(it => it.mode == mode)
             .ToListAsync();
         if (db_info.Count > 0)
         {
-            return await db
-                .OSUSeasonalPass
-                .Where(it => it.uid == oid)
-                .Where(it => it.mode == mode)
-                .Set(it => it.tth, tth)
-                .UpdateAsync() > -1;
+            return await db.OSUSeasonalPass
+                    .Where(it => it.uid == oid)
+                    .Where(it => it.mode == mode)
+                    .Set(it => it.tth, tth)
+                    .UpdateAsync() > -1;
         }
         var t = false;
         if (
-            await db
-                .InsertAsync(
-                    new OSUSeasonalPass()
-                    {
-                        inittth = tth,
-                        tth = tth,
-                        mode = mode,
-                        uid = oid
-                    }
-                ) > -1
+            await db.InsertAsync(
+                new OSUSeasonalPass()
+                {
+                    inittth = tth,
+                    tth = tth,
+                    mode = mode,
+                    uid = oid
+                }
+            ) > -1
         )
             t = true;
         return t;
@@ -437,8 +432,7 @@ public class Client
     static public async Task<bool> SetOsuInfoPanelVersion(long osu_uid, int ver)
     {
         using var db = GetInstance();
-        var result = await db
-            .UserOSU
+        var result = await db.UserOSU
             .Where(it => it.osu_uid == osu_uid)
             .Set(it => it.customInfoEngineVer, ver)
             .UpdateAsync();
@@ -448,8 +442,7 @@ public class Client
     static public async Task<bool> SetOsuInfoPanelV2ColorMode(long osu_uid, int ver)
     {
         using var db = GetInstance();
-        var result = await db
-            .UserOSU
+        var result = await db.UserOSU
             .Where(it => it.osu_uid == osu_uid)
             .Set(it => it.InfoPanelV2_Mode, ver)
             .UpdateAsync();
@@ -459,8 +452,7 @@ public class Client
     public static async Task<bool> UpdateInfoPanelV2CustomCmd(long osu_uid, string cmd)
     {
         using var db = GetInstance();
-        var result = await db
-            .UserOSU
+        var result = await db.UserOSU
             .Where(it => it.osu_uid == osu_uid)
             .Set(it => it.InfoPanelV2_CustomMode, cmd)
             .UpdateAsync();
@@ -471,8 +463,7 @@ public class Client
     {
         var DBUser = await GetUserByOsuUID(osu_uid);
         using var db = GetInstance();
-        var result = await db
-            .User
+        var result = await db.User
             .Where(it => it.uid == DBUser.uid)
             .Set(it => it.permissions, permission)
             .UpdateAsync();
@@ -482,8 +473,7 @@ public class Client
     static public async Task<bool> SetOsuUserPermissionByEmail(string email, string permission)
     {
         using var db = GetInstance();
-        var result = await db
-            .User
+        var result = await db.User
             .Where(it => it.email == email)
             .Set(it => it.permissions, permission)
             .UpdateAsync();
@@ -509,8 +499,7 @@ public class Client
         }
 
         //查找谱面对应的mod数据是否存在
-        var db_info = await db
-            .OsuStandardBeatmapTechData
+        var db_info = await db.OsuStandardBeatmapTechData
             .Where(it => it.bid == bid)
             .Where(it => it.mod == modstring)
             .ToListAsync();

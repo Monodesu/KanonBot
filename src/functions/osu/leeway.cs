@@ -1,4 +1,4 @@
-﻿using KanonBot.Drivers;
+using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
 using System.Net;

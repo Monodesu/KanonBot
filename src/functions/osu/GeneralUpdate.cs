@@ -1,4 +1,4 @@
-﻿using KanonBot.API;
+using KanonBot.API;
 using Serilog;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using KanonBot.API;
+using KanonBot.API;
 using KanonBot.Drivers;
 using KanonBot.functions.osu;
 using KanonBot.Message;
