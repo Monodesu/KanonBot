@@ -1051,6 +1051,7 @@ namespace KanonBot.LegacyImage
             );
             // time
             textOptions.Font = new Font(TorusRegular, 27.61f);
+            data.scoreInfo.CreatedAt.AddHours(8);//to UTC+8
             var time = data.scoreInfo.CreatedAt.ToString("yyyy/MM/dd HH:mm:ss");
             textOptions.Origin = new PointF(145, 505);
             score.Mutate(

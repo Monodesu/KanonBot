@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 using Flurl.Util;
 using KanonBot.API;
 using KanonBot.Drivers;
+using KanonBot.functions.osu;
+using KanonBot.functions.osu.rosupp;
 using KanonBot.Message;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static KanonBot.API.OSU.Models;
+using static KanonBot.API.OSU.Models.PPlusData;
 
 namespace KanonBot.functions.osubot
 {
@@ -43,16 +46,144 @@ namespace KanonBot.functions.osubot
                 case "todaybp":
                     await TodayBP(target, childCmd);
                     break;
-                case "annualpass":
-                    // await AnnualPass(target, childCmd);
+                case "seasonalpass":
+                    await SeasonalPass(target, childCmd);
+                    break;
+                case "recommend":
+                    await BeatmapRecommend(target, childCmd);
                     break;
                 default:
-                    await target.reply("!get bonuspp/elo/rolecost/bpht/todaybp");
+                    await target.reply(
+                                       """
+                                       !get bonuspp
+                                            elo
+                                            rolecost
+                                            bpht
+                                            todaybp
+                                            seasonalpass
+                                            recommend
+                                       """);
                     return;
             }
         }
 
+        async private static Task BeatmapRecommend(Target target, string cmd)
+        {
+            //only osu!standard
+            #region 验证
+            long? osuID = null;
+            OSU.Enums.Mode? mode;
+            Database.Model.User? DBUser = null;
+            Database.Model.UserOSU? DBOsuInfo = null;
 
+            // 解析指令
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
+            mode = command.osu_mode;
+
+            // 验证账户
+            var AccInfo = Accounts.GetAccInfo(target);
+            DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+            if (DBUser == null)
+            // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            // 验证账号信息
+            var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
+            DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
+            if (DBOsuInfo == null)
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+
+            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+            osuID = DBOsuInfo.osu_uid;
+
+
+
+            // 验证osu信息
+            var OnlineOsuInfo = await OSU.GetUser(osuID!.Value, OSU.Enums.Mode.OSU); //取osu模式的值
+            if (OnlineOsuInfo == null)
+            {
+                if (DBOsuInfo != null)
+                    await target.reply("被办了。");
+                else
+                    await target.reply("猫猫没有找到此用户。");
+                // 中断查询
+                return;
+            }
+            OnlineOsuInfo.PlayMode = mode!.Value;
+            #endregion
+
+            //是否获取NF谱面
+            bool AllowNF = false,
+                 AllowEZ = false;
+            cmd = cmd.ToLower().Trim();
+            if (cmd.Contains("nf"))
+                AllowNF = true;
+            if (cmd.Contains("ez"))
+                AllowEZ = true;
+            //获取前50bp
+            var allBP = await OSU.GetUserScores(
+                        OnlineOsuInfo.Id,
+                        OSU.Enums.UserScoreType.Best,
+                        OSU.Enums.Mode.OSU,
+                        50,
+                        0
+                    );
+            if (allBP == null)
+            {
+                await target.reply("打过的图太少了，多玩一玩再来寻求推荐吧~");
+                return;
+            }
+            if (allBP.Length < 50)
+            {
+                await target.reply("打过的图太少了，多玩一玩再来寻求推荐吧~");
+                return;
+            }
+            //从数据库获取相似的谱面
+            var randBP = allBP![new Random().Next(0, 49)];
+            //get stars from rosupp
+            var ppinfo = await PerformanceCalculator.CalculatePanelData(randBP);
+
+            var data = new List<Database.Model.OsuStandardBeatmapTechData>();
+
+            if (AllowNF || AllowEZ)
+                data = await Database.Client.GetOsuStandardBeatmapTechData(
+                                       (int)ppinfo.ppInfo.ppStat.aim!,
+                                       (int)ppinfo.ppInfo.ppStat.speed!,
+                                       (int)ppinfo.ppInfo.ppStat.acc!,
+                                       200);
+            else
+                data = await Database.Client.GetOsuStandardBeatmapTechData(
+                                           (int)ppinfo.ppInfo.ppStat.aim!,
+                                           (int)ppinfo.ppInfo.ppStat.speed!,
+                                           (int)ppinfo.ppInfo.ppStat.acc!,
+                                           30);
+
+            //TODO 默认去除NF/HT/EZ这三个mod  用户指定mod
+
+
+
+
+            //检查谱面列表长度
+            if (data.Count == 0)
+            {
+                await target.reply("猫猫没办法给你推荐谱面了，当前存入数据库的已经找不到合适的谱面推荐给你了...");
+                return;
+            }
+
+            //返回
+            string msg = $"以下是猫猫给你推荐的谱面：\n";
+            int beatmapindex = new Random().Next(0, data.Count - 1);
+            string mods = "";
+            if (data[beatmapindex].mod != "")
+            {
+                if (data[beatmapindex].mod!.Contains(','))
+                    foreach (var xx in data[beatmapindex].mod!.Split(","))
+                        mods += xx;
+                else mods += data[beatmapindex].mod!;
+            }
+            else mods += "None";
+            msg += $"https://osu.ppy.sh/b/{data[beatmapindex].bid}\nStars:{data[beatmapindex].stars} PP:{data[beatmapindex].total} Mod:{mods}\n";
+            await target.reply(msg[..msg.LastIndexOf('\n')]);
+        }
         async private static Task Bonuspp(Target target, string cmd)
         {
             #region 验证
@@ -669,9 +800,90 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        private static void AnnualPass(Target target, string cmd) //may need to change describe
+        async private static Task SeasonalPass(Target target, string cmd)
         {
+            #region 验证
+            long? osuID = null;
+            OSU.Enums.Mode? mode;
+            Database.Model.User? DBUser = null;
+            Database.Model.UserOSU? DBOsuInfo = null;
 
+            // 解析指令
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
+            mode = command.osu_mode;
+
+            // 解析指令
+
+            // 验证账户
+            var AccInfo = Accounts.GetAccInfo(target);
+            DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+            if (DBUser == null)
+            // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            // 验证账号信息
+            var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
+            DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
+            if (DBOsuInfo == null)
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+
+            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+            osuID = DBOsuInfo.osu_uid;
+
+
+            // 验证osu信息
+            var OnlineOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
+            if (OnlineOsuInfo == null)
+            {
+                if (DBOsuInfo != null)
+                    await target.reply("被办了。");
+                else
+                    await target.reply("猫猫没有找到此用户。");
+                // 中断查询
+                return;
+            }
+            OnlineOsuInfo.PlayMode = mode!.Value;
+            #endregion
+
+            //查询前先更新
+            if (DBOsuInfo != null)
+                await Seasonalpass.Update(
+                    OnlineOsuInfo!.Id,
+                    OnlineOsuInfo!.PlayMode!.ToStr(),
+                    OnlineOsuInfo.Statistics.TotalHits
+                );
+
+            //旧版，将于2023年1月1日弃用
+            var seasonalpassinfo = await Database.Client.GetSeasonalPassInfo(OnlineOsuInfo!.Id, OnlineOsuInfo!.PlayMode!.ToStr())!;
+
+            if (seasonalpassinfo == null)
+            {
+                await target.reply("数据库中无此用户的季票信息，请稍后再试。");
+                return;
+            }
+            //10000tth一级，每升1级所需tth+2000
+            long temptth = seasonalpassinfo.tth - seasonalpassinfo.inittth;
+            int levelcount = 0;
+            while (true)
+            {
+                temptth = temptth - (10000 + levelcount * 2000);
+                if (temptth > 0)
+                    levelcount = levelcount + 1;
+                else break;
+            }
+            int tt = 0;
+            for (int i = 0; i < levelcount; ++i)
+            {
+                tt += 10000 + i * 2000;
+            }
+            double t = Math.Round(
+                Math.Round(
+                    ((double)((seasonalpassinfo.tth - seasonalpassinfo.inittth - tt) * 100) / (double)(10000 + levelcount * 2000)), 4), 4
+            );
+            string str;
+            str = $"{OnlineOsuInfo.Username}\n自2022年11月29日以来\n您在{OnlineOsuInfo!.PlayMode!.ToStr()}模式下的等级为{levelcount}级 " +
+            $"({t}%)" +
+            $"\n共击打了{seasonalpassinfo.tth - seasonalpassinfo.inittth}次\n距离升级还需要{Math.Abs(temptth)}tth";
+            await target.reply(str);
         }
     }
 }

@@ -114,6 +114,7 @@ namespace KanonBot.functions.osubot
                     {
                         await Database.Client.InsertOsuStandardBeatmapTechData(
                             scores[0].Beatmap!.BeatmapId,
+                            data.ppInfo.star,
                             (int)data.ppInfo.ppStats![0].total,
                             (int)data.ppInfo.ppStats![0].acc!,
                             (int)data.ppInfo.ppStats![0].speed!,

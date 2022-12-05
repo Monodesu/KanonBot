@@ -33,6 +33,9 @@ public class Model
         public long bid { get; set; }
 
         [Column]
+        public double stars { get; set; }
+
+        [Column]
         public int total { get; set; }
 
         [Column]

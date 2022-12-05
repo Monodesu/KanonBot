@@ -482,6 +482,7 @@ public class Client
 
     public static async Task<bool> InsertOsuStandardBeatmapTechData(
         long bid,
+        double stars,
         int total,
         int acc,
         int speed,
@@ -494,7 +495,11 @@ public class Client
         if (mods.Length > 0)
         {
             foreach (var x in mods)
+            {
                 modstring += x + ",";
+                if (x.ToLower() == "pf" || x.ToLower() == "sd" || x.ToLower() == "ap" || x.ToLower() == "rx" || x.ToLower() == "v2")
+                    return true; //不保存以上mod
+            }
             modstring = modstring[..^1];
         }
 
@@ -510,6 +515,7 @@ public class Client
                 new()
                 {
                     bid = bid,
+                    stars = stars,
                     total = total,
                     acc = acc,
                     speed = speed,
@@ -530,5 +536,21 @@ public class Client
         {
             return true;
         }
+    }
+    public static async Task<OSUSeasonalPass> GetSeasonalPassInfo(long oid, string mode)
+    {
+        using var db = GetInstance();
+        return await db.OSUSeasonalPass.Where(it => it.uid == oid).Where(it => it.mode == mode).FirstOrDefaultAsync();
+    }
+
+    public static async Task<List<OsuStandardBeatmapTechData>> GetOsuStandardBeatmapTechData(int aim, int speed, int acc, int range = 20)
+    {
+        using var db = GetInstance();
+        return await db.OsuStandardBeatmapTechData.Where(it => it.aim > aim - range && it.aim < aim + range
+                                                               && it.speed > speed - range && it.speed < speed + range
+                                                               && it.acc > acc - range && it.acc < acc + range
+                                                               )
+
+                                                      .ToListAsync();
     }
 }
