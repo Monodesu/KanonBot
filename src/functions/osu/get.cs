@@ -198,13 +198,13 @@ namespace KanonBot.functions.osubot
                         for (int i = 0; i < mods.Count; i++)
                             if (mods[i].ToUpper() == "NC") mods[i] = "DT";
                         foreach (var xx in mods)
-                            data.RemoveAll(x => !x.mod!.Contains(xx));
+                            data.RemoveAll(x => x.mod!.IndexOf(xx) == -1);
                         if (!ez)
-                            data.RemoveAll(x => !x.mod!.Contains("EZ"));
+                            data.RemoveAll(x => x.mod!.IndexOf("EZ") != -1);
                         if (!nf)
-                            data.RemoveAll(x => !x.mod!.Contains("NF"));
+                            data.RemoveAll(x => x.mod!.IndexOf("NF") != -1);
                         if (!ht)
-                            data.RemoveAll(x => !x.mod!.Contains("HT"));
+                            data.RemoveAll(x => x.mod!.IndexOf("HT") != -1);
                     }
                 }
                 else
@@ -248,15 +248,15 @@ namespace KanonBot.functions.osubot
                 if (data.Count > 0)
                 {
                     for (int i = 0; i < mods.Count; i++)
-                        if (mods[i].ToUpper() == "NC") mods[i] = "DT";
+                        if (mods[i] == "NC") mods[i] = "DT";
                     foreach (var xx in mods)
-                        data.RemoveAll(x => !x.mod!.Contains(xx));
+                        data.RemoveAll(x => x.mod!.IndexOf(xx) == -1);
                     if (!ez)
-                        data.RemoveAll(x => !x.mod!.Contains("EZ"));
+                        data.RemoveAll(x => x.mod!.IndexOf("EZ") != -1);
                     if (!nf)
-                        data.RemoveAll(x => !x.mod!.Contains("NF"));
+                        data.RemoveAll(x => x.mod!.IndexOf("NF") != -1);
                     if (!ht)
-                        data.RemoveAll(x => !x.mod!.Contains("HT"));
+                        data.RemoveAll(x => x.mod!.IndexOf("HT") != -1);
                 }
                 else
                 {
