@@ -36,20 +36,16 @@ FlurlHttp.GlobalSettings.Redirects.ForwardAuthorizationHeader = true;
 FlurlHttp.GlobalSettings.Redirects.AllowSecureToInsecure = true;
 var config = Config.inner!;
 
-var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] { }, API.OSU.Enums.Mode.Mania).Result!;
-score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
-var attr = API.OSU.GetBeatmapAttributes(score.Score.Beatmap!.BeatmapId, new string[] { }, API.OSU.Enums.Mode.Mania).Result;
-Console.WriteLine("beatmap attr {0}", Json.Serialize(attr));
-API.OSU.BeatmapFileChecker(score.Score.Beatmap!.BeatmapId).Wait();
-Console.WriteLine("pp {0}", score.Score.PP);
-Console.WriteLine("acc {0}", score.Score.Accuracy);
-var data = PerformanceCalculator.CalculatePanelData(score.Score).Result;
-Console.WriteLine("cal pp {0}", data.ppInfo.ppStat.total);
-Console.WriteLine("cal data {0}", Json.Serialize(data.ppInfo));
-
-
-
-
+// var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] { }, API.OSU.Enums.Mode.Mania).Result!;
+// score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
+// var attr = API.OSU.GetBeatmapAttributes(score.Score.Beatmap!.BeatmapId, new string[] { }, API.OSU.Enums.Mode.Mania).Result;
+// Console.WriteLine("beatmap attr {0}", Json.Serialize(attr));
+// API.OSU.BeatmapFileChecker(score.Score.Beatmap!.BeatmapId).Wait();
+// Console.WriteLine("pp {0}", score.Score.PP);
+// Console.WriteLine("acc {0}", score.Score.Accuracy);
+// var data = PerformanceCalculator.CalculatePanelData(score.Score).Result;
+// Console.WriteLine("cal pp {0}", data.ppInfo.ppStat.total);
+// Console.WriteLine("cal data {0}", Json.Serialize(data.ppInfo));
 
 var log = new LoggerConfiguration()
                 .WriteTo.Async(a => a.Console())

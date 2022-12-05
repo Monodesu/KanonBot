@@ -186,12 +186,7 @@ namespace KanonBot.functions.osu.rosupp
                     {
                         mode = data.scoreInfo.Mode,
                         mods = data.scoreInfo.Mods,
-                        combo = data.scoreInfo.MaxCombo,
-                        n300 = statistics.CountGreat,
-                        n100 = statistics.CountOk,
-                        n50 = statistics.CountMeh,
-                        nmisses = statistics.CountMiss,
-                        nkatu = statistics.CountKatu,
+                        acc = acc,
                     }.build(ref p);
                     return Result2Info(
                     beatmap.GetRef().Calculate(
