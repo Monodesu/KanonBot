@@ -100,7 +100,7 @@ ffierror calculator_destroy(calculator** context);
 
 ffierror calculator_new(calculator** context, sliceu8 beatmap_data);
 
-calculateresult calculator_calculate(calculator* context, scoreparams score_params);
+calculateresult calculator_calculate(calculator* context, const scoreparams* score_params);
 
 optionf64 calculator_scorePos(const calculator* context, calculateresult res);
 

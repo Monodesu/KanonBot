@@ -12,7 +12,7 @@ def init_lib(path):
 
     c_lib.calculator_destroy.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
     c_lib.calculator_new.argtypes = [ctypes.POINTER(ctypes.c_void_p), Sliceu8]
-    c_lib.calculator_calculate.argtypes = [ctypes.c_void_p, ERROR]
+    c_lib.calculator_calculate.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
     c_lib.calculator_scorePos.argtypes = [ctypes.c_void_p, CalculateResult]
     c_lib.score_params_destroy.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
     c_lib.score_params_new.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
@@ -571,7 +571,7 @@ class Calculator:
 
     def __del__(self):
         c_lib.calculator_destroy(self._ctx, )
-    def calculate(self, score_params) -> CalculateResult:
+    def calculate(self, score_params: ctypes.c_void_p) -> CalculateResult:
         """"""
         return c_lib.calculator_calculate(self._ctx, score_params)
 

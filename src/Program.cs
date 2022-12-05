@@ -1,22 +1,22 @@
-﻿global using Serilog;
-global using Flurl;
+﻿global using Flurl;
 global using Flurl.Http;
 global using LanguageExt;
+global using Serilog;
 global using static LanguageExt.Prelude;
-
 using KanonBot;
 using KanonBot.API;
 using KanonBot.command_parser;
 using KanonBot.Drivers;
 using KanonBot.Event;
 using KanonBot.functions.osu;
+using KanonBot.functions.osu.rosupp;
 using KanonBot.Serializer;
+using MySqlConnector;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RosuPP;
+using API = KanonBot.API;
 using Msg = KanonBot.Message;
-using MySqlConnector;
-
-
 
 #region 初始化
 Console.WriteLine("---KanonBot---");
@@ -36,18 +36,20 @@ FlurlHttp.GlobalSettings.Redirects.ForwardAuthorizationHeader = true;
 FlurlHttp.GlobalSettings.Redirects.AllowSecureToInsecure = true;
 var config = Config.inner!;
 
-var builder = new MySqlConnectionStringBuilder
-{
-	Server = config.database.host,
-    Port = (uint)config.database.port,
-	UserID = config.database.user,
-	Password = config.database.password,
-	Database = config.database.db,
-    CharacterSet = "utf8mb4",
-};
+var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] { }, API.OSU.Enums.Mode.Mania).Result!;
+score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
+var attr = API.OSU.GetBeatmapAttributes(score.Score.Beatmap!.BeatmapId, new string[] { }, API.OSU.Enums.Mode.Mania).Result;
+Console.WriteLine("beatmap attr {0}", Json.Serialize(attr));
+API.OSU.BeatmapFileChecker(score.Score.Beatmap!.BeatmapId).Wait();
+Console.WriteLine("pp {0}", score.Score.PP);
+Console.WriteLine("acc {0}", score.Score.Accuracy);
+var data = PerformanceCalculator.CalculatePanelData(score.Score).Result;
+Console.WriteLine("cal pp {0}", data.ppInfo.ppStat.total);
+Console.WriteLine("cal data {0}", Json.Serialize(data.ppInfo));
 
-using var connection = new MySqlConnection(builder.ConnectionString);
-await connection.OpenAsync();
+
+
+
 
 var log = new LoggerConfiguration()
                 .WriteTo.Async(a => a.Console())

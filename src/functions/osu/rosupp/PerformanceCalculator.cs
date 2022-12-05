@@ -120,9 +120,8 @@ namespace KanonBot.functions.osu.rosupp
             public string[]? mods;
             public double? acc;
             public uint? n300, n100, n50, nmisses, nkatu, combo, passedObjects, clockRate;
-            public ScoreParams build()
+            public void build(ref ScoreParams p)
             {
-                var p = ScoreParams.New();
                 p.Mode(mode switch
                 {
                     OSU.Enums.Mode.OSU => Mode.Osu,
@@ -139,7 +138,6 @@ namespace KanonBot.functions.osu.rosupp
                 if (nkatu != null) p.NKatu(nkatu.Value);
                 if (combo != null) p.Combo(combo.Value);
                 if (mods != null) p.Mods(Intmod_parser(mods));
-                return p;
             }
         }
 
@@ -163,8 +161,8 @@ namespace KanonBot.functions.osu.rosupp
                 throw;
             }
 
-            // 开始计算
-            data.ppInfo = Result2Info(beatmap.GetRef().Calculate(new Params
+            var p = ScoreParams.New();
+            new Params
             {
                 mode = data.scoreInfo.Mode,
                 mods = data.scoreInfo.Mods,
@@ -174,21 +172,33 @@ namespace KanonBot.functions.osu.rosupp
                 n50 = statistics.CountMeh,
                 nmisses = statistics.CountMiss,
                 nkatu = statistics.CountKatu,
-            }.build().Context));
+            }.build(ref p);
+            // 开始计算
+            data.ppInfo = Result2Info(beatmap.GetRef().Calculate(p.Context));
 
             // 5种acc + 全连
             double[] accs = { 100.00, 99.00, 98.00, 97.00, 95.00, data.scoreInfo.Accuracy * 100.00 };
             data.ppInfo.ppStats = accs.Select(
-                acc => Result2Info(
+                acc =>
+                {
+                    var p = ScoreParams.New();
+                    new Params
+                    {
+                        mode = data.scoreInfo.Mode,
+                        mods = data.scoreInfo.Mods,
+                        combo = data.scoreInfo.MaxCombo,
+                        n300 = statistics.CountGreat,
+                        n100 = statistics.CountOk,
+                        n50 = statistics.CountMeh,
+                        nmisses = statistics.CountMiss,
+                        nkatu = statistics.CountKatu,
+                    }.build(ref p);
+                    return Result2Info(
                     beatmap.GetRef().Calculate(
-                        new Params
-                        {
-                            mode = data.scoreInfo.Mode,
-                            mods = data.scoreInfo.Mods,
-                            acc = acc,
-                        }.build().Context
-                    )
-                ).ppStat
+                        p.Context
+                        )
+                    ).ppStat;
+                }
             ).ToList();
 
             return data;

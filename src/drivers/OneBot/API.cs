@@ -1,7 +1,9 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Collections.Concurrent;
 using KanonBot.Message;
 using KanonBot.Serializer;
+using LanguageExt.UnsafeValueAccess;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 namespace KanonBot.Drivers;
 public partial class OneBot
@@ -22,7 +24,7 @@ public partial class OneBot
             public AutoResetEvent ResetEvent { get; } = new AutoResetEvent(false);
             public Models.CQResponse? Data { get; set; }
         }
-        public Dictionary<Guid, RetCallback> CallbackList = new();
+        public ConcurrentDictionary<Guid, RetCallback> CallbackList = new();
         public void Echo(Models.CQResponse res)
         {
             this.CallbackList[res.Echo].Data = res;
@@ -30,13 +32,12 @@ public partial class OneBot
         }
         private Models.CQResponse Send(Models.CQRequest req)
         {
-            this.CallbackList.Add(req.Echo, new RetCallback());
             this.CallbackList[req.Echo] = new RetCallback();    // 创建回调
             this.socket.Send(req);                              // 发送
             this.CallbackList[req.Echo].ResetEvent.WaitOne();   // 等待回调
-            var ret = this.CallbackList[req.Echo].Data!;         // 获取回调
-            this.CallbackList.Remove(req.Echo);                 // 移除回调
-            return ret;
+            RetCallback ret;         // 获取回调
+            this.CallbackList.Remove(req.Echo, out ret!);                 // 移除回调
+            return ret.Data!;
         }
         #endregion
 

@@ -83,7 +83,7 @@ impl ScoreParams {
 }
 
 impl ScoreParams {
-    pub fn apply(self, mut calculator: AnyPP) -> AnyPP {
+    pub fn apply<'a>(&self, mut calculator: AnyPP<'a>) -> AnyPP<'a> {
         let ScoreParams {
             mode,
             mods,
@@ -134,7 +134,7 @@ impl ScoreParams {
             calculator = calculator.clock_rate(clock_rate);
         }
 
-        calculator = calculator.mods(mods);
+        calculator = calculator.mods(*mods);
 
         if let Some(acc) = acc.into_option() {
             calculator = calculator.accuracy(acc);
