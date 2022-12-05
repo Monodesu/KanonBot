@@ -1551,7 +1551,7 @@ namespace KanonBot.DrawV2
                     x.DrawText(
                         drawOptions,
                         textOptions,
-                        $"Update at {DateTime.Now}",
+                        $"Update at {DateTime.Now:yyyy/MM/dd HH:mm:ss}",
                         new SolidBrush(footerColor),
                         null
                     )

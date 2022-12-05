@@ -247,7 +247,7 @@ namespace KanonBot.LegacyImage
                     x.DrawText(
                         drawOptions,
                         textOptions,
-                        $"update: {(DateTime.Now).ToString()}",
+                        $"update: {DateTime.Now:yyyy/MM/dd HH:mm:ss}",
                         new SolidBrush(Color.White),
                         null
                     )
