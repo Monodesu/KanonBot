@@ -3030,7 +3030,7 @@ namespace KanonBot.DrawV2
             //osu!rankChart
             try
             {
-                var RankHistory = data.userInfo.RankHistory.Data.Take(8).Reverse().ToArray();
+                var RankHistory = data.userInfo.RankHistory.Data.Reverse().Take(8).ToArray();
                 using var rankChart = DrawLineChart(
                     714,
                     240,

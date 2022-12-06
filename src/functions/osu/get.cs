@@ -196,8 +196,7 @@ namespace KanonBot.functions.osubot
                 {
                     if (mods.Count == 0)
                     {
-                        foreach (var x in mods)
-                            data.RemoveAll(x => x.mod != "");
+                        data.RemoveAll(x => x.mod != "");
                     }
                     else
                     {
