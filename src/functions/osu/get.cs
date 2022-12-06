@@ -214,7 +214,8 @@ namespace KanonBot.functions.osubot
                     ez = false,
                     ht = false,
                     nf = false,
-                    td = false;
+                    td = false,
+                    so = false;
                 foreach (var x in mods)
                 {
                     var xx = x.ToLower().Trim();
@@ -237,6 +238,11 @@ namespace KanonBot.functions.osubot
                     {
                         isDiffReductionMod = true;
                         td = true;
+                    }
+                    if (xx == "so")
+                    {
+                        isDiffReductionMod = true;
+                        so = true;
                     }
                 }
                 data = await Database.Client.GetOsuStandardBeatmapTechData(
@@ -264,6 +270,8 @@ namespace KanonBot.functions.osubot
                             data.RemoveAll(x => x.mod!.IndexOf("HT") != -1);
                         if (!td)
                             data.RemoveAll(x => x.mod!.IndexOf("TD") != -1);
+                        if (!so)
+                            data.RemoveAll(x => x.mod!.IndexOf("SO") != -1);
                     }
                 }
                 else
@@ -278,7 +286,8 @@ namespace KanonBot.functions.osubot
                     ez = false,
                     ht = false,
                     nf = false,
-                    td = false;
+                    td = false,
+                    so = false;
                 foreach (var x in mods)
                 {
                     var xx = x.ToLower().Trim();
@@ -302,6 +311,11 @@ namespace KanonBot.functions.osubot
                         isDiffReductionMod = true;
                         td = true;
                     }
+                    if (xx == "so")
+                    {
+                        isDiffReductionMod = true;
+                        so = true;
+                    }
                 }
                 //使用解析到的mod 如果是EZ/HT 需要适当把pprange放宽
                 data = await Database.Client.GetOsuStandardBeatmapTechData(
@@ -324,6 +338,8 @@ namespace KanonBot.functions.osubot
                         data.RemoveAll(x => x.mod!.IndexOf("HT") != -1);
                     if (!td)
                         data.RemoveAll(x => x.mod!.IndexOf("TD") != -1);
+                    if (!so)
+                        data.RemoveAll(x => x.mod!.IndexOf("SO") != -1);
                 }
                 else
                 {
