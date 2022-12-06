@@ -487,6 +487,10 @@ public class Client
         int acc,
         int speed,
         int aim,
+        int a99,
+        int a98,
+        int a97,
+        int a95,
         string[] mods
     )
     {
@@ -527,7 +531,11 @@ public class Client
                     acc = acc,
                     speed = speed,
                     aim = aim,
-                    mod = modstring
+                    mod = modstring,
+                    pp_95acc = a95,
+                    pp_97acc = a97,
+                    pp_98acc = a98,
+                    pp_99acc = a99,
                 };
             try
             {

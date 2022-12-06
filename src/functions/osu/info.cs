@@ -315,6 +315,10 @@ namespace KanonBot.functions.osubot
                                 (int)data.ppInfo.ppStats![0].acc!,
                                 (int)data.ppInfo.ppStats![0].speed!,
                                 (int)data.ppInfo.ppStats![0].aim!,
+                                (int)data.ppInfo.ppStats![1].total,
+                                (int)data.ppInfo.ppStats![2].total,
+                                (int)data.ppInfo.ppStats![3].total,
+                                (int)data.ppInfo.ppStats![4].total,
                                 score.Mods
                             );
                 }

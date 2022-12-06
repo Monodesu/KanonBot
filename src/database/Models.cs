@@ -49,6 +49,18 @@ public class Model
 
         [Column]
         public string? mod { get; set; }
+
+        [Column]
+        public int pp_99acc { get; set; }
+
+        [Column]
+        public int pp_98acc { get; set; }
+
+        [Column]
+        public int pp_97acc { get; set; }
+
+        [Column]
+        public int pp_95acc { get; set; }
     }
 
     [Table("osu_seasonalpass_2022_s4")]

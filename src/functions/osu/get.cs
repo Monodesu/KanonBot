@@ -367,7 +367,14 @@ namespace KanonBot.functions.osubot
                 else mod += data[beatmapindex].mod!;
             }
             else mod += "None";
-            msg += $"https://osu.ppy.sh/b/{data[beatmapindex].bid}\nStars:{data[beatmapindex].stars.ToString("0.##*")}  Mod:{mod}  PP:{data[beatmapindex].total}\n";
+            msg +=
+                $"""
+                https://osu.ppy.sh/b/{data[beatmapindex].bid}
+                Stars:{data[beatmapindex].stars.ToString("0.##*")}  Mod:{mod}
+                PP Statistics:
+                100%:{data[beatmapindex].total} 99%:{data[beatmapindex].pp_99acc}
+                98%:{data[beatmapindex].pp_98acc} 97%:{data[beatmapindex].pp_97acc} 95%:{data[beatmapindex].pp_95acc}
+                """;
             await target.reply(msg[..msg.LastIndexOf('\n')]);
         }
 

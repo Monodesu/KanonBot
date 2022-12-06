@@ -106,24 +106,31 @@ namespace KanonBot.functions.osubot
                         ImageSegment.Type.Base64
                     )
                 );
-                //if (scoreInfos[0].Mode == OSU.Enums.Mode.OSU)
-                //{
-                    //recent、score不再添加
-                    //if (
-                    //    scoreInfos[0].Beatmap!.Status == OSU.Enums.Status.ranked
-                    //    || scoreInfos[0].Beatmap!.Status == OSU.Enums.Status.approved
-                    //)
-                    //    await Database.Client.InsertOsuStandardBeatmapTechData(
-                    //        scoreInfos[0].Beatmap!.BeatmapId,
-                    //        data.ppInfo.star,
-                    //        (int)data.ppInfo.ppStats![0].total,
-                    //        (int)data.ppInfo.ppStats![0].acc!,
-                    //        (int)data.ppInfo.ppStats![0].speed!,
-                    //        (int)data.ppInfo.ppStats![0].aim!,
-                    //        scoreInfos[0].Mods
-                    //    );
+                if (scoreInfos[0].Mode == OSU.Enums.Mode.OSU)
+                {
+                    if (
+                        scoreInfos[0].Beatmap!.Status == OSU.Enums.Status.ranked
+                        || scoreInfos[0].Beatmap!.Status == OSU.Enums.Status.approved
+                    )
+                        if (scoreInfos[0].Rank.ToUpper() == "XH" ||
+                            scoreInfos[0].Rank.ToUpper() == "X" ||
+                            scoreInfos[0].Rank.ToUpper() == "SH" ||
+                            scoreInfos[0].Rank.ToUpper() == "S")
+                            await Database.Client.InsertOsuStandardBeatmapTechData(
+                                scoreInfos[0].Beatmap!.BeatmapId,
+                                data.ppInfo.star,
+                                (int)data.ppInfo.ppStats![0].total,
+                                (int)data.ppInfo.ppStats![0].acc!,
+                                (int)data.ppInfo.ppStats![0].speed!,
+                                (int)data.ppInfo.ppStats![0].aim!,
+                                (int)data.ppInfo.ppStats![1].total,
+                                (int)data.ppInfo.ppStats![2].total,
+                                (int)data.ppInfo.ppStats![3].total,
+                                (int)data.ppInfo.ppStats![4].total,
+                                scoreInfos[0].Mods
+                            );
                     // 绘制
-                //}
+                }
             }
             else
             {
