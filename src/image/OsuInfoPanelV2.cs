@@ -1439,35 +1439,41 @@ namespace KanonBot.DrawV2
                 }
             }
             //ppsub
-            textOptions.HorizontalAlignment = HorizontalAlignment.Right;
-            textOptions.Font = new Font(TorusRegular, 40);
-            var ppsub_point = 2374 + pp_front_length - 40;
-            textOptions.Origin = new PointF(ppsub_point, 440);
-            info.Mutate(
-                x =>
-                    x.DrawText(
-                        drawOptions,
-                        textOptions,
-                        string.Format("{0:N0}", scorePP),
-                        new SolidBrush(ppProgressBarColorTextColor),
-                        null
-                    )
-            );
+            if (scorePP != 0)
+            {
+                textOptions.HorizontalAlignment = HorizontalAlignment.Right;
+                textOptions.Font = new Font(TorusRegular, 40);
+                var ppsub_point = 2374 + pp_front_length - 40;
+                textOptions.Origin = new PointF(ppsub_point, 440);
+                info.Mutate(
+                    x =>
+                        x.DrawText(
+                            drawOptions,
+                            textOptions,
+                            string.Format("{0:N0}", scorePP),
+                            new SolidBrush(ppProgressBarColorTextColor),
+                            null
+                        )
+                );
+            }
 
             //acc sub
-            var accsub_point =
-                (2374 + (int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0))) - 40;
-            textOptions.Origin = new PointF(accsub_point, 641);
-            info.Mutate(
-                x =>
-                    x.DrawText(
-                        drawOptions,
-                        textOptions,
-                        "300",
-                        new SolidBrush(accProgressBarColorTextColor),
-                        null
-                    )
-            );
+            if (data.userInfo.Statistics.HitAccuracy != 0)
+            {
+                var accsub_point =
+                    (2374 + (int)(1443.00 * (data.userInfo.Statistics.HitAccuracy / 100.0))) - 40;
+                textOptions.Origin = new PointF(accsub_point, 641);
+                info.Mutate(
+                    x =>
+                        x.DrawText(
+                            drawOptions,
+                            textOptions,
+                            "300",
+                            new SolidBrush(accProgressBarColorTextColor),
+                            null
+                        )
+                );
+            }
 
             //grades
             textOptions.Font = new Font(TorusRegular, 38);
@@ -3028,44 +3034,31 @@ namespace KanonBot.DrawV2
             info.Mutate(x => x.DrawImage(osuprofilemode, new Point(osuprofilemode_x_pos, 293), 1));
 
             //osu!rankChart
-            try
+            long[] RankHistory;
+            if (data.userInfo.RankHistory != null)
             {
-                var RankHistory = data.userInfo.RankHistory.Data.Reverse().Take(8).ToArray();
-                using var rankChart = DrawLineChart(
-                    714,
-                    240,
-                    7,
-                    RankHistory,
-                    RankLineChartColor,
-                    RankLineChartTextColor,
-                    RankLineChartDashColor,
-                    RankLineChartDotColor,
-                    RankLineChartDotStrokeColor,
-                    true,
-                    7f,
-                    5f
-                );
-                info.Mutate(x => x.DrawImage(rankChart, new Point(1576, 694), 1));
+                RankHistory = data.userInfo.RankHistory.Data.Take(8).Reverse().ToArray();
             }
-            catch
+            else
             {
-                long[] RankHistory = { 0, 0, 0, 0, 0, 0, 0, 0 };
-                using var rankChart = DrawLineChart(
-                    714,
-                    240,
-                    7,
-                    RankHistory,
-                    RankLineChartColor,
-                    RankLineChartTextColor,
-                    RankLineChartDashColor,
-                    RankLineChartDotColor,
-                    RankLineChartDotStrokeColor,
-                    true,
-                    7f,
-                    5f
-                );
-                info.Mutate(x => x.DrawImage(rankChart, new Point(1576, 694), 1));
+                RankHistory = new long[] { 0, 0, 0, 0, 0, 0, 0, 0 };
             }
+            using var rankChart = DrawLineChart(
+                714,
+                240,
+                7,
+                RankHistory,
+                RankLineChartColor,
+                RankLineChartTextColor,
+                RankLineChartDashColor,
+                RankLineChartDotColor,
+                RankLineChartDotStrokeColor,
+                true,
+                7f,
+                5f
+            );
+            info.Mutate(x => x.DrawImage(rankChart, new Point(1576, 694), 1));
+
             //date
             var DateXPos = 2227;
             var DateValue = DateTime.Now;
@@ -3137,14 +3130,10 @@ namespace KanonBot.DrawV2
 
             for (int i = 0; i < DataCount; i++)
             {
-                yPos.Add(
-                    (
-                        (int)(
-                            ((double)Height - 80.00)
-                            * ((double)(Data[i] - yPosMin) / (double)(yPosMax - yPosMin))
-                        )
-                    ) + 50
-                );
+                var x = ((double)(Data[i] - yPosMin) / (double)(yPosMax - yPosMin));
+                if (double.IsNaN(x))
+                    x = 0.8;
+                yPos.Add(((int)(((double)Height - 80.00) * x)) + 50);
             }
 
             //绘制虚线

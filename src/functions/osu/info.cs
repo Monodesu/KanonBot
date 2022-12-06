@@ -144,7 +144,7 @@ namespace KanonBot.functions.osubot
                             );
                         }
                         catch { } //更新pp+失败，不返回信息
-                    }).Start();
+                    }).RunSynchronously();
                 }
 
                 var badgeID = DBUser!.displayed_badge_ids;
@@ -184,13 +184,16 @@ namespace KanonBot.functions.osubot
                     {
                         try
                         {
+                            var temppppinfo = await API.OSU.TryGetUserPlusData(tempOsuInfo!);
+                            if (temppppinfo == null)
+                                return;
                             await Database.Client.UpdateOsuPPlusData(
-                                (await API.OSU.TryGetUserPlusData(tempOsuInfo!))!.User,
+                                temppppinfo!.User,
                                 tempOsuInfo!.Id
                             );
                         }
                         catch { } //更新pp+失败，不返回信息
-                    }).Start();
+                    }).RunSynchronously();
                 }
             }
 

@@ -310,7 +310,7 @@ namespace KanonBot.API
                 {
                     return await GetUserPlusData(user.Username);
                 }
-                catch (System.Exception)
+                catch
                 {
 
                     return null;
