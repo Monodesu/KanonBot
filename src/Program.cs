@@ -154,6 +154,8 @@ drivers.append(
         }
     })
 );
+//kook引擎有内存泄露问题，暂时禁用
+/*
 drivers.append(
     new KanonBot.Drivers.Kook(config.kook!.token!, config.kook!.botID!)
     .onMessage(async (target) =>
@@ -161,6 +163,7 @@ drivers.append(
         await Universal.Parser(target);
     })
 );
+*/
 drivers.StartAll();
 ExitEvent.WaitOne();
 Log.CloseAndFlush();

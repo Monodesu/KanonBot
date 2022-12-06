@@ -161,7 +161,8 @@ namespace KanonBot.functions.osubot
                 bool isDiffReductionMod = false,
                     ez = false,
                     ht = false,
-                    nf = false;
+                    nf = false,
+                    td = false;
                 foreach (var x in mods)
                 {
                     var xx = x.ToLower().Trim();
@@ -179,6 +180,11 @@ namespace KanonBot.functions.osubot
                     {
                         isDiffReductionMod = true;
                         ez = true;
+                    }
+                    if (xx == "td")
+                    {
+                        isDiffReductionMod = true;
+                        td = true;
                     }
                 }
                 data = await Database.Client.GetOsuStandardBeatmapTechData(
@@ -205,6 +211,8 @@ namespace KanonBot.functions.osubot
                             data.RemoveAll(x => x.mod!.IndexOf("NF") != -1);
                         if (!ht)
                             data.RemoveAll(x => x.mod!.IndexOf("HT") != -1);
+                        if (!td)
+                            data.RemoveAll(x => x.mod!.IndexOf("TD") != -1);
                     }
                 }
                 else
@@ -218,7 +226,8 @@ namespace KanonBot.functions.osubot
                 bool isDiffReductionMod = false,
                     ez = false,
                     ht = false,
-                    nf = false;
+                    nf = false,
+                    td = false;
                 foreach (var x in mods)
                 {
                     var xx = x.ToLower().Trim();
@@ -236,6 +245,11 @@ namespace KanonBot.functions.osubot
                     {
                         isDiffReductionMod = true;
                         ez = true;
+                    }
+                    if (xx == "td")
+                    {
+                        isDiffReductionMod = true;
+                        td = true;
                     }
                 }
                 //使用解析到的mod 如果是EZ/HT 需要适当把pprange放宽
@@ -257,6 +271,8 @@ namespace KanonBot.functions.osubot
                         data.RemoveAll(x => x.mod!.IndexOf("NF") != -1);
                     if (!ht)
                         data.RemoveAll(x => x.mod!.IndexOf("HT") != -1);
+                    if (!td)
+                        data.RemoveAll(x => x.mod!.IndexOf("TD") != -1);
                 }
                 else
                 {
@@ -287,6 +303,7 @@ namespace KanonBot.functions.osubot
             msg += $"https://osu.ppy.sh/b/{data[beatmapindex].bid}\nStars:{data[beatmapindex].stars.ToString("0.##*")}  Mod:{mod}  PP:{data[beatmapindex].total}\n";
             await target.reply(msg[..msg.LastIndexOf('\n')]);
         }
+
         async private static Task Bonuspp(Target target, string cmd)
         {
             #region 验证
