@@ -115,7 +115,8 @@ namespace KanonBot.functions.osubot
                         if (scoreInfos[0].Rank.ToUpper() == "XH" ||
                             scoreInfos[0].Rank.ToUpper() == "X" ||
                             scoreInfos[0].Rank.ToUpper() == "SH" ||
-                            scoreInfos[0].Rank.ToUpper() == "S")
+                            scoreInfos[0].Rank.ToUpper() == "S" ||
+                            scoreInfos[0].Rank.ToUpper() == "A")
                             await Database.Client.InsertOsuStandardBeatmapTechData(
                                 scoreInfos[0].Beatmap!.BeatmapId,
                                 data.ppInfo.star,

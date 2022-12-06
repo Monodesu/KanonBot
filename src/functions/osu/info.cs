@@ -307,20 +307,27 @@ namespace KanonBot.functions.osubot
                 //计算pp
                 try
                 {
-                    var data = await PerformanceCalculator.CalculatePanelData(score);
-                    await Database.Client.InsertOsuStandardBeatmapTechData(
-                    score.Beatmap!.BeatmapId,
-                    data.ppInfo.star,
-                                (int)data.ppInfo.ppStats![0].total,
-                                (int)data.ppInfo.ppStats![0].acc!,
-                                (int)data.ppInfo.ppStats![0].speed!,
-                                (int)data.ppInfo.ppStats![0].aim!,
-                                (int)data.ppInfo.ppStats![1].total,
-                                (int)data.ppInfo.ppStats![2].total,
-                                (int)data.ppInfo.ppStats![3].total,
-                                (int)data.ppInfo.ppStats![4].total,
-                                score.Mods
-                            );
+                    if (score.Rank.ToUpper() == "XH" ||
+                           score.Rank.ToUpper() == "X" ||
+                           score.Rank.ToUpper() == "SH" ||
+                           score.Rank.ToUpper() == "S" ||
+                           score.Rank.ToUpper() == "A")
+                    {
+                        var data = await PerformanceCalculator.CalculatePanelData(score);
+                        await Database.Client.InsertOsuStandardBeatmapTechData(
+                        score.Beatmap!.BeatmapId,
+                        data.ppInfo.star,
+                                    (int)data.ppInfo.ppStats![0].total,
+                                    (int)data.ppInfo.ppStats![0].acc!,
+                                    (int)data.ppInfo.ppStats![0].speed!,
+                                    (int)data.ppInfo.ppStats![0].aim!,
+                                    (int)data.ppInfo.ppStats![1].total,
+                                    (int)data.ppInfo.ppStats![2].total,
+                                    (int)data.ppInfo.ppStats![3].total,
+                                    (int)data.ppInfo.ppStats![4].total,
+                                    score.Mods
+                                );
+                    }
                 }
                 catch
                 {

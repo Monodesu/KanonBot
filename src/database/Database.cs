@@ -558,12 +558,14 @@ public class Client
         return await db.OSUSeasonalPass.Where(it => it.uid == oid).Where(it => it.mode == mode).FirstOrDefaultAsync();
     }
 
-    public static async Task<List<OsuStandardBeatmapTechData>> GetOsuStandardBeatmapTechData(int aim, int speed, int acc, int range = 20)
+    public static async Task<List<OsuStandardBeatmapTechData>> GetOsuStandardBeatmapTechData(int aim, int speed, int acc, int range = 20, bool boost = false)
     {
         using var db = GetInstance();
-        return await db.OsuStandardBeatmapTechData.Where(it => it.aim > aim - range / 2 && it.aim < aim + range
-                                                               && it.speed > speed - range / 2 && it.speed < speed + range
-                                                               && it.acc > acc - range / 2 && it.acc < acc + range
+        var trange = range;
+        if (boost) trange = 50;
+        return await db.OsuStandardBeatmapTechData.Where(it => it.aim > aim - range / 2 && it.aim < aim + trange
+                                                               && it.speed > speed - range / 2 && it.speed < speed + trange
+                                                               && it.acc > acc - range / 2 && it.acc < acc + trange
                                                                )
 
                                                       .ToListAsync();

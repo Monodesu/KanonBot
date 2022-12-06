@@ -215,7 +215,8 @@ namespace KanonBot.functions.osubot
                     ht = false,
                     nf = false,
                     td = false,
-                    so = false;
+                    so = false,
+                    dt = false;
                 foreach (var x in mods)
                 {
                     var xx = x.ToLower().Trim();
@@ -244,12 +245,18 @@ namespace KanonBot.functions.osubot
                         isDiffReductionMod = true;
                         so = true;
                     }
+                    if (xx == "dt" || xx == "nc")
+                    {
+                        dt = true;
+                    }
                 }
                 data = await Database.Client.GetOsuStandardBeatmapTechData(
                                        (int)ppinfo.ppInfo.ppStat.aim!,
                                        (int)ppinfo.ppInfo.ppStat.speed!,
                                        (int)ppinfo.ppInfo.ppStat.acc!,
-                                       isDiffReductionMod ? NFEZHT_range : normal_range);
+                                       isDiffReductionMod ? NFEZHT_range : normal_range,
+                                       dt
+                                       );
                 if (data.Count > 0)
                 {
                     if (mods.Count == 0)
@@ -287,7 +294,8 @@ namespace KanonBot.functions.osubot
                     ht = false,
                     nf = false,
                     td = false,
-                    so = false;
+                    so = false,
+                    dt = false;
                 foreach (var x in mods)
                 {
                     var xx = x.ToLower().Trim();
@@ -316,13 +324,19 @@ namespace KanonBot.functions.osubot
                         isDiffReductionMod = true;
                         so = true;
                     }
+                    if (xx == "dt" || xx == "nc")
+                    {
+                        dt = true;
+                    }
                 }
                 //使用解析到的mod 如果是EZ/HT 需要适当把pprange放宽
                 data = await Database.Client.GetOsuStandardBeatmapTechData(
                                        (int)ppinfo.ppInfo.ppStat.aim!,
                                        (int)ppinfo.ppInfo.ppStat.speed!,
                                        (int)ppinfo.ppInfo.ppStat.acc!,
-                                       isDiffReductionMod ? NFEZHT_range : normal_range);
+                                       isDiffReductionMod ? NFEZHT_range : normal_range,
+                                       dt
+                                       );
 
                 if (data.Count > 0)
                 {
@@ -370,12 +384,12 @@ namespace KanonBot.functions.osubot
             msg +=
                 $"""
                 https://osu.ppy.sh/b/{data[beatmapindex].bid}
-                Stars:{data[beatmapindex].stars.ToString("0.##*")}  Mod:{mod}
+                Stars: {data[beatmapindex].stars.ToString("0.##*")}  Mod: {mod}
                 PP Statistics:
-                100%:{data[beatmapindex].total} 99%:{data[beatmapindex].pp_99acc}
-                98%:{data[beatmapindex].pp_98acc} 97%:{data[beatmapindex].pp_97acc} 95%:{data[beatmapindex].pp_95acc}
+                100%: {data[beatmapindex].total}pp  99%: {data[beatmapindex].pp_99acc}pp
+                98%: {data[beatmapindex].pp_98acc}pp  97%: {data[beatmapindex].pp_97acc}pp  95%: {data[beatmapindex].pp_95acc}pp
                 """;
-            await target.reply(msg[..msg.LastIndexOf('\n')]);
+            await target.reply(msg);
         }
 
         async private static Task Bonuspp(Target target, string cmd)
