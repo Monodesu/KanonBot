@@ -3037,7 +3037,7 @@ namespace KanonBot.DrawV2
             long[] RankHistory;
             if (data.userInfo.RankHistory != null)
             {
-                RankHistory = data.userInfo.RankHistory.Data.Take(8).Reverse().ToArray();
+                RankHistory = data.userInfo.RankHistory.Data.Reverse().Take(8).ToArray();
             }
             else
             {
