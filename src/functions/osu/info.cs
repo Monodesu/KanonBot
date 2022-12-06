@@ -1,9 +1,11 @@
 ﻿using KanonBot.API;
 using KanonBot.Drivers;
 using KanonBot.functions.osu;
+using KanonBot.functions.osu.rosupp;
 using KanonBot.Message;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
+using static LinqToDB.Common.Configuration;
 
 namespace KanonBot.functions.osubot
 {
@@ -207,11 +209,14 @@ namespace KanonBot.functions.osubot
             if (DBOsuInfo != null)
             {
                 custominfoengineVer = DBOsuInfo!.customInfoEngineVer;
-                if (Enum.IsDefined(typeof(LegacyImage.Draw.UserPanelData.CustomMode), DBOsuInfo.InfoPanelV2_Mode)) {
+                if (Enum.IsDefined(typeof(LegacyImage.Draw.UserPanelData.CustomMode), DBOsuInfo.InfoPanelV2_Mode))
+                {
                     data.customMode = (LegacyImage.Draw.UserPanelData.CustomMode)DBOsuInfo.InfoPanelV2_Mode;
                     if (data.customMode == LegacyImage.Draw.UserPanelData.CustomMode.Custom)
                         data.ColorConfigRaw = DBOsuInfo.InfoPanelV2_CustomMode!;
-                } else {
+                }
+                else
+                {
                     throw new Exception("未知的自定义模式");
                 }
             }
@@ -219,6 +224,7 @@ namespace KanonBot.functions.osubot
             using var stream = new MemoryStream();
             //info默认输出高质量图片？
             SixLabors.ImageSharp.Image img;
+            OSU.Models.Score[]? allBP = System.Array.Empty<OSU.Models.Score>();
             switch (custominfoengineVer) //0=null 1=v1 2=v2
             {
                 case 1:
@@ -238,7 +244,7 @@ namespace KanonBot.functions.osubot
                         LegacyImage.Draw.UserPanelData.CustomMode.Dark => DrawV2.OsuInfoPanelV2.InfoCustom.DarkDefault,
                         _ => throw new ArgumentOutOfRangeException("未知的自定义模式")
                     };
-                    var allBP = await OSU.GetUserScores(
+                    allBP = await OSU.GetUserScores(
                         data.userInfo.Id,
                         OSU.Enums.UserScoreType.Best,
                         data.userInfo.PlayMode,
@@ -273,6 +279,50 @@ namespace KanonBot.functions.osubot
                     DBOsuInfo!.osu_mode!,
                     tempOsuInfo.Statistics.TotalHits
                 );
+            try
+            {
+                if (data.userInfo.PlayMode == OSU.Enums.Mode.OSU) //只存std的
+                    if (allBP!.Length > 0)
+                        await InsertBeatmapTechInfo(allBP);
+                    else
+                    {
+                        allBP = await OSU.GetUserScores(
+                        data.userInfo.Id,
+                        OSU.Enums.UserScoreType.Best,
+                        OSU.Enums.Mode.OSU,
+                        100,
+                        0
+                    );
+                        if (allBP!.Length > 0)
+                            await InsertBeatmapTechInfo(allBP);
+                    }
+            }
+            catch { }
+        }
+
+        async public static Task InsertBeatmapTechInfo(OSU.Models.Score[] allbp)
+        {
+            foreach (var score in allbp)
+            {
+                //计算pp
+                try
+                {
+                    var data = await PerformanceCalculator.CalculatePanelData(score);
+                    await Database.Client.InsertOsuStandardBeatmapTechData(
+                    score.Beatmap!.BeatmapId,
+                    data.ppInfo.star,
+                                (int)data.ppInfo.ppStats![0].total,
+                                (int)data.ppInfo.ppStats![0].acc!,
+                                (int)data.ppInfo.ppStats![0].speed!,
+                                (int)data.ppInfo.ppStats![0].aim!,
+                                score.Mods
+                            );
+                }
+                catch
+                {
+                    //无视错误
+                }
+            }
         }
     }
 }

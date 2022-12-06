@@ -544,7 +544,7 @@ public class Client
             return true;
         }
     }
-    public static async Task<OSUSeasonalPass> GetSeasonalPassInfo(long oid, string mode)
+    public static async Task<OSUSeasonalPass?> GetSeasonalPassInfo(long oid, string mode)
     {
         using var db = GetInstance();
         return await db.OSUSeasonalPass.Where(it => it.uid == oid).Where(it => it.mode == mode).FirstOrDefaultAsync();
@@ -553,9 +553,9 @@ public class Client
     public static async Task<List<OsuStandardBeatmapTechData>> GetOsuStandardBeatmapTechData(int aim, int speed, int acc, int range = 20)
     {
         using var db = GetInstance();
-        return await db.OsuStandardBeatmapTechData.Where(it => it.aim > aim - range && it.aim < aim + range
-                                                               && it.speed > speed - range && it.speed < speed + range
-                                                               && it.acc > acc - range && it.acc < acc + range
+        return await db.OsuStandardBeatmapTechData.Where(it => it.aim > aim - range / 2 && it.aim < aim + range
+                                                               && it.speed > speed - range / 2 && it.speed < speed + range
+                                                               && it.acc > acc - range / 2 && it.acc < acc + range
                                                                )
 
                                                       .ToListAsync();

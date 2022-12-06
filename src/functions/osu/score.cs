@@ -119,26 +119,26 @@ namespace KanonBot.functions.osubot
                     ImageSegment.Type.Base64
                 )
             );
-            if (scoreData.Score.Mode == OSU.Enums.Mode.OSU)
-            {
-                //rosupp
-                if (
-                    scoreData.Score.Beatmap.Status == OSU.Enums.Status.ranked
-                    || scoreData.Score.Beatmap.Status == OSU.Enums.Status.approved
-                )
-                    await Database.Client.InsertOsuStandardBeatmapTechData(
-                        scoreData.Score.Beatmap.BeatmapId,
-                        data.ppInfo.star,
-                        (int)data.ppInfo.ppStats![0].total,
-                        (int)data.ppInfo.ppStats![0].acc!,
-                        (int)data.ppInfo.ppStats![0].speed!,
-                        (int)data.ppInfo.ppStats![0].aim!,
-                        scoreData.Score.Mods
-                    );
+            //if (scoreData.Score.Mode == OSU.Enums.Mode.OSU)
+            //{
+                //recent、score不再添加
+                //if (
+                //    scoreData.Score.Beatmap.Status == OSU.Enums.Status.ranked
+                //    || scoreData.Score.Beatmap.Status == OSU.Enums.Status.approved
+                //)
+                //    await Database.Client.InsertOsuStandardBeatmapTechData(
+                //        scoreData.Score.Beatmap.BeatmapId,
+                //        data.ppInfo.star,
+                //        (int)data.ppInfo.ppStats![0].total,
+                //        (int)data.ppInfo.ppStats![0].acc!,
+                //        (int)data.ppInfo.ppStats![0].speed!,
+                //        (int)data.ppInfo.ppStats![0].aim!,
+                //        scoreData.Score.Mods
+                //    );
                 //osu-tools
                 // var data = await KanonBot.osutools.Calculator.CalculateAsync(scoreData.Score);
                 // 绘制
-            }
+            //}
         }
     }
 }

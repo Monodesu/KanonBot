@@ -52,6 +52,12 @@ namespace KanonBot.functions.osubot
                 case "recommend":
                     await BeatmapRecommend(target, childCmd);
                     break;
+                case "mu":
+                    await SendProfileLink(target, childCmd);
+                    break;
+                case "profile":
+                    await SendProfileLink(target, childCmd);
+                    break;
                 default:
                     await target.reply(
                                        """
@@ -62,15 +68,61 @@ namespace KanonBot.functions.osubot
                                             todaybp
                                             seasonalpass
                                             recommend
+                                            mu/profile
                                        """);
                     return;
             }
         }
 
+        async private static Task SendProfileLink(Target target, string cmd)
+        {
+            #region 验证
+            long? osuID = null;
+            OSU.Enums.Mode? mode;
+            Database.Model.User? DBUser = null;
+            Database.Model.UserOSU? DBOsuInfo = null;
+
+            // 解析指令
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
+            mode = command.osu_mode;
+
+            // 验证账户
+            var AccInfo = Accounts.GetAccInfo(target);
+            DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+            if (DBUser == null)
+            // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            // 验证账号信息
+            var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
+            DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
+            if (DBOsuInfo == null)
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+
+            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+            osuID = DBOsuInfo.osu_uid;
+
+
+
+            // 验证osu信息
+            var OnlineOsuInfo = await OSU.GetUser(osuID!.Value, OSU.Enums.Mode.OSU); //取osu模式的值
+            if (OnlineOsuInfo == null)
+            {
+                if (DBOsuInfo != null)
+                    await target.reply("被办了。");
+                else
+                    await target.reply("猫猫没有找到此用户。");
+                // 中断查询
+                return;
+            }
+            OnlineOsuInfo.PlayMode = mode!.Value;
+            #endregion
+            await target.reply($"{OnlineOsuInfo.Username}\nhttps://osu.ppy.sh/u/{OnlineOsuInfo.Id}");
+        }
+
         async private static Task BeatmapRecommend(Target target, string cmd)
         {
-            int normal_range = 30;
-            int NFEZHT_range = 100;
+            int normal_range = 20;
+            int NFEZHT_range = 60;
             //only osu!standard
             #region 验证
             long? osuID = null;
@@ -119,7 +171,7 @@ namespace KanonBot.functions.osubot
                         OnlineOsuInfo.Id,
                         OSU.Enums.UserScoreType.Best,
                         OSU.Enums.Mode.OSU,
-                        50,
+                        20,
                         0
                     );
             if (allBP == null)
@@ -127,14 +179,14 @@ namespace KanonBot.functions.osubot
                 await target.reply("打过的图太少了，多玩一玩再来寻求推荐吧~");
                 return;
             }
-            if (allBP.Length < 50)
+            if (allBP.Length < 20)
             {
                 await target.reply("打过的图太少了，多玩一玩再来寻求推荐吧~");
                 return;
             }
 
             //从数据库获取相似的谱面
-            var randBP = allBP![new Random().Next(0, 49)];
+            var randBP = allBP![new Random().Next(0, 19)];
             //get stars from rosupp
             var ppinfo = await PerformanceCalculator.CalculatePanelData(randBP);
 
