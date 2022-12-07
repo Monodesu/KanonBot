@@ -256,6 +256,7 @@ namespace KanonBot.functions.osubot
                         allBP!,
                         v2Options,
                         DBOsuInfo != null,
+                        false,
                         isDataOfDayAvaiavle
                     );
                     await img.SaveAsync(stream, new PngEncoder());

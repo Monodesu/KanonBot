@@ -756,7 +756,8 @@ namespace KanonBot.DrawV2
             OSU.Models.Score[] allBP,
             InfoCustom v2Options,
             bool isBonded = false,
-            bool eventmode = false
+            bool eventmode = false,
+            bool isDataOfDayAvaiavle = true
         )
         {
             var ColorMode = data.customMode;
@@ -880,6 +881,8 @@ namespace KanonBot.DrawV2
 
             var info = new Image<Rgba32>(4000, 2640);
             //获取全部bp
+
+            var prevStatistics = data.prevUserInfo?.Statistics ?? data.userInfo.Statistics; // 没有就为当前数据
 
             //设定textOption/drawOption
             var textOptions = new TextOptions(new Font(TorusSemiBold, 120))
@@ -1247,7 +1250,7 @@ namespace KanonBot.DrawV2
                 if (
                     Math.Abs(
                         data.userInfo.Statistics.CountryRank
-                            - data.prevUserInfo!.Statistics.CountryRank
+                            - prevStatistics.CountryRank
                     ) >= 1
                 )
                 {
@@ -1263,7 +1266,7 @@ namespace KanonBot.DrawV2
                                     "{0:N0}",
                                     Math.Abs(
                                         data.userInfo.Statistics.CountryRank
-                                            - data.prevUserInfo!.Statistics.CountryRank
+                                            - prevStatistics.CountryRank
                                     )
                                 ),
                                 new SolidBrush(CountryRankDiffColor),
@@ -1277,7 +1280,7 @@ namespace KanonBot.DrawV2
                     if (
                         (
                             data.userInfo.Statistics.CountryRank
-                            - data.prevUserInfo!.Statistics.CountryRank
+                            - prevStatistics.CountryRank
                         ) > 0
                     )
                         cr_indicator_icon_increase.Mutate(x => x.Rotate(180));
@@ -1319,7 +1322,7 @@ namespace KanonBot.DrawV2
             );
             if (isBonded)
             {
-                if (Math.Abs(data.userInfo.Statistics.PP - data.prevUserInfo!.Statistics.PP) >= 1.0)
+                if (Math.Abs(data.userInfo.Statistics.PP - prevStatistics.PP) >= 1.0)
                 {
                     textOptions.HorizontalAlignment = HorizontalAlignment.Right;
                     textOptions.Origin = new PointF(3735, 350);
@@ -1333,7 +1336,7 @@ namespace KanonBot.DrawV2
                                     "{0:N0}",
                                     Math.Abs(
                                         data.userInfo.Statistics.PP
-                                            - data.prevUserInfo!.Statistics.PP
+                                            - prevStatistics.PP
                                     )
                                 ),
                                 new SolidBrush(ppDiffColor),
@@ -1344,7 +1347,7 @@ namespace KanonBot.DrawV2
                         $"./work/panelv2/icons/indicator.png"
                     );
                     pp_indicator_icon_increase.Mutate(x => x.Resize(36, 36));
-                    if ((data.userInfo.Statistics.PP - data.prevUserInfo!.Statistics.PP) < 0)
+                    if ((data.userInfo.Statistics.PP - prevStatistics.PP) < 0)
                         pp_indicator_icon_increase.Mutate(x => x.Rotate(180));
                     pp_indicator_icon_increase.Mutate(
                         x =>
@@ -1386,7 +1389,7 @@ namespace KanonBot.DrawV2
                 if (
                     Math.Abs(
                         data.userInfo.Statistics.HitAccuracy
-                            - data.prevUserInfo!.Statistics.HitAccuracy
+                            - prevStatistics.HitAccuracy
                     ) >= 0.01
                 )
                 {
@@ -1401,7 +1404,7 @@ namespace KanonBot.DrawV2
                                 string.Format(
                                     "{0:0.##}%",
                                     data.userInfo.Statistics.HitAccuracy
-                                        - data.prevUserInfo!.Statistics.HitAccuracy
+                                        - prevStatistics.HitAccuracy
                                 ),
                                 new SolidBrush(accDiffColor),
                                 null
@@ -1414,7 +1417,7 @@ namespace KanonBot.DrawV2
                     if (
                         (
                             data.userInfo.Statistics.HitAccuracy
-                            - data.prevUserInfo!.Statistics.HitAccuracy
+                            - prevStatistics.HitAccuracy
                         ) < 0.0
                     )
                         acc_indicator_icon_increase.Mutate(x => x.Rotate(180));
@@ -1643,7 +1646,7 @@ namespace KanonBot.DrawV2
                 //play time
                 textOptions.Origin = new PointF(1705, 1265);
                 text = Utils.Duration2StringWithoutSec(
-                    data.userInfo.Statistics.PlayTime - data.prevUserInfo!.Statistics.PlayTime
+                    data.userInfo.Statistics.PlayTime - prevStatistics.PlayTime
                 );
                 info.Mutate(
                     x =>
@@ -1685,7 +1688,7 @@ namespace KanonBot.DrawV2
                 textOptions.Origin = new PointF(2285, 1265);
                 text = string.Format(
                     "{0:N0}",
-                    data.userInfo.Statistics.TotalHits - data.prevUserInfo!.Statistics.TotalHits
+                    data.userInfo.Statistics.TotalHits - prevStatistics.TotalHits
                 );
                 info.Mutate(
                     x =>
@@ -1727,7 +1730,7 @@ namespace KanonBot.DrawV2
                 textOptions.Origin = new PointF(2853, 1265);
                 text = string.Format(
                     "{0:N0}",
-                    data.userInfo.Statistics.PlayCount - data.prevUserInfo!.Statistics.PlayCount
+                    data.userInfo.Statistics.PlayCount - prevStatistics.PlayCount
                 );
                 info.Mutate(
                     x =>
@@ -1769,7 +1772,7 @@ namespace KanonBot.DrawV2
                 textOptions.Origin = new PointF(3420, 1265);
                 text = string.Format(
                     "{0:N0}",
-                    data.userInfo.Statistics.RankedScore - data.prevUserInfo!.Statistics.RankedScore
+                    data.userInfo.Statistics.RankedScore - prevStatistics.RankedScore
                 );
                 info.Mutate(
                     x =>
@@ -3086,13 +3089,48 @@ namespace KanonBot.DrawV2
             //textOptions.Origin = new PointF(2000, 2582);
             //info.Mutate(x => x.DrawText(drawOptions, textOptions, "this is a test version and does not represent the final quality", new SolidBrush(footerColor), null));
 
+            /*
+            if (data.daysBefore > 1)
+            {
+                if (isDataOfDayAvaiavle)
+                {
+                    textOptions.Origin = new PointF(300, 25);
+                    info.Mutate(
+                        x =>
+                            x.DrawText(
+                                drawOptions,
+                                textOptions,
+                                $"对比自{data.daysBefore}天前",
+                                new SolidBrush(Color.White),
+                                null
+                            )
+                    );
+                }
+                else
+                {
+                    textOptions.Origin = new PointF(300, 25);
+                    info.Mutate(
+                        x =>
+                            x.DrawText(
+                                drawOptions,
+                                textOptions,
+                                $" 请求的日期没有数据.." + $"当前数据对比自{data.daysBefore}天前",
+                                new SolidBrush(Color.White),
+                                null
+                            )
+                    );
+                }
+            }
+
+            */
+
             //resize to 1920x?
             info.Mutate(
-                x =>
-                    x.Resize(
-                        new ResizeOptions() { Size = new Size(1920, 0), Mode = ResizeMode.Max }
-                    )
-            );
+            x =>
+                x.Resize(
+                    new ResizeOptions() { Size = new Size(1920, 0), Mode = ResizeMode.Max }
+                )
+        );
             return info;
         }
 
