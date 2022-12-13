@@ -1202,11 +1202,11 @@ namespace KanonBot.functions.osubot
                 {
                     await target.reply("指定的范围不正确"); return;
                 }
-                if (EndAt < 2 || StartAt > 100)
+                if (EndAt < 2 || EndAt > 100)
                 {
                     await target.reply("指定的范围不正确"); return;
                 }
-                if (EndAt > StartAt)
+                if (EndAt < StartAt)
                 {
                     await target.reply("指定的范围不正确"); return;
                 }
