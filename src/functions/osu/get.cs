@@ -1206,6 +1206,10 @@ namespace KanonBot.functions.osubot
                 {
                     await target.reply("指定的范围不正确"); return;
                 }
+                if (EndAt > StartAt)
+                {
+                    await target.reply("指定的范围不正确"); return;
+                }
             }
             List<OSU.Models.Score> TBP = new();
             List<int> Rank = new();
