@@ -37,9 +37,15 @@ using System.Collections;
 
 namespace KanonBot.image
 {
-    public static class TodaysBP
+    public static class ScoreList
     {
-        public static async Task<Img> Draw(List<OSU.Models.Score> TBP, List<int> Rank, OSU.Models.User userInfo)
+        public enum Type
+        {
+            TODAYBP,
+            BPLIST,
+            RECENTLIST
+        }
+        public static async Task<Img> Draw(Type type, List<OSU.Models.Score> TBP, List<int> Rank, OSU.Models.User userInfo)
         {
             //设定textOption/drawOption
             var textOptions = new TextOptions(new Font(TorusSemiBold, 120))
@@ -71,7 +77,17 @@ namespace KanonBot.image
             image.Mutate(x => x.Fill(Color.White));
 
             //绘制页眉
-            using var MainPic = await ReadImageRgba("./work/panelv2/tbp_main_score.png");
+            string MainPicPath = "";
+            switch (type)
+            {
+                case Type.TODAYBP:
+                    MainPicPath = "./work/panelv2/tbp_main_score.png";
+                    break;
+                case Type.BPLIST:
+                    MainPicPath = "./work/panelv2/bplist_main_score.png";
+                    break;
+            }
+            using var MainPic = await ReadImageRgba(MainPicPath);
 
             //绘制beatmap图像
             var scorebgPath = $"./work/background/{TBP[0].Beatmap!.BeatmapId}.png";

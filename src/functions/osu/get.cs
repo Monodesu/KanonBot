@@ -10,6 +10,7 @@ using KanonBot.API;
 using KanonBot.Drivers;
 using KanonBot.functions.osu;
 using KanonBot.functions.osu.rosupp;
+using KanonBot.image;
 using KanonBot.Message;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -36,8 +37,8 @@ namespace KanonBot.functions.osubot
                 case "bonuspp":
                     await Bonuspp(target, childCmd);
                     break;
-                case "elo":
-                    //await Elo(target, childCmd);
+                case "bplist":
+                    await BPList(target, childCmd);
                     break;
                 case "rolecost":
                     await Rolecost(target, childCmd);
@@ -66,6 +67,7 @@ namespace KanonBot.functions.osubot
                                        !get bonuspp
                                             rolecost
                                             bpht
+                                            bplist
                                             todaybp
                                             seasonalpass
                                             recommend
@@ -1025,7 +1027,7 @@ namespace KanonBot.functions.osubot
             }
             else
             {
-                var image = await KanonBot.image.TodaysBP.Draw(TBP, Rank, OnlineOsuInfo);
+                var image = await KanonBot.image.ScoreList.Draw(ScoreList.Type.TODAYBP, TBP, Rank, OnlineOsuInfo);
                 using var stream = new MemoryStream();
                 await image.SaveAsync(stream, new PngEncoder());
                 await target.reply(
@@ -1121,6 +1123,114 @@ namespace KanonBot.functions.osubot
             $"({t}%)" +
             $"\n共击打了{seasonalpassinfo.tth - seasonalpassinfo.inittth}次\n距离升级还需要{Math.Abs(temptth)}tth";
             await target.reply(str);
+        }
+
+        async private static Task BPList(Target target, string cmd)
+        {
+            #region 验证
+            long? osuID = null;
+            OSU.Enums.Mode? mode;
+            Database.Model.User? DBUser = null;
+            Database.Model.UserOSU? DBOsuInfo = null;
+
+            // 解析指令
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
+            mode = command.osu_mode;
+
+            // 验证账户
+            var AccInfo = Accounts.GetAccInfo(target);
+            DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+            if (DBUser == null)
+            // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            // 验证账号信息
+            var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
+            DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
+            if (DBOsuInfo == null)
+            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+
+            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+            osuID = DBOsuInfo.osu_uid;
+
+
+            // 验证osu信息
+            var OnlineOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
+            if (OnlineOsuInfo == null)
+            {
+                if (DBOsuInfo != null)
+                    await target.reply("被办了。");
+                else
+                    await target.reply("猫猫没有找到此用户。");
+                // 中断查询
+                return;
+            }
+            OnlineOsuInfo.PlayMode = mode!.Value;
+            #endregion
+
+            var allBP = await OSU.GetUserScores(OnlineOsuInfo!.Id, OSU.Enums.UserScoreType.Best, mode!.Value, 100, 0);
+            if (allBP == null) { await target.reply("查询成绩时出错。"); return; }
+
+            //开始解析命令
+            int StartAt = 1;
+            int EndAt = 10;
+            var tempcmd = cmd.Trim().ToLower();
+            if (tempcmd != "")
+            {
+                if (tempcmd.IndexOf('-') != -1)
+                {
+                    //指定了范围
+                    var t = tempcmd.Split('-');
+                    if (!int.TryParse(t[0].Trim(), out StartAt))
+                    {
+                        await target.reply("指定的范围不正确"); return;
+                    }
+                    if (!int.TryParse(t[1].Trim(), out EndAt))
+                    {
+                        await target.reply("指定的范围不正确"); return;
+                    }
+                }
+                else
+                {
+                    //只指定了最大值
+                    if (!int.TryParse(tempcmd, out EndAt))
+                    {
+                        await target.reply("指定的范围不正确"); return;
+                    }
+                }
+
+                if (StartAt < 1 || StartAt > 99)
+                {
+                    await target.reply("指定的范围不正确"); return;
+                }
+                if (EndAt < 2 || StartAt > 100)
+                {
+                    await target.reply("指定的范围不正确"); return;
+                }
+            }
+            List<OSU.Models.Score> TBP = new();
+            List<int> Rank = new();
+            for (int i = StartAt - 1; i < (allBP.Length > EndAt ? EndAt : allBP.Length); ++i) TBP.Add(allBP[i]);
+            for (int i = StartAt - 1; i < (allBP.Length > EndAt ? EndAt : allBP.Length); ++i) Rank.Add(i + 1);
+
+            if (TBP.Count == 0)
+            {
+
+                if (cmd == "")
+                    await target.reply($"你在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上还没有bp呢。。");
+                else
+                    await target.reply($"{OnlineOsuInfo.Username} 在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上还没有bp呢。。");
+            }
+            else
+            {
+                var image = await KanonBot.image.ScoreList.Draw(ScoreList.Type.BPLIST, TBP, Rank, OnlineOsuInfo);
+                using var stream = new MemoryStream();
+                await image.SaveAsync(stream, new PngEncoder());
+                await target.reply(
+                    new Chain().image(
+                    Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
+                        ImageSegment.Type.Base64
+                ));
+            }
         }
     }
 }
