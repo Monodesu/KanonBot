@@ -116,7 +116,9 @@ namespace KanonBot.image
                         )
                 );
 
-            image.Mutate(x => x.DrawImage(scorebg, new Point(92, 433), 1));
+            Img bgtemp = new Image<Rgba32>(365, 210);
+            bgtemp.Mutate(x => x.DrawImage(scorebg, new Point(0, 0), 1));
+            image.Mutate(x => x.DrawImage(bgtemp, new Point(92, 433), 1));
             image.Mutate(x => x.DrawImage(MainPic, new Point(0, 0), 1));
 
             //头像、用户名、PP
