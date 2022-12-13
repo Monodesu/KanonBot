@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -12,6 +13,7 @@ using KanonBot.functions.osu.rosupp;
 using KanonBot.Message;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SixLabors.ImageSharp.Formats.Png;
 using static KanonBot.API.OSU.Models;
 using static KanonBot.API.OSU.Models.PPlusData;
 
@@ -35,7 +37,7 @@ namespace KanonBot.functions.osubot
                     await Bonuspp(target, childCmd);
                     break;
                 case "elo":
-                    await Elo(target, childCmd);
+                    //await Elo(target, childCmd);
                     break;
                 case "rolecost":
                     await Rolecost(target, childCmd);
@@ -62,7 +64,6 @@ namespace KanonBot.functions.osubot
                     await target.reply(
                                        """
                                        !get bonuspp
-                                            elo
                                             rolecost
                                             bpht
                                             todaybp
@@ -983,7 +984,24 @@ namespace KanonBot.functions.osubot
 
             var allBP = await OSU.GetUserScores(OnlineOsuInfo!.Id, OSU.Enums.UserScoreType.Best, mode!.Value, 100, 0);
             if (allBP == null) { await target.reply("查询成绩时出错。"); return; }
-            var str = $"";
+            List<OSU.Models.Score> TBP = new();
+            List<int> Rank = new();
+
+            //test codes
+            //foreach (var x in allBP) TBP.Add(x);
+            //for (int i = 0; i < allBP.Length; ++i) Rank.Add(i + 1);
+            //var image1 = await KanonBot.image.TodaysBP.Draw(TBP.Take(10).ToList(), Rank, OnlineOsuInfo);
+            //using var stream1 = new MemoryStream();
+            //await image1.SaveAsync(stream1, new PngEncoder());
+            //await target.reply(
+            //    new Chain().image(
+            //    Convert.ToBase64String(stream1.ToArray(), 0, (int)stream1.Length),
+            //        ImageSegment.Type.Base64
+            //));
+            //return;
+            //test end
+
+
             var t = DateTime.Now.Hour < 4 ? DateTime.Now.Date.AddDays(-1).AddHours(4) : DateTime.Now.Date.AddHours(4);
             for (int i = 0; i < allBP.Length; i++)
             {
@@ -991,12 +1009,15 @@ namespace KanonBot.functions.osubot
                 var ts = (item.CreatedAt - t).Days;
                 if (0 <= ts && ts < 1)
                 {
-                    str += $"\n#{i + 1} {item.Rank} {item.Accuracy * 100:0.##}% {item.PP:0.##}pp";
-                    if (item.Mods.Length > 0) str += $" +{string.Join(',', item.Mods)}";
+                    TBP.Add(item);
+                    Rank.Add(i + 1);
+                    //str += $"\n#{i + 1} {item.Rank} {item.Accuracy * 100:0.##}% {item.PP:0.##}pp";
+                    //if (item.Mods.Length > 0) str += $" +{string.Join(',', item.Mods)}";
                 }
             }
-            if (str == "")
+            if (TBP.Count == 0)
             {
+
                 if (cmd == "")
                     await target.reply($"你今天在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上还没有新bp呢。。");
                 else
@@ -1004,7 +1025,15 @@ namespace KanonBot.functions.osubot
             }
             else
             {
-                await target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上新增的BP:" + str);
+                var image = await KanonBot.image.TodaysBP.Draw(TBP, Rank, OnlineOsuInfo);
+                using var stream = new MemoryStream();
+                await image.SaveAsync(stream, new PngEncoder());
+                await target.reply(
+                    new Chain().image(
+                    Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
+                        ImageSegment.Type.Base64
+                ));
+                //await target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上新增的BP:" + str);
             }
         }
 
