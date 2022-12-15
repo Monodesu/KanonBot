@@ -12,12 +12,12 @@ using SixLabors.ImageSharp.Diagnostics;
 
 namespace KanonBot.functions.osu.rosupp
 {
-
     public static class PerformanceCalculator
     {
         class Beatmap
         {
             Calculator calculator;
+
             public Beatmap(byte[] beatmapData)
             {
                 // 手动处理内存
@@ -26,10 +26,10 @@ namespace KanonBot.functions.osu.rosupp
                 data.Free();
             }
 
-            public ref Calculator GetRef()
-            {
-                return ref this.calculator;
-            }
+            public ref Calculator GetRef() => ref this.calculator;
+
+            public CalculateResult Calculate(ScoreParams scoreParams) =>
+                this.calculator.Calculate(scoreParams.Context);
         }
         public static List<string> mods_str = new(){ "NF", "EZ", "TD", "HD", "HR", "SD", "DT", "RX",
                                                     "HT", "NC", "FL", "AU", "SO", "AP", "PF", "K4",
@@ -37,15 +37,24 @@ namespace KanonBot.functions.osu.rosupp
                                                     "K9", "KC", "K1", "K3", "K2", "S2", "MR" };
         public struct PPInfo
         {
-            public required double star, CS, HP, AR, OD;
+            public required double star,
+                CS,
+                HP,
+                AR,
+                OD;
             public double? accuracy;
             public uint? maxCombo;
             public required PPStat ppStat;
             public List<PPStat>? ppStats;
+
             public struct PPStat
             {
                 public required double total;
-                public double? aim, speed, acc, strain, flashlight;
+                public double? aim,
+                    speed,
+                    acc,
+                    strain,
+                    flashlight;
             }
         }
 
@@ -66,8 +75,7 @@ namespace KanonBot.functions.osu.rosupp
             Autoplay = 1 << 11,
             SpunOut = 1 << 12,
             Relax2 = 1 << 13, // Autopilot
-            Perfect =
-            1 << 14 | SuddenDeath, // Only set along with SuddenDeath. i.e: PF only gives 16416
+            Perfect = 1 << 14 | SuddenDeath, // Only set along with SuddenDeath. i.e: PF only gives 16416
             Key4 = 1 << 15,
             Key5 = 1 << 16,
             Key6 = 1 << 17,
@@ -85,12 +93,22 @@ namespace KanonBot.functions.osu.rosupp
             ScoreV2 = 1 << 29,
             Mirror = 1 << 30,
             KeyMod = Key1 | Key2 | Key3 | Key4 | Key5 | Key6 | Key7 | Key8 | Key9 | KeyCoop,
-            FreeModAllowed = NoFail | Easy | Hidden | HardRock | SuddenDeath | Flashlight | FadeIn
-            | Relax | Relax2 | SpunOut | KeyMod,
+            FreeModAllowed =
+                NoFail
+                | Easy
+                | Hidden
+                | HardRock
+                | SuddenDeath
+                | Flashlight
+                | FadeIn
+                | Relax
+                | Relax2
+                | SpunOut
+                | KeyMod,
             ScoreIncreaseMods = Hidden | HardRock | DoubleTime | Flashlight | FadeIn
         };
 
-        public static PPInfo Result2Info(CalculateResult result)
+        public static PPInfo ToPPInfo(this CalculateResult result)
         {
             return new PPInfo()
             {
@@ -119,25 +137,43 @@ namespace KanonBot.functions.osu.rosupp
             public required OSU.Enums.Mode mode;
             public string[]? mods;
             public double? acc;
-            public uint? n300, n100, n50, nmisses, nkatu, combo, passedObjects, clockRate;
+            public uint? n300,
+                n100,
+                n50,
+                nmisses,
+                nkatu,
+                combo,
+                passedObjects,
+                clockRate;
+
             public void build(ref ScoreParams p)
             {
-                p.Mode(mode switch
-                {
-                    OSU.Enums.Mode.OSU => Mode.Osu,
-                    OSU.Enums.Mode.Taiko => Mode.Taiko,
-                    OSU.Enums.Mode.Fruits => Mode.Catch,
-                    OSU.Enums.Mode.Mania => Mode.Mania,
-                    _ => throw new ArgumentException()
-                });
-                if (acc != null) p.Acc(acc.Value);
-                if (n300 != null) p.N300(n300.Value);
-                if (n100 != null) p.N100(n100.Value);
-                if (n50 != null) p.N50(n50.Value);
-                if (nmisses != null) p.NMisses(nmisses.Value);
-                if (nkatu != null) p.NKatu(nkatu.Value);
-                if (combo != null) p.Combo(combo.Value);
-                if (mods != null) p.Mods(Intmod_parser(mods));
+                p.Mode(
+                    mode switch
+                    {
+                        OSU.Enums.Mode.OSU => Mode.Osu,
+                        OSU.Enums.Mode.Taiko => Mode.Taiko,
+                        OSU.Enums.Mode.Fruits => Mode.Catch,
+                        OSU.Enums.Mode.Mania => Mode.Mania,
+                        _ => throw new ArgumentException()
+                    }
+                );
+                if (acc != null)
+                    p.Acc(acc.Value);
+                if (n300 != null)
+                    p.N300(n300.Value);
+                if (n100 != null)
+                    p.N100(n100.Value);
+                if (n50 != null)
+                    p.N50(n50.Value);
+                if (nmisses != null)
+                    p.NMisses(nmisses.Value);
+                if (nkatu != null)
+                    p.NKatu(nkatu.Value);
+                if (combo != null)
+                    p.Combo(combo.Value);
+                if (mods != null)
+                    p.Mods(Intmod_parser(mods));
             }
         }
 
@@ -152,7 +188,11 @@ namespace KanonBot.functions.osu.rosupp
                 // 下载谱面
                 await OSU.BeatmapFileChecker(score.Beatmap!.BeatmapId);
                 // 读取铺面
-                beatmap = new Beatmap(await File.ReadAllBytesAsync($"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu"));
+                beatmap = new Beatmap(
+                    await File.ReadAllBytesAsync(
+                        $"./work/beatmap/{data.scoreInfo.Beatmap!.BeatmapId}.osu"
+                    )
+                );
             }
             catch (Exception)
             {
@@ -174,12 +214,19 @@ namespace KanonBot.functions.osu.rosupp
                 nkatu = statistics.CountKatu,
             }.build(ref p);
             // 开始计算
-            data.ppInfo = Result2Info(beatmap.GetRef().Calculate(p.Context));
+            data.ppInfo = beatmap.Calculate(p).ToPPInfo();
 
             // 5种acc + 全连
-            double[] accs = { 100.00, 99.00, 98.00, 97.00, 95.00, data.scoreInfo.Accuracy * 100.00 };
-            data.ppInfo.ppStats = accs.Select(
-                acc =>
+            double[] accs =
+            {
+                100.00,
+                99.00,
+                98.00,
+                97.00,
+                95.00,
+                data.scoreInfo.Accuracy * 100.00
+            };
+            data.ppInfo.ppStats = accs.Select(acc =>
                 {
                     var p = ScoreParams.New();
                     new Params
@@ -188,16 +235,13 @@ namespace KanonBot.functions.osu.rosupp
                         mods = data.scoreInfo.Mods,
                         acc = acc,
                     }.build(ref p);
-                    return Result2Info(
-                    beatmap.GetRef().Calculate(
-                        p.Context
-                        )
-                    ).ppStat;
-                }
-            ).ToList();
+                    return beatmap.Calculate(p).ToPPInfo().ppStat;
+                })
+                .ToList();
 
             return data;
         }
+
         public static uint Intmod_parser(string[] mods)
         {
             List<Mods> enabled_mods = new();
