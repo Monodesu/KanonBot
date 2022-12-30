@@ -1,9 +1,4 @@
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using KanonBot.Message;
-using KanonBot.Serializer;
-using Flurl;
-using Flurl.Http;
 
 namespace KanonBot.Drivers;
 public partial class Guild

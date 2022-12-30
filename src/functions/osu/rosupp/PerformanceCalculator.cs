@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using KanonBot.API;
 using KanonBot.LegacyImage;
 using RosuPP;
-using Serilog;
-using SixLabors.ImageSharp.Diagnostics;
 
 namespace KanonBot.functions.osu.rosupp
 {

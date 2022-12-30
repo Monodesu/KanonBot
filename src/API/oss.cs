@@ -1,7 +1,6 @@
 
 using Aliyun.OSS.Common;
 using Aliyun.OSS;
-using Serilog;
 
 
 namespace KanonBot.API;

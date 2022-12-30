@@ -1,18 +1,10 @@
-global using Flurl;
-global using Flurl.Http;
-global using LanguageExt;
-global using Serilog;
-global using static LanguageExt.Prelude;
-global using KanonBot;
-global using static KanonBot.Utils;
-using KanonBot.API;
+
+using System.IO;
 using KanonBot.command_parser;
 using KanonBot.Drivers;
 using KanonBot.Event;
 using KanonBot.functions.osu;
-using KanonBot.functions.osu.rosupp;
 using KanonBot.Serializer;
-using MySqlConnector;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RosuPP;

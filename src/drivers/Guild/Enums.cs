@@ -1,8 +1,4 @@
-using Newtonsoft.Json;
 using System.ComponentModel;
-using KanonBot.Message;
-using KanonBot.Serializer;
-using Newtonsoft.Json.Linq;
 
 
 namespace KanonBot.Drivers;

@@ -4,16 +4,6 @@
 #pragma warning disable CS8618 // 非null 字段未初始化
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using System.Net;
-using Serilog;
-using Flurl;
-using Flurl.Http;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using Newtonsoft.Json.Converters;
-using System.ComponentModel;
-
 
 namespace KanonBot.API
 {

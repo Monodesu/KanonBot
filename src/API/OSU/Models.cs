@@ -1,7 +1,5 @@
 #pragma warning disable CS8618 // 非null 字段未初始化
 using Newtonsoft.Json;
-using System.ComponentModel;
-using KanonBot.Message;
 using KanonBot.Serializer;
 using Newtonsoft.Json.Linq;
 using NullValueHandling = Newtonsoft.Json.NullValueHandling;

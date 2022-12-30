@@ -3,7 +3,6 @@
 #pragma warning disable CS8604 // 解引用可能出现空引用。
 
 using System.Net.Mail;
-using Serilog;
 
 namespace KanonBot;
 public static class Mail

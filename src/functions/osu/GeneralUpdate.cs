@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using static KanonBot.Database.Model;
 using CronNET.Impl;
+using System.IO;
 
 namespace KanonBot.functions.osu
 {

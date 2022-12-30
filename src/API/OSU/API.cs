@@ -1,15 +1,9 @@
 #pragma warning disable CS8618 // 非null 字段未初始化
 // Flurl.Http.FlurlHttpTimeoutException
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using System.Net;
-using Serilog;
-using Flurl;
-using Flurl.Http;
-using System.Security.Cryptography;
-using static KanonBot.API.OSU.Models;
-using KanonBot.functions.osu.rosupp;
 using KanonBot.Serializer;
+using System.IO;
 
 namespace KanonBot.API
 {

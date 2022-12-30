@@ -1,5 +1,4 @@
 #pragma warning disable CS8602 // 解引用可能出现空引用。
-using System;
 using Flurl.Util;
 using KanonBot.API;
 using KanonBot.Drivers;

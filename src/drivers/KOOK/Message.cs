@@ -1,10 +1,5 @@
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using KanonBot.Message;
-using KanonBot.API;
-using KanonBot.Serializer;
-using Serilog;
 using libKook = Kook;
 using Kook.WebSocket;
 

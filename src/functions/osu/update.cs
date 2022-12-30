@@ -2,6 +2,7 @@ using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
 using KanonBot.functions.osu;
+using System.IO;
 
 namespace KanonBot.functions.osubot
 {

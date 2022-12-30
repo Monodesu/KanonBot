@@ -1,17 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Net.WebSockets;
-using Websocket.Client;
-using KanonBot.Message;
-using KanonBot.Serializer;
 using KanonBot.Event;
-using Newtonsoft.Json;
-using Serilog;
 using Serilog.Events;
-using Newtonsoft.Json.Linq;
-using System.Timers;
 using libKook = Kook;
 using Kook.WebSocket;
 

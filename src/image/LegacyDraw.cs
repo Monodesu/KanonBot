@@ -1,13 +1,8 @@
 #pragma warning disable CS8618 // 非null 字段未初始化
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Numerics;
-using System.Security.Claims;
-using Flurl;
-using Flurl.Http;
 using KanonBot.API;
 using KanonBot.functions.osu.rosupp;
-using Serilog;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.ColorSpaces;
@@ -15,7 +10,6 @@ using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using static KanonBot.functions.osu.rosupp.PerformanceCalculator;
 using Img = SixLabors.ImageSharp.Image;
 
 namespace KanonBot.LegacyImage

@@ -1,10 +1,6 @@
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using KanonBot.Message;
 using KanonBot.API;
-using KanonBot.Serializer;
-using Serilog;
 
 namespace KanonBot.Drivers;
 public partial class Guild

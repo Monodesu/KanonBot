@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using Flurl;
-using Flurl.Http;
 using KanonBot.API;
-using KanonBot.functions.osu.rosupp;
-using KanonBot.functions.osubot;
 using KanonBot.Image;
 using KanonBot.LegacyImage;
-using Serilog;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
@@ -26,14 +16,7 @@ using SixLabors.ImageSharp.Processing;
 using static KanonBot.LegacyImage.Draw;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
-using System.Collections.Generic;
-using LanguageExt.ClassInstances;
-using LanguageExt;
-using static LinqToDB.Reflection.Methods.LinqToDB.Insert;
 using static KanonBot.functions.osu.rosupp.PerformanceCalculator;
-using static LinqToDB.Common.Configuration;
-using LanguageExt.ClassInstances.Pred;
-using System.Collections;
 
 namespace KanonBot.image
 {

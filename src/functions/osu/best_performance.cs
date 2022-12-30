@@ -7,6 +7,7 @@ using KanonBot.functions.osu.rosupp;
 using RosuPP;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using System.IO;
 
 namespace KanonBot.functions.osubot
 {

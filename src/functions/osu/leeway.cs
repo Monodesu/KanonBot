@@ -5,6 +5,7 @@ using System.Net;
 using Flurl;
 using Flurl.Http;
 using RosuPP;
+using System.IO;
 
 namespace KanonBot.functions.osubot
 {

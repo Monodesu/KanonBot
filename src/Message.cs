@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using KanonBot.Drivers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

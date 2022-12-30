@@ -3,6 +3,7 @@ using KanonBot.Message;
 using KanonBot.API;
 using KanonBot.Serializer;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using System.IO;
 
 namespace KanonBot.functions.osubot
 {

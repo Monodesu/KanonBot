@@ -1,8 +1,6 @@
 #pragma warning disable CS8618 // 非null 字段未初始化
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Serilog;
 using NullValueHandling = Newtonsoft.Json.NullValueHandling;
 
 namespace KanonBot.Drivers;

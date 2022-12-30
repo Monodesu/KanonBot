@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Msg = KanonBot.Message;
 using KanonBot.Event;
 using KanonBot.Serializer;
 

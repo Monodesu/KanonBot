@@ -1,17 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Net.WebSockets;
 using Websocket.Client;
-using KanonBot.Message;
 using KanonBot.Serializer;
 using KanonBot.Event;
-using Newtonsoft.Json;
-using Serilog;
 using Newtonsoft.Json.Linq;
-using System.Timers;
-
 namespace KanonBot.Drivers;
 public partial class Guild : ISocket, IDriver
 {

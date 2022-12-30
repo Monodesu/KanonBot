@@ -1,5 +1,6 @@
 #pragma warning disable IDE1006 // 命名样式
 
+using System.IO;
 using KanonBot.Serializer;
 using Tomlyn.Model;
 
