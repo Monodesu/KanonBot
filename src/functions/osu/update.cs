@@ -79,7 +79,6 @@ namespace KanonBot.functions.osubot
             //try { File.Delete($"./work/v1_cover/{OnlineOsuInfo!.Id}.png"); } catch { }
             try { File.Delete($"./work/avatar/{OnlineOsuInfo!.Id}.png"); } catch { }
             try { File.Delete($"./work/legacy/v1_cover/osu!web/{OnlineOsuInfo!.Id}.png"); } catch { }
-            try { await Seasonalpass.Update(OnlineOsuInfo!.Id, DBOsuInfo!.osu_mode!, OnlineOsuInfo.Statistics.TotalHits); } catch { }
             await target.reply("主要数据已更新完毕，pp+数据正在后台更新，请稍后使用info功能查看结果。");
 
             try { await Database.Client.UpdateOsuPPlusData((await API.OSU.TryGetUserPlusData(OnlineOsuInfo!))!.User, OnlineOsuInfo!.Id); }

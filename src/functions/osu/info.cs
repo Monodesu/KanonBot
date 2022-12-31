@@ -275,12 +275,6 @@ namespace KanonBot.functions.osubot
                     ImageSegment.Type.Base64
                 )
             );
-            if (DBOsuInfo != null)
-                await Seasonalpass.Update(
-                    tempOsuInfo!.Id,
-                    DBOsuInfo!.osu_mode!,
-                    tempOsuInfo.Statistics.TotalHits
-                );
             try
             {
                 if (data.userInfo.PlayMode == OSU.Enums.Mode.OSU) //只存std的

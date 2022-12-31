@@ -16,6 +16,7 @@ public class Model
         public ITable<OsuStandardBeatmapTechData> OsuStandardBeatmapTechData =>
             this.GetTable<OsuStandardBeatmapTechData>();
         public ITable<OSUSeasonalPass> OSUSeasonalPass => this.GetTable<OSUSeasonalPass>();
+        public ITable<OSUSeasonalPass_ScoreRecords> OSUSeasonalPass_ScoreRecords => this.GetTable<OSUSeasonalPass_ScoreRecords>();
         public ITable<User> User => this.GetTable<User>();
         public ITable<UserOSU> UserOSU => this.GetTable<UserOSU>();
         public ITable<OsuArchivedRec> OsuArchivedRec => this.GetTable<OsuArchivedRec>();
@@ -62,21 +63,27 @@ public class Model
         [Column]
         public int pp_95acc { get; set; }
     }
+    [Table("seasonalpass_scorerecords")]
+    public class OSUSeasonalPass_ScoreRecords
+    {
+        [Column]
+        public long score_id { get; set; }
+        [Column]
+        public string? mode { get; set; }
+    }
 
-    [Table("osu_seasonalpass_2022_s4")]
+    [Table("seasonalpass_2023_s1")]
     public class OSUSeasonalPass
     {
-        [PrimaryKey]
-        public long uid { get; set; }
+        [Column]
+        public long osu_id { get; set; }
 
         [Column]
         public string? mode { get; set; }
 
         [Column]
-        public long tth { get; set; }
+        public int point { get; set; }
 
-        [Column]
-        public long inittth { get; set; }
     }
 
     [Table("users")]

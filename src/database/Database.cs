@@ -1,5 +1,6 @@
 #pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable IDE0044 // 添加只读修饰符
+using System;
 using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography;
 using KanonBot.Drivers;
@@ -397,20 +398,20 @@ public class Client
         return await db.InsertAsync(bl);
     }
 
-    public static async Task<bool> UpdateSeasonalPass(long oid, string mode, long tth)
+    public static async Task<bool> UpdateSeasonalPass(long oid, string mode, int add_point)
     {
         //检查数据库中有无信息
         using var db = GetInstance();
         var db_info = await db.OSUSeasonalPass
-            .Where(it => it.uid == oid)
+            .Where(it => it.osu_id == oid)
             .Where(it => it.mode == mode)
             .ToListAsync();
         if (db_info.Count > 0)
         {
             return await db.OSUSeasonalPass
-                    .Where(it => it.uid == oid)
+                    .Where(it => it.osu_id == oid)
                     .Where(it => it.mode == mode)
-                    .Set(it => it.tth, tth)
+                    .Set(it => it.point, it => it.point + add_point)
                     .UpdateAsync() > -1;
         }
         var t = false;
@@ -418,10 +419,9 @@ public class Client
             await db.InsertAsync(
                 new OSUSeasonalPass()
                 {
-                    inittth = tth,
-                    tth = tth,
+                    point = add_point,
                     mode = mode,
-                    uid = oid
+                    osu_id = oid
                 }
             ) > -1
         )
@@ -555,8 +555,34 @@ public class Client
     public static async Task<OSUSeasonalPass?> GetSeasonalPassInfo(long oid, string mode)
     {
         using var db = GetInstance();
-        return await db.OSUSeasonalPass.Where(it => it.uid == oid).Where(it => it.mode == mode).FirstOrDefaultAsync();
+        return await db.OSUSeasonalPass.Where(it => it.osu_id == oid).Where(it => it.mode == mode).FirstOrDefaultAsync();
     }
+
+    //true=数据库不存在，已成功插入数据，可以进行pt计算
+    public static async Task<bool> SeasonalPass_Query_Score_Status(string mode, long score_id)
+    {
+        using var db = GetInstance();
+        var li = await db
+                    .OSUSeasonalPass_ScoreRecords
+                    .Where(it => it.score_id == score_id && it.mode == mode)
+                    .Select(it => it.score_id)
+                    .ToListAsync();
+        if (li.Count > 0)
+            return false;
+
+        //insert
+        var d = new OSUSeasonalPass_ScoreRecords() { score_id = score_id, mode = mode };
+        try
+        {
+            await db.InsertAsync(d);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
 
     public static async Task<List<OsuStandardBeatmapTechData>> GetOsuStandardBeatmapTechData(int aim, int speed, int acc, int range = 20, bool boost = false)
     {

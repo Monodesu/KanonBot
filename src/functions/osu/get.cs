@@ -1083,46 +1083,80 @@ namespace KanonBot.functions.osubot
             OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
-            //查询前先更新
-            if (DBOsuInfo != null)
-                await Seasonalpass.Update(
-                    OnlineOsuInfo!.Id,
-                    OnlineOsuInfo!.PlayMode!.ToStr(),
-                    OnlineOsuInfo.Statistics.TotalHits
-                );
-
-            //旧版，将于2023年1月1日弃用
             var seasonalpassinfo = await Database.Client.GetSeasonalPassInfo(OnlineOsuInfo!.Id, OnlineOsuInfo!.PlayMode!.ToStr())!;
-
             if (seasonalpassinfo == null)
             {
                 await target.reply("数据库中无此用户的季票信息，请稍后再试。");
                 return;
             }
-            //10000tth一级，每升1级所需tth+2000
-            long temptth = seasonalpassinfo.tth - seasonalpassinfo.inittth;
+
+            //100point一级，每升1级所需point+20
+            long temppoint = seasonalpassinfo.point;
             int levelcount = 0;
             while (true)
             {
-                temptth = temptth - (10000 + levelcount * 2000);
-                if (temptth > 0)
+                temppoint = temppoint - (100 + levelcount * 20);
+               if (temppoint > 0)
                     levelcount = levelcount + 1;
                 else break;
             }
             int tt = 0;
             for (int i = 0; i < levelcount; ++i)
             {
-                tt += 10000 + i * 2000;
+                tt += 100 + i * 20;
             }
             double t = Math.Round(
                 Math.Round(
-                    ((double)((seasonalpassinfo.tth - seasonalpassinfo.inittth - tt) * 100) / (double)(10000 + levelcount * 2000)), 4), 4
+                    ((double)((seasonalpassinfo.point - tt) * 100) / (double)(100 + levelcount * 20)), 4), 4
             );
+
+
             string str;
-            str = $"{OnlineOsuInfo.Username}\n自2022年11月29日以来\n您在{OnlineOsuInfo!.PlayMode!.ToStr()}模式下的等级为{levelcount}级 " +
+            str = $"{OnlineOsuInfo.Username}\n自2023年1月1日以来\n您在{OnlineOsuInfo!.PlayMode!.ToStr()}模式下的等级为{levelcount}级 " +
             $"({t}%)" +
-            $"\n共击打了{seasonalpassinfo.tth - seasonalpassinfo.inittth}次\n距离升级还需要{Math.Abs(temptth)}tth";
+            $"\n共获得了了{seasonalpassinfo.point}pt\n距离升级大约还需要{Math.Abs(temppoint)}pt";
             await target.reply(str);
+
+            ////查询前先更新
+            //if (DBOsuInfo != null)
+            //    await Seasonalpass.Update(
+            //        OnlineOsuInfo!.Id,
+            //        OnlineOsuInfo!.PlayMode!.ToStr(),
+            //        OnlineOsuInfo.Statistics.TotalHits
+            //    );
+
+            ////旧版，将于2023年1月1日弃用
+            //var seasonalpassinfo = await Database.Client.GetSeasonalPassInfo(OnlineOsuInfo!.Id, OnlineOsuInfo!.PlayMode!.ToStr())!;
+
+            //if (seasonalpassinfo == null)
+            //{
+            //    await target.reply("数据库中无此用户的季票信息，请稍后再试。");
+            //    return;
+            //}
+            ////10000tth一级，每升1级所需tth+2000
+            //long temptth = seasonalpassinfo.tth - seasonalpassinfo.inittth;
+            //int levelcount = 0;
+            //while (true)
+            //{
+            //    temptth = temptth - (10000 + levelcount * 2000);
+            //    if (temptth > 0)
+            //        levelcount = levelcount + 1;
+            //    else break;
+            //}
+            //int tt = 0;
+            //for (int i = 0; i < levelcount; ++i)
+            //{
+            //    tt += 10000 + i * 2000;
+            //}
+            //double t = Math.Round(
+            //    Math.Round(
+            //        ((double)((seasonalpassinfo.tth - seasonalpassinfo.inittth - tt) * 100) / (double)(10000 + levelcount * 2000)), 4), 4
+            //);
+            //string str;
+            //str = $"{OnlineOsuInfo.Username}\n自2022年11月29日以来\n您在{OnlineOsuInfo!.PlayMode!.ToStr()}模式下的等级为{levelcount}级 " +
+            //$"({t}%)" +
+            //$"\n共击打了{seasonalpassinfo.tth - seasonalpassinfo.inittth}次\n距离升级还需要{Math.Abs(temptth)}tth";
+            //await target.reply(str);
         }
 
         async private static Task BPList(Target target, string cmd)

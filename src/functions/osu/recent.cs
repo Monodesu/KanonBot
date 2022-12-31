@@ -5,6 +5,8 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using KanonBot.functions.osu.rosupp;
 using System.IO;
+using KanonBot.functions.osu;
+using static KanonBot.API.OSU.Models;
 
 namespace KanonBot.functions.osubot
 {
@@ -132,6 +134,21 @@ namespace KanonBot.functions.osubot
                                 scoreInfos[0].Mods
                             );
                     // 绘制
+                }
+                //季票信息
+
+                if (is_bounded && scoreInfos[0].Rank.ToUpper() != "F")
+                {
+                    bool temp_abletoinsert = true;
+                    foreach (var x in data.scoreInfo.Mods)
+                    {
+                        if (x.ToUpper() == "AP") temp_abletoinsert = false;
+                        if (x.ToUpper() == "RX") temp_abletoinsert = false;
+                    }
+                    if (temp_abletoinsert)
+                        await Seasonalpass.Update(
+                        OnlineOsuInfo.Id,
+                        data);
                 }
             }
             else
