@@ -37,7 +37,6 @@
         <CargoTargetPath>$(MSBuildThisFileDirectory)/../target</CargoTargetPath>
 
         <CargoConfiguration>release</CargoConfiguration>
-        <CargoConfiguration Condition=" '$(Configuration)' == 'Debug' ">debug</CargoConfiguration>
 
         <CargoTarget Condition=" '$(IsWindows)' == 'true' ">x86_64-pc-windows-msvc</CargoTarget>
         <CargoTarget Condition=" '$(IsLinux)' == 'true' ">x86_64-unknown-linux-gnu</CargoTarget>
@@ -62,7 +61,7 @@
         <CargoChannelArg Condition=" '$(CargoChannel)' != '' " Include="+$(CargoChannel)" />
         <CargoBuildArg Include="--target $(CargoTarget)" />
         <!-- 不管了，一直release就完了 -->
-        <CargoBuildArg Condition=" '$(CargoConfiguration)' == 'release' " Include="--release" />
+        <CargoBuildArg Include="--release" />
     </ItemGroup>
 
     <Target Name="Cargo" BeforeTargets="Build">
