@@ -29,30 +29,42 @@ namespace KanonBot.functions.osubot
             DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
             if (DBUser == null)
             // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
-            string rootCmd, childCmd = "";
+            {
+                await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                return;
+            }
+            string rootCmd,
+                childCmd = "";
             try
             {
                 var tmp = cmd.SplitOnFirstOccurence(" ");
                 rootCmd = tmp[0].Trim();
                 childCmd = tmp[1].Trim();
             }
-            catch { rootCmd = cmd; }
+            catch
+            {
+                rootCmd = cmd;
+            }
             switch (rootCmd.ToLower())
             {
                 case "sudo":
-                    await SudoExecute(target, childCmd, AccInfo); return;
+                    await SudoExecute(target, childCmd, AccInfo);
+                    return;
                 case "set":
-                    await Set(target, childCmd, AccInfo); return;
+                    await Set(target, childCmd, AccInfo);
+                    return;
                 case "info":
-                    await Info(target, childCmd, AccInfo); return;
+                    await Info(target, childCmd, AccInfo);
+                    return;
                 case "list":
-                    await List(target, AccInfo); return;
+                    await List(target, AccInfo);
+                    return;
                 default:
                     await target.reply("!badge set/info/list");
                     return;
             }
         }
+
         private static async Task SudoExecute(Target target, string cmd, AccInfo accinfo)
         {
             var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
@@ -79,13 +91,16 @@ namespace KanonBot.functions.osubot
                         permissions_flag = -1;
                         break;
                     case "user":
-                        if (permissions_flag < 1) permissions_flag = 1;
+                        if (permissions_flag < 1)
+                            permissions_flag = 1;
                         break;
                     case "mod":
-                        if (permissions_flag < 2) permissions_flag = 2;
+                        if (permissions_flag < 2)
+                            permissions_flag = 2;
                         break;
                     case "admin":
-                        if (permissions_flag < 3) permissions_flag = 3;
+                        if (permissions_flag < 3)
+                            permissions_flag = 3;
                         break;
                     case "system":
                         permissions_flag = -2;
@@ -94,107 +109,125 @@ namespace KanonBot.functions.osubot
                         permissions_flag = -1;
                         break;
                 }
-
             }
 
-            if (permissions_flag < 2) return; //权限不够不处理
-
+            if (permissions_flag < 2)
+                return; //权限不够不处理
 
             //execute
-            string rootCmd, childCmd = "";
+            string rootCmd,
+                childCmd = "";
             try
             {
                 var tmp = cmd.SplitOnFirstOccurence(" ");
                 rootCmd = tmp[0].Trim();
                 childCmd = tmp[1].Trim();
             }
-            catch { rootCmd = cmd; }
+            catch
+            {
+                rootCmd = cmd;
+            }
 
             switch (rootCmd)
             {
                 case "create":
-                    await SudoCreate(target, childCmd); return;
+                    await SudoCreate(target, childCmd);
+                    return;
                 case "delete":
-                    SudoDelete(target, childCmd); return;
+                    SudoDelete(target, childCmd);
+                    return;
                 case "getuser":
-                    SudoGetUser(target, childCmd); return;
+                    SudoGetUser(target, childCmd);
+                    return;
                 case "list":
                     //await List(target, accinfo);
                     return;
                 case "addbyemail":
-                    await SudoAdd(target, childCmd, 0); return;
+                    await SudoAdd(target, childCmd, 0);
+                    return;
                 case "addbyoid":
-                    await SudoAdd(target, childCmd, 1); return;
+                    await SudoAdd(target, childCmd, 1);
+                    return;
                 default:
                     return;
             }
-
         }
+
         //注：没有完全适配多徽章安装，需要等新面板后再做适配
         private static async Task Set(Target target, string cmd, AccInfo accinfo)
         {
             if (int.TryParse(cmd, out int badgeNum))
             {
-                if (badgeNum < 1)
+                if (badgeNum < -1 || badgeNum == 0)
                 {
                     await target.reply("你提供的badge id不正确，请重新检查。");
+                    return;
                 }
 
                 var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
-                if (userinfo!.owned_badge_ids == null)
+                if (userinfo == null) {
+                    await target.reply("未找到账号信息...");
+                    return;
+                }
+
+                if (userinfo.owned_badge_ids == null)
                 {
-                    await target.reply("你还没有牌子呢..."); return;
+                    await target.reply("你还没有牌子呢...");
+                    return;
                 }
 
                 //获取已拥有的牌子
                 List<string> owned_badges = new();
-                if (userinfo.owned_badge_ids.IndexOf(",") < 1)
+                if (userinfo.owned_badge_ids.Contains(','))
                 {
-                    owned_badges.Add(userinfo.owned_badge_ids.Trim());
+                    owned_badges.Append(userinfo.owned_badge_ids.Split(','));
                 }
                 else
                 {
-                    var owned_badges_temp1 = userinfo.owned_badge_ids.Split(",");
-                    foreach (var x in owned_badges_temp1)
-                        owned_badges.Add(x);
+                    owned_badges.Add(userinfo.owned_badge_ids.Trim());
                 }
 
                 //获取当前已安装的牌子
                 List<string> displayed_badges = new();
-                if (userinfo.displayed_badge_ids!.IndexOf(",") < 1)
-                {
-                    if (userinfo.displayed_badge_ids != null)
+                if (userinfo.displayed_badge_ids != null)
+                    if (userinfo.displayed_badge_ids.Contains(','))
+                    {
+                        displayed_badges.Append(userinfo!.displayed_badge_ids.Split(','));
+                    }
+                    else
+                    {
                         displayed_badges.Add(userinfo.displayed_badge_ids.Trim());
-                }
-                else
-                {
-                    var displayed_badges_temp1 = userinfo!.displayed_badge_ids.Split(",");
-                    foreach (var x in displayed_badges_temp1)
-                        displayed_badges.Add(x);
-                }
+                    }
 
                 //检查当前badge
                 foreach (var x in displayed_badges)
                 {
                     if (x == badgeNum.ToString())
                     {
-                        await target.reply($"你现在的主显badge已经是 {x} 了！"); return;
+                        await target.reply($"你现在的主显badge已经是 {x} 了！");
+                        return;
                     }
                 }
 
-                //检查用户是否拥有此badge
-                if (owned_badges.Count < badgeNum && badgeNum > 0)
-                {
-                    await target.reply($"你好像没有编号为 {badgeNum} 的badge呢..."); return;
-                }
 
                 //设置badge
                 //没有完全适配多徽章安装，需要等新面板后再取消注释
                 //if (displayed_badges.Count == 0)
                 //{
-                if (badgeNum > 0)
+                if (badgeNum != -1)
                 {
-                    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), owned_badges[badgeNum - 1]))
+                    //检查用户是否拥有此badge
+                    if (owned_badges.Count < badgeNum)
+                    {
+                        await target.reply($"你好像没有编号为 {badgeNum} 的badge呢...");
+                        return;
+                    }
+                    if (
+                        await Database.Client.SetDisplayedBadge(
+                            userinfo.uid.ToString(),
+                            owned_badges[badgeNum - 1]
+                        )
+                    )
                         await target.reply($"设置成功");
                     else
                         await target.reply($"因数据库原因设置失败，请稍后再试。");
@@ -227,6 +260,7 @@ namespace KanonBot.functions.osubot
                 await target.reply("你提供的badge id不正确，请重新检查。");
             }
         }
+
         private static async Task Info(Target target, string cmd, AccInfo accinfo)
         {
             if (int.TryParse(cmd, out int badgeNum))
@@ -237,62 +271,73 @@ namespace KanonBot.functions.osubot
                 }
 
                 var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
+                    if (userinfo == null) {
+                    await target.reply("未找到账号信息...");
+                    return;
+                }
+
                 if (userinfo!.owned_badge_ids == null)
                 {
-                    await target.reply("你还没有牌子呢..."); return;
+                    await target.reply("你还没有牌子呢...");
+                    return;
                 }
 
                 //获取已拥有的牌子
                 List<string> owned_badges = new();
-                if (userinfo.owned_badge_ids.IndexOf(",") < 1)
+                if (userinfo.owned_badge_ids.Contains(','))
                 {
-                    owned_badges.Add(userinfo.owned_badge_ids.Trim());
+                    owned_badges.Append(userinfo.owned_badge_ids.Split(','));
                 }
                 else
                 {
-                    var owned_badges_temp1 = userinfo.owned_badge_ids.Split(",");
-                    foreach (var x in owned_badges_temp1)
-                        owned_badges.Add(x);
+                    owned_badges.Add(userinfo.owned_badge_ids.Trim());
                 }
 
                 //检查用户是否拥有此badge
                 if (owned_badges.Count < badgeNum)
                 {
-                    await target.reply($"你好像没有编号为 {badgeNum} 的badge呢..."); return;
+                    await target.reply($"你好像没有编号为 {badgeNum} 的badge呢...");
+                    return;
                 }
-
 
                 //获取badge信息
                 var badgeinfo = await Database.Client.GetBadgeInfo(owned_badges[badgeNum - 1]);
-                await target.reply($"badge信息:\n" +
-                    $"名称: {badgeinfo!.name}({badgeinfo.id})\n" +
-                    $"中文名称: {badgeinfo.name_chinese}\n" +
-                    $"描述: {badgeinfo.description}");
+                await target.reply(
+                    $"badge信息:\n"
+                        + $"名称: {badgeinfo!.name}({badgeinfo.id})\n"
+                        + $"中文名称: {badgeinfo.name_chinese}\n"
+                        + $"描述: {badgeinfo.description}"
+                );
             }
             else
             {
                 await target.reply("你提供的badge id不正确，请重新检查。");
             }
         }
+
         private static async Task List(Target target, AccInfo accinfo)
         {
             var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
+            if (userinfo == null) {
+                await target.reply("未找到账号信息...");
+                return;
+            }
+
             if (userinfo!.owned_badge_ids == null)
             {
-                await target.reply("你还没有牌子呢..."); return;
+                await target.reply("你还没有牌子呢...");
+                return;
             }
 
             //获取已拥有的牌子
             List<string> owned_badges = new();
-            if (userinfo.owned_badge_ids.IndexOf(",") < 1)
+            if (userinfo.owned_badge_ids.Contains(','))
             {
-                owned_badges.Add(userinfo.owned_badge_ids.Trim());
+                owned_badges.Append(userinfo.owned_badge_ids.Split(','));
             }
             else
             {
-                var owned_badges_temp1 = userinfo.owned_badge_ids.Split(",");
-                foreach (var x in owned_badges_temp1)
-                    owned_badges.Add(x);
+                owned_badges.Add(userinfo.owned_badge_ids.Trim());
             }
 
             //获取badge信息
@@ -342,15 +387,15 @@ namespace KanonBot.functions.osubot
             await target.reply($"图片成功上传，新的badgeID为{db_badgeid}");
             File.Delete(filepath);
         }
+
         private static void SudoDelete(Target target, string cmd)
         {
             //不是真正的删除，而是禁用某个badge，使其无法被检索到
             //以后再说 到真正需要此功能的时候再写
         }
-        private static void SudoGetUser(Target target, string cmd)
-        {
 
-        }
+        private static void SudoGetUser(Target target, string cmd) { }
+
         private static async Task SudoAdd(Target target, string cmd, int addMethod)
         {
             var args = cmd.Split("#"); //args[0]=badge id      args[1]=user(s)
@@ -385,9 +430,17 @@ namespace KanonBot.functions.osubot
                     }
 
                     //检查badge是否合法以及是否存在
-                    if (!int.TryParse(badgeid, out _)) { await target.reply("badgeid不正确，请重新检查。"); return; }
+                    if (!int.TryParse(badgeid, out _))
+                    {
+                        await target.reply("badgeid不正确，请重新检查。");
+                        return;
+                    }
                     badge = await Database.Client.GetBadgeInfo(badgeid);
-                    if (badge == null) { await target.reply($"似乎没有badgeid为 {badgeid} 的badge呢。"); return; }
+                    if (badge == null)
+                    {
+                        await target.reply($"似乎没有badgeid为 {badgeid} 的badge呢。");
+                        return;
+                    }
 
                     await target.reply($"开始徽章添加任务。");
                     //添加badge
@@ -468,9 +521,17 @@ namespace KanonBot.functions.osubot
                     }
 
                     //检查badge是否合法以及是否存在
-                    if (!int.TryParse(badgeid, out _)) { await target.reply("badgeid不正确，请重新检查。"); return; }
+                    if (!int.TryParse(badgeid, out _))
+                    {
+                        await target.reply("badgeid不正确，请重新检查。");
+                        return;
+                    }
                     badge = await Database.Client.GetBadgeInfo(badgeid);
-                    if (badge == null) { await target.reply($"似乎没有badgeid为 {badgeid} 的badge呢。"); return; }
+                    if (badge == null)
+                    {
+                        await target.reply($"似乎没有badgeid为 {badgeid} 的badge呢。");
+                        return;
+                    }
 
                     await target.reply($"开始徽章添加任务。");
                     //添加badge
@@ -539,15 +600,10 @@ namespace KanonBot.functions.osubot
                 default:
                     return;
             }
-
         }
-        private static void SudoRemove(Target target, string cmd)
-        {
 
-        }
-        private static void SudoList(Target target, string cmd)
-        {
+        private static void SudoRemove(Target target, string cmd) { }
 
-        }
+        private static void SudoList(Target target, string cmd) { }
     }
 }

@@ -145,15 +145,18 @@ namespace KanonBot.command_parser
                 }
                 catch (Flurl.Http.FlurlHttpTimeoutException)
                 {
-                    await target.reply("API访问超时，请稍后重试吧");
+                    await target.reply("获取数据超时，请稍后重试吧");
                 }
                 catch (Flurl.Http.FlurlHttpException ex)
                 {
-                    await target.reply("网络出现错误！错误已上报");
-                    var rtmp = $"Target Message: {target.msg}\n" + $"Exception: {ex}\n";
-                    // $"Message: {ex.Message}\n" +
-                    // $"Source: {ex.Source}\n" +
-                    // $"StackTrace: {ex.StackTrace}";
+                    await target.reply("获取数据时出错，之后再试试吧");
+                    var rtmp = $"""
+                    网络异常
+                    Target Platform: {target.platform}
+                    Target User: {target.sender}
+                    Target Message: {target.msg}
+                    Exception: {ex}
+                    """;
                     Utils.SendDebugMail("mono@desu.life", rtmp);
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
                     Log.Error("网络异常 ↓\n{ex}", ex);
@@ -161,25 +164,39 @@ namespace KanonBot.command_parser
                 catch (System.IO.IOException ex)
                 {
                     // 文件竞争问题, 懒得处理了直接摆烂
-                    Log.Error("出现文件竞争问题 ↓\n{ex}", ex);
                     if (ex.Message.Contains("being used by another process"))
-                        return;
+                    {
+                        Log.Error("出现文件竞争问题 ↓\n{ex}", ex);
+                    }
+                    else
+                    {
+                        await target.reply("文件操作异常，错误内容已自动上报");
+                        var rtmp = $"""
+                        文件操作异常
+                        Target Platform: {target.platform}
+                        Target User: {target.sender}
+                        Target Message: {target.msg}
+                        Exception: {ex}
+                        """;
+                        Utils.SendDebugMail("mono@desu.life", rtmp);
+                        Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
+                        Log.Error("文件操作异常 ↓\n{ex}", ex);
+                    }
                 }
                 catch (Exception ex)
                 {
                     await target.reply("出现了未知错误，错误内容已自动上报");
-                    var rtmp = $"Target Message: {target.msg}\n" + $"Exception: {ex}\n";
-                    // $"Message: {ex.Message}\n" +
-                    // $"Source: {ex.Source}\n" +
-                    // $"StackTrace: {ex.StackTrace}";
+                    var rtmp = $"""
+                    未知异常
+                    Target Platform: {target.platform}
+                    Target User: {target.sender}
+                    Target Message: {target.msg}
+                    Exception: {ex}
+                    """;
                     Utils.SendDebugMail("mono@desu.life", rtmp);
                     Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
                     Log.Error("执行指令异常 ↓\n{ex}", ex);
                 }
-            }
-            else
-            {
-                return;
             }
         }
     }
