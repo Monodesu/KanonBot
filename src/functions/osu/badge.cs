@@ -165,7 +165,8 @@ namespace KanonBot.functions.osubot
                 }
 
                 var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
-                if (userinfo == null) {
+                if (userinfo == null)
+                {
                     await target.reply("未找到账号信息...");
                     return;
                 }
@@ -180,35 +181,38 @@ namespace KanonBot.functions.osubot
                 List<string> owned_badges = new();
                 if (userinfo.owned_badge_ids.Contains(','))
                 {
-                    owned_badges.Append(userinfo.owned_badge_ids.Split(','));
+                    owned_badges = userinfo.owned_badge_ids.Split(',').ToList();
                 }
                 else
                 {
+                    owned_badges = new();
                     owned_badges.Add(userinfo.owned_badge_ids.Trim());
                 }
 
                 //获取当前已安装的牌子
-                List<string> displayed_badges = new();
                 if (userinfo.displayed_badge_ids != null)
+                {
+                    List<string> displayed_badges;
                     if (userinfo.displayed_badge_ids.Contains(','))
                     {
-                        displayed_badges.Append(userinfo!.displayed_badge_ids.Split(','));
+                        displayed_badges =  userinfo.displayed_badge_ids.Split(',').ToList();
                     }
                     else
                     {
+                        displayed_badges = new();
                         displayed_badges.Add(userinfo.displayed_badge_ids.Trim());
                     }
 
-                //检查当前badge
-                foreach (var x in displayed_badges)
-                {
-                    if (x == badgeNum.ToString())
+                    //检查当前badge
+                    foreach (var x in displayed_badges)
                     {
-                        await target.reply($"你现在的主显badge已经是 {x} 了！");
-                        return;
+                        if (x == badgeNum.ToString())
+                        {
+                            await target.reply($"你现在的主显badge已经是 {x} 了！");
+                            return;
+                        }
                     }
                 }
-
 
                 //设置badge
                 //没有完全适配多徽章安装，需要等新面板后再取消注释
@@ -271,7 +275,8 @@ namespace KanonBot.functions.osubot
                 }
 
                 var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
-                    if (userinfo == null) {
+                if (userinfo == null)
+                {
                     await target.reply("未找到账号信息...");
                     return;
                 }
@@ -283,13 +288,14 @@ namespace KanonBot.functions.osubot
                 }
 
                 //获取已拥有的牌子
-                List<string> owned_badges = new();
+                List<string> owned_badges;
                 if (userinfo.owned_badge_ids.Contains(','))
                 {
-                    owned_badges.Append(userinfo.owned_badge_ids.Split(','));
+                    owned_badges = userinfo.owned_badge_ids.Split(',').ToList();
                 }
                 else
                 {
+                    owned_badges = new();
                     owned_badges.Add(userinfo.owned_badge_ids.Trim());
                 }
 
@@ -318,7 +324,8 @@ namespace KanonBot.functions.osubot
         private static async Task List(Target target, AccInfo accinfo)
         {
             var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
-            if (userinfo == null) {
+            if (userinfo == null)
+            {
                 await target.reply("未找到账号信息...");
                 return;
             }
@@ -330,13 +337,14 @@ namespace KanonBot.functions.osubot
             }
 
             //获取已拥有的牌子
-            List<string> owned_badges = new();
+            List<string> owned_badges;
             if (userinfo.owned_badge_ids.Contains(','))
             {
-                owned_badges.Append(userinfo.owned_badge_ids.Split(','));
+                owned_badges = userinfo.owned_badge_ids.Split(',').ToList();
             }
             else
             {
+                owned_badges = new();
                 owned_badges.Add(userinfo.owned_badge_ids.Trim());
             }
 
