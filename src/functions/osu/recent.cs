@@ -87,7 +87,7 @@ namespace KanonBot.functions.osubot
                 OnlineOsuInfo.Id,
                 OSU.Enums.UserScoreType.Recent,
                 command.osu_mode ?? OSU.Enums.Mode.OSU,
-                1,
+                50,　//default was 1, due to seasonalpass set it to 50
                 command.order_number - 1,
                 includeFails
             );
@@ -109,46 +109,59 @@ namespace KanonBot.functions.osubot
                         ImageSegment.Type.Base64
                     )
                 );
-                if (scoreInfos[0].Mode == OSU.Enums.Mode.OSU)
-                {
-                    if (
-                        scoreInfos[0].Beatmap!.Status == OSU.Enums.Status.ranked
-                        || scoreInfos[0].Beatmap!.Status == OSU.Enums.Status.approved
-                    )
-                        if (scoreInfos[0].Rank.ToUpper() == "XH" ||
-                            scoreInfos[0].Rank.ToUpper() == "X" ||
-                            scoreInfos[0].Rank.ToUpper() == "SH" ||
-                            scoreInfos[0].Rank.ToUpper() == "S" ||
-                            scoreInfos[0].Rank.ToUpper() == "A")
-                            await Database.Client.InsertOsuStandardBeatmapTechData(
-                                scoreInfos[0].Beatmap!.BeatmapId,
-                                data.ppInfo.star,
-                                (int)data.ppInfo.ppStats![0].total,
-                                (int)data.ppInfo.ppStats![0].acc!,
-                                (int)data.ppInfo.ppStats![0].speed!,
-                                (int)data.ppInfo.ppStats![0].aim!,
-                                (int)data.ppInfo.ppStats![1].total,
-                                (int)data.ppInfo.ppStats![2].total,
-                                (int)data.ppInfo.ppStats![3].total,
-                                (int)data.ppInfo.ppStats![4].total,
-                                scoreInfos[0].Mods
-                            );
-                    // 绘制
-                }
-                //季票信息
 
-                if (is_bounded && scoreInfos[0].Rank.ToUpper() != "F")
+                foreach (var x in scoreInfos)
                 {
-                    bool temp_abletoinsert = true;
-                    foreach (var x in data.scoreInfo.Mods)
+                    //处理谱面数据
+                    if (x.Rank.ToUpper() != "F")
                     {
-                        if (x.ToUpper() == "AP") temp_abletoinsert = false;
-                        if (x.ToUpper() == "RX") temp_abletoinsert = false;
+                        //计算pp数据
+                        data = await PerformanceCalculator.CalculatePanelData(x);
+
+                        //季票信息
+                        if (is_bounded)
+                        {
+                            bool temp_abletoinsert = true;
+                            foreach (var c in x.Mods)
+                            {
+                                if (c.ToUpper() == "AP") temp_abletoinsert = false;
+                                if (c.ToUpper() == "RX") temp_abletoinsert = false;
+                            }
+                            if (temp_abletoinsert)
+                                await Seasonalpass.Update(
+                                OnlineOsuInfo.Id,
+                                data);
+                        }
+                        //std推图
+                        if (x.Mode == OSU.Enums.Mode.OSU)
+                        {
+                            if (
+                                x.Beatmap!.Status == OSU.Enums.Status.ranked
+                                || x.Beatmap!.Status == OSU.Enums.Status.approved
+                            )
+                                if (x.Rank.ToUpper() == "XH" ||
+                                    x.Rank.ToUpper() == "X" ||
+                                    x.Rank.ToUpper() == "SH" ||
+                                    x.Rank.ToUpper() == "S" ||
+                                    x.Rank.ToUpper() == "A")
+                                {
+                                    await Database.Client.InsertOsuStandardBeatmapTechData(
+                                                                        x.Beatmap!.BeatmapId,
+                                                                        data.ppInfo.star,
+                                                                        (int)data.ppInfo.ppStats![0].total,
+                                                                        (int)data.ppInfo.ppStats![0].acc!,
+                                                                        (int)data.ppInfo.ppStats![0].speed!,
+                                                                        (int)data.ppInfo.ppStats![0].aim!,
+                                                                        (int)data.ppInfo.ppStats![1].total,
+                                                                        (int)data.ppInfo.ppStats![2].total,
+                                                                        (int)data.ppInfo.ppStats![3].total,
+                                                                        (int)data.ppInfo.ppStats![4].total,
+                                                                        x.Mods
+                                                                    );
+
+                                }
+                        }
                     }
-                    if (temp_abletoinsert)
-                        await Seasonalpass.Update(
-                        OnlineOsuInfo.Id,
-                        data);
                 }
             }
             else
