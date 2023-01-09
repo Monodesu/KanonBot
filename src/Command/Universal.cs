@@ -183,6 +183,29 @@ namespace KanonBot.command_parser
                         Log.Error("文件操作异常 ↓\n{ex}", ex);
                     }
                 }
+                catch (AggregateException ae)
+                {
+                    foreach (var e in ae.InnerExceptions) {
+                        if (e is Flurl.Http.FlurlHttpTimeoutException) {
+                            await target.reply("获取数据超时，请稍后重试吧");
+                            return;
+                        } else if (e is Flurl.Http.FlurlHttpException) {
+                            await target.reply("获取数据时出错，之后再试试吧");
+                        }
+                    }
+
+                    await target.reply("出现了未知错误，错误内容已自动上报");
+                    var rtmp = $"""
+                    未知异常
+                    Target Platform: {target.platform}
+                    Target User: {target.sender}
+                    Target Message: {target.msg}
+                    Exception: {ae}
+                    """;
+                    Utils.SendDebugMail("mono@desu.life", rtmp);
+                    Utils.SendDebugMail("fantasyzhjk@qq.com", rtmp);
+                    Log.Error("执行指令异常 ↓\n{ex}", ae);
+                }
                 catch (Exception ex)
                 {
                     await target.reply("出现了未知错误，错误内容已自动上报");

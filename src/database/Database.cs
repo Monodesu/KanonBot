@@ -36,6 +36,7 @@ public class Client
                 Password = config.database.password,
                 Database = config.database.db,
                 CharacterSet = "utf8mb4",
+                CancellationTimeout = 5,
             }.ConnectionString
         );
         // 暂时只有Mysql
