@@ -1,4 +1,5 @@
 using System;
+using System.CommandLine;
 using System.IO;
 using System.Security.Cryptography;
 using Flurl;
@@ -8,11 +9,13 @@ using JetBrains.Annotations;
 using KanonBot.API;
 using KanonBot.Drivers;
 using KanonBot.Message;
+using LanguageExt;
 using Microsoft.CodeAnalysis;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -62,7 +65,7 @@ namespace KanonBot.functions.osubot
                 case "list":
                     await List(target, AccInfo);
                     return;
-                case "redeembadge":
+                case "redeem":
                     await RedeemBadge(target, childCmd, DBUser.uid);
                     return;
                 default:
@@ -320,12 +323,24 @@ namespace KanonBot.functions.osubot
 
                 //获取badge信息
                 var badgeinfo = await Database.Client.GetBadgeInfo(owned_badges[badgeNum - 1]);
-                await target.reply(
-                    $"badge信息:\n"
-                        + $"名称: {badgeinfo!.name}({badgeinfo.id})\n"
-                        + $"中文名称: {badgeinfo.name_chinese}\n"
-                        + $"描述: {badgeinfo.description}"
-                );
+
+                var rtmsg = new Chain();
+                using var stream = new MemoryStream();
+                var badge_img = await ReadImageRgba($"./work/badges/{badgeinfo!.id}.png");
+                await badge_img.SaveAsync(stream, new PngEncoder());
+                rtmsg.image(Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length), ImageSegment.Type.Base64).msg(
+                    $"徽章信息如下：\n" +
+                    $"名称：{badgeinfo!.name}({badgeinfo.id})\n" +
+                    $"中文名称: {badgeinfo.name_chinese}\n" +
+                    $"描述: {badgeinfo.description}");
+                await target.reply(rtmsg);
+
+                //await target.reply(
+                //    $"badge信息:\n"
+                //        + $"名称: {badgeinfo!.name}({badgeinfo.id})\n"
+                //        + $"中文名称: {badgeinfo.name_chinese}\n"
+                //        + $"描述: {badgeinfo.description}"
+                //);
             }
             else
             {
@@ -638,12 +653,83 @@ namespace KanonBot.functions.osubot
                 var data = await Database.Client.RedeemBadgeRedemptionCode(uid, cmd);
                 if (data != null)
                 {
+                    if (data.redeem_user != -1)
+                    {
+                        await target.reply("该兑换码不存在或已被兑换。");
+                        return;
+                    }
+                    //添加badge
+                    var userInfo = await Database.Client.GetUser((int)uid);
+                    if (userInfo == null) return;
+                    //获取已拥有的牌子
+                    List<string> owned_badges = new();
+                    if (userInfo.owned_badge_ids != null && userInfo.owned_badge_ids != "") //用户没有badge的情况下，直接写入
+                    {
+                        //用户只有一个badge的时候直接追加
+                        if (userInfo.owned_badge_ids!.IndexOf(",") == -1)
+                        {
+                            if (userInfo.owned_badge_ids != "")
+                                owned_badges.Add(userInfo.owned_badge_ids.Trim());
+                        }
+                        else
+                        {
+                            //用户有2个或以上badge的情况下，先解析再追加新的badge后写入
+                            var owned_badges_temp1 = userInfo.owned_badge_ids.Split(",");
+                            foreach (var xx in owned_badges_temp1)
+                                owned_badges.Add(xx);
+                        }
+                        //添加之前先查重
+                        foreach (var xx in owned_badges)
+                        {
+                            if (xx.Contains(data.badge_id.ToString()))
+                            {
+                                await target.reply("您已经拥有此badge了，无法再继续兑换了。");
+                                return;
+                            }
+                        }
+                    }
+                    //添加
+                    owned_badges.Add(data.badge_id.ToString());
+                    string t = "";
+                    foreach (var xxx in owned_badges)
+                    {
+                        t += xxx + ",";
+                    }
+
+                    if (!await Database.Client.SetOwnedBadge((int)userInfo.uid, t[..^1]))
+                    {
+                        await target.reply($"数据库发生了错误，无法兑换badge，请联系管理员处理。");
+                        return;
+                    }
+
                     var badgeinfo = await Database.Client.GetBadgeInfo(data.badge_id.ToString());
-                    await target.reply($"已成功兑换徽章。\n" +
+
+                    var rtmsg = new Chain();
+                    rtmsg.image($"./work/badges/{badgeinfo!.id}.png", ImageSegment.Type.File).msg($"已成功兑换徽章。\n" +
                         $"徽章信息如下：\n" +
                         $"名称：{badgeinfo!.name}({badgeinfo.id})\n" +
                         $"中文名称: {badgeinfo.name_chinese}\n" +
-                        $"描述: {badgeinfo.description}\n\n");
+                        $"描述: {badgeinfo.description}");
+
+                    Mail.MailStruct ms = new()
+                    {
+                        MailTo = new string[] { "mono@desu.life", "fantasyzhjk@qq.com" },
+                        Subject = "desu.life - 有新的徽章兑换码被使用",
+                        Body = $"有新的徽章兑换码被使用\n\n用户id：{userInfo.uid}\n" +
+                        $"徽章id：{badgeinfo!.id}\n" +
+                        $"徽章名称：{badgeinfo!.name}({badgeinfo.id})\n" +
+                        $"徽章中文名称: {badgeinfo.name_chinese}\n" +
+                        $"徽章描述: {badgeinfo.description}\n" +
+                        $"兑换码：{data.code}",
+                        IsBodyHtml = false
+                    };
+                    try
+                    {
+                        Mail.Send(ms);
+                    }
+                    catch { }
+
+                    await target.reply(rtmsg);
                     return;
                 }
                 else
@@ -672,7 +758,7 @@ namespace KanonBot.functions.osubot
                 for (int i = 0; i < amount; i++)
                 {
                     var error_count = 0;
-                    var code = RandomStr(50, true);
+                    var code = RandomStr(50, false);
                     while (error_count < 4)
                     {
                         var status = await Database.Client.CreateBadgeRedemptionCode(badge_id, code);
@@ -695,8 +781,12 @@ namespace KanonBot.functions.osubot
                 if (codes.Count != amount)
                     str += $"有 {amount - codes.Count} 个兑换码生成失败。";
                 str += "\n生成的兑换码如下：";
+                var count = 1;
                 foreach (var x in codes)
-                    str += $"\n{x}";
+                {
+                    str += $"\n{count}: {x}";
+                    count++;
+                }
 
                 Mail.MailStruct ms = new()
                 {

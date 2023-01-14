@@ -4,6 +4,7 @@ using System;
 using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography;
 using KanonBot.Drivers;
+using KanonBot.functions.osubot;
 using LinqToDB;
 using LinqToDB.Configuration;
 using LinqToDB.Data;
@@ -15,6 +16,7 @@ using RosuPP;
 using Serilog;
 using Tomlyn.Model;
 using static KanonBot.API.OSU.Enums;
+using static KanonBot.API.OSU.Legacy;
 using static KanonBot.API.OSU.Models;
 using static KanonBot.Database.Model;
 
@@ -117,6 +119,12 @@ public class Client
     {
         using var db = GetInstance();
         return await db.User.Where(it => it.email == mailAddr).FirstOrDefaultAsync();
+    }
+
+    static public async Task<Model.User?> GetUser(int uid)
+    {
+        using var db = GetInstance();
+        return await db.User.Where(it => it.uid == uid).FirstOrDefaultAsync();
     }
 
     static public async Task<Model.User?> GetUsersByUID(string UID, Platform platform)
@@ -266,6 +274,15 @@ public class Client
     {
         using var db = GetInstance();
         var data = await db.User.FirstOrDefaultAsync(it => it.email == email);
+        data.owned_badge_ids = owned_ids;
+        var res = await db.UpdateAsync(data);
+        return res > -1;
+    }
+
+    static public async Task<bool> SetOwnedBadge(int uid, string owned_ids)
+    {
+        using var db = GetInstance();
+        var data = await db.User.FirstOrDefaultAsync(it => it.uid == uid);
         data.owned_badge_ids = owned_ids;
         var res = await db.UpdateAsync(data);
         return res > -1;
@@ -615,7 +632,8 @@ public class Client
         {
             badge_id = badge_id,
             gen_time = DateTime.Now.ToString(),
-            code = code
+            code = code,
+            redeem_user = -1
         };
         try
         {
@@ -635,6 +653,25 @@ public class Client
                     .BadgeRedemptionCode
                     .Where(it => it.code == code)
                     .FirstOrDefaultAsync();
-        return li!;
+
+        if (li == null)
+            return null!;
+        else if (li.redeem_user != -1 || li.redeem_time != null)
+            return null!;
+
+        var result = await db.BadgeRedemptionCode
+            .Where(it => it.id == li.id)
+            .Set(it => it.redeem_time, DateTime.Now.ToString())
+            .Set(it => it.redeem_user, (int)uid)
+            .UpdateAsync();
+
+        if (result > -1)
+        {
+            return li!;
+        }
+        else
+        {
+            return null!;
+        }
     }
 }

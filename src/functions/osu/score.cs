@@ -103,7 +103,10 @@ namespace KanonBot.functions.osubot
 
             if (scoreData == null)
             {
-                await target.reply("猫猫没有找到你的成绩");
+                if (command.self_query)
+                    await target.reply("猫猫没有找到你的成绩");
+                else
+                    await target.reply("猫猫没有找到TA的成绩");
                 return;
             }
             //ppy的getscore api不会返回beatmapsets信息，需要手动获取

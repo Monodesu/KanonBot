@@ -144,38 +144,55 @@ namespace KanonBot
                 // 处理score解析
                 else if (type == FuncType.Score)
                 {
-                    // arg1 = bid
-                    // arg2 = osu_mode
-                    // arg3 = username
-                    // arg4 = mods
-
                     // arg1 = username
-                    // arg2 = mods :
+                    // arg2 = osu_mode :
                     // arg3 = bid #
-                    // arg4 = osu_mode +
+                    // arg4 = mods +
 
-                    param.osu_username = arg1;
-                    if (arg4 != "")
+                    if (arg3 == "") //没提供用户名
+                    {
+                        param.osu_username = "";
+                        if (arg1 == "") param.order_number = -1; //bid必须有效，否则返回 -1
+                        else
+                        {
+                            try
+                            {
+                                var index = int.Parse(arg1);
+                                param.order_number = index < 1 ? -1 : index;
+                            }
+                            catch
+                            {
+                                param.order_number = -1;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //提供了用户名
+                        param.osu_username = arg1;
+                        if (arg3 == "") param.order_number = -1; //bid必须有效，否则返回 -1
+                        else
+                        {
+                            try
+                            {
+                                var index = int.Parse(arg3[1..]);
+                                param.order_number = index < 1 ? -1 : index;
+                            }
+                            catch
+                            {
+                                param.order_number = -1;
+                            }
+                        }
+                    }
+
+                    if (arg2 != "")
                         try
                         {
                             param.osu_mode = OSU.Enums.Int2Mode(
-                        int.Parse(arg4[1..]));
+                        int.Parse(arg2[1..]));
                         }
                         catch { param.osu_mode = null; }
-                    param.osu_mods = arg2 != "" ? arg2[1..] : "";
-                    if (arg3 == "") param.order_number = -1; //bid必须有效，否则返回 -1
-                    else
-                    {
-                        try
-                        {
-                            var index = int.Parse(arg3[1..]);
-                            param.order_number = index < 1 ? -1 : index;
-                        }
-                        catch
-                        {
-                            param.order_number = -1;
-                        }
-                    }
+                    param.osu_mods = arg4 != "" ? arg4[1..] : "";
                     if (param.osu_username == "") param.self_query = true;
                 }
                 else if (type == FuncType.Leeway)
