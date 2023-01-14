@@ -705,7 +705,10 @@ namespace KanonBot.functions.osubot
                     var badgeinfo = await Database.Client.GetBadgeInfo(data.badge_id.ToString());
 
                     var rtmsg = new Chain();
-                    rtmsg.image($"./work/badges/{badgeinfo!.id}.png", ImageSegment.Type.File).msg($"已成功兑换徽章。\n" +
+                    using var stream = new MemoryStream();
+                    var badge_img = await ReadImageRgba($"./work/badges/{badgeinfo!.id}.png");
+                    await badge_img.SaveAsync(stream, new PngEncoder());
+                    rtmsg.image(Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length), ImageSegment.Type.Base64).msg($"已成功兑换徽章。\n" +
                         $"徽章信息如下：\n" +
                         $"名称：{badgeinfo!.name}({badgeinfo.id})\n" +
                         $"中文名称: {badgeinfo.name_chinese}\n" +
