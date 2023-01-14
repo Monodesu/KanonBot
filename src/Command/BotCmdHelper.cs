@@ -49,13 +49,13 @@ namespace KanonBot
                     switch (section)
                     {
                         case 1:
-                            arg2 += cmd[i];
+                            arg2 += cmd[i]; // :
                             break;
                         case 2:
-                            arg3 += cmd[i];
+                            arg3 += cmd[i]; // #
                             break;
                         case 3:
-                            arg4 += cmd[i];
+                            arg4 += cmd[i]; // +
                             break;
                         case 4:
                             param.res = true;
@@ -148,20 +148,27 @@ namespace KanonBot
                     // arg2 = osu_mode
                     // arg3 = username
                     // arg4 = mods
-                    param.osu_username = arg3;
-                    if (arg2 != "") try
+
+                    // arg1 = username
+                    // arg2 = mods :
+                    // arg3 = bid #
+                    // arg4 = osu_mode +
+
+                    param.osu_username = arg1;
+                    if (arg4 != "")
+                        try
                         {
                             param.osu_mode = OSU.Enums.Int2Mode(
-                        int.Parse(arg2[1..]));
+                        int.Parse(arg4[1..]));
                         }
                         catch { param.osu_mode = null; }
-                    param.osu_mods = arg4 != "" ? arg4[1..] : "";
-                    if (arg1 == "") param.order_number = -1; //bid必须有效，否则返回 -1
+                    param.osu_mods = arg2 != "" ? arg2[1..] : "";
+                    if (arg3 == "") param.order_number = -1; //bid必须有效，否则返回 -1
                     else
                     {
                         try
                         {
-                            var index = int.Parse(arg1);
+                            var index = int.Parse(arg3[1..]);
                             param.order_number = index < 1 ? -1 : index;
                         }
                         catch
