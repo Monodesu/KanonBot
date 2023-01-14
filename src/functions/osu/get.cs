@@ -630,7 +630,7 @@ namespace KanonBot.functions.osubot
 
         async private static Task Rolecost(Target target, string cmd)
         {
-            cmd = cmd.Trim();
+            cmd = cmd.ToLower().Trim();
             Func<OSU.Models.User, OSU.Models.PPlusData.UserData, double> occost = (userInfo, pppData) =>
             {
                 double a, c, z, p;
@@ -689,6 +689,12 @@ namespace KanonBot.functions.osubot
                 return Math.Round(cost, 2);
             };
 
+            Func<OSU.Models.User, double> zkfccost = (userInfo) =>
+            {
+                //formula  cost=bp1pp*0.6+(bp1pp-bp100pp)*0.4+tth/175+PPTotal*0.05      !!!!not this one
+                //formula  cost=pp/1831+tth/13939393  !!!!current
+                return (double)userInfo.Statistics.PP / 1831.0 + (double)userInfo.Statistics.TotalHits / 13939393.0;
+            };
             #region 验证
             long? osuID = null;
             OSU.Enums.Mode? mode;
@@ -696,7 +702,7 @@ namespace KanonBot.functions.osubot
             Database.Model.UserOSU? DBOsuInfo = null;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.RoleCost);
             mode = command.osu_mode;
 
             // 解析指令
@@ -754,7 +760,7 @@ namespace KanonBot.functions.osubot
             OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
-            switch (cmd)
+            switch (command.match_name)
             {
                 case "occ":
                     try
@@ -764,6 +770,7 @@ namespace KanonBot.functions.osubot
                     }
                     catch { await target.reply($"获取pp+失败"); return; }
                     break;
+                ////////////////////////////////////////////////////////////////////////////////////////
                 case "onc":
                     var onc = oncost(OnlineOsuInfo);
                     if (onc == -1)
@@ -771,6 +778,7 @@ namespace KanonBot.functions.osubot
                     else
                         await target.reply($"在ONC中，{OnlineOsuInfo.Username} 的cost为：{onc}");
                     break;
+                ////////////////////////////////////////////////////////////////////////////////////////
                 case "ost":
                     try
                     {
@@ -816,8 +824,13 @@ namespace KanonBot.functions.osubot
                     }
                     catch { await target.reply($"获取elo失败"); return; }
                     break;
+                ////////////////////////////////////////////////////////////////////////////////////////
+                case "zkfc":
+                    await target.reply($"在ZKFC S1中，{OnlineOsuInfo.Username} 的cost为：{Math.Round(zkfccost(OnlineOsuInfo), 2)}");
+                    break;
+                ////////////////////////////////////////////////////////////////////////////////////////
                 default:
-                    await target.reply($"请输入要查询cost的比赛名称的缩写。");
+                    await target.reply($"请输入要查询cost的比赛名称的缩写。\n当前已支持的比赛：onc/occ/ost/zkfc\n其他比赛请联系赛事主办方提供cost算法");
                     break;
             }
         }
@@ -1096,7 +1109,7 @@ namespace KanonBot.functions.osubot
             while (true)
             {
                 temppoint = temppoint - (100 + levelcount * 20);
-               if (temppoint > 0)
+                if (temppoint > 0)
                     levelcount = levelcount + 1;
                 else break;
             }

@@ -69,7 +69,7 @@ namespace KanonBot.functions.osubot
                     await RedeemBadge(target, childCmd, DBUser.uid);
                     return;
                 default:
-                    await target.reply("!badge set/info/list");
+                    await target.reply("!badge set/info/list/redeem");
                     return;
             }
         }
