@@ -330,7 +330,7 @@ namespace KanonBot.functions.osubot
                 await badge_img.SaveAsync(stream, new PngEncoder());
                 rtmsg.image(Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length), ImageSegment.Type.Base64).msg(
                     $"徽章信息如下：\n" +
-                    $"名称：{badgeinfo!.name}({badgeinfo.id})\n" +
+                    $"名称：{badgeinfo!.name}\n" + //({badgeinfo.id})\n" +
                     $"中文名称: {badgeinfo.name_chinese}\n" +
                     $"描述: {badgeinfo.description}");
                 await target.reply(rtmsg);

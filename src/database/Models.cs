@@ -38,10 +38,10 @@ public class Model
         public int badge_id { get; set; }
 
         [Column]
-        public string? gen_time { get; set; }
+        public DateTimeOffset gen_time { get; set; }
 
         [Column]
-        public string? redeem_time { get; set; }
+        public DateTimeOffset redeem_time { get; set; }
 
         [Column]
         public int redeem_user { get; set; }

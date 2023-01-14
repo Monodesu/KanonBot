@@ -631,7 +631,7 @@ public class Client
         var d = new BadgeRedemptionCode()
         {
             badge_id = badge_id,
-            gen_time = DateTime.Now.ToString(),
+            gen_time = DateTime.Now,
             code = code,
             redeem_user = -1
         };
@@ -640,8 +640,9 @@ public class Client
             await db.InsertAsync(d);
             return true;
         }
-        catch
+        catch(Exception ex)
         {
+            Console.WriteLine(ex.Message);
             return false;
         }
     }
@@ -656,12 +657,12 @@ public class Client
 
         if (li == null)
             return null!;
-        else if (li.redeem_user != -1 || li.redeem_time != null)
+        else if (li.redeem_user != -1)
             return null!;
 
         var result = await db.BadgeRedemptionCode
             .Where(it => it.id == li.id)
-            .Set(it => it.redeem_time, DateTime.Now.ToString())
+            .Set(it => it.redeem_time, DateTime.Now)
             .Set(it => it.redeem_user, (int)uid)
             .UpdateAsync();
 
