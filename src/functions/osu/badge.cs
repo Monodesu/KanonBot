@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using Flurl;
@@ -7,6 +8,7 @@ using JetBrains.Annotations;
 using KanonBot.API;
 using KanonBot.Drivers;
 using KanonBot.Message;
+using Microsoft.CodeAnalysis;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
@@ -14,6 +16,7 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using static KanonBot.API.OSU.Legacy;
 using static KanonBot.functions.Accounts;
 using Img = SixLabors.ImageSharp.Image;
 
@@ -58,6 +61,9 @@ namespace KanonBot.functions.osubot
                     return;
                 case "list":
                     await List(target, AccInfo);
+                    return;
+                case "redeembadge":
+                    await RedeemBadge(target, childCmd, DBUser.uid);
                     return;
                 default:
                     await target.reply("!badge set/info/list");
@@ -148,6 +154,12 @@ namespace KanonBot.functions.osubot
                 case "addbyoid":
                     await SudoAdd(target, childCmd, 1);
                     return;
+                case "createbadgeredemptioncode":
+                    if (permissions_flag < 3)
+                        await target.reply("权限不足。");
+                    else
+                        await SudoCreateBadgeRedemptionCode(target, childCmd);
+                    return;
                 default:
                     return;
             }
@@ -195,7 +207,7 @@ namespace KanonBot.functions.osubot
                     List<string> displayed_badges;
                     if (userinfo.displayed_badge_ids.Contains(','))
                     {
-                        displayed_badges =  userinfo.displayed_badge_ids.Split(',').ToList();
+                        displayed_badges = userinfo.displayed_badge_ids.Split(',').ToList();
                     }
                     else
                     {
@@ -613,5 +625,101 @@ namespace KanonBot.functions.osubot
         private static void SudoRemove(Target target, string cmd) { }
 
         private static void SudoList(Target target, string cmd) { }
+
+        private static async Task RedeemBadge(Target target, string cmd, long uid)
+        {
+            if (cmd.Length < 2)
+            {
+                await target.reply("请提供正确的兑换码。");
+                return;
+            }
+            else
+            {
+                var data = await Database.Client.RedeemBadgeRedemptionCode(uid, cmd);
+                if (data != null)
+                {
+                    var badgeinfo = await Database.Client.GetBadgeInfo(data.badge_id.ToString());
+                    await target.reply($"已成功兑换徽章。\n" +
+                        $"徽章信息如下：\n" +
+                        $"名称：{badgeinfo!.name}({badgeinfo.id})\n" +
+                        $"中文名称: {badgeinfo.name_chinese}\n" +
+                        $"描述: {badgeinfo.description}\n\n");
+                    return;
+                }
+                else
+                {
+                    await target.reply("该兑换码不存在或已被兑换。");
+                    return;
+                }
+            }
+        }
+
+        private static async Task SudoCreateBadgeRedemptionCode(Target target, string cmd)
+        {
+            try
+            {
+                var tmp_op = cmd.Split("#"); //0=badgeid 1=how many codes need to be generated(amount)
+                var badge_id = int.Parse(tmp_op[0]);
+                var amount = int.Parse(tmp_op[1]);
+
+                if (amount < 0)
+                {
+                    await target.reply("amount必须大于0。");
+                    return;
+                }
+
+                List<string> codes = new();
+                for (int i = 0; i < amount; i++)
+                {
+                    var error_count = 0;
+                    var code = RandomStr(50, true);
+                    while (error_count < 4)
+                    {
+                        var status = await Database.Client.CreateBadgeRedemptionCode(badge_id, code);
+                        if (status)
+                        {
+                            codes.Add(code);
+                            break;
+                        }
+                        else error_count++;
+                    }
+                }
+                var badgeinfo = await Database.Client.GetBadgeInfo(badge_id.ToString());
+                string str = "";
+                str += $"此次操作生成了id为 {badge_id} 的徽章\n\n" +
+                    $"徽章信息如下：\n" +
+                    $"名称：{badgeinfo!.name}({badgeinfo.id})\n" +
+                    $"中文名称: {badgeinfo.name_chinese}\n" +
+                    $"描述: {badgeinfo.description}\n\n" +
+                    $"此次共生成了 {codes.Count} 个兑换码，";
+                if (codes.Count != amount)
+                    str += $"有 {amount - codes.Count} 个兑换码生成失败。";
+                str += "\n生成的兑换码如下：";
+                foreach (var x in codes)
+                    str += $"\n{x}";
+
+                Mail.MailStruct ms = new()
+                {
+                    MailTo = new string[] { "mono@desu.life", "fantasyzhjk@qq.com" },
+                    Subject = "desu.life - 有新的徽章兑换码被创建",
+                    Body = str,
+                    IsBodyHtml = false
+                };
+                try
+                {
+                    Mail.Send(ms);
+                    await target.reply("徽章兑换码已通过邮件发送至管理员邮箱，请从邮箱内查阅。");
+                }
+                catch
+                {
+                    await target.reply("徽章兑换码无法通过邮件发送至管理员邮箱，但已成功添加至数据库，请从数据库内查询。");
+                }
+            }
+            catch
+            {
+                await target.reply("发生了错误。[!badge sudo createbadgeredemptioncode badge_id#amount]");
+                return;
+            }
+        }
     }
 }

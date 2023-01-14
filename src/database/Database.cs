@@ -597,4 +597,44 @@ public class Client
 
                                                       .ToListAsync();
     }
+
+    //true=成功生成代码
+    public static async Task<bool> CreateBadgeRedemptionCode(int badge_id, string code)
+    {
+        using var db = GetInstance();
+        var li = await db
+                    .BadgeRedemptionCode
+                    .Where(it => it.code == code)
+                    .Select(it => it.id)
+                    .ToListAsync();
+        if (li.Count > 0)
+            return false;
+
+        //insert
+        var d = new BadgeRedemptionCode()
+        {
+            badge_id = badge_id,
+            gen_time = DateTime.Now.ToString(),
+            code = code
+        };
+        try
+        {
+            await db.InsertAsync(d);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static async Task<BadgeRedemptionCode> RedeemBadgeRedemptionCode(long uid, string code)
+    {
+        using var db = GetInstance();
+        var li = await db
+                    .BadgeRedemptionCode
+                    .Where(it => it.code == code)
+                    .FirstOrDefaultAsync();
+        return li!;
+    }
 }

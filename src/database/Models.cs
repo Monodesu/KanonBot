@@ -23,10 +23,56 @@ public class Model
         public ITable<OsuPPlus> OsuPPlus => this.GetTable<OsuPPlus>();
         public ITable<BadgeList> BadgeList => this.GetTable<BadgeList>();
         public ITable<MailVerify> MailVerify => this.GetTable<MailVerify>();
+        public ITable<Bottle> Bottle => this.GetTable<Bottle>();
+        public ITable<BadgeRedemptionCode> BadgeRedemptionCode => this.GetTable<BadgeRedemptionCode>();
 
         // ... other tables ...
     }
+    [Table("badge_redemption_code")]
+    public class BadgeRedemptionCode
+    {
+        [PrimaryKey]
+        public int id { get; set; }
 
+        [Column]
+        public int badge_id { get; set; }
+
+        [Column]
+        public string? gen_time { get; set; }
+
+        [Column]
+        public string? redeem_time { get; set; }
+
+        [Column]
+        public int redeem_user { get; set; }
+
+        [Column]
+        public string? code { get; set; }
+    }
+    [Table("bottle")]
+    public class Bottle
+    {
+        [PrimaryKey]
+        public int id { get; set; }
+
+        [Column]
+        public string? time { get; set; }
+
+        [Column]
+        public string? platform { get; set; }
+
+        [Column]
+        public string? user { get; set; }
+
+        [Column]
+        public string? message { get; set; }
+
+        [Column]
+        public int pickedcount { get; set; }
+
+        [Column]
+        public bool haspickedup { get; set; }
+    }
     [Table("osu_standard_beatmap_tech_data")]
     public class OsuStandardBeatmapTechData
     {
