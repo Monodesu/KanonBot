@@ -19,6 +19,8 @@ namespace KanonBot
             public int order_number;//用于info的查询n天之前、pr，bp的序号，score的bid，如未提供则返回0
             public bool res; //是否输出高精度图片
             public bool self_query;
+            public Option<int> StartAt;
+            public Option<int> EndAt;
         }
 
         public enum FuncType
@@ -29,7 +31,8 @@ namespace KanonBot
             PassRecent,
             Score,
             Leeway,
-            RoleCost
+            RoleCost,
+            BPList,
         }
 
         public static BotParameter CmdParser(string cmd, FuncType type)
@@ -71,7 +74,42 @@ namespace KanonBot
                 arg3 = arg3.Trim();
                 arg4 = arg4.Trim();
                 // 处理info解析
-                if (type == FuncType.Info)
+                if (type == FuncType.BPList)
+                {
+                    // arg1 = username
+                    // arg2 = osu_mode
+                    // arg3 = osu_days_before_to_query
+                    // #1-100
+                    if (arg2 != "")
+                        try
+                        {
+                            param.osu_mode = OSU.Enums.Int2Mode(int.Parse(arg2[1..]));
+                        }
+                        catch { param.osu_mode = null; }
+                    if (arg3 != "") {
+                        param.osu_username = arg1;
+                        var tmp = arg3[1..];
+                        if (tmp.Contains('-')) {
+                            var t = tmp.Split('-');
+                            param.StartAt = parseInt(t[0].Trim());  // StartAt
+                            param.EndAt = parseInt(t[1].Trim());  // EndAt
+                        } else { //只指定了最大值
+                            param.StartAt = Some(1);  // StartAt
+                            param.EndAt = parseInt(tmp.Trim());  // EndAt
+                        }
+                    } else {
+                        param.self_query = true;
+                        if (arg1.Contains('-')) {
+                            var t = arg1.Split('-');
+                            param.StartAt = parseInt(t[0].Trim());  // StartAt
+                            param.EndAt = parseInt(t[1].Trim());  // EndAt
+                        } else { //只指定了最大值
+                            param.StartAt = Some(1);  // StartAt
+                            param.EndAt = parseInt(arg1.Trim());  // EndAt
+                        }
+                    }
+                }
+                else if (type == FuncType.Info)
                 {
                     // arg1 = username
                     // arg2 = osu_mode

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -12,6 +13,7 @@ using KanonBot.functions.osu;
 using KanonBot.functions.osu.rosupp;
 using KanonBot.image;
 using KanonBot.Message;
+using LanguageExt.UnsafeValueAccess;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SixLabors.ImageSharp.Formats.Png;
@@ -24,14 +26,18 @@ namespace KanonBot.functions.osubot
     {
         async public static Task Execute(Target target, string cmd)
         {
-            string rootCmd, childCmd = "";
+            string rootCmd,
+                childCmd = "";
             try
             {
                 var tmp = cmd.SplitOnFirstOccurence(" ");
                 rootCmd = tmp[0].Trim();
                 childCmd = tmp[1].Trim().ToLower();
             }
-            catch { rootCmd = cmd; }
+            catch
+            {
+                rootCmd = cmd;
+            }
             switch (rootCmd.ToLower())
             {
                 case "bonuspp":
@@ -63,7 +69,7 @@ namespace KanonBot.functions.osubot
                     break;
                 default:
                     await target.reply(
-                                       """
+                        """
                                        !get bonuspp
                                             rolecost
                                             bpht
@@ -72,7 +78,8 @@ namespace KanonBot.functions.osubot
                                             seasonalpass
                                             recommend
                                             mu/profile
-                                       """);
+                                       """
+                    );
                     return;
             }
         }
@@ -94,17 +101,21 @@ namespace KanonBot.functions.osubot
             DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
             if (DBUser == null)
             // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            {
+                await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                return;
+            }
             // 验证账号信息
             var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
             DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
             if (DBOsuInfo == null)
-            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            {
+                await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                return;
+            }
 
-            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
             osuID = DBOsuInfo.osu_uid;
-
-
 
             // 验证osu信息
             var OnlineOsuInfo = await OSU.GetUser(osuID!.Value, OSU.Enums.Mode.OSU); //取osu模式的值
@@ -119,7 +130,9 @@ namespace KanonBot.functions.osubot
             }
             OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
-            await target.reply($"{OnlineOsuInfo.Username}\nhttps://osu.ppy.sh/u/{OnlineOsuInfo.Id}");
+            await target.reply(
+                $"{OnlineOsuInfo.Username}\nhttps://osu.ppy.sh/u/{OnlineOsuInfo.Id}"
+            );
         }
 
         async private static Task BeatmapRecommend(Target target, string cmd)
@@ -142,17 +155,21 @@ namespace KanonBot.functions.osubot
             DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
             if (DBUser == null)
             // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            {
+                await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                return;
+            }
             // 验证账号信息
             var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
             DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
             if (DBOsuInfo == null)
-            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            {
+                await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                return;
+            }
 
-            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
             osuID = DBOsuInfo.osu_uid;
-
-
 
             // 验证osu信息
             var OnlineOsuInfo = await OSU.GetUser(osuID!.Value, OSU.Enums.Mode.OSU); //取osu模式的值
@@ -171,12 +188,12 @@ namespace KanonBot.functions.osubot
 
             //获取前50bp
             var allBP = await OSU.GetUserScores(
-                        OnlineOsuInfo.Id,
-                        OSU.Enums.UserScoreType.Best,
-                        OSU.Enums.Mode.OSU,
-                        20,
-                        0
-                    );
+                OnlineOsuInfo.Id,
+                OSU.Enums.UserScoreType.Best,
+                OSU.Enums.Mode.OSU,
+                20,
+                0
+            );
             if (allBP == null)
             {
                 await target.reply("打过的图太少了，多玩一玩再来寻求推荐吧~");
@@ -194,7 +211,6 @@ namespace KanonBot.functions.osubot
             var ppinfo = await PerformanceCalculator.CalculatePanelData(randBP);
 
             var data = new List<Database.Model.OsuStandardBeatmapTechData>();
-
 
             //解析mod
             List<string> mods = new();
@@ -254,12 +270,12 @@ namespace KanonBot.functions.osubot
                     }
                 }
                 data = await Database.Client.GetOsuStandardBeatmapTechData(
-                                       (int)ppinfo.ppInfo.ppStat.aim!,
-                                       (int)ppinfo.ppInfo.ppStat.speed!,
-                                       (int)ppinfo.ppInfo.ppStat.acc!,
-                                       isDiffReductionMod ? NFEZHT_range : normal_range,
-                                       dt
-                                       );
+                    (int)ppinfo.ppInfo.ppStat.aim!,
+                    (int)ppinfo.ppInfo.ppStat.speed!,
+                    (int)ppinfo.ppInfo.ppStat.acc!,
+                    isDiffReductionMod ? NFEZHT_range : normal_range,
+                    dt
+                );
                 if (data.Count > 0)
                 {
                     if (mods.Count == 0)
@@ -269,7 +285,8 @@ namespace KanonBot.functions.osubot
                     else
                     {
                         for (int i = 0; i < mods.Count; i++)
-                            if (mods[i].ToUpper() == "NC") mods[i] = "DT";
+                            if (mods[i].ToUpper() == "NC")
+                                mods[i] = "DT";
                         foreach (var xx in mods)
                             data.RemoveAll(x => x.mod!.IndexOf(xx) == -1);
                         if (!ez)
@@ -334,17 +351,18 @@ namespace KanonBot.functions.osubot
                 }
                 //使用解析到的mod 如果是EZ/HT 需要适当把pprange放宽
                 data = await Database.Client.GetOsuStandardBeatmapTechData(
-                                       (int)ppinfo.ppInfo.ppStat.aim!,
-                                       (int)ppinfo.ppInfo.ppStat.speed!,
-                                       (int)ppinfo.ppInfo.ppStat.acc!,
-                                       isDiffReductionMod ? NFEZHT_range : normal_range,
-                                       dt
-                                       );
+                    (int)ppinfo.ppInfo.ppStat.aim!,
+                    (int)ppinfo.ppInfo.ppStat.speed!,
+                    (int)ppinfo.ppInfo.ppStat.acc!,
+                    isDiffReductionMod ? NFEZHT_range : normal_range,
+                    dt
+                );
 
                 if (data.Count > 0)
                 {
                     for (int i = 0; i < mods.Count; i++)
-                        if (mods[i] == "NC") mods[i] = "DT";
+                        if (mods[i] == "NC")
+                            mods[i] = "DT";
                     foreach (var xx in mods)
                         data.RemoveAll(x => x.mod!.IndexOf(xx) == -1);
                     if (!ez)
@@ -381,11 +399,12 @@ namespace KanonBot.functions.osubot
                 if (data[beatmapindex].mod!.Contains(','))
                     foreach (var xx in data[beatmapindex].mod!.Split(","))
                         mod += xx;
-                else mod += data[beatmapindex].mod!;
+                else
+                    mod += data[beatmapindex].mod!;
             }
-            else mod += "None";
-            msg +=
-                $"""
+            else
+                mod += "None";
+            msg += $"""
                 https://osu.ppy.sh/b/{data[beatmapindex].bid}
                 Stars: {data[beatmapindex].stars.ToString("0.##*")}  Mod: {mod}
                 PP Statistics:
@@ -415,20 +434,29 @@ namespace KanonBot.functions.osubot
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
                 // 验证账号信息
                 var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
                 DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
 
-                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
             {
                 // 查询用户是否绑定
-                var tempOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU);
+                var tempOsuInfo = await OSU.GetUser(
+                    command.osu_username,
+                    command.osu_mode ?? OSU.Enums.Mode.OSU
+                );
                 if (tempOsuInfo != null)
                 {
                     DBOsuInfo = await Database.Client.GetOsuUser(tempOsuInfo.Id);
@@ -469,10 +497,31 @@ namespace KanonBot.functions.osubot
                 return;
             }
             // 因为上面确定过模式，这里就直接用userdata里的mode了
-            var allBP = await OSU.GetUserScores(OnlineOsuInfo.Id, OSU.Enums.UserScoreType.Best, mode!.Value, 100, 0);
-            if (allBP == null) { await target.reply("查询成绩时出错。"); return; }
-            if (allBP!.Length == 0) { await target.reply("这个模式你还没有成绩呢.."); return; }
-            double scorePP = 0.0, bounsPP = 0.0, pp = 0.0, sumOxy = 0.0, sumOx2 = 0.0, avgX = 0.0, avgY = 0.0, sumX = 0.0;
+            var allBP = await OSU.GetUserScores(
+                OnlineOsuInfo.Id,
+                OSU.Enums.UserScoreType.Best,
+                mode!.Value,
+                100,
+                0
+            );
+            if (allBP == null)
+            {
+                await target.reply("查询成绩时出错。");
+                return;
+            }
+            if (allBP!.Length == 0)
+            {
+                await target.reply("这个模式你还没有成绩呢..");
+                return;
+            }
+            double scorePP = 0.0,
+                bounsPP = 0.0,
+                pp = 0.0,
+                sumOxy = 0.0,
+                sumOx2 = 0.0,
+                avgX = 0.0,
+                avgY = 0.0,
+                sumX = 0.0;
             List<double> ys = new();
             for (int i = 0; i < allBP.Length; ++i)
             {
@@ -510,24 +559,32 @@ namespace KanonBot.functions.osubot
             }
             scorePP += pp;
             bounsPP = OnlineOsuInfo.Statistics.PP - scorePP;
-            int totalscores = OnlineOsuInfo.Statistics.GradeCounts.A + OnlineOsuInfo.Statistics.GradeCounts.S + OnlineOsuInfo.Statistics.GradeCounts.SH + OnlineOsuInfo.Statistics.GradeCounts.SS + OnlineOsuInfo.Statistics.GradeCounts.SSH;
+            int totalscores =
+                OnlineOsuInfo.Statistics.GradeCounts.A
+                + OnlineOsuInfo.Statistics.GradeCounts.S
+                + OnlineOsuInfo.Statistics.GradeCounts.SH
+                + OnlineOsuInfo.Statistics.GradeCounts.SS
+                + OnlineOsuInfo.Statistics.GradeCounts.SSH;
             bool max;
             if (totalscores >= 25397 || bounsPP >= 416.6667)
                 max = true;
             else
                 max = false;
-            int rankedScores = max ? Math.Max(totalscores, 25397) : (int)Math.Round(Math.Log10(-(bounsPP / 416.6667) + 1.0) / Math.Log10(0.9994));
+            int rankedScores = max
+                ? Math.Max(totalscores, 25397)
+                : (int)Math.Round(Math.Log10(-(bounsPP / 416.6667) + 1.0) / Math.Log10(0.9994));
             if (double.IsNaN(scorePP) || double.IsNaN(bounsPP))
             {
                 scorePP = 0.0;
                 bounsPP = 0.0;
                 rankedScores = 0;
             }
-            var str = $"{OnlineOsuInfo.Username} ({OnlineOsuInfo.PlayMode.ToStr()})\n" +
-                $"总PP：{OnlineOsuInfo.Statistics.PP.ToString("0.##")}pp\n" +
-                $"原始PP：{scorePP.ToString("0.##")}pp\n" +
-                $"Bonus PP：{bounsPP.ToString("0.##")}pp\n" +
-                $"共计算出 {rankedScores} 个被记录的ranked谱面成绩。";
+            var str =
+                $"{OnlineOsuInfo.Username} ({OnlineOsuInfo.PlayMode.ToStr()})\n"
+                + $"总PP：{OnlineOsuInfo.Statistics.PP.ToString("0.##")}pp\n"
+                + $"原始PP：{scorePP.ToString("0.##")}pp\n"
+                + $"Bonus PP：{bounsPP.ToString("0.##")}pp\n"
+                + $"共计算出 {rankedScores} 个被记录的ranked谱面成绩。";
             await target.reply(str);
         }
 
@@ -551,20 +608,29 @@ namespace KanonBot.functions.osubot
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
                 // 验证账号信息
                 var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
                 DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
 
-                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
             {
                 // 查询用户是否绑定
-                var tempOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU);
+                var tempOsuInfo = await OSU.GetUser(
+                    command.osu_username,
+                    command.osu_mode ?? OSU.Enums.Mode.OSU
+                );
                 if (tempOsuInfo != null)
                 {
                     DBOsuInfo = await Database.Client.GetOsuUser(tempOsuInfo.Id);
@@ -612,7 +678,9 @@ namespace KanonBot.functions.osubot
                                     await target.reply(eloInfo["message"]!.ToString());
                                     break;
                                 case 40004:
-                                    await target.reply($"{(string)eloInfo["message"]!}\n{OnlineOsuInfo.Username}的初始ELO为: {eloInfo["elo"]}");
+                                    await target.reply(
+                                        $"{(string)eloInfo["message"]!}\n{OnlineOsuInfo.Username}的初始ELO为: {eloInfo["elo"]}"
+                                    );
                                     break;
                             }
                             return;
@@ -631,19 +699,33 @@ namespace KanonBot.functions.osubot
         async private static Task Rolecost(Target target, string cmd)
         {
             cmd = cmd.ToLower().Trim();
-            Func<OSU.Models.User, OSU.Models.PPlusData.UserData, double> occost = (userInfo, pppData) =>
+            Func<OSU.Models.User, OSU.Models.PPlusData.UserData, double> occost = (
+                userInfo,
+                pppData
+            ) =>
             {
-                double a, c, z, p;
+                double a,
+                    c,
+                    z,
+                    p;
                 p = userInfo.Statistics.PP;
-                z = 1.92 * Math.Pow(pppData.JumpAimTotal, 0.953) + 69.7 * Math.Pow(pppData.FlowAimTotal, 0.596)
-                    + 0.588 * Math.Pow(pppData.SpeedTotal, 1.175) + 3.06 * Math.Pow(pppData.StaminaTotal, 0.993);
+                z =
+                    1.92 * Math.Pow(pppData.JumpAimTotal, 0.953)
+                    + 69.7 * Math.Pow(pppData.FlowAimTotal, 0.596)
+                    + 0.588 * Math.Pow(pppData.SpeedTotal, 1.175)
+                    + 3.06 * Math.Pow(pppData.StaminaTotal, 0.993);
                 a = Math.Pow(pppData.AccuracyTotal, 1.2768) * Math.Pow(p, 0.88213);
-                c = Math.Min(0.00930973 * Math.Pow(p / 1000, 2.64192) * Math.Pow(z / 4000, 1.48422), 7) + Math.Min(a / 7554280, 3);
+                c =
+                    Math.Min(
+                        0.00930973 * Math.Pow(p / 1000, 2.64192) * Math.Pow(z / 4000, 1.48422),
+                        7
+                    ) + Math.Min(a / 7554280, 3);
                 return Math.Round(c, 2);
             };
             Func<OSU.Models.User, double> oncost = (userInfo) =>
             {
-                double fx, pp;
+                double fx,
+                    pp;
                 pp = userInfo.Statistics.PP;
                 if (pp <= 4000 && pp >= 2000)
                 {
@@ -657,7 +739,8 @@ namespace KanonBot.functions.osubot
             };
             Func<long, int, double> ostcost = (rank, elo) =>
             {
-                double rankelo, cost;
+                double rankelo,
+                    cost;
                 if (elo == 0)
                 {
                     elo = (int)(1500 - 600 * (Math.Log((rank + 500) / 8500.0) / Math.Log(4.0)));
@@ -693,7 +776,8 @@ namespace KanonBot.functions.osubot
             {
                 //formula  cost=bp1pp*0.6+(bp1pp-bp100pp)*0.4+tth/175+PPTotal*0.05      !!!!not this one
                 //formula  cost=pp/1831+tth/13939393  !!!!current
-                return (double)userInfo.Statistics.PP / 1831.0 + (double)userInfo.Statistics.TotalHits / 13939393.0;
+                return (double)userInfo.Statistics.PP / 1831.0
+                    + (double)userInfo.Statistics.TotalHits / 13939393.0;
             };
             #region 验证
             long? osuID = null;
@@ -713,20 +797,29 @@ namespace KanonBot.functions.osubot
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
                 // 验证账号信息
                 var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
                 DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
 
-                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
             {
                 // 查询用户是否绑定
-                var tempOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU);
+                var tempOsuInfo = await OSU.GetUser(
+                    command.osu_username,
+                    command.osu_mode ?? OSU.Enums.Mode.OSU
+                );
                 if (tempOsuInfo != null)
                 {
                     DBOsuInfo = await Database.Client.GetOsuUser(tempOsuInfo.Id);
@@ -766,9 +859,15 @@ namespace KanonBot.functions.osubot
                     try
                     {
                         var pppData = await OSU.GetUserPlusData(OnlineOsuInfo.Id);
-                        await target.reply($"在猫猫杯S1中，{OnlineOsuInfo.Username} 的cost为：{occost(OnlineOsuInfo, pppData.User)}");
+                        await target.reply(
+                            $"在猫猫杯S1中，{OnlineOsuInfo.Username} 的cost为：{occost(OnlineOsuInfo, pppData.User)}"
+                        );
                     }
-                    catch { await target.reply($"获取pp+失败"); return; }
+                    catch
+                    {
+                        await target.reply($"获取pp+失败");
+                        return;
+                    }
                     break;
                 ////////////////////////////////////////////////////////////////////////////////////////
                 case "onc":
@@ -807,11 +906,15 @@ namespace KanonBot.functions.osubot
                         if (elo != 0)
                         {
                             var matchId = await OSU.GetUserEloRecentPlay(OnlineOsuInfo.Id);
-                            var body = (await OSU.GetMatchInfo(matchId.Value))!["result"]!.ToObject<JObject>();
+                            var body = (await OSU.GetMatchInfo(matchId.Value))![
+                                "result"
+                            ]!.ToObject<JObject>();
                             TimeSpan ts = new();
                             foreach (var item in body!)
                             {
-                                var dt = DateTimeOffset.Parse(item.Value!["start_time"]!.ToString());
+                                var dt = DateTimeOffset.Parse(
+                                    item.Value!["start_time"]!.ToString()
+                                );
                                 ts = DateTime.Now - dt;
                                 break;
                             }
@@ -820,17 +923,27 @@ namespace KanonBot.functions.osubot
                                 elo = 0;
                             }
                         }
-                        await target.reply($"在OST中，{OnlineOsuInfo.Username} 的cost为：{ostcost(OnlineOsuInfo.Statistics.GlobalRank, elo)}");
+                        await target.reply(
+                            $"在OST中，{OnlineOsuInfo.Username} 的cost为：{ostcost(OnlineOsuInfo.Statistics.GlobalRank, elo)}"
+                        );
                     }
-                    catch { await target.reply($"获取elo失败"); return; }
+                    catch
+                    {
+                        await target.reply($"获取elo失败");
+                        return;
+                    }
                     break;
                 ////////////////////////////////////////////////////////////////////////////////////////
                 case "zkfc":
-                    await target.reply($"在ZKFC S1中，{OnlineOsuInfo.Username} 的cost为：{Math.Round(zkfccost(OnlineOsuInfo), 2)}");
+                    await target.reply(
+                        $"在ZKFC S1中，{OnlineOsuInfo.Username} 的cost为：{Math.Round(zkfccost(OnlineOsuInfo), 2)}"
+                    );
                     break;
                 ////////////////////////////////////////////////////////////////////////////////////////
                 default:
-                    await target.reply($"请输入要查询cost的比赛名称的缩写。\n当前已支持的比赛：onc/occ/ost/zkfc\n其他比赛请联系赛事主办方提供cost算法");
+                    await target.reply(
+                        $"请输入要查询cost的比赛名称的缩写。\n当前已支持的比赛：onc/occ/ost/zkfc\n其他比赛请联系赛事主办方提供cost算法"
+                    );
                     break;
             }
         }
@@ -855,20 +968,29 @@ namespace KanonBot.functions.osubot
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
                 // 验证账号信息
                 var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
                 DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
 
-                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
             {
                 // 查询用户是否绑定
-                var tempOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU);
+                var tempOsuInfo = await OSU.GetUser(
+                    command.osu_username,
+                    command.osu_mode ?? OSU.Enums.Mode.OSU
+                );
                 if (tempOsuInfo != null)
                 {
                     DBOsuInfo = await Database.Client.GetOsuUser(tempOsuInfo.Id);
@@ -902,8 +1024,18 @@ namespace KanonBot.functions.osubot
             OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
-            var allBP = await OSU.GetUserScores(OnlineOsuInfo!.Id, OSU.Enums.UserScoreType.Best, mode!.Value, 100, 0);
-            if (allBP == null) { await target.reply("查询成绩时出错。"); return; }
+            var allBP = await OSU.GetUserScores(
+                OnlineOsuInfo!.Id,
+                OSU.Enums.UserScoreType.Best,
+                mode!.Value,
+                100,
+                0
+            );
+            if (allBP == null)
+            {
+                await target.reply("查询成绩时出错。");
+                return;
+            }
             double totalPP = 0;
             // 如果bp数量小于10则取消
             if (allBP!.Length < 10)
@@ -919,14 +1051,15 @@ namespace KanonBot.functions.osubot
                 totalPP += item.PP;
             }
             var last = allBP.Length;
-            var str = $"{OnlineOsuInfo.Username} 在 {OnlineOsuInfo.PlayMode.ToStr()} 模式中:"
-            + $"\n你的 bp1 有 {allBP[0].PP:0.##}pp"
-            + $"\n你的 bp2 有 {allBP[1].PP:0.##}pp"
-            + $"\n..."
-            + $"\n你的 bp{last - 1} 有 {allBP[last - 2].PP:0.##}pp"
-            + $"\n你的 bp{last} 有 {allBP[last - 1].PP:0.##}pp"
-            + $"\n你 bp1 与 bp{last} 相差了有 {allBP[0].PP - allBP[last - 1].PP:0.##}pp"
-            + $"\n你的 bp 榜上所有成绩的平均值为 {totalPP / allBP.Length:0.##}pp";
+            var str =
+                $"{OnlineOsuInfo.Username} 在 {OnlineOsuInfo.PlayMode.ToStr()} 模式中:"
+                + $"\n你的 bp1 有 {allBP[0].PP:0.##}pp"
+                + $"\n你的 bp2 有 {allBP[1].PP:0.##}pp"
+                + $"\n..."
+                + $"\n你的 bp{last - 1} 有 {allBP[last - 2].PP:0.##}pp"
+                + $"\n你的 bp{last} 有 {allBP[last - 1].PP:0.##}pp"
+                + $"\n你 bp1 与 bp{last} 相差了有 {allBP[0].PP - allBP[last - 1].PP:0.##}pp"
+                + $"\n你的 bp 榜上所有成绩的平均值为 {totalPP / allBP.Length:0.##}pp";
             await target.reply(str);
         }
 
@@ -950,20 +1083,29 @@ namespace KanonBot.functions.osubot
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
                 // 验证账号信息
                 var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
                 DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
                 if (DBOsuInfo == null)
-                { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
 
-                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
             {
                 // 查询用户是否绑定
-                var tempOsuInfo = await OSU.GetUser(command.osu_username, command.osu_mode ?? OSU.Enums.Mode.OSU);
+                var tempOsuInfo = await OSU.GetUser(
+                    command.osu_username,
+                    command.osu_mode ?? OSU.Enums.Mode.OSU
+                );
                 if (tempOsuInfo != null)
                 {
                     DBOsuInfo = await Database.Client.GetOsuUser(tempOsuInfo.Id);
@@ -997,8 +1139,18 @@ namespace KanonBot.functions.osubot
             OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
-            var allBP = await OSU.GetUserScores(OnlineOsuInfo!.Id, OSU.Enums.UserScoreType.Best, mode!.Value, 100, 0);
-            if (allBP == null) { await target.reply("查询成绩时出错。"); return; }
+            var allBP = await OSU.GetUserScores(
+                OnlineOsuInfo!.Id,
+                OSU.Enums.UserScoreType.Best,
+                mode!.Value,
+                100,
+                0
+            );
+            if (allBP == null)
+            {
+                await target.reply("查询成绩时出错。");
+                return;
+            }
             List<OSU.Models.Score> TBP = new();
             List<int> Rank = new();
 
@@ -1017,7 +1169,10 @@ namespace KanonBot.functions.osubot
             //test end
 
 
-            var t = DateTime.Now.Hour < 4 ? DateTime.Now.Date.AddDays(-1).AddHours(4) : DateTime.Now.Date.AddHours(4);
+            var t =
+                DateTime.Now.Hour < 4
+                    ? DateTime.Now.Date.AddDays(-1).AddHours(4)
+                    : DateTime.Now.Date.AddHours(4);
             for (int i = 0; i < allBP.Length; i++)
             {
                 var item = allBP[i];
@@ -1032,22 +1187,29 @@ namespace KanonBot.functions.osubot
             }
             if (TBP.Count == 0)
             {
-
                 if (cmd == "")
                     await target.reply($"你今天在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上还没有新bp呢。。");
                 else
-                    await target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上还没有新bp呢。。");
+                    await target.reply(
+                        $"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上还没有新bp呢。。"
+                    );
             }
             else
             {
-                var image = await KanonBot.image.ScoreList.Draw(ScoreList.Type.TODAYBP, TBP, Rank, OnlineOsuInfo);
+                var image = await KanonBot.image.ScoreList.Draw(
+                    ScoreList.Type.TODAYBP,
+                    TBP,
+                    Rank,
+                    OnlineOsuInfo
+                );
                 using var stream = new MemoryStream();
                 await image.SaveAsync(stream, new PngEncoder());
                 await target.reply(
                     new Chain().image(
-                    Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
+                        Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
                         ImageSegment.Type.Base64
-                ));
+                    )
+                );
                 //await target.reply($"{OnlineOsuInfo.Username} 今天在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上新增的BP:" + str);
             }
         }
@@ -1071,16 +1233,21 @@ namespace KanonBot.functions.osubot
             DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
             if (DBUser == null)
             // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            {
+                await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                return;
+            }
             // 验证账号信息
             var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
             DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
             if (DBOsuInfo == null)
-            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            {
+                await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                return;
+            }
 
-            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
+            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
             osuID = DBOsuInfo.osu_uid;
-
 
             // 验证osu信息
             var OnlineOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
@@ -1096,7 +1263,10 @@ namespace KanonBot.functions.osubot
             OnlineOsuInfo.PlayMode = mode!.Value;
             #endregion
 
-            var seasonalpassinfo = await Database.Client.GetSeasonalPassInfo(OnlineOsuInfo!.Id, OnlineOsuInfo!.PlayMode!.ToStr())!;
+            var seasonalpassinfo = await Database.Client.GetSeasonalPassInfo(
+                OnlineOsuInfo!.Id,
+                OnlineOsuInfo!.PlayMode!.ToStr()
+            )!;
             if (seasonalpassinfo == null)
             {
                 await target.reply("数据库中无此用户的季票信息，请稍后再试。");
@@ -1111,7 +1281,8 @@ namespace KanonBot.functions.osubot
                 temppoint = temppoint - (100 + levelcount * 20);
                 if (temppoint > 0)
                     levelcount = levelcount + 1;
-                else break;
+                else
+                    break;
             }
             int tt = 0;
             for (int i = 0; i < levelcount; ++i)
@@ -1120,14 +1291,20 @@ namespace KanonBot.functions.osubot
             }
             double t = Math.Round(
                 Math.Round(
-                    ((double)((seasonalpassinfo.point - tt) * 100) / (double)(100 + levelcount * 20)), 4), 4
+                    (
+                        (double)((seasonalpassinfo.point - tt) * 100)
+                        / (double)(100 + levelcount * 20)
+                    ),
+                    4
+                ),
+                4
             );
 
-
             string str;
-            str = $"{OnlineOsuInfo.Username}\n自2023年1月1日以来\n您在{OnlineOsuInfo!.PlayMode!.ToStr()}模式下的等级为{levelcount}级 " +
-            $"({t}%)" +
-            $"\n共获得了了{seasonalpassinfo.point}pt\n距离升级大约还需要{Math.Abs(temppoint)}pt";
+            str =
+                $"{OnlineOsuInfo.Username}\n自2023年1月1日以来\n您在{OnlineOsuInfo!.PlayMode!.ToStr()}模式下的等级为{levelcount}级 "
+                + $"({t}%)"
+                + $"\n共获得了了{seasonalpassinfo.point}pt\n距离升级大约还需要{Math.Abs(temppoint)}pt";
             await target.reply(str);
 
             ////查询前先更新
@@ -1181,28 +1358,61 @@ namespace KanonBot.functions.osubot
             Database.Model.UserOSU? DBOsuInfo = null;
 
             // 解析指令
-            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Info);
+            var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.BPList);
             mode = command.osu_mode;
 
             // 验证账户
-            var AccInfo = Accounts.GetAccInfo(target);
-            DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
-            if (DBUser == null)
-            // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
-            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
-            // 验证账号信息
-            var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
-            DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
-            if (DBOsuInfo == null)
-            { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
+            if (command.self_query == true)
+            {
+                var AccInfo = Accounts.GetAccInfo(target);
+                DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+                if (DBUser == null)
+                // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
+                // 验证账号信息
+                var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
+                DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
+                if (DBOsuInfo == null)
+                {
+                    await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
+                    return;
+                }
 
-            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;    // 从数据库解析，理论上不可能错
-            osuID = DBOsuInfo.osu_uid;
-
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
+                osuID = DBOsuInfo.osu_uid;
+            }
+            else
+            {
+                // 查询用户是否绑定
+                var OnlineOsuInfo = await OSU.GetUser(
+                    command.osu_username,
+                    command.osu_mode ?? OSU.Enums.Mode.OSU
+                );
+                if (OnlineOsuInfo != null)
+                {
+                    DBOsuInfo = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
+                    if (DBOsuInfo != null)
+                    {
+                        DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
+                        mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
+                    }
+                    mode ??= OnlineOsuInfo.PlayMode;
+                    osuID = OnlineOsuInfo.Id;
+                }
+                else
+                {
+                    // 直接取消查询，简化流程
+                    await target.reply("猫猫没有找到此用户。");
+                    return;
+                }
+            }
 
             // 验证osu信息
-            var OnlineOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
-            if (OnlineOsuInfo == null)
+            var tempOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
+            if (tempOsuInfo == null)
             {
                 if (DBOsuInfo != null)
                     await target.reply("被办了。");
@@ -1211,76 +1421,82 @@ namespace KanonBot.functions.osubot
                 // 中断查询
                 return;
             }
-            OnlineOsuInfo.PlayMode = mode!.Value;
+            tempOsuInfo.PlayMode = mode!.Value;
             #endregion
 
-            var allBP = await OSU.GetUserScores(OnlineOsuInfo!.Id, OSU.Enums.UserScoreType.Best, mode!.Value, 100, 0);
-            if (allBP == null) { await target.reply("查询成绩时出错。"); return; }
+            var allBP = await OSU.GetUserScores(
+                tempOsuInfo!.Id,
+                OSU.Enums.UserScoreType.Best,
+                mode!.Value,
+                100,
+                0
+            );
+            if (allBP == null)
+            {
+                await target.reply("查询成绩时出错。");
+                return;
+            }
 
             //开始解析命令
-            int StartAt = 1;
-            int EndAt = 10;
-            var tempcmd = cmd.Trim().ToLower();
-            if (tempcmd != "")
-            {
-                if (tempcmd.IndexOf('-') != -1)
-                {
-                    //指定了范围
-                    var t = tempcmd.Split('-');
-                    if (!int.TryParse(t[0].Trim(), out StartAt))
-                    {
-                        await target.reply("指定的范围不正确"); return;
-                    }
-                    if (!int.TryParse(t[1].Trim(), out EndAt))
-                    {
-                        await target.reply("指定的范围不正确"); return;
-                    }
-                }
-                else
-                {
-                    //只指定了最大值
-                    if (!int.TryParse(tempcmd, out EndAt))
-                    {
-                        await target.reply("指定的范围不正确"); return;
-                    }
-                }
-
-                if (StartAt < 1 || StartAt > 99)
-                {
-                    await target.reply("指定的范围不正确"); return;
-                }
-                if (EndAt < 2 || EndAt > 100)
-                {
-                    await target.reply("指定的范围不正确"); return;
-                }
-                if (EndAt < StartAt)
-                {
-                    await target.reply("指定的范围不正确"); return;
-                }
+            if (command.StartAt.IsNone) {
+                await target.reply("指定的范围不正确");
+                return;
             }
+            if (command.EndAt.IsNone) {
+                await target.reply("指定的范围不正确");
+                return;
+            }
+            int StartAt = command.StartAt.Value();
+            int EndAt = command.EndAt.Value();
+
+            if (StartAt < 1 || StartAt > 99)
+            {
+                await target.reply("指定的范围不正确");
+                return;
+            }
+            if (EndAt < 2 || EndAt > 100)
+            {
+                await target.reply("指定的范围不正确");
+                return;
+            }
+            if (EndAt < StartAt)
+            {
+                await target.reply("指定的范围不正确");
+                return;
+            }
+
             List<OSU.Models.Score> TBP = new();
             List<int> Rank = new();
-            for (int i = StartAt - 1; i < (allBP.Length > EndAt ? EndAt : allBP.Length); ++i) TBP.Add(allBP[i]);
-            for (int i = StartAt - 1; i < (allBP.Length > EndAt ? EndAt : allBP.Length); ++i) Rank.Add(i + 1);
+            for (int i = StartAt - 1; i < (allBP.Length > EndAt ? EndAt : allBP.Length); ++i)
+                TBP.Add(allBP[i]);
+            for (int i = StartAt - 1; i < (allBP.Length > EndAt ? EndAt : allBP.Length); ++i)
+                Rank.Add(i + 1);
 
             if (TBP.Count == 0)
             {
-
                 if (cmd == "")
-                    await target.reply($"你在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上还没有bp呢。。");
+                    await target.reply($"你在 {tempOsuInfo.PlayMode.ToStr()} 模式上还没有bp呢。。");
                 else
-                    await target.reply($"{OnlineOsuInfo.Username} 在 {OnlineOsuInfo.PlayMode.ToStr()} 模式上还没有bp呢。。");
+                    await target.reply(
+                        $"{tempOsuInfo.Username} 在 {tempOsuInfo.PlayMode.ToStr()} 模式上还没有bp呢。。"
+                    );
             }
             else
             {
-                var image = await KanonBot.image.ScoreList.Draw(ScoreList.Type.BPLIST, TBP, Rank, OnlineOsuInfo);
+                using var image = await KanonBot.image.ScoreList.Draw(
+                    ScoreList.Type.BPLIST,
+                    TBP,
+                    Rank,
+                    tempOsuInfo
+                );
                 using var stream = new MemoryStream();
                 await image.SaveAsync(stream, new PngEncoder());
                 await target.reply(
                     new Chain().image(
-                    Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
+                        Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
                         ImageSegment.Type.Base64
-                ));
+                    )
+                );
             }
         }
     }
