@@ -28,7 +28,13 @@ namespace KanonBot.image
             BPLIST,
             RECENTLIST
         }
-        public static async Task<Img> Draw(Type type, List<OSU.Models.Score> TBP, List<int> Rank, OSU.Models.User userInfo)
+
+        public static async Task<Img> Draw(
+            Type type,
+            List<OSU.Models.Score> TBP,
+            List<int> Rank,
+            OSU.Models.User userInfo
+        )
         {
             //设定textOption/drawOption
             var textOptions = new TextOptions(new Font(TorusSemiBold, 120))
@@ -90,16 +96,16 @@ namespace KanonBot.image
                     Log.Warning(msg);
                 }
             }
+            
             using var scorebg = await TryAsync(ReadImageRgba(scorebgPath!))
                 .IfFail(await ReadImageRgba("./work/legacy/load-failed-img.png"));
+            
             scorebg.Mutate(
-                    x =>
-                        x.Resize(
-                            new ResizeOptions() { Size = new Size(365, 0), Mode = ResizeMode.Max }
-                        )
-                );
+                x =>
+                    x.Resize(new ResizeOptions() { Size = new Size(365, 0), Mode = ResizeMode.Max })
+            );
 
-            Img bgtemp = new Image<Rgba32>(365, 210);
+            using var bgtemp = new Image<Rgba32>(365, 210);
             bgtemp.Mutate(x => x.DrawImage(scorebg, new Point(0, 0), 1));
             image.Mutate(x => x.DrawImage(bgtemp, new Point(92, 433), 1));
             image.Mutate(x => x.DrawImage(MainPic, new Point(0, 0), 1));
@@ -153,8 +159,6 @@ namespace KanonBot.image
                         null
                     )
             );
-
-
 
             //绘制页眉的信息 496x585
             //title  +mods
@@ -358,7 +362,6 @@ namespace KanonBot.image
                     )
             );
 
-
             //页中
             for (int i = 1; i < TBP.Count; ++i)
             {
@@ -382,10 +385,7 @@ namespace KanonBot.image
                             }
                         })
                 );
-                SubPic.Mutate(
-                       x =>
-                           x.DrawImage(osuscoremode_icon, new Point(92, 48), 1)
-                   );
+                SubPic.Mutate(x => x.DrawImage(osuscoremode_icon, new Point(92, 48), 1));
 
                 //main title
                 textOptions.HorizontalAlignment = HorizontalAlignment.Left;
@@ -403,21 +403,18 @@ namespace KanonBot.image
                 }
                 textOptions.Origin = new PointF(204, 96);
                 SubPic.Mutate(
-                                x =>
-                                    x.DrawText(
-                                        drawOptions,
-                                        textOptions,
-                                        title,
-                                        new SolidBrush(Color.ParseHex("#656b6d")),
-                                        null
-                                    )
-                            );
+                    x =>
+                        x.DrawText(
+                            drawOptions,
+                            textOptions,
+                            title,
+                            new SolidBrush(Color.ParseHex("#656b6d")),
+                            null
+                        )
+                );
                 //Rank
                 textOptions.Font = new Font(TorusRegular, 34);
-                textOptions.Origin = new PointF(
-                    204,
-                    138
-                );
+                textOptions.Origin = new PointF(204, 138);
                 SubPic.Mutate(
                     x =>
                         x.DrawText(
@@ -429,11 +426,7 @@ namespace KanonBot.image
                         )
                 );
                 var textMeasurePos =
-                    204
-                    + TextMeasurer.Measure($"#{Rank[i]}", textOptions).Width
-                    + 5;
-
-
+                    204 + TextMeasurer.Measure($"#{Rank[i]}", textOptions).Width + 5;
 
                 //split
                 textOptions.Origin = new PointF(textMeasurePos, 138);
@@ -450,7 +443,6 @@ namespace KanonBot.image
                 textMeasurePos =
                     textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
 
-
                 //version
                 title = "";
                 foreach (char c in TBP[i].Beatmap!.Version)
@@ -463,10 +455,7 @@ namespace KanonBot.image
                         break;
                     }
                 }
-                textOptions.Origin = new PointF(
-                    textMeasurePos,
-                    138
-                );
+                textOptions.Origin = new PointF(textMeasurePos, 138);
                 SubPic.Mutate(
                     x =>
                         x.DrawText(
@@ -478,9 +467,7 @@ namespace KanonBot.image
                         )
                 );
                 textMeasurePos =
-                    textMeasurePos
-                    + TextMeasurer.Measure(title, textOptions).Width
-                    + 5;
+                    textMeasurePos + TextMeasurer.Measure(title, textOptions).Width + 5;
 
                 //split
                 textOptions.Origin = new PointF(textMeasurePos, 138);
@@ -511,9 +498,7 @@ namespace KanonBot.image
                 );
                 textMeasurePos =
                     textMeasurePos
-                    + TextMeasurer
-                        .Measure(TBP[i].Beatmap!.BeatmapId.ToString(), textOptions)
-                        .Width
+                    + TextMeasurer.Measure(TBP[i].Beatmap!.BeatmapId.ToString(), textOptions).Width
                     + 5;
 
                 //split
@@ -545,9 +530,7 @@ namespace KanonBot.image
                 );
                 textMeasurePos =
                     textMeasurePos
-                    + TextMeasurer
-                        .Measure(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions)
-                        .Width
+                    + TextMeasurer.Measure(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions).Width
                     + 5;
 
                 //split
@@ -579,9 +562,7 @@ namespace KanonBot.image
                 );
                 textMeasurePos =
                     textMeasurePos
-                    + TextMeasurer
-                        .Measure(TBP[i].Accuracy.ToString("0.##%"), textOptions)
-                        .Width
+                    + TextMeasurer.Measure(TBP[i].Accuracy.ToString("0.##%"), textOptions).Width
                     + 5;
 
                 //split
@@ -605,7 +586,7 @@ namespace KanonBot.image
                     x =>
                         x.DrawText(
                             drawOptions,
-                    textOptions,
+                            textOptions,
                             TBP[i].Rank,
                             new SolidBrush(Color.ParseHex("#656b6d")),
                             null
@@ -623,14 +604,7 @@ namespace KanonBot.image
                         {
                             using var modicon = await Img.LoadAsync($"./work/mods_v2/2x/{x}.png");
                             modicon.Mutate(x => x.Resize(90, 90));
-                            SubPic.Mutate(
-                                x =>
-                                    x.DrawImage(
-                                        modicon,
-                                        new Point(mods_pos_x, 48),
-                                        1
-                                    )
-                            );
+                            SubPic.Mutate(x => x.DrawImage(modicon, new Point(mods_pos_x, 48), 1));
                             mods_pos_x += 70 - (TBP[i].Mods.Length - 7) * 9;
                         }
                     }
@@ -641,14 +615,7 @@ namespace KanonBot.image
                         {
                             using var modicon = await Img.LoadAsync($"./work/mods_v2/2x/{x}.png");
                             modicon.Mutate(x => x.Resize(90, 90));
-                            SubPic.Mutate(
-                                x =>
-                                    x.DrawImage(
-                                        modicon,
-                                        new Point(mods_pos_x, 48),
-                                        1
-                                    )
-                            );
+                            SubPic.Mutate(x => x.DrawImage(modicon, new Point(mods_pos_x, 48), 1));
                             mods_pos_x += 84;
                         }
                     }
@@ -659,18 +626,10 @@ namespace KanonBot.image
                         {
                             using var modicon = await Img.LoadAsync($"./work/mods_v2/2x/{x}.png");
                             modicon.Mutate(x => x.Resize(90, 90));
-                            SubPic.Mutate(
-                                x =>
-                                    x.DrawImage(
-                                        modicon,
-                                        new Point(mods_pos_x, 48),
-                                        1
-                                    )
-                            );
+                            SubPic.Mutate(x => x.DrawImage(modicon, new Point(mods_pos_x, 48), 1));
                             mods_pos_x += 105;
                         }
                     }
-
                 }
 
                 //pp
@@ -693,7 +652,9 @@ namespace KanonBot.image
             }
             //页尾
             using var FooterPic = await ReadImageRgba("./work/panelv2/score_list_footer.png");
-            image.Mutate(x => x.DrawImage(FooterPic, new Point(0, 698 + (TBP.Count - 1) * 186 + 1), 1));
+            image.Mutate(
+                x => x.DrawImage(FooterPic, new Point(0, 698 + (TBP.Count - 1) * 186 + 1), 1)
+            );
             return image;
         }
     }

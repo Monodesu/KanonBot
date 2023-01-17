@@ -65,6 +65,7 @@ namespace KanonBot.functions.osu
             //删除头像以及osu!web缓存
             try { try { var files = Directory.GetFiles($@".\work\avatar\"); foreach (var file in files) try { File.Delete(file); } catch { } } catch { } } catch { }
             try { try { var files = Directory.GetFiles($@".\work\legacy\v1_cover\osu!web\"); foreach (var file in files) try { File.Delete(file); } catch { } } catch { } } catch { }
+            Environment.Exit(0);
             return (userList.Count, stopwatch.Elapsed);
         }
 
