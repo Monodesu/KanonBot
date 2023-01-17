@@ -8,6 +8,7 @@ using KanonBot.Serializer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RosuPP;
+using SixLabors.ImageSharp.Diagnostics;
 using API = KanonBot.API;
 using Msg = KanonBot.Message;
 
@@ -50,6 +51,12 @@ Log.Information("初始化成功 {@config}", config);
 
 Log.Information("注册用户数据更新事件");
 GeneralUpdate.DailyUpdate();
+
+MemoryDiagnostics.UndisposedAllocation += allocationStackTrace =>
+{
+    Log.Warning($@"Undisposed allocation detected at:{Environment.NewLine}{allocationStackTrace}");
+};
+
 #endregion
 
 

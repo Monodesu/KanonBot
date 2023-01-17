@@ -6,6 +6,7 @@ using KanonBot.functions.osu.rosupp;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Diagnostics;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
@@ -626,7 +627,7 @@ namespace KanonBot.LegacyImage
         public static async Task<Img> DrawScore(ScorePanelData data)
         {
             var ppInfo = data.ppInfo;
-            var score = await Img.LoadAsync("work/legacy/v2_scorepanel/default-score-v2.png");
+            var score = new Image<Rgba32>(1950, 1088);
             // 先下载必要文件
             var bgPath = $"./work/background/{data.scoreInfo.Beatmap!.BeatmapId}.png";
             if (!File.Exists(bgPath))
@@ -666,7 +667,6 @@ namespace KanonBot.LegacyImage
                     return await ReadImageRgba(avatarPath); // 下载后再读取
                 });
 
-
             using var panel = data.scoreInfo.Mode switch
             {
                 OSU.Enums.Mode.Fruits
@@ -677,9 +677,15 @@ namespace KanonBot.LegacyImage
             };
 
             // bg
-            using var bg = await TryAsync(ReadImageRgba(bgPath!))
-                .IfFail(await Img.LoadAsync<Rgba32>("./work/legacy/load-failed-img.png"));
-
+            Image<Rgba32> bg;
+            try
+            {
+                bg = await Img.LoadAsync<Rgba32>(bgPath!);
+            }
+            catch
+            {
+                bg = await Img.LoadAsync<Rgba32>("./work/legacy/load-failed-img.png");
+            }
             using var smallBg = bg.Clone(x => x.RoundCorner(new Size(433, 296), 20));
             using var backBlack = new Image<Rgba32>(1950 - 2, 1088);
             backBlack.Mutate(
@@ -690,6 +696,8 @@ namespace KanonBot.LegacyImage
             score.Mutate(x => x.DrawImage(backBlack, 0.33f));
             score.Mutate(x => x.DrawImage(panel, 1));
             score.Mutate(x => x.DrawImage(smallBg, new Point(27, 34), 1));
+            bg.Dispose();
+
             // StarRing
             // diff circle
             // green, blue, yellow, red, purple, black
@@ -761,53 +769,41 @@ namespace KanonBot.LegacyImage
             score.Mutate(x => x.DrawImage(diffCircle, new Point(512, 257), 1));
             // beatmap_status
             if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.ranked)
-                score.Mutate(
-                    async x =>
-                        x.DrawImage(
-                            await Img.LoadAsync("./work/icons/ranked.png"),
-                            new Point(415, 16),
-                            1
-                        )
-                );
-            if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.approved)
-                score.Mutate(
-                    async x =>
-                        x.DrawImage(
-                            await Img.LoadAsync("./work/icons/approved.png"),
-                            new Point(415, 16),
-                            1
-                        )
-                );
-            if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.loved)
-                score.Mutate(
-                    async x =>
-                        x.DrawImage(
-                            await Img.LoadAsync("./work/icons/loved.png"),
-                            new Point(415, 16),
-                            1
-                        )
-                );
-            // mods
-            var mods = data.scoreInfo.Mods;
-            var modp = 0;
-            foreach (var mod in mods)
             {
-                try
-                {
-                    using var modPic = await Img.LoadAsync($"./work/mods/{mod}.png");
-                    modPic.Mutate(x => x.Resize(200, 61));
-                    score.Mutate(x => x.DrawImage(modPic, new Point((modp * 160) + 440, 440), 1));
-                    modp += 1;
-                }
-                catch
-                {
-                    continue;
-                }
+                using var c = await Img.LoadAsync("./work/icons/ranked.png");
+                score.Mutate(x => x.DrawImage(c, new Point(415, 16), 1));
             }
-            // rankings
-            var ranking = data.scoreInfo.Passed ? data.scoreInfo.Rank : "F";
-            using var rankPic = await Img.LoadAsync($"./work/ranking/ranking-{ranking}.png");
-            score.Mutate(x => x.DrawImage(rankPic, new Point(913, 874), 1));
+            if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.approved)
+            {
+                using var c = await Img.LoadAsync("./work/icons/approved.png");
+                score.Mutate(x => x.DrawImage(c, new Point(415, 16), 1));
+            }
+            if (data.scoreInfo.Beatmap.Status is OSU.Enums.Status.loved)
+            {
+                using var c = await Img.LoadAsync("./work/icons/loved.png");
+                score.Mutate(x => x.DrawImage(c, new Point(415, 16), 1));
+            }
+            // mods
+            // var mods = data.scoreInfo.Mods;
+            // var modp = 0;
+            // foreach (var mod in mods)
+            // {
+            //     try
+            //     {
+            //         using var modPic = await Img.LoadAsync($"./work/mods/{mod}.png");
+            //         modPic.Mutate(x => x.Resize(200, 61));
+            //         score.Mutate(x => x.DrawImage(modPic, new Point((modp * 160) + 440, 440), 1));
+            //         modp += 1;
+            //     }
+            //     catch
+            //     {
+            //         continue;
+            //     }
+            // }
+            // // rankings
+            // var ranking = data.scoreInfo.Passed ? data.scoreInfo.Rank : "F";
+            // using var rankPic = await Img.LoadAsync($"./work/ranking/ranking-{ranking}.png");
+            // score.Mutate(x => x.DrawImage(rankPic, new Point(913, 874), 1));
             // text part (文字部分)
             var font = new Font(TorusRegular, 60);
             var drawOptions = new DrawingOptions
@@ -1045,7 +1041,7 @@ namespace KanonBot.LegacyImage
             );
             // time
             textOptions.Font = new Font(TorusRegular, 27.61f);
-            data.scoreInfo.CreatedAt.AddHours(8);//to UTC+8
+            data.scoreInfo.CreatedAt.AddHours(8); //to UTC+8
             var time = data.scoreInfo.CreatedAt.ToString("yyyy/MM/dd HH:mm:ss");
             textOptions.Origin = new PointF(145, 505);
             score.Mutate(
@@ -1483,14 +1479,14 @@ namespace KanonBot.LegacyImage
             acchue.Mutate(
                 x =>
                     x.DrawText(
-                            drawOptions,
-                            textOptions,
-                            $"{acc.ToString("0.0#")}%",
-                            new SolidBrush(color),
-                            null
-                        )
-                        .Hue(((float)hue))
+                        drawOptions,
+                        textOptions,
+                        $"{acc.ToString("0.0#")}%",
+                        new SolidBrush(color),
+                        null
+                    )
             );
+            acchue.Mutate(x => x.Hue(((float)hue)));
             score.Mutate(x => x.DrawImage(acchue, 1));
             // combo
             var combo = data.scoreInfo.MaxCombo;
@@ -1562,14 +1558,14 @@ namespace KanonBot.LegacyImage
                     combohue.Mutate(
                         x =>
                             x.DrawText(
-                                    drawOptions,
-                                    textOptions,
-                                    $"{combo}x",
-                                    new SolidBrush(color),
-                                    null
-                                )
-                                .Hue(((float)hue))
+                                drawOptions,
+                                textOptions,
+                                $"{combo}x",
+                                new SolidBrush(color),
+                                null
+                            )
                     );
+                    combohue.Mutate(x => x.Hue(((float)hue)));
                     score.Mutate(x => x.DrawImage(combohue, 1));
                 }
                 else
@@ -1665,27 +1661,23 @@ namespace KanonBot.LegacyImage
             {
                 hi.abilityFillColor = Color.FromRgba(255, 123, 172, 50);
                 hi.abilityLineColor = Color.FromRgba(255, 123, 172, 255);
-                ppvsImg.Mutate(
-                    x => x.DrawImage(Hexagram.Draw(u1d, multi, exp, hi), new Point(0, -120), 1)
-                );
+                using var tmp1 = Hexagram.Draw(u1d, multi, exp, hi);
+                ppvsImg.Mutate(x => x.DrawImage(tmp1, new Point(0, -120), 1));
                 hi.abilityFillColor = Color.FromRgba(41, 171, 226, 50);
                 hi.abilityLineColor = Color.FromRgba(41, 171, 226, 255);
-                ppvsImg.Mutate(
-                    x => x.DrawImage(Hexagram.Draw(u2d, multi, exp, hi), new Point(0, -120), 1)
-                );
+                using var tmp2 = Hexagram.Draw(u2d, multi, exp, hi);
+                ppvsImg.Mutate(x => x.DrawImage(tmp2, new Point(0, -120), 1));
             }
             else
             {
                 hi.abilityFillColor = Color.FromRgba(41, 171, 226, 50);
                 hi.abilityLineColor = Color.FromRgba(41, 171, 226, 255);
-                ppvsImg.Mutate(
-                    x => x.DrawImage(Hexagram.Draw(u2d, multi, exp, hi), new Point(0, -120), 1)
-                );
+                using var tmp1 = Hexagram.Draw(u2d, multi, exp, hi);
+                ppvsImg.Mutate(x => x.DrawImage(tmp1, new Point(0, -120), 1));
                 hi.abilityFillColor = Color.FromRgba(255, 123, 172, 50);
                 hi.abilityLineColor = Color.FromRgba(255, 123, 172, 255);
-                ppvsImg.Mutate(
-                    x => x.DrawImage(Hexagram.Draw(u1d, multi, exp, hi), new Point(0, -120), 1)
-                );
+                using var tmp2 = Hexagram.Draw(u1d, multi, exp, hi);
+                ppvsImg.Mutate(x => x.DrawImage(tmp2, new Point(0, -120), 1));
             }
 
             // text

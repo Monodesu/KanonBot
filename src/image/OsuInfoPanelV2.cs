@@ -18,6 +18,7 @@ using static KanonBot.LegacyImage.Draw;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 using System.Collections.Generic;
+using SixLabors.ImageSharp.Diagnostics;
 
 namespace KanonBot.DrawV2
 {
