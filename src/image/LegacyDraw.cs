@@ -784,26 +784,26 @@ namespace KanonBot.LegacyImage
                 score.Mutate(x => x.DrawImage(c, new Point(415, 16), 1));
             }
             // mods
-            // var mods = data.scoreInfo.Mods;
-            // var modp = 0;
-            // foreach (var mod in mods)
-            // {
-            //     try
-            //     {
-            //         using var modPic = await Img.LoadAsync($"./work/mods/{mod}.png");
-            //         modPic.Mutate(x => x.Resize(200, 61));
-            //         score.Mutate(x => x.DrawImage(modPic, new Point((modp * 160) + 440, 440), 1));
-            //         modp += 1;
-            //     }
-            //     catch
-            //     {
-            //         continue;
-            //     }
-            // }
-            // // rankings
-            // var ranking = data.scoreInfo.Passed ? data.scoreInfo.Rank : "F";
-            // using var rankPic = await Img.LoadAsync($"./work/ranking/ranking-{ranking}.png");
-            // score.Mutate(x => x.DrawImage(rankPic, new Point(913, 874), 1));
+            var mods = data.scoreInfo.Mods;
+            var modp = 0;
+            foreach (var mod in mods)
+            {
+                try
+                {
+                    using var modPic = await Img.LoadAsync($"./work/mods/{mod}.png");
+                    modPic.Mutate(x => x.Resize(200, 61));
+                    score.Mutate(x => x.DrawImage(modPic, new Point((modp * 160) + 440, 440), 1));
+                    modp += 1;
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+            // rankings
+            var ranking = data.scoreInfo.Passed ? data.scoreInfo.Rank : "F";
+            using var rankPic = await Img.LoadAsync($"./work/ranking/ranking-{ranking}.png");
+            score.Mutate(x => x.DrawImage(rankPic, new Point(913, 874), 1));
             // text part (文字部分)
             var font = new Font(TorusRegular, 60);
             var drawOptions = new DrawingOptions
