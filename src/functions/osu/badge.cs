@@ -242,7 +242,7 @@ namespace KanonBot.functions.osubot
                 }
 
                 //去重
-                _ = badge_temp.Where((x, i) => badge_temp.FindIndex(z => z == x) == i);
+                badge_temp = badge_temp.Distinct().ToList();
             }
             //单badge
             else
@@ -291,9 +291,9 @@ namespace KanonBot.functions.osubot
             }
 
             //设置badge
-            if (badge_temp.Count > 4)
+            if (badge_temp.Count > 6)
             {
-                await target.reply($"提供的badge数量不可超过 4 个，当前提供的badge数量为 {badge_temp.Count} 个。");
+                await target.reply($"提供的badge数量不可超过 6 个，当前提供的badge数量为 {badge_temp.Count} 个。");
                 return;
             }
 
