@@ -1147,54 +1147,6 @@ namespace KanonBot.DrawV2
             using var panel = await ReadImageRgba(panelPath); // 读取
             info.Mutate(x => x.DrawImage(panel, new Point(0, 0), 1));
 
-            //avatar
-            var avatarPath = $"./work/avatar/{data.userInfo.Id}.png";
-            using var avatar = await TryAsync(ReadImageRgba(avatarPath))
-                .IfFail(async () =>
-                {
-                    try
-                    {
-                        avatarPath = await data.userInfo.AvatarUrl.DownloadFileAsync(
-                            "./work/avatar/",
-                            $"{data.userInfo.Id}.png"
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
-                        Log.Error(msg);
-                        throw; // 下载失败直接抛出error
-                    }
-                    return await ReadImageRgba(avatarPath); // 下载后再读取
-                });
-
-            // 亮度
-            avatar.Mutate(x => x.Brightness(AvatarBrightness));
-            avatar.Mutate(x => x.Resize(200, 200).RoundCorner(new Size(200, 200), 25));
-            avatar.Mutate(
-                x =>
-                    x.ProcessPixelRowsAsVector4(row =>
-                    {
-                        for (int p = 0; p < row.Length; p++)
-                            if (row[p].W > 0.2f)
-                                row[p].W = AvatarAlpha;
-                    })
-            );
-            info.Mutate(x => x.DrawImage(avatar, new Point(1531, 72), 1));
-
-            //username
-            textOptions.Origin = new PointF(1780, 230);
-            info.Mutate(
-                x =>
-                    x.DrawText(
-                        drawOptions,
-                        textOptions,
-                        data.userInfo.Username,
-                        new SolidBrush(UsernameColor),
-                        null
-                    )
-            );
-
             //rank
             textOptions.Font = new Font(TorusRegular, 60);
             textOptions.Origin = new PointF(1972, 481);
@@ -2922,6 +2874,7 @@ namespace KanonBot.DrawV2
             {
                 for (int i = 0; i < data.badgeId.Count; ++i)
                 {
+                    if (data.badgeId[i] == -9) continue;
                     var (_badge, format) = await ReadImageRgbaWithFormat(
                     $"./work/badges/{data.badgeId[i]}.png"
                 );
@@ -2932,27 +2885,57 @@ namespace KanonBot.DrawV2
                         File.Delete($"./work/badges/{data.badgeId[i]}.png");
                         badge.Save($"./work/badges/{data.badgeId[i]}.png", new PngEncoder());
                     }
-                    badge.Mutate(
+
+                    //绘制
+                    if (i < 5)
+                    {
+                        //top
+                        badge.Mutate(
                         x =>
                             x.Resize(236, 110)
                                 .Brightness(BadgeBrightness)
                                 .RoundCorner(new Size(236, 110), 20)
                     );
 
-                    badge.Mutate(
-                        x =>
-                            x.ProcessPixelRowsAsVector4(row =>
-                            {
-                                for (int p = 0; p < row.Length; p++)
-                                    if (row[p].W > 0.2f)
-                                        row[p].W = BadgeAlpha;
-                            })
-                    );
-                    //绘制
-                    if (data.userInfo.IsSupporter && DisplaySupporterStatus)
-                        info.Mutate(x => x.DrawImage(badge, new Point(3420 - i * 276, 93), 1));
+                        badge.Mutate(
+                            x =>
+                                x.ProcessPixelRowsAsVector4(row =>
+                                {
+                                    for (int p = 0; p < row.Length; p++)
+                                        if (row[p].W > 0.2f)
+                                            row[p].W = BadgeAlpha;
+                                })
+                        );
+                        if (data.userInfo.IsSupporter && DisplaySupporterStatus)
+                            info.Mutate(x => x.DrawImage(badge, new Point(3420 - i * 276, 93), 1));
+                        else
+                            info.Mutate(x => x.DrawImage(badge, new Point(3566 - i * 276, 93), 1));
+                    }
                     else
-                        info.Mutate(x => x.DrawImage(badge, new Point(3566 - i * 276, 93), 1));
+                    {
+                        //bottom
+                        badge.Mutate(
+                        x =>
+                            x.Resize(236, 110)
+                                .Brightness(BadgeBrightness)
+                                .RoundCorner(new Size(108, 50), 9.2f)
+                    );
+
+                        badge.Mutate(
+                            x =>
+                                x.ProcessPixelRowsAsVector4(row =>
+                                {
+                                    for (int p = 0; p < row.Length; p++)
+                                        if (row[p].W > 0.2f)
+                                            row[p].W = BadgeAlpha;
+                                })
+                        );
+                        if (data.userInfo.IsSupporter && DisplaySupporterStatus)
+                            info.Mutate(x => x.DrawImage(badge, new Point(3414 - (i - 6) * 132, 223), 1));
+                        else
+                            info.Mutate(x => x.DrawImage(badge, new Point(3560 - (i - 6) * 132, 223), 1));
+                    }
+
                 }
             }
 
@@ -2972,6 +2955,57 @@ namespace KanonBot.DrawV2
                 );
                 info.Mutate(x => x.DrawImage(temp, new Point(3692, 93), 1));
             }
+
+            //avatar
+            var avatarPath = $"./work/avatar/{data.userInfo.Id}.png";
+            using var avatar = await TryAsync(ReadImageRgba(avatarPath))
+                .IfFail(async () =>
+                {
+                    try
+                    {
+                        avatarPath = await data.userInfo.AvatarUrl.DownloadFileAsync(
+                            "./work/avatar/",
+                            $"{data.userInfo.Id}.png"
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
+                        Log.Error(msg);
+                        throw; // 下载失败直接抛出error
+                    }
+                    return await ReadImageRgba(avatarPath); // 下载后再读取
+                });
+
+            // 亮度
+            avatar.Mutate(x => x.Brightness(AvatarBrightness));
+            avatar.Mutate(x => x.Resize(200, 200).RoundCorner(new Size(200, 200), 25));
+            avatar.Mutate(
+                x =>
+                    x.ProcessPixelRowsAsVector4(row =>
+                    {
+                        for (int p = 0; p < row.Length; p++)
+                            if (row[p].W > 0.2f)
+                                row[p].W = AvatarAlpha;
+                    })
+            );
+            info.Mutate(x => x.DrawImage(avatar, new Point(1531, 72), 1));
+
+            //username
+            textOptions.Font = new Font(TorusSemiBold, 120);
+            textOptions.VerticalAlignment = VerticalAlignment.Bottom;
+            textOptions.HorizontalAlignment = HorizontalAlignment.Left;
+            textOptions.Origin = new PointF(1780, 230);
+            info.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        data.userInfo.Username,
+                        new SolidBrush(UsernameColor),
+                        null
+                    )
+            );
 
             //osu!mode
             using var osuprofilemode_icon = await ReadImageRgba(
@@ -2994,6 +3028,7 @@ namespace KanonBot.DrawV2
                     break;
             }
             textOptions.Font = new Font(TorusRegular, 55);
+            textOptions.VerticalAlignment = VerticalAlignment.Center;
             textOptions.HorizontalAlignment = HorizontalAlignment.Left;
             var osuprofilemode_text_measure = TextMeasurer.Measure(
                 osuprofilemode_text,

@@ -138,9 +138,18 @@ namespace KanonBot.LegacyImage
             {
                 try
                 {
-                    using var badge = await Img.LoadAsync($"./work/badges/{data.badgeId[0]}.png");
-                    badge.Mutate(x => x.Resize(86, 40).RoundCorner(new Size(86, 40), 5));
-                    info.Mutate(x => x.DrawImage(badge, new Point(272, 152), 1));
+                    int dbcountl = 0;
+                    for (int i = 0; i < data.badgeId.Count; ++i)
+                    {
+                        if (data.badgeId[i] > -1)
+                        {
+                            using var badge = await Img.LoadAsync($"./work/badges/{data.badgeId[i]}.png");
+                            badge.Mutate(x => x.Resize(86, 40).RoundCorner(new Size(86, 40), 5));
+                            info.Mutate(x => x.DrawImage(badge, new Point(272 + (dbcountl * 106), 152), 1));
+                            ++dbcountl;
+                            if (dbcountl > 4) break;
+                        }
+                    }
                 }
                 catch { }
             }

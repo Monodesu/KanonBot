@@ -1,6 +1,7 @@
 using System;
 using System.CommandLine;
 using System.IO;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using Flurl;
 using Flurl.Http;
@@ -209,11 +210,59 @@ namespace KanonBot.functions.osubot
                 {
                     if (int.TryParse(badge, out int badgeNum))
                     {
-                        if (badgeNum < -1 || badgeNum == 0)
+                        if (badgeNum == 0)
                         {
                             await target.reply($"你提供的badge id({badge})有误，请重新检查。");
                             return;
                         }
+                        //检查用户是否拥有此badge
+                        if (badgeNum > 0)
+                        {
+                            if (badgeNum > owned_badges.Count)
+                            {
+                                await target.reply($"你好像没有编号为 {cmd} 的badge呢..."); ;
+                                return;
+                            }
+                            bool is_badge_owned = false;
+                            foreach (var x in owned_badges)
+                                if (x == owned_badges[badgeNum - 1])
+                                {
+                                    is_badge_owned = true;
+                                    break;
+                                }
+
+                            if (!is_badge_owned)
+                            {
+                                await target.reply($"你好像没有编号为 {badgeNum} 的badge呢...");
+                                return;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (badge.Length > 0)
+                        {
+                            await target.reply($"你提供的badge id({badge})有误，请重新检查。");
+                            return;
+                        }
+                    }
+                }
+
+                //去重
+                badge_temp = badge_temp.Distinct().ToList();
+            }
+            //单badge
+            else
+            {
+                if (int.TryParse(cmd, out int badgeNum))
+                {
+                    if (badgeNum == 0)
+                    {
+                        await target.reply($"你提供的badge id({cmd})有误，请重新检查。");
+                        return;
+                    }
+                    if (badgeNum != -1 && badgeNum > -2)
+                    {
                         //检查用户是否拥有此badge
                         if (badgeNum > owned_badges.Count)
                         {
@@ -230,48 +279,17 @@ namespace KanonBot.functions.osubot
 
                         if (!is_badge_owned)
                         {
-                            await target.reply($"你好像没有编号为 {badgeNum} 的badge呢...");
+                            await target.reply($"你好像没有编号为 {cmd} 的badge呢...");
                             return;
                         }
                     }
                     else
                     {
-                        await target.reply($"你提供的badge id({badge})有误，请重新检查。");
-                        return;
-                    }
-                }
-
-                //去重
-                badge_temp = badge_temp.Distinct().ToList();
-            }
-            //单badge
-            else
-            {
-                if (int.TryParse(cmd, out int badgeNum))
-                {
-                    if (badgeNum < -1 || badgeNum == 0)
-                    {
-                        await target.reply($"你提供的badge id({cmd})有误，请重新检查。");
-                        return;
-                    }
-                    //检查用户是否拥有此badge
-                    if (badgeNum > owned_badges.Count)
-                    {
-                        await target.reply($"你好像没有编号为 {cmd} 的badge呢..."); ;
-                        return;
-                    }
-                    bool is_badge_owned = false;
-                    foreach (var x in owned_badges)
-                        if (x == owned_badges[badgeNum - 1])
+                        if (badgeNum != -1)
                         {
-                            is_badge_owned = true;
-                            break;
+                            await target.reply($"你提供的badge id({cmd})有误，请重新检查。");
+                            return;
                         }
-
-                    if (!is_badge_owned)
-                    {
-                        await target.reply($"你好像没有编号为 {cmd} 的badge呢...");
-                        return;
                     }
                 }
                 else
@@ -291,9 +309,9 @@ namespace KanonBot.functions.osubot
             }
 
             //设置badge
-            if (badge_temp.Count > 6)
+            if (badge_temp.Count > 19)
             {
-                await target.reply($"提供的badge数量不可超过 6 个，当前提供的badge数量为 {badge_temp.Count} 个。");
+                await target.reply($"提供的badge数量不可超过 19 个，当前提供的badge数量为 {badge_temp.Count} 个。");
                 return;
             }
 
@@ -310,7 +328,10 @@ namespace KanonBot.functions.osubot
                 var text_temp = "";
                 foreach (var x in badge_temp)
                 {
-                    text_temp += $"{owned_badges[int.Parse(x) - 1]},";
+                    if (!int.TryParse(x, out int a))
+                        a = -9;
+                    if (a > 0) text_temp += $"{owned_badges[a - 1]},";
+                    else text_temp += $"-9,";
                 }
                 text_temp = text_temp[..^1];
                 if (
