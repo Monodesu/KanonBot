@@ -2867,74 +2867,75 @@ namespace KanonBot.DrawV2
 
             //badges
             if (data.badgeId != null)
-                if (data.badgeId[0] != -1)
-                {
-                    for (int i = 0; i < data.badgeId.Count; ++i)
+                if (data.badgeId.Count > 0)
+                    if (data.badgeId[0] != -1)
                     {
-                        if (data.badgeId[i] == -9) continue;
-                        var (_badge, format) = await ReadImageRgbaWithFormat(
-                        $"./work/badges/{data.badgeId[i]}.png"
-                    );
-                        using var badge = _badge;
-                        //检测上传的badge format是否正确，否则重新格式化
-                        if (format.DefaultMimeType.Trim().ToLower()[..3] != "png")
+                        for (int i = 0; i < data.badgeId.Count; ++i)
                         {
-                            File.Delete($"./work/badges/{data.badgeId[i]}.png");
-                            badge.Save($"./work/badges/{data.badgeId[i]}.png", new PngEncoder());
-                        }
-
-                        //绘制
-                        if (i < 5)
-                        {
-                            //top
-                            badge.Mutate(
-                            x =>
-                                x.Resize(236, 110)
-                                    .Brightness(BadgeBrightness)
-                                    .RoundCorner(new Size(236, 110), 20)
+                            if (data.badgeId[i] == -9) continue;
+                            var (_badge, format) = await ReadImageRgbaWithFormat(
+                            $"./work/badges/{data.badgeId[i]}.png"
                         );
+                            using var badge = _badge;
+                            //检测上传的badge format是否正确，否则重新格式化
+                            if (format.DefaultMimeType.Trim().ToLower()[..3] != "png")
+                            {
+                                File.Delete($"./work/badges/{data.badgeId[i]}.png");
+                                badge.Save($"./work/badges/{data.badgeId[i]}.png", new PngEncoder());
+                            }
 
-                            badge.Mutate(
+                            //绘制
+                            if (i < 5)
+                            {
+                                //top
+                                badge.Mutate(
                                 x =>
-                                    x.ProcessPixelRowsAsVector4(row =>
-                                    {
-                                        for (int p = 0; p < row.Length; p++)
-                                            if (row[p].W > 0.2f)
-                                                row[p].W = BadgeAlpha;
-                                    })
+                                    x.Resize(236, 110)
+                                        .Brightness(BadgeBrightness)
+                                        .RoundCorner(new Size(236, 110), 20)
                             );
-                            if (data.userInfo.IsSupporter && DisplaySupporterStatus)
-                                info.Mutate(x => x.DrawImage(badge, new Point(3420 - i * 276, 93), 1));
-                            else
-                                info.Mutate(x => x.DrawImage(badge, new Point(3566 - i * 276, 93), 1));
-                        }
-                        else
-                        {
-                            //bottom
-                            badge.Mutate(
-                            x =>
-                                x.Resize(236, 110)
-                                    .Brightness(BadgeBrightness)
-                                    .RoundCorner(new Size(108, 50), 9.2f)
-                        );
 
-                            badge.Mutate(
+                                badge.Mutate(
+                                    x =>
+                                        x.ProcessPixelRowsAsVector4(row =>
+                                        {
+                                            for (int p = 0; p < row.Length; p++)
+                                                if (row[p].W > 0.2f)
+                                                    row[p].W = BadgeAlpha;
+                                        })
+                                );
+                                if (data.userInfo.IsSupporter && DisplaySupporterStatus)
+                                    info.Mutate(x => x.DrawImage(badge, new Point(3420 - i * 276, 93), 1));
+                                else
+                                    info.Mutate(x => x.DrawImage(badge, new Point(3566 - i * 276, 93), 1));
+                            }
+                            else
+                            {
+                                //bottom
+                                badge.Mutate(
                                 x =>
-                                    x.ProcessPixelRowsAsVector4(row =>
-                                    {
-                                        for (int p = 0; p < row.Length; p++)
-                                            if (row[p].W > 0.2f)
-                                                row[p].W = BadgeAlpha;
-                                    })
+                                    x.Resize(236, 110)
+                                        .Brightness(BadgeBrightness)
+                                        .RoundCorner(new Size(108, 50), 9.2f)
                             );
-                            if (data.userInfo.IsSupporter && DisplaySupporterStatus)
-                                info.Mutate(x => x.DrawImage(badge, new Point(3414 - (i - 6) * 132, 223), 1));
-                            else
-                                info.Mutate(x => x.DrawImage(badge, new Point(3560 - (i - 6) * 132, 223), 1));
-                        }
 
+                                badge.Mutate(
+                                    x =>
+                                        x.ProcessPixelRowsAsVector4(row =>
+                                        {
+                                            for (int p = 0; p < row.Length; p++)
+                                                if (row[p].W > 0.2f)
+                                                    row[p].W = BadgeAlpha;
+                                        })
+                                );
+                                if (data.userInfo.IsSupporter && DisplaySupporterStatus)
+                                    info.Mutate(x => x.DrawImage(badge, new Point(3414 - (i - 6) * 132, 223), 1));
+                                else
+                                    info.Mutate(x => x.DrawImage(badge, new Point(3560 - (i - 6) * 132, 223), 1));
+                            }
+
+                        }
                     }
-                }
 
             //osu!supporter
             if (data.userInfo.IsSupporter && DisplaySupporterStatus)
