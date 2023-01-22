@@ -151,24 +151,30 @@ namespace KanonBot.functions.osubot
                 }
 
                 var badgeID = DBUser!.displayed_badge_ids;
-                // legacy只取第一个badge
+                // 由于v1v2绘制位置以及绘制方向的不同，legacy(v1)只取第一个badge
                 if (badgeID != null)
+                {
                     try
                     {
-                        if (badgeID.Contains(","))
-                            badgeID = badgeID[..badgeID.IndexOf(",")];
+                        if (badgeID!.IndexOf(",") != -1)
+                        {
+                            var y = badgeID.Split(",");
+                            foreach (var x in y)
+                                data.badgeId.Add(int.Parse(x));
+                        }
+                        else
+                        {
+                            data.badgeId.Add(int.Parse(badgeID!));
+                        }
                     }
                     catch
                     {
-                        badgeID = "-1";
+                        data.badgeId = new() { -1 };
                     }
-                try
-                {
-                    data.badgeId = int.Parse(badgeID!);
                 }
-                catch
+                else
                 {
-                    data.badgeId = -1;
+                    data.badgeId = new() { -1 };
                 }
             }
             else

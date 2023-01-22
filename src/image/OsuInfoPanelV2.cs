@@ -2914,38 +2914,46 @@ namespace KanonBot.DrawV2
             }
 
             //badges
-            if (data.badgeId != -1)
-            {
-                var (_badge, format) = await ReadImageRgbaWithFormat(
-                    $"./work/badges/{data.badgeId}.png"
-                );
-                using var badge = _badge;
-                //检测上传的infopanel尺寸是否正确
-                if (format.DefaultMimeType.Trim().ToLower()[..3] != "png")
-                {
-                    File.Delete($"./work/badges/{data.badgeId}.png");
-                    badge.Save($"./work/badges/{data.badgeId}.png", new PngEncoder());
-                }
-                badge.Mutate(
-                    x =>
-                        x.Resize(236, 110)
-                            .Brightness(BadgeBrightness)
-                            .RoundCorner(new Size(236, 110), 20)
-                );
 
-                badge.Mutate(
-                    x =>
-                        x.ProcessPixelRowsAsVector4(row =>
-                        {
-                            for (int p = 0; p < row.Length; p++)
-                                if (row[p].W > 0.2f)
-                                    row[p].W = BadgeAlpha;
-                        })
+
+
+
+            if (data.badgeId[0] != -1)
+            {
+                for (int i = 0; i < data.badgeId.Count; ++i)
+                {
+                    var (_badge, format) = await ReadImageRgbaWithFormat(
+                    $"./work/badges/{data.badgeId[i]}.png"
                 );
-                if (data.userInfo.IsSupporter && DisplaySupporterStatus)
-                    info.Mutate(x => x.DrawImage(badge, new Point(3420, 93), 1));
-                else
-                    info.Mutate(x => x.DrawImage(badge, new Point(3566, 93), 1));
+                    using var badge = _badge;
+                    //检测上传的badge format是否正确，否则重新格式化
+                    if (format.DefaultMimeType.Trim().ToLower()[..3] != "png")
+                    {
+                        File.Delete($"./work/badges/{data.badgeId[i]}.png");
+                        badge.Save($"./work/badges/{data.badgeId[i]}.png", new PngEncoder());
+                    }
+                    badge.Mutate(
+                        x =>
+                            x.Resize(236, 110)
+                                .Brightness(BadgeBrightness)
+                                .RoundCorner(new Size(236, 110), 20)
+                    );
+
+                    badge.Mutate(
+                        x =>
+                            x.ProcessPixelRowsAsVector4(row =>
+                            {
+                                for (int p = 0; p < row.Length; p++)
+                                    if (row[p].W > 0.2f)
+                                        row[p].W = BadgeAlpha;
+                            })
+                    );
+                    //绘制
+                    if (data.userInfo.IsSupporter && DisplaySupporterStatus)
+                        info.Mutate(x => x.DrawImage(badge, new Point(3420 - i * 276, 93), 1));
+                    else
+                        info.Mutate(x => x.DrawImage(badge, new Point(3566 - i * 276, 93), 1));
+                }
             }
 
             //osu!supporter

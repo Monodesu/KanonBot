@@ -24,7 +24,7 @@ namespace KanonBot.LegacyImage
             public OSU.Models.PPlusData.UserData? pplusInfo;
             public string? customPanel;
             public int daysBefore = 0;
-            public int badgeId = -1;
+            public List<int> badgeId = new();
             public CustomMode customMode = CustomMode.Dark; //0=custom 1=light 2=dark
             public string ColorConfigRaw;
 
@@ -133,12 +133,12 @@ namespace KanonBot.LegacyImage
             avatar.Mutate(x => x.Resize(190, 190).RoundCorner(new Size(190, 190), 40));
             info.Mutate(x => x.DrawImage(avatar, new Point(39, 55), 1));
 
-            // badge
-            if (data.badgeId != -1)
+            // badge 取第一个绘制
+            if (data.badgeId[0] != -1)
             {
                 try
                 {
-                    using var badge = await Img.LoadAsync($"./work/badges/{data.badgeId}.png");
+                    using var badge = await Img.LoadAsync($"./work/badges/{data.badgeId[0]}.png");
                     badge.Mutate(x => x.Resize(86, 40).RoundCorner(new Size(86, 40), 5));
                     info.Mutate(x => x.DrawImage(badge, new Point(272, 152), 1));
                 }

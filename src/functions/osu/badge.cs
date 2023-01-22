@@ -171,112 +171,158 @@ namespace KanonBot.functions.osubot
         //注：没有完全适配多徽章安装，需要等新面板后再做适配
         private static async Task Set(Target target, string cmd, AccInfo accinfo)
         {
-            if (int.TryParse(cmd, out int badgeNum))
+            //获取用户信息
+            var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
+            if (userinfo == null)
             {
-                if (badgeNum < -1 || badgeNum == 0)
-                {
-                    await target.reply("你提供的badge id不正确，请重新检查。");
-                    return;
-                }
+                await target.reply("未找到账号信息...");
+                return;
+            }
 
-                var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
-                if (userinfo == null)
-                {
-                    await target.reply("未找到账号信息...");
-                    return;
-                }
+            if (userinfo.owned_badge_ids == null)
+            {
+                await target.reply("你还没有牌子呢...");
+                return;
+            }
 
-                if (userinfo.owned_badge_ids == null)
-                {
-                    await target.reply("你还没有牌子呢...");
-                    return;
-                }
-
-                //获取已拥有的牌子
-                List<string> owned_badges = new();
-                if (userinfo.owned_badge_ids.Contains(','))
-                {
-                    owned_badges = userinfo.owned_badge_ids.Split(',').ToList();
-                }
-                else
-                {
-                    owned_badges = new();
-                    owned_badges.Add(userinfo.owned_badge_ids.Trim());
-                }
-
-                //获取当前已安装的牌子
-                if (userinfo.displayed_badge_ids != null)
-                {
-                    List<string> displayed_badges;
-                    if (userinfo.displayed_badge_ids.Contains(','))
-                    {
-                        displayed_badges = userinfo.displayed_badge_ids.Split(',').ToList();
-                    }
-                    else
-                    {
-                        displayed_badges = new();
-                        displayed_badges.Add(userinfo.displayed_badge_ids.Trim());
-                    }
-
-                    //检查当前badge
-                    foreach (var x in displayed_badges)
-                    {
-                        if (x == badgeNum.ToString())
-                        {
-                            await target.reply($"你现在的主显badge已经是 {x} 了！");
-                            return;
-                        }
-                    }
-                }
-
-                //设置badge
-                //没有完全适配多徽章安装，需要等新面板后再取消注释
-                //if (displayed_badges.Count == 0)
-                //{
-                if (badgeNum != -1)
-                {
-                    //检查用户是否拥有此badge
-                    if (owned_badges.Count < badgeNum)
-                    {
-                        await target.reply($"你好像没有编号为 {badgeNum} 的badge呢...");
-                        return;
-                    }
-                    if (
-                        await Database.Client.SetDisplayedBadge(
-                            userinfo.uid.ToString(),
-                            owned_badges[badgeNum - 1]
-                        )
-                    )
-                        await target.reply($"设置成功");
-                    else
-                        await target.reply($"因数据库原因设置失败，请稍后再试。");
-                    return;
-                }
-                else
-                {
-                    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), "-1"))
-                        await target.reply($"设置成功，已关闭badge显示。");
-                    else
-                        await target.reply($"因数据库原因设置失败，请稍后再试。");
-                    return;
-                }
-                //}
-                //else
-                //{
-                //    string settemp1 = "";
-                //    foreach (var x in displayed_badges)
-                //        settemp1 += x + ",";
-                //    settemp1 += owned_badges[badgeNum - 1];
-                //    if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), settemp1))
-                //        await target.reply($"设置成功");
-                //    else
-                //        await target.reply($"因数据库原因设置失败，请稍后再试。");
-                //    return;
-                //}
+            //获取已拥有的牌子
+            List<string> owned_badges = new();
+            if (userinfo.owned_badge_ids.Contains(','))
+            {
+                owned_badges = userinfo.owned_badge_ids.Split(',').ToList();
             }
             else
             {
-                await target.reply("你提供的badge id不正确，请重新检查。");
+                owned_badges = new();
+                owned_badges.Add(userinfo.owned_badge_ids.Trim());
+            }
+
+            List<string> badge_temp = new();
+
+            //如果存在多badge
+            if (cmd.IndexOf(",") != -1)
+            {
+
+                badge_temp = cmd.Split(",").ToList();
+
+                foreach (var badge in badge_temp)
+                {
+                    if (int.TryParse(badge, out int badgeNum))
+                    {
+                        if (badgeNum < -1 || badgeNum == 0)
+                        {
+                            await target.reply($"你提供的badge id({badge})有误，请重新检查。");
+                            return;
+                        }
+                        //检查用户是否拥有此badge
+                        if (badgeNum > owned_badges.Count)
+                        {
+                            await target.reply($"你好像没有编号为 {cmd} 的badge呢..."); ;
+                            return;
+                        }
+                        bool is_badge_owned = false;
+                        foreach (var x in owned_badges)
+                            if (x == owned_badges[badgeNum - 1])
+                            {
+                                is_badge_owned = true;
+                                break;
+                            }
+
+                        if (!is_badge_owned)
+                        {
+                            await target.reply($"你好像没有编号为 {badgeNum} 的badge呢...");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        await target.reply($"你提供的badge id({badge})有误，请重新检查。");
+                        return;
+                    }
+                }
+
+                //去重
+                _ = badge_temp.Where((x, i) => badge_temp.FindIndex(z => z == x) == i);
+            }
+            //单badge
+            else
+            {
+                if (int.TryParse(cmd, out int badgeNum))
+                {
+                    if (badgeNum < -1 || badgeNum == 0)
+                    {
+                        await target.reply($"你提供的badge id({cmd})有误，请重新检查。");
+                        return;
+                    }
+                    //检查用户是否拥有此badge
+                    if (badgeNum > owned_badges.Count)
+                    {
+                        await target.reply($"你好像没有编号为 {cmd} 的badge呢..."); ;
+                        return;
+                    }
+                    bool is_badge_owned = false;
+                    foreach (var x in owned_badges)
+                        if (x == owned_badges[badgeNum - 1])
+                        {
+                            is_badge_owned = true;
+                            break;
+                        }
+
+                    if (!is_badge_owned)
+                    {
+                        await target.reply($"你好像没有编号为 {cmd} 的badge呢...");
+                        return;
+                    }
+                }
+                else
+                {
+                    if (cmd.Length > 0)
+                    {
+                        await target.reply($"你提供的badge id({cmd})有误，请重新检查。");
+                    }
+                    else
+                    {
+                        await target.reply($"请提供要设置的badge id。");
+                    }
+                    return;
+                }
+
+                badge_temp.Add(badgeNum.ToString());
+            }
+
+            //设置badge
+            if (badge_temp.Count > 4)
+            {
+                await target.reply($"提供的badge数量不可超过 4 个，当前提供的badge数量为 {badge_temp.Count} 个。");
+                return;
+            }
+
+            if (badge_temp.Count == 1 && badge_temp[0] == "-1") //关闭badge显示
+            {
+                if (await Database.Client.SetDisplayedBadge(userinfo.uid.ToString(), "-1"))
+                    await target.reply($"设置成功，已关闭badge显示。");
+                else
+                    await target.reply($"因数据库原因设置失败，请稍后再试。");
+                return;
+            }
+            else
+            {
+                var text_temp = "";
+                foreach (var x in badge_temp)
+                {
+                    text_temp += $"{owned_badges[int.Parse(x) - 1]},";
+                }
+                text_temp = text_temp[..^1];
+                if (
+                    await Database.Client.SetDisplayedBadge(
+                        userinfo.uid.ToString(),
+                        text_temp
+                    )
+                )
+                    await target.reply($"设置成功");
+                else
+                    await target.reply($"因数据库原因设置失败，请稍后再试。");
+                return;
             }
         }
 

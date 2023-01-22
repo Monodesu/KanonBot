@@ -52,10 +52,11 @@ Log.Information("初始化成功 {@config}", config);
 Log.Information("注册用户数据更新事件");
 GeneralUpdate.DailyUpdate();
 
-MemoryDiagnostics.UndisposedAllocation += allocationStackTrace =>
-{
-    Log.Warning($@"Undisposed allocation detected at:{Environment.NewLine}{allocationStackTrace}");
-};
+//这个东西很占资源，先注释了
+//MemoryDiagnostics.UndisposedAllocation += allocationStackTrace =>
+//{
+//    Log.Warning($@"Undisposed allocation detected at:{Environment.NewLine}{allocationStackTrace}");
+//};
 
 #endregion
 
@@ -67,8 +68,8 @@ drivers.append(
     .onMessage(async (target) =>
     {
         var api = (target.socket as OneBot.Server.Socket)!.api;
-        Log.Information("← 收到CQ端用户 {0} 的消息 {1}", target.sender,target.msg);
-        Log.Debug("↑ 详情 {@0}", target.raw!);
+        Log.Information("← 收到OneBot用户 {0} 的消息 {1}", target.sender,target.msg);
+        Log.Debug("↑ OneBot详情 {@0}", target.raw!);
         // Log.Debug("↑ 详情 {0}", Json.Serialize((target.raw! as OneBot.Models.CQMessageEventBase)!.MessageList));
         //switch (target.raw)
         //{
@@ -91,13 +92,13 @@ drivers.append(
         switch (e)
         {
             case HeartBeat h:
-                Log.Debug("收到心跳包 {h}", h);
+                Log.Debug("收到OneBot心跳包 {h}", h);
                 break;
             case Ready l:
-                Log.Debug("收到生命周期事件 {h}", l);
+                Log.Debug("收到OneBot生命周期事件 {h}", l);
                 break;
             case RawEvent r:
-                Log.Debug("收到事件 {r}", r);
+                Log.Debug("收到OneBot事件 {r}", r);
                 break;
             default:
                 break;
@@ -113,9 +114,9 @@ drivers.append(
     {
         var api = (target.socket as Guild)!.api;
         var messageData = (target.raw as Guild.Models.MessageData)!;
-        Log.Information("← 收到消息 {0}", target.msg);
-        Log.Debug("↑ 详情 {@0}", messageData);
-        Log.Debug("↑ 附件 {@0}", Json.Serialize(messageData.Attachments));
+        Log.Information("← 收到QQ Guild消息 {0}", target.msg);
+        Log.Debug("↑ QQ Guild详情 {@0}", messageData);
+        Log.Debug("↑ QQ Guild附件 {@0}", Json.Serialize(messageData.Attachments));
         // var res = api.SendMessage(messageData.ChannelID, new Guild.Models.SendMessageData() {
         //     MessageId = messageData.ID,
         //     MessageReference = new() { MessageId = messageData.ID }
@@ -128,12 +129,12 @@ drivers.append(
         }
         catch (Flurl.Http.FlurlHttpException ex)
         {
-            Log.Error("请求 API 时发生异常，{0}", ex);
+            Log.Error("请求 API 时发生异常<QQ Guild>，{0}", ex);
             await target.reply("请求 API 时发生异常");
         }
         catch (Exception ex)
         {
-            Log.Error("发生未知错误，{0}", ex);
+            Log.Error("发生未知错误<QQ Guild>，{0}", ex);
             await target.reply("发生未知错误");
         }
     })
@@ -143,10 +144,10 @@ drivers.append(
         {
             case RawEvent r:
                 var data = (r.value as Guild.Models.PayloadBase<JToken>)!;
-                Log.Debug("收到事件: {@0} 数据: {1}", data, data.Data?.ToString(Formatting.None) ?? null);
+                Log.Debug("收到QQ Guild事件: {@0} 数据: {1}", data, data.Data?.ToString(Formatting.None) ?? null);
                 break;
             case Ready l:
-                Log.Debug("收到生命周期事件 {h}", l);
+                Log.Debug("收到QQ Guild生命周期事件 {h}", l);
                 break;
             default:
                 break;
