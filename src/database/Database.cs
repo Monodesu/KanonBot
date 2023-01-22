@@ -616,7 +616,7 @@ public class Client
     }
 
     //true=成功生成代码
-    public static async Task<bool> CreateBadgeRedemptionCode(int badge_id, string code)
+    public static async Task<bool> CreateBadgeRedemptionCode(int badge_id, string code, bool can_repeatedly, DateTimeOffset expire_at)
     {
         using var db = GetInstance();
         var li = await db
@@ -633,14 +633,15 @@ public class Client
             badge_id = badge_id,
             gen_time = DateTime.Now,
             code = code,
-            redeem_user = -1
+            can_repeatedly = can_repeatedly,
+            expire_at = expire_at
         };
         try
         {
             await db.InsertAsync(d);
             return true;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
             return false;
@@ -657,22 +658,25 @@ public class Client
 
         if (li == null)
             return null!;
-        else if (li.redeem_user != -1)
-            return null!;
+        if (!li.can_repeatedly)
+            if (li.redeem_count > 0)
+                return null!;
 
+        return li!;
+
+    }
+
+    public static async Task<bool> SetBadgeRedemptionCodeStatus(int id, long uid, string code)
+    {
+        using var db = GetInstance();
         var result = await db.BadgeRedemptionCode
-            .Where(it => it.id == li.id)
+            .Where(it => it.id == id)
             .Set(it => it.redeem_time, DateTime.Now)
-            .Set(it => it.redeem_user, (int)uid)
+            .Set(it => it.redeem_user, it => it.redeem_user == null ? uid.ToString() : it.redeem_user + "," + uid.ToString())
+            .Set(it => it.redeem_count, it => it.redeem_count + 1)
             .UpdateAsync();
-
         if (result > -1)
-        {
-            return li!;
-        }
-        else
-        {
-            return null!;
-        }
+            return true;
+        return false;
     }
 }

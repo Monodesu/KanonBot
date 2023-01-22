@@ -720,9 +720,16 @@ namespace KanonBot.functions.osubot
                 var data = await Database.Client.RedeemBadgeRedemptionCode(uid, cmd);
                 if (data != null)
                 {
-                    if (data.redeem_user != -1)
+                    //检测牌子是否已过兑换期限
+                    if (data.expire_at < DateTimeOffset.Now)
                     {
-                        await target.reply("该兑换码不存在或已被兑换。");
+                        await target.reply("该兑换码不存在或已失效。");
+                        return;
+                    }
+                    //检测牌子是否可被重复兑换
+                    if (data.redeem_count != 0 && data.can_repeatedly == false)
+                    {
+                        await target.reply("该兑换码不存在或已失效。");
                         return;
                     }
                     //添加badge
@@ -755,6 +762,20 @@ namespace KanonBot.functions.osubot
                             }
                         }
                     }
+                    //设置兑换码状态
+                    try
+                    {
+                        if (!await Database.Client.SetBadgeRedemptionCodeStatus(data.id, uid, cmd))
+                        {
+                            await target.reply("数据库发生了错误，无法兑换badge，请联系管理员处理。(1)");
+                            return;
+                        }
+                    }
+                    catch
+                    {
+                        await target.reply("数据库发生了错误，无法兑换badge，请联系管理员处理。(2)");
+                        return;
+                    }
                     //添加
                     owned_badges.Add(data.badge_id.ToString());
                     string t = "";
@@ -765,7 +786,7 @@ namespace KanonBot.functions.osubot
 
                     if (!await Database.Client.SetOwnedBadge((int)userInfo.uid, t[..^1]))
                     {
-                        await target.reply($"数据库发生了错误，无法兑换badge，请联系管理员处理。");
+                        await target.reply($"数据库发生了错误，无法兑换badge，请联系管理员处理。(3)");
                         return;
                     }
 
@@ -804,7 +825,7 @@ namespace KanonBot.functions.osubot
                 }
                 else
                 {
-                    await target.reply("该兑换码不存在或已被兑换。");
+                    await target.reply("该兑换码不存在或已失效。");
                     return;
                 }
             }
@@ -812,11 +833,14 @@ namespace KanonBot.functions.osubot
 
         private static async Task SudoCreateBadgeRedemptionCode(Target target, string cmd)
         {
+            //badgeid#amount#can_repeatedly(true/false)#expire_at(num of days later)
             try
             {
                 var tmp_op = cmd.Split("#"); //0=badgeid 1=how many codes need to be generated(amount)
                 var badge_id = int.Parse(tmp_op[0]);
                 var amount = int.Parse(tmp_op[1]);
+                bool can_repeatedly = bool.TryParse(tmp_op[2], out bool crt) ? crt : false;
+                var expire_at = int.Parse(tmp_op[3]);
 
                 if (amount < 0)
                 {
@@ -831,18 +855,24 @@ namespace KanonBot.functions.osubot
                     var code = RandomStr(50, false);
                     while (error_count < 4)
                     {
-                        var status = await Database.Client.CreateBadgeRedemptionCode(badge_id, code);
+                        var status = await Database.Client.CreateBadgeRedemptionCode(badge_id, code, can_repeatedly, DateTimeOffset.Parse(DateTime.Now.AddDays(expire_at).ToString()));
                         if (status)
                         {
                             codes.Add(code);
                             break;
                         }
-                        else error_count++;
+                        else
+                        {
+                            await Task.Delay(100);
+                            error_count++;
+                        }
                     }
                 }
                 var badgeinfo = await Database.Client.GetBadgeInfo(badge_id.ToString());
                 string str = "";
-                str += $"此次操作生成了id为 {badge_id} 的徽章\n\n" +
+                str += $"此次操作生成了id为 {badge_id} 的徽章\n\n";
+                if (can_repeatedly) str += $"注意：此徽章可被重复兑换\n";
+                str += $"此徽章将于{DateTime.Parse(DateTime.Now.AddDays(expire_at).ToString())}过期，在此时间后将不能再被兑换。\n" +
                     $"徽章信息如下：\n" +
                     $"名称：{badgeinfo!.name}({badgeinfo.id})\n" +
                     $"中文名称: {badgeinfo.name_chinese}\n" +

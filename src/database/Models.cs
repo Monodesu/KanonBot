@@ -38,13 +38,22 @@ public class Model
         public int badge_id { get; set; }
 
         [Column]
+        public bool can_repeatedly { get; set; }
+
+        [Column]
+        public int redeem_count { get; set; }
+
+        [Column]
+        public DateTimeOffset expire_at { get; set; }
+
+        [Column]
         public DateTimeOffset gen_time { get; set; }
 
         [Column]
         public DateTimeOffset redeem_time { get; set; }
 
         [Column]
-        public int redeem_user { get; set; }
+        public string? redeem_user { get; set; }
 
         [Column]
         public string? code { get; set; }
