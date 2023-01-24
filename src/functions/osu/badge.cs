@@ -721,7 +721,7 @@ namespace KanonBot.functions.osubot
                 if (data != null)
                 {
                     //检测牌子是否已过兑换期限
-                    if (data.expire_at < DateTimeOffset.Now)
+                    if (data.expire_at.Ticks < DateTimeOffset.Now.Ticks)
                     {
                         await target.reply("该兑换码不存在或已失效。");
                         return;
