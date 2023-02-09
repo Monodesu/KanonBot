@@ -16,7 +16,6 @@ using RosuPP;
 using Serilog;
 using Tomlyn.Model;
 using static KanonBot.API.OSU.Enums;
-using static KanonBot.API.OSU.Legacy;
 using static KanonBot.API.OSU.Models;
 using static KanonBot.Database.Model;
 

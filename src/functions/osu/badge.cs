@@ -20,7 +20,6 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using static KanonBot.API.OSU.Legacy;
 using static KanonBot.functions.Accounts;
 using Img = SixLabors.ImageSharp.Image;
 

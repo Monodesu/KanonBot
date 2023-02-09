@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 interoptopus = "0.14.15"
-rosu-pp = "0.9.2"
+rosu-pp = "0.9.3"
 thiserror = "1.0.37"
 
 [dev-dependencies]
