@@ -5,12 +5,51 @@ using KanonBot.functions.osu;
 using KanonBot.functions.osubot;
 using KanonBot.Message;
 using LanguageExt;
+using LanguageExt.ClassInstances;
 using Serilog;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Sockets;
+using System.Threading;
 
 namespace KanonBot.command_parser
 {
     public static class Universal
     {
+        private static Dictionary<string, ISocket> CommandList = new();
+        private static SemaphoreSlim semaphore = new(1);
+
+        private static async Task<bool> ReduplicateTargetChecker_Lock(Target target)
+        {
+            // 确认此消息是否已被处理
+            await semaphore.WaitAsync(); //异步锁
+            if (!CommandList.ContainsKey(target.sender!))
+            {
+                CommandList.Add(target.sender!, target.socket);
+                semaphore.Release(); //解锁
+                return true;
+            }
+            else
+            {
+                // 判断是否由同一socket发出，如果是，继续执行，否则返回false
+                if (CommandList.TryGetValue(target.sender!, out var value))
+                {
+                    if (value == target.socket)
+                    {
+                        semaphore.Release();
+                        return true;
+                    }
+                }
+            }
+            semaphore.Release();
+            return false;
+        }
+
+        private static void TargetChecker_RemoveElement(Target target)
+        {
+            CommandList.Remove(target.sender!);
+        }
+
         public static async Task Parser(Target target)
         {
             // 解析之前先确认是否有等待的消息
@@ -25,6 +64,15 @@ namespace KanonBot.command_parser
 
             string? cmd = null;
             var msg = target.msg;
+
+            if (msg.StartsWith("!") || msg.StartsWith("/") || msg.StartsWith("！"))
+            {
+                // 检测相同指令重复
+                if (!await ReduplicateTargetChecker_Lock(target)) return;
+
+                cmd = msg.Build();
+                cmd = cmd[1..]; //删除命令唤起符
+            }
 
             // var isAtSelf = false;
             // if (msg.StartsWith(new Message.AtSegment(target.selfAccount!, target.platform)))
@@ -41,11 +89,6 @@ namespace KanonBot.command_parser
             // }
 
 
-            if (msg.StartsWith("!") || msg.StartsWith("/") || msg.StartsWith("！"))
-            {
-                cmd = msg.Build();
-                cmd = cmd.Substring(1); //删除命令唤起符
-            }
 
             if (cmd != null)
             {
@@ -59,6 +102,7 @@ namespace KanonBot.command_parser
                     if (cmd.StartsWith("bpme"))
                         return;
                     await BestPerformance.Execute(target, cmd[2..].Trim());
+                    TargetChecker_RemoveElement(target);
                     return;
                 }
 
@@ -82,60 +126,78 @@ namespace KanonBot.command_parser
                     {
                         case "reg":
                             await Accounts.RegAccount(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "bind":
                             await Accounts.BindService(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "info":
                             await Info.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "recent":
                             await Recent.Execute(target, childCmd, true);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "re":
                             await Recent.Execute(target, childCmd, true);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "pr":
                             await Recent.Execute(target, childCmd, false);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "bp":
                             await BestPerformance.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "score":
                             await Score.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "help":
                             await Help.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "ping":
                             await Ping.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "update":
                             await Update.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "get":
                             await Get.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return; // get bonuspp/elo/rolecost/bpht/todaybp/annualpass
                         case "badge":
                             await Badge.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "leeway":
                         case "lc":
                             await Leeway.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "set":
                             await Setter.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "ppvs":
                             await PPvs.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
 
                         // Admin
                         case "sudo": //管理员
                             await Sudo.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "su": //超级管理员
                             await Su.Execute(target, childCmd);
+                            TargetChecker_RemoveElement(target);
                             return;
                         case "dailyupdate":
                             return;
@@ -185,11 +247,15 @@ namespace KanonBot.command_parser
                 }
                 catch (AggregateException ae)
                 {
-                    foreach (var e in ae.InnerExceptions) {
-                        if (e is Flurl.Http.FlurlHttpTimeoutException) {
+                    foreach (var e in ae.InnerExceptions)
+                    {
+                        if (e is Flurl.Http.FlurlHttpTimeoutException)
+                        {
                             await target.reply("获取数据超时，请稍后重试吧");
                             return;
-                        } else if (e is Flurl.Http.FlurlHttpException) {
+                        }
+                        else if (e is Flurl.Http.FlurlHttpException)
+                        {
                             await target.reply("获取数据时出错，之后再试试吧");
                         }
                     }

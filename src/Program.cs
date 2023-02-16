@@ -68,7 +68,7 @@ drivers.append(
     .onMessage(async (target) =>
     {
         var api = (target.socket as OneBot.Server.Socket)!.api;
-        Log.Information("← 收到OneBot用户 {0} 的消息 {1}", target.sender,target.msg);
+        Log.Information("← 收到OneBot用户 {0} 的消息 {1}", target.sender, target.msg);
         Log.Debug("↑ OneBot详情 {@0}", target.raw!);
         // Log.Debug("↑ 详情 {0}", Json.Serialize((target.raw! as OneBot.Models.CQMessageEventBase)!.MessageList));
         //switch (target.raw)

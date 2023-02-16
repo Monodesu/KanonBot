@@ -433,12 +433,14 @@ public static class Utils
         catch { }
     }
 
-    async public static Task<Image<Rgba32>> ReadImageRgba(string path) {
+    async public static Task<Image<Rgba32>> ReadImageRgba(string path)
+    {
         using var img = await Img.LoadAsync(path);
         return img.CloneAs<Rgba32>();
     }
 
-    async public static Task<(Image<Rgba32>, IImageFormat)> ReadImageRgbaWithFormat(string path) {
+    async public static Task<(Image<Rgba32>, IImageFormat)> ReadImageRgbaWithFormat(string path)
+    {
         using var s = Utils.LoadFile2ReadStream(path);
         var (temppic, format) = await Img.LoadWithFormatAsync(s);
         var pic = temppic.CloneAs<Rgba32>();
@@ -544,4 +546,10 @@ public static class Utils
                 (float)Math.Round(starDifficulty, 2, MidpointRounding.AwayFromZero)
             )
             .ToColor();
+
+    public static int RandomNum(int min, int max)
+    {
+        var r = new Random(DateTime.Now.Millisecond + DateTime.Now.Second + DateTime.Now.Minute + DateTime.Now.Microsecond + DateTime.Now.Nanosecond);
+        return r.Next(min, max);
+    }
 }
