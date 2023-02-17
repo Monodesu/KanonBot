@@ -45,7 +45,7 @@ namespace KanonBot.command_parser
             return false;
         }
 
-        private static void TargetChecker_RemoveElement(Target target)
+        public static void TargetChecker_RemoveElement(Target target)
         {
             CommandList.Remove(target.sender!);
         }
@@ -102,7 +102,6 @@ namespace KanonBot.command_parser
                     if (cmd.StartsWith("bpme"))
                         return;
                     await BestPerformance.Execute(target, cmd[2..].Trim());
-                    TargetChecker_RemoveElement(target);
                     return;
                 }
 
@@ -126,78 +125,60 @@ namespace KanonBot.command_parser
                     {
                         case "reg":
                             await Accounts.RegAccount(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "bind":
                             await Accounts.BindService(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "info":
                             await Info.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "recent":
                             await Recent.Execute(target, childCmd, true);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "re":
                             await Recent.Execute(target, childCmd, true);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "pr":
                             await Recent.Execute(target, childCmd, false);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "bp":
                             await BestPerformance.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "score":
                             await Score.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "help":
                             await Help.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "ping":
                             await Ping.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "update":
                             await Update.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "get":
                             await Get.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return; // get bonuspp/elo/rolecost/bpht/todaybp/annualpass
                         case "badge":
                             await Badge.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "leeway":
                         case "lc":
                             await Leeway.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "set":
                             await Setter.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "ppvs":
                             await PPvs.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
 
                         // Admin
                         case "sudo": //管理员
                             await Sudo.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "su": //超级管理员
                             await Su.Execute(target, childCmd);
-                            TargetChecker_RemoveElement(target);
                             return;
                         case "dailyupdate":
                             return;

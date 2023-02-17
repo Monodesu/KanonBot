@@ -85,7 +85,19 @@ drivers.append(
         //}
         //var res = api.SendGroupMessage(xxxxx, target.msg);
         //Log.Information("→ 发送消息ID {@0}", res);
-        await Universal.Parser(target);
+        try
+        {
+            await Universal.Parser(target);
+        }
+        catch
+        {
+            Universal.TargetChecker_RemoveElement(target);
+        }
+        finally
+        {
+            Universal.TargetChecker_RemoveElement(target);
+        }
+
     })
     .onEvent((client, e) =>
     {
