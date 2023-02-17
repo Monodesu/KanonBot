@@ -7,6 +7,7 @@ using KanonBot.Message;
 using LanguageExt;
 using LanguageExt.ClassInstances;
 using Serilog;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
@@ -16,38 +17,32 @@ namespace KanonBot.command_parser
 {
     public static class Universal
     {
-        private static Dictionary<string, ISocket> CommandList = new();
-        private static SemaphoreSlim semaphore = new(1);
+        private static ConcurrentDictionary<string, string> CommandList = new();
 
-        private static async Task<bool> ReduplicateTargetChecker_Lock(Target target)
+        private static bool ReduplicateTargetChecker_Lock(Target target)
         {
             // 确认此消息是否已被处理
-            await semaphore.WaitAsync(); //异步锁
             if (!CommandList.ContainsKey(target.sender!))
             {
-                CommandList.Add(target.sender!, target.socket);
-                semaphore.Release(); //解锁
-                return true;
+                if (CommandList.TryAdd(target.sender!, target.msg.ToString()))
+                    return true;
+                return false;
             }
             else
             {
-                // 判断是否由同一socket发出，如果是，继续执行，否则返回false
+                // 判断是否为同一条指令，如果是，继续返回false，否则继续执行
                 if (CommandList.TryGetValue(target.sender!, out var value))
                 {
-                    if (value == target.socket)
-                    {
-                        semaphore.Release();
+                    if (value != target.msg.ToString())
                         return true;
-                    }
                 }
             }
-            semaphore.Release();
             return false;
         }
 
         public static void TargetChecker_RemoveElement(Target target)
         {
-            CommandList.Remove(target.sender!);
+            CommandList.TryRemove(target.sender!, out _);
         }
 
         public static async Task Parser(Target target)
@@ -68,7 +63,7 @@ namespace KanonBot.command_parser
             if (msg.StartsWith("!") || msg.StartsWith("/") || msg.StartsWith("！"))
             {
                 // 检测相同指令重复
-                if (!await ReduplicateTargetChecker_Lock(target)) return;
+                if (!ReduplicateTargetChecker_Lock(target)) return;
 
                 cmd = msg.Build();
                 cmd = cmd[1..]; //删除命令唤起符
