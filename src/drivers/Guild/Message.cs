@@ -5,12 +5,16 @@ using KanonBot.API;
 namespace KanonBot.Drivers;
 public partial class Guild
 {
-    public class Message
+    public partial class Message
     {
-        static readonly string AtPattern = @"<@!?(.*?)> ?";
-        static readonly string EmojiPattern =  @"<emoji:(.*?)>";
-        static readonly string ChannelPattern =  @"<#(.*?)>";
-        static readonly string AtEveryonePattern = @"@everyone";
+        [GeneratedRegex(@"<@!?(.*?)> ?", RegexOptions.Multiline)]
+        private static partial Regex AtPattern();
+        [GeneratedRegex(@"<emoji:(.*?)>", RegexOptions.Multiline)]
+        private static partial Regex EmojiPattern();
+        [GeneratedRegex(@"<#(.*?)>", RegexOptions.Multiline)]
+        private static partial Regex ChannelPattern();
+        [GeneratedRegex(@"@everyone", RegexOptions.Multiline)]
+        private static partial Regex AtEveryonePattern();
         public static Models.SendMessageData Build(Models.SendMessageData data, Chain msgChain)
         {
             var content = String.Empty;
@@ -48,20 +52,19 @@ public partial class Guild
         {
             // 先处理 content
             var segList = new List<(Match m, IMsgSegment seg)>();
-            RegexOptions options = RegexOptions.Multiline;
-            foreach (Match m in Regex.Matches(MessageData.Content, AtPattern, options).Cast<Match>())
+            foreach (Match m in AtPattern().Matches(MessageData.Content).Cast<Match>())
             {
                 segList.Add((m, new AtSegment(m.Groups[1].Value, Platform.Guild)));
             }
-            foreach (Match m in Regex.Matches(MessageData.Content, EmojiPattern, options).Cast<Match>())
+            foreach (Match m in EmojiPattern().Matches(MessageData.Content).Cast<Match>())
             {
                 segList.Add((m, new EmojiSegment(m.Groups[1].Value)));
             }
-            foreach (Match m in Regex.Matches(MessageData.Content, ChannelPattern, options).Cast<Match>())
+            foreach (Match m in ChannelPattern().Matches(MessageData.Content).Cast<Match>())
             {
                 segList.Add((m, new RawSegment("Channel", m.Groups[1].Value)));
             }
-            foreach (Match m in Regex.Matches(MessageData.Content, AtEveryonePattern, options).Cast<Match>())
+            foreach (Match m in AtEveryonePattern().Matches(MessageData.Content).Cast<Match>())
             {
                 segList.Add((m, new AtSegment("all", Platform.Guild)));
             }

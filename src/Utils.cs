@@ -17,7 +17,7 @@ using Img = SixLabors.ImageSharp.Image;
 
 namespace KanonBot;
 
-public static class Utils
+public static partial class Utils
 {
     public static async Task<Option<T>> TimeOut<T>(this Task<T> task, TimeSpan delay)
     {
@@ -273,12 +273,13 @@ public static class Utils
         return new String(c);
     }
 
+    [GeneratedRegex(@"^http(s)?://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?$")]
+    private static partial Regex UrlRegex();
     public static bool IsUrl(string str)
     {
         try
         {
-            string Url = @"^http(s)?://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?$";
-            return Regex.IsMatch(str, Url);
+            return UrlRegex().IsMatch(str);
         }
         catch (Exception)
         {
@@ -350,11 +351,11 @@ public static class Utils
         return "";
     }
 
+    [GeneratedRegex(@"([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,5})+")]
+    private static partial Regex EmailRegex();
     public static bool IsMailAddr(string str)
     {
-        string emailStr = @"([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,5})+";
-        Regex emailReg = new(emailStr);
-        if (emailReg.IsMatch(str))
+        if (EmailRegex().IsMatch(str))
             return true;
         return false;
     }

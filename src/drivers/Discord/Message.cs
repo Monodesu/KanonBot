@@ -6,8 +6,10 @@ namespace KanonBot.Drivers;
 
 public partial class Discord
 {
-    static readonly string AtPattern = @"\(met\)(.*?)\(met\)";
-    static readonly string AtAdminPattern = @"\(rol\)(.*?)\(rol\)";
+    [GeneratedRegex(@"\(met\)(.*?)\(met\)", RegexOptions.Multiline)]
+    private static partial Regex AtPattern();
+    [GeneratedRegex(@"\(rol\)(.*?)\(rol\)", RegexOptions.Multiline)]
+    private static partial Regex AtAdminPattern();
 
     public class Message
     {
@@ -23,12 +25,11 @@ public partial class Discord
             var chain = new Chain();
             // 处理 content
             var segList = new List<(Match m, IMsgSegment seg)>();
-            RegexOptions options = RegexOptions.Multiline;
-            foreach (Match m in Regex.Matches(MessageData.Content, AtPattern, options).Cast<Match>())
+            foreach (Match m in AtPattern().Matches(MessageData.Content).Cast<Match>())
             {
                 segList.Add((m, new AtSegment(m.Groups[1].Value, Platform.KOOK)));
             }
-            foreach (Match m in Regex.Matches(MessageData.Content, AtAdminPattern, options).Cast<Match>())
+            foreach (Match m in AtAdminPattern().Matches(MessageData.Content).Cast<Match>())
             {
                 segList.Add((m, new RawSegment("DISCORD AT ADMIN", m.Groups[1].Value)));
             }
