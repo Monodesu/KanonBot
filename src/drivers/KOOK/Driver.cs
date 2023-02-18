@@ -115,8 +115,7 @@ public partial class Kook : ISocket, IDriver
 
     public async Task Start()
     {
-        // return this.instance.Start();
-        await this.instance.LoginAsync(libKook.TokenType.Bot, this.token);
+        await this.instance.LoginAsync(tokenType: libKook.TokenType.Bot, this.token);
         await this.instance.StartAsync();
     }
 
