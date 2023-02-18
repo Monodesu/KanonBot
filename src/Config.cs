@@ -137,10 +137,8 @@ public class Config
         }
         public void save(string path)
         {
-            using (var f = new StreamWriter(path))
-            {
-                f.Write(this.ToString());
-            }
+            using var f = new StreamWriter(path);
+            f.Write(this.ToString());
         }
 
         public override string ToString()

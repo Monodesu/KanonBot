@@ -53,6 +53,6 @@ public class HeartBeat : IEvent
 
     public override string ToString()
     {
-        return $"<heartbeat;time={this.value.ToString()}>";
+        return $"<heartbeat;time={this.value}>";
     }
 }

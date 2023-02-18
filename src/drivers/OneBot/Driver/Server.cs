@@ -60,9 +60,8 @@ public partial class OneBot
             }
             public Socket? Remove(Guid k)
             {
-                Socket? s;
                 mut.WaitOne();
-                this.inner.Remove(k, out s);
+                this.inner.Remove(k, out Socket? s);
                 mut.ReleaseMutex();
                 return s;
             }
@@ -75,8 +74,10 @@ public partial class OneBot
         WebSocketServer instance;
         public Server(string url)
         {
-            var server = new WebSocketServer(url);
-            server.RestartAfterListenError = true;
+            var server = new WebSocketServer(url)
+            {
+                RestartAfterListenError = true
+            };
             Fleck.FleckLog.LogAction = (level, message, ex) =>
             {
                 switch (level)

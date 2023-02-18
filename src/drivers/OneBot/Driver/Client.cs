@@ -42,11 +42,12 @@ public partial class OneBot
                 return client;
             });
 
-            var client = new WebsocketClient(new Uri(url), factory);
-
-            client.Name = "OneBot";
-            client.ReconnectTimeout = TimeSpan.FromSeconds(30);
-            client.ErrorReconnectTimeout = TimeSpan.FromSeconds(30);
+            var client = new WebsocketClient(new Uri(url), factory)
+            {
+                Name = "OneBot",
+                ReconnectTimeout = TimeSpan.FromSeconds(30),
+                ErrorReconnectTimeout = TimeSpan.FromSeconds(30)
+            };
             // client.ReconnectionHappened.Subscribe(info =>
             //     Console.WriteLine($"Reconnection happened, type: {info.Type}, url: {client.Url}"));
             // client.DisconnectionHappened.Subscribe(info =>

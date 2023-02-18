@@ -11,7 +11,7 @@ public partial class OneBot
     // API 部分 * 包装 Driver
     public class API
     {
-        ISocket socket;
+        readonly ISocket socket;
         public API(ISocket socket)
         {
             this.socket = socket;

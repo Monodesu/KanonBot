@@ -193,8 +193,10 @@ namespace KanonBot.functions.osubot
             }
             else
             {
-                owned_badges = new();
-                owned_badges.Add(userinfo.owned_badge_ids.Trim());
+                owned_badges = new()
+                {
+                    userinfo.owned_badge_ids.Trim()
+                };
             }
 
             List<string> badge_temp = new();
@@ -376,8 +378,10 @@ namespace KanonBot.functions.osubot
                 }
                 else
                 {
-                    owned_badges = new();
-                    owned_badges.Add(userinfo.owned_badge_ids.Trim());
+                    owned_badges = new()
+                    {
+                        userinfo.owned_badge_ids.Trim()
+                    };
                 }
 
                 //检查用户是否拥有此badge
@@ -437,8 +441,10 @@ namespace KanonBot.functions.osubot
             }
             else
             {
-                owned_badges = new();
-                owned_badges.Add(userinfo.owned_badge_ids.Trim());
+                owned_badges = new()
+                {
+                    userinfo.owned_badge_ids.Trim()
+                };
             }
 
             //获取badge信息
@@ -502,7 +508,7 @@ namespace KanonBot.functions.osubot
             var args = cmd.Split("#"); //args[0]=badge id      args[1]=user(s)
             var badgeid = args[0].Trim();
             string[] users;
-            if (args[1].Contains("/"))
+            if (args[1].Contains('/'))
                 users = args[1].Split("/");
             else
                 users = new string[] { args[1] };
@@ -559,7 +565,7 @@ namespace KanonBot.functions.osubot
                             if (userInfo.owned_badge_ids != null || userInfo.owned_badge_ids != "") //用户没有badge的情况下，直接写入
                             {
                                 //用户只有一个badge的时候直接追加
-                                if (userInfo.owned_badge_ids!.IndexOf(",") == -1)
+                                if (!userInfo.owned_badge_ids!.Contains(','))
                                 {
                                     if (userInfo.owned_badge_ids != "")
                                         owned_badges.Add(userInfo.owned_badge_ids.Trim());
@@ -650,7 +656,7 @@ namespace KanonBot.functions.osubot
                             if (userInfo.owned_badge_ids != null && userInfo.owned_badge_ids != "") //用户没有badge的情况下，直接写入
                             {
                                 //用户只有一个badge的时候直接追加
-                                if (userInfo.owned_badge_ids!.IndexOf(",") == -1)
+                                if (!userInfo.owned_badge_ids.Contains(','))
                                 {
                                     if (userInfo.owned_badge_ids != "")
                                         owned_badges.Add(userInfo.owned_badge_ids.Trim());
@@ -739,7 +745,7 @@ namespace KanonBot.functions.osubot
                     if (userInfo.owned_badge_ids != null && userInfo.owned_badge_ids != "") //用户没有badge的情况下，直接写入
                     {
                         //用户只有一个badge的时候直接追加
-                        if (userInfo.owned_badge_ids!.IndexOf(",") == -1)
+                        if (!userInfo.owned_badge_ids.Contains(',', StringComparison.CurrentCulture))
                         {
                             if (userInfo.owned_badge_ids != "")
                                 owned_badges.Add(userInfo.owned_badge_ids.Trim());
@@ -838,7 +844,7 @@ namespace KanonBot.functions.osubot
                 var tmp_op = cmd.Split("#"); //0=badgeid 1=how many codes need to be generated(amount)
                 var badge_id = int.Parse(tmp_op[0]);
                 var amount = int.Parse(tmp_op[1]);
-                bool can_repeatedly = bool.TryParse(tmp_op[2], out bool crt) ? crt : false;
+                bool can_repeatedly = bool.TryParse(tmp_op[2], out bool crt) && crt;
                 var expire_at = int.Parse(tmp_op[3]);
 
                 if (amount < 0)

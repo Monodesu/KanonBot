@@ -66,7 +66,7 @@ public class AtSegment : IMsgSegment
 
     public string Build()
     {
-        return $"<at;{platform.ToString()}={value}>";
+        return $"{platform}={value}";
     }
 }
 
@@ -88,17 +88,14 @@ public class ImageSegment : IMsgSegment
 
     public string Build()
     {
-        switch (this.t)
+        return this.t switch
         {
-            case Type.File:
-                return $"<image;file={this.value}>";
-            case Type.Base64:
-                return $"<image;base64>";
-            case Type.Url:
-                return $"<image;url={this.value}>";
-        }
-        // 保险
-        return "";
+            Type.File => $"<image;file={this.value}>",
+            Type.Base64 => $"<image;base64>",
+            Type.Url => $"<image;url={this.value}>",
+            // 保险
+            _ => "",
+        };
     }
 }
 

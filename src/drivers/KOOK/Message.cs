@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.RegularExpressions;
 using KanonBot.Message;
 using libKook = Kook;
@@ -48,9 +49,9 @@ public partial class Kook
                     case TextSegment s:
                         if (msglist.Count > 0)
                         {
-                            if (msglist[msglist.Count - 1].MessageType == Enums.MessageType.Text)
+                            if (msglist[^1].MessageType == Enums.MessageType.Text)
                             {
-                                msglist[msglist.Count - 1].Content += s.value;
+                                msglist[^1].Content += s.value;
                                 continue;
                             }
                         }
@@ -66,9 +67,9 @@ public partial class Kook
                         if (msglist.Count > 0)
                         {
                             // 将一类文字消息合并起来到 Text 中
-                            if (msglist[msglist.Count - 1].MessageType == Enums.MessageType.Text)
+                            if (msglist[^1].MessageType == Enums.MessageType.Text)
                             {
-                                msglist[msglist.Count - 1].Content += _at;
+                                msglist[^1].Content += _at;
                                 continue;
                             }
                         }
@@ -94,11 +95,11 @@ public partial class Kook
             // 处理 content
             var segList = new List<(Match m, IMsgSegment seg)>();
             RegexOptions options = RegexOptions.Multiline;
-            foreach (Match m in Regex.Matches(MessageData.Content, AtPattern, options))
+            foreach (Match m in Regex.Matches(MessageData.Content, AtPattern, options).AsEnumerable())
             {
                 segList.Add((m, new AtSegment(m.Groups[1].Value, Platform.KOOK)));
             }
-            foreach (Match m in Regex.Matches(MessageData.Content, AtAdminPattern, options))
+            foreach (Match m in Regex.Matches(MessageData.Content, AtAdminPattern, options).AsEnumerable())
             {
                 segList.Add((m, new RawSegment("KOOK AT ADMIN", m.Groups[1].Value)));
             }
@@ -126,13 +127,13 @@ public partial class Kook
                 {
                     if (pos < x.m.Index)
                     {
-                        AddText(MessageData.Content.Substring(pos, x.m.Index - pos));
+                        AddText(MessageData.Content[pos..x.m.Index]);
                     }
                     chain.Add(x.seg);
                     pos = x.m.Index + x.m.Length;
                 });
             if (pos < MessageData.Content.Length)
-                AddText(MessageData.Content.Substring(pos));
+                AddText(MessageData.Content[pos..]);
 
             return chain;
         }

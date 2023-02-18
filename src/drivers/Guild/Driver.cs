@@ -48,11 +48,12 @@ public partial class Guild : ISocket, IDriver
             return client;
         });
 
-        var client = new WebsocketClient(new Uri(url), factory);
-
-        client.Name = "Guild";
-        client.ReconnectTimeout = null;
-        client.ErrorReconnectTimeout = TimeSpan.FromSeconds(30);
+        var client = new WebsocketClient(new Uri(url), factory)
+        {
+            Name = "Guild",
+            ReconnectTimeout = null,
+            ErrorReconnectTimeout = TimeSpan.FromSeconds(30)
+        };
         // client.ReconnectionHappened.Subscribe(info =>
         //     Console.WriteLine($"Reconnection happened, type: {info.Type}, url: {client.Url}"));
         // client.DisconnectionHappened.Subscribe(info =>

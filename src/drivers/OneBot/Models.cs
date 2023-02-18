@@ -36,7 +36,7 @@ public partial class OneBot
             public string Name { get; init; }
         }
 
-        public struct Segment
+        public readonly struct Segment
         {
             /// <summary>
             /// 消息段类型

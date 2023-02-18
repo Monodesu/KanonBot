@@ -158,7 +158,7 @@ public class Processor
     /// <summary>
     /// 计算坐标
     /// </summary>
-    private Point Get_ADIP_Pos(int pos_x, int pos_y, int width, int height, int value, string direction)
+    private static Point Get_ADIP_Pos(int pos_x, int pos_y, int width, int height, int value, string direction)
     {
         Point point = new();
         switch (direction)

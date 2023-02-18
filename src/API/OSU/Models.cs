@@ -540,8 +540,7 @@ namespace KanonBot.API
                     {
                         if (reader.TokenType == JsonToken.Null) return null;
                         var value = serializer.Deserialize<string>(reader);
-                        long l;
-                        if (Int64.TryParse(value, out l))
+                        if (Int64.TryParse(value, out long l))
                         {
                             return l;
                         }
@@ -560,7 +559,7 @@ namespace KanonBot.API
                         return;
                     }
 
-                    public static readonly ParseStringConverter Singleton = new ParseStringConverter();
+                    public static readonly ParseStringConverter Singleton = new();
                 }
             }
 

@@ -288,7 +288,7 @@ namespace KanonBot.functions.osubot
                             if (mods[i].ToUpper() == "NC")
                                 mods[i] = "DT";
                         foreach (var xx in mods)
-                            data.RemoveAll(x => x.mod!.IndexOf(xx) == -1);
+                            data.RemoveAll(x => !x.mod!.Contains(xx));
                         if (!ez)
                             data.RemoveAll(x => x.mod!.IndexOf("EZ") != -1);
                         if (!nf)
@@ -364,7 +364,7 @@ namespace KanonBot.functions.osubot
                         if (mods[i] == "NC")
                             mods[i] = "DT";
                     foreach (var xx in mods)
-                        data.RemoveAll(x => x.mod!.IndexOf(xx) == -1);
+                        data.RemoveAll(x => !x.mod!.Contains(xx));
                     if (!ez)
                         data.RemoveAll(x => x.mod!.IndexOf("EZ") != -1);
                     if (!nf)
@@ -406,7 +406,7 @@ namespace KanonBot.functions.osubot
                 mod += "None";
             msg += $"""
                 https://osu.ppy.sh/b/{data[beatmapindex].bid}
-                Stars: {data[beatmapindex].stars.ToString("0.##*")}  Mod: {mod}
+                Stars: {data[beatmapindex].stars:0.##*}  Mod: {mod}
                 PP Statistics:
                 100%: {data[beatmapindex].total}pp  99%: {data[beatmapindex].pp_99acc}pp
                 98%: {data[beatmapindex].pp_98acc}pp  97%: {data[beatmapindex].pp_97acc}pp  95%: {data[beatmapindex].pp_95acc}pp
@@ -581,9 +581,9 @@ namespace KanonBot.functions.osubot
             }
             var str =
                 $"{OnlineOsuInfo.Username} ({OnlineOsuInfo.PlayMode.ToStr()})\n"
-                + $"总PP：{OnlineOsuInfo.Statistics.PP.ToString("0.##")}pp\n"
-                + $"原始PP：{scorePP.ToString("0.##")}pp\n"
-                + $"Bonus PP：{bounsPP.ToString("0.##")}pp\n"
+                + $"总PP：{OnlineOsuInfo.Statistics.PP:0.##}pp\n"
+                + $"原始PP：{scorePP:0.##}pp\n"
+                + $"Bonus PP：{bounsPP:0.##}pp\n"
                 + $"共计算出 {rankedScores} 个被记录的ranked谱面成绩。";
             await target.reply(str);
         }
@@ -699,10 +699,10 @@ namespace KanonBot.functions.osubot
         async private static Task Rolecost(Target target, string cmd)
         {
             cmd = cmd.ToLower().Trim();
-            Func<OSU.Models.User, OSU.Models.PPlusData.UserData, double> occost = (
-                userInfo,
-                pppData
-            ) =>
+            static double occost(
+User userInfo,
+UserData pppData
+            )
             {
                 double a,
                     c,
@@ -721,8 +721,8 @@ namespace KanonBot.functions.osubot
                         7
                     ) + Math.Min(a / 7554280, 3);
                 return Math.Round(c, 2);
-            };
-            Func<OSU.Models.User, double> oncost = (userInfo) =>
+            }
+            static double oncost(User userInfo)
             {
                 double fx,
                     pp;
@@ -736,8 +736,8 @@ namespace KanonBot.functions.osubot
                 {
                     return -1;
                 }
-            };
-            Func<long, int, double> ostcost = (rank, elo) =>
+            }
+            static double ostcost(long rank, int elo)
             {
                 double rankelo,
                     cost;
@@ -770,15 +770,15 @@ namespace KanonBot.functions.osubot
                     }
                 }
                 return Math.Round(cost, 2);
-            };
+            }
 
-            Func<OSU.Models.User, double> zkfccost = (userInfo) =>
+            static double zkfccost(User userInfo)
             {
                 //formula  cost=bp1pp*0.6+(bp1pp-bp100pp)*0.4+tth/175+PPTotal*0.05      !!!!not this one
                 //formula  cost=pp/1831+tth/13939393  !!!!current
                 return (double)userInfo.Statistics.PP / 1831.0
                     + (double)userInfo.Statistics.TotalHits / 13939393.0;
-            };
+            }
             #region 验证
             long? osuID = null;
             OSU.Enums.Mode? mode;
@@ -1278,9 +1278,9 @@ namespace KanonBot.functions.osubot
             int levelcount = 0;
             while (true)
             {
-                temppoint = temppoint - (100 + levelcount * 20);
+                temppoint -= (100 + levelcount * 20);
                 if (temppoint > 0)
-                    levelcount = levelcount + 1;
+                    levelcount++;
                 else
                     break;
             }

@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace KanonBot.functions.osubot;
 
-public class Leeway_Calculator
+public partial class Leeway_Calculator
 {
     private const double DT = 1.5f;
 
@@ -113,46 +113,46 @@ public class Leeway_Calculator
 
     public double GetHP(string beatmap)
     {
-        return double.Parse(Regex.Match(beatmap, "HPDrainRate:(.*?)\n").Groups[1].Value, CultureInfo.InvariantCulture);
+        return double.Parse(HPRegex().Match(beatmap).Groups[1].Value, CultureInfo.InvariantCulture);
     }
 
     public double GetCS(string beatmap)
     {
-        return double.Parse(Regex.Match(beatmap, "CircleSize:(.*?)\n").Groups[1].Value, CultureInfo.InvariantCulture);
+        return double.Parse(CSRegex().Match(beatmap).Groups[1].Value, CultureInfo.InvariantCulture);
     }
 
     public double GetOD(string beatmap)
     {
-        return double.Parse(Regex.Match(beatmap, "OverallDifficulty:(.*?)\n").Groups[1].Value,
+        return double.Parse(ODRegex().Match(beatmap).Groups[1].Value,
             CultureInfo.InvariantCulture);
     }
 
 
     public double GetSliderMult(string beatmap)
     {
-        return double.Parse(Regex.Match(beatmap, "SliderMultiplier:(.*?)\n").Groups[1].Value,
+        return double.Parse(SliderMRegex().Match(beatmap).Groups[1].Value,
             CultureInfo.InvariantCulture);
     }
 
     public double GetSliderTRate(string beatmap)
     {
-        return double.Parse(Regex.Match(beatmap, "SliderTickRate:(.*?)\n").Groups[1].Value,
+        return double.Parse(SliderTRRegex().Match(beatmap).Groups[1].Value,
             CultureInfo.InvariantCulture);
     }
 
     public string GetTitle(string beatmap)
     {
-        return Regex.Match(beatmap, "Title:(.*?)\n").Groups[1].Value.Trim();
+        return TitleRegex().Match(beatmap).Groups[1].Value.Trim();
     }
 
     public string GetArtist(string beatmap)
     {
-        return Regex.Match(beatmap, "Artist:(.*?)\n").Groups[1].Value.Trim();
+        return ArtistRegex().Match(beatmap).Groups[1].Value.Trim();
     }
 
     public string GetDifficultyName(string beatmap)
     {
-        return Regex.Match(beatmap, "Version:(.*?)\n").Groups[1].Value.Trim();
+        return VersionRegex().Match(beatmap).Groups[1].Value.Trim();
     }
 
     public double GetAdjustTime(string[] mods)
@@ -189,7 +189,7 @@ public class Leeway_Calculator
 
     public int GetBeatmapVersion(string beatmap)
     {
-        return int.Parse(Regex.Match(beatmap, "osu file format v([0-9]+)").Groups[1].Value);
+        return int.Parse(FileVersionRegex().Match(beatmap).Groups[1].Value);
     }
 
     public List<int[]> GetSpinners(string beatmap)
@@ -260,7 +260,7 @@ public class Leeway_Calculator
         var sliderTRate = GetSliderTRate(beatmap);
         var hitObjects = GetBeatmapHitObjects(beatmap);
         var startTime = int.Parse(hitObjects[0].Split(',')[2]);
-        var endTime = int.Parse(hitObjects[hitObjects.Count - 1].Split(',')[2]);
+        var endTime = int.Parse(hitObjects[^1].Split(',')[2]);
         var timingPoints = GetTimingPoints(beatmap);
         var currentScore = 0;
         var currentCombo = 0;
@@ -459,4 +459,23 @@ public class Leeway_Calculator
             _ => 0.0
         });
     }
+
+    [GeneratedRegex("OverallDifficulty:(.*?)\n")]
+    private static partial Regex ODRegex();
+    [GeneratedRegex("CircleSize:(.*?)\n")]
+    private static partial Regex CSRegex();
+    [GeneratedRegex("HPDrainRate:(.*?)\n")]
+    private static partial Regex HPRegex();
+    [GeneratedRegex("SliderMultiplier:(.*?)\n")]
+    private static partial Regex SliderMRegex();
+    [GeneratedRegex("SliderTickRate:(.*?)\n")]
+    private static partial Regex SliderTRRegex();
+    [GeneratedRegex("Title:(.*?)\n")]
+    private static partial Regex TitleRegex();
+    [GeneratedRegex("Artist:(.*?)\n")]
+    private static partial Regex ArtistRegex();
+    [GeneratedRegex("Version:(.*?)\n")]
+    private static partial Regex VersionRegex();
+    [GeneratedRegex("osu file format v([0-9]+)")]
+    private static partial Regex FileVersionRegex();
 }

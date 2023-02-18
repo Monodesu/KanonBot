@@ -184,9 +184,11 @@ namespace KanonBot.API
                 List<ScoreInfo> scoreInfos = new();
                 foreach (var score in body)
                 {
-                    ScoreInfo scoreInfo = new();
-                    scoreInfo.mode = mode;
-                    scoreInfo.scoreType = scoreType;
+                    ScoreInfo scoreInfo = new()
+                    {
+                        mode = mode,
+                        scoreType = scoreType
+                    };
                     try { scoreInfo.userId = (long)score["user"]["id"]; } catch { scoreInfo.userId = 0; }
                     try { scoreInfo.userName = score["user"]["username"].ToString(); } catch { scoreInfo.userName = ""; }
                     try { scoreInfo.userAvatarUrl = score["user"]["avatar_url"].ToString(); } catch { scoreInfo.userAvatarUrl = ""; }
@@ -210,9 +212,11 @@ namespace KanonBot.API
                     foreach (var mod in mods) { scoreInfo.mods.Add(mod.ToString()); }
                     var beatmap = score["beatmap"];
                     var beatmapSet = score["beatmapset"];
-                    scoreInfo.beatmapInfo = new();
-                    scoreInfo.beatmapInfo.mode = mode;
-                    scoreInfo.beatmapInfo.beatmapStatus = beatmap["status"].ToString();
+                    scoreInfo.beatmapInfo = new()
+                    {
+                        mode = mode,
+                        beatmapStatus = beatmap["status"].ToString()
+                    };
                     try { scoreInfo.beatmapId = (long)beatmap["id"]; } catch { scoreInfo.beatmapId = 0; }
                     try { scoreInfo.beatmapInfo.beatmapId = (long)beatmap["id"]; } catch { scoreInfo.beatmapInfo.beatmapId = 0; }
                     try { scoreInfo.beatmapInfo.beatmapsetId = (long)beatmap["beatmapset_id"]; } catch { scoreInfo.beatmapInfo.beatmapsetId = 0; }

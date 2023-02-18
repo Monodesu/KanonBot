@@ -25,7 +25,7 @@ impl Calculator {
     pub fn calculate(&mut self, score_params: *const ScoreParams) -> CalculateResult {
         let score_params = unsafe {
             score_params.as_ref().unwrap_or_else(|| {
-                panic!("！！未知的参数，score_params: {:?}", score_params)
+                panic!("！！未知的参数，score_params: {score_params:?}")
             })
         };
         let mods = score_params.mods;

@@ -243,9 +243,9 @@ namespace KanonBot.LegacyImage
             var textOptions = new TextOptions(new Font(Exo2Regular, 20))
             {
                 VerticalAlignment = VerticalAlignment.Bottom,
-                HorizontalAlignment = HorizontalAlignment.Left
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Origin = new PointF(15, 25)
             };
-            textOptions.Origin = new PointF(15, 25);
             info.Mutate(
                 x =>
                     x.DrawText(
@@ -982,7 +982,7 @@ namespace KanonBot.LegacyImage
                 x => x.DrawText(drawOptions, textOptions, hp, new SolidBrush(color), null)
             );
             // stars, version
-            var starText = $"Stars: {star.ToString("0.##")}";
+            var starText = $"Stars: {star:0.##}";
             textOptions.Origin = new PointF(584, 292);
             score.Mutate(
                 x =>
@@ -1477,7 +1477,7 @@ namespace KanonBot.LegacyImage
                     x.DrawText(
                         drawOptions,
                         textOptions,
-                        $"{acc.ToString("0.0#")}%",
+                        $"{acc:0.0#}%",
                         new SolidBrush(Color.Black),
                         null
                     )
@@ -1490,7 +1490,7 @@ namespace KanonBot.LegacyImage
                     x.DrawText(
                         drawOptions,
                         textOptions,
-                        $"{acc.ToString("0.0#")}%",
+                        $"{acc:0.0#}%",
                         new SolidBrush(color),
                         null
                     )
@@ -1909,9 +1909,11 @@ namespace KanonBot.LegacyImage
             // 极坐标转直角坐标系
             public static PointF r82xy(R8 r8)
             {
-                PointF xy = new();
-                xy.X = (float)(r8.r * Math.Sin(r8._8 * Math.PI / 180));
-                xy.Y = (float)(r8.r * Math.Cos(r8._8 * Math.PI / 180));
+                PointF xy = new()
+                {
+                    X = (float)(r8.r * Math.Sin(r8._8 * Math.PI / 180)),
+                    Y = (float)(r8.r * Math.Cos(r8._8 * Math.PI / 180))
+                };
                 return xy;
             }
 

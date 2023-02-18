@@ -211,15 +211,17 @@ public class Client
         var data = await db.OsuPPlus.FirstOrDefaultAsync(it => it.uid == osu_uid && it.pp != 0);
         if (data != null)
         {
-            var realData = new API.OSU.Models.PPlusData.UserData();
-            realData.UserId = osu_uid;
-            realData.PerformanceTotal = data.pp;
-            realData.AccuracyTotal = data.acc;
-            realData.FlowAimTotal = data.flow;
-            realData.JumpAimTotal = data.jump;
-            realData.PrecisionTotal = data.pre;
-            realData.SpeedTotal = data.spd;
-            realData.StaminaTotal = data.sta;
+            var realData = new API.OSU.Models.PPlusData.UserData
+            {
+                UserId = osu_uid,
+                PerformanceTotal = data.pp,
+                AccuracyTotal = data.acc,
+                FlowAimTotal = data.flow,
+                JumpAimTotal = data.jump,
+                PrecisionTotal = data.pre,
+                SpeedTotal = data.spd,
+                StaminaTotal = data.sta
+            };
             return realData;
         }
         else
@@ -376,9 +378,11 @@ public class Client
         if (data == null)
             return (-1, null);
 
-        ui.Statistics = new();
-        ui.Statistics.GradeCounts = new();
-        ui.Statistics.Level = new();
+        ui.Statistics = new()
+        {
+            GradeCounts = new(),
+            Level = new()
+        };
         ui.Id = oid;
         ui.Statistics.TotalScore = data.total_score;
         ui.Statistics.TotalHits = data.total_hit;

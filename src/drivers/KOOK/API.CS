@@ -8,21 +8,21 @@ public partial class Kook
     // API 部分 * 包装 Driver
     public class API
     {
-        string AuthToken;
+        readonly string AuthToken;
         public static readonly string EndPoint = "https://www.kookapp.cn/api/v3";
         public API(string authToken)
         {
             this.AuthToken = $"Bot {authToken}";
         }
 
-        IFlurlRequest http()
+        private IFlurlRequest Http()
         {
             return EndPoint.WithHeader("Authorization", this.AuthToken);
         }
 
         async public Task<string> GetWebsocketUrl()
         {
-            var res = await this.http()
+            var res = await this.Http()
                 .AppendPathSegments("gateway", "index")
                 .SetQueryParam("compress", 0)
                 .GetJsonAsync<JObject>();
@@ -44,7 +44,7 @@ public partial class Kook
         /// <returns>url</returns>
         async public Task<string> CreateAsset(Stream data, string? filename = null)
         {
-            var res = await this.http()
+            var res = await this.Http()
                 .AppendPathSegments("asset", "create")
                 .SetQueryParam("compress", 0)
                 .PostMultipartAsync(mp => mp
@@ -63,7 +63,7 @@ public partial class Kook
             {
                 msg.TargetId = userID;
                 msg.QuotedMessageId = QuotedMessageId;
-                await this.http()
+                await this.Http()
                 .AppendPathSegments("direct-message", "create")
                 .PostJsonAsync(msg);
             }
@@ -77,7 +77,7 @@ public partial class Kook
             {
                 msg.TargetId = channelID;
                 msg.EphemeralUserId = TempMsgTargetId;
-                await this.http()
+                await this.Http()
                 .AppendPathSegments("message", "create")
                 .PostJsonAsync(msg);
             }

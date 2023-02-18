@@ -173,8 +173,10 @@ namespace KanonBot.functions.osu.rosupp
 
         async public static Task<Draw.ScorePanelData> CalculatePanelData(OSU.Models.Score score)
         {
-            var data = new Draw.ScorePanelData();
-            data.scoreInfo = score;
+            var data = new Draw.ScorePanelData
+            {
+                scoreInfo = score
+            };
             var statistics = data.scoreInfo.Statistics;
             Beatmap beatmap;
             try

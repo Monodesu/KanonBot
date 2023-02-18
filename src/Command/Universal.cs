@@ -146,7 +146,7 @@ namespace KanonBot.command_parser
                             await Help.Execute(target, childCmd);
                             return;
                         case "ping":
-                            await Ping.Execute(target, childCmd);
+                            await Ping.Execute(target);
                             return;
                         case "update":
                             await Update.Execute(target, childCmd);

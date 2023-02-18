@@ -26,9 +26,11 @@ public static class Mail
         message.Subject = ms.Subject;
         message.Body = ms.Body;
         message.IsBodyHtml = ms.IsBodyHtml;
-        SmtpClient client = new SmtpClient(config.mail.smtpHost, config.mail.smtpPort); //设置邮件服务器
-        client.Credentials = new System.Net.NetworkCredential(config.mail.userName, config.mail.passWord); //设置邮箱用户名与密码
-        client.EnableSsl = true; //启用SSL
+        var client = new SmtpClient(config.mail.smtpHost, config.mail.smtpPort)
+        {
+            Credentials = new System.Net.NetworkCredential(config.mail.userName, config.mail.passWord), //设置邮箱用户名与密码
+            EnableSsl = true //启用SSL
+        }; //设置邮件服务器
         client.Send(message); //发送
     }
 }

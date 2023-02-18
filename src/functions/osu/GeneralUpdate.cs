@@ -15,7 +15,7 @@ namespace KanonBot.functions.osu
 {
     public static class GeneralUpdate
     {
-        private static readonly CronDaemon daemon = new CronDaemon();
+        private static readonly CronDaemon daemon = new();
         public static void DailyUpdate()
         {
             // *    *    *    *    *
@@ -49,7 +49,7 @@ namespace KanonBot.functions.osu
         {
             var stopwatch = Stopwatch.StartNew();
             var userList = await Database.Client.GetOsuUserList();
-            ParallelOptions options = new ParallelOptions { MaxDegreeOfParallelism = 4 };
+            var options = new ParallelOptions { MaxDegreeOfParallelism = 4 };
             await Parallel.ForEachAsync(userList, options, async (userID, _) =>
             {
                 try

@@ -49,19 +49,19 @@ public partial class Guild
             // 先处理 content
             var segList = new List<(Match m, IMsgSegment seg)>();
             RegexOptions options = RegexOptions.Multiline;
-            foreach (Match m in Regex.Matches(MessageData.Content, AtPattern, options))
+            foreach (Match m in Regex.Matches(MessageData.Content, AtPattern, options).Cast<Match>())
             {
                 segList.Add((m, new AtSegment(m.Groups[1].Value, Platform.Guild)));
             }
-            foreach (Match m in Regex.Matches(MessageData.Content, EmojiPattern, options))
+            foreach (Match m in Regex.Matches(MessageData.Content, EmojiPattern, options).Cast<Match>())
             {
                 segList.Add((m, new EmojiSegment(m.Groups[1].Value)));
             }
-            foreach (Match m in Regex.Matches(MessageData.Content, ChannelPattern, options))
+            foreach (Match m in Regex.Matches(MessageData.Content, ChannelPattern, options).Cast<Match>())
             {
                 segList.Add((m, new RawSegment("Channel", m.Groups[1].Value)));
             }
-            foreach (Match m in Regex.Matches(MessageData.Content, AtEveryonePattern, options))
+            foreach (Match m in Regex.Matches(MessageData.Content, AtEveryonePattern, options).Cast<Match>())
             {
                 segList.Add((m, new AtSegment("all", Platform.Guild)));
             }
@@ -77,13 +77,13 @@ public partial class Guild
             {
                 if (pos < x.m.Index)
                 {
-                    AddText(MessageData.Content.Substring(pos, x.m.Index - pos));
+                    AddText(MessageData.Content[pos..x.m.Index]);
                 }
                 chain.Add(x.seg);
                 pos = x.m.Index + x.m.Length;
             });
             if (pos < MessageData.Content.Length)
-                AddText(MessageData.Content.Substring(pos));
+                AddText(MessageData.Content[pos..]);
 
             // 然后处理 Attachments
             if (MessageData.Attachments != null)
@@ -92,7 +92,7 @@ public partial class Guild
                 {
                     if (attachment["content_type"]?.ToString() == "image/jpeg")
                     {
-                        chain.Add(new ImageSegment($"https://{attachment["url"]!.ToString()}", ImageSegment.Type.Url));
+                        chain.Add(new ImageSegment($"https://{attachment["url"]}", ImageSegment.Type.Url));
                     }
                 }
             }

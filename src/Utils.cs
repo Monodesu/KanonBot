@@ -40,6 +40,32 @@ public static class Utils
         }
     } // 获取失败返回80
 
+    public static Option<String> ParseAt(String msg)
+    {
+        if (msg.Contains('=')) { }
+        return None;
+    }
+
+    // public static string ParseAt(string input)
+    // {
+    //     string pattern = @"@.*?#(\d*)";
+    //     RegexOptions options = RegexOptions.Multiline;
+    //     var matches = Regex.Matches(input, pattern, options);
+    //     foreach (Match m in matches.Reverse())
+    //     {
+    //         input = input.Remove(m.Index, m.Value.Length);
+    //         input = input.Insert(m.Index, $"kaiheila={m.Groups[1].Value}");
+    //     }
+    //     pattern = @"\[CQ:at,qq=(\d*)\]";
+    //     matches = Regex.Matches(input, pattern, options);
+    //     foreach (Match m in matches.Reverse())
+    //     {
+    //         input = input.Remove(m.Index, m.Value.Length);
+    //         input = input.Insert(m.Index, $"qq={m.Groups[1].Value}");
+    //     }
+    //     return input;
+    // }
+
     public static string? GetObjectDescription(Object value)
     {
         foreach (var field in value.GetType().GetFields())
@@ -73,7 +99,7 @@ public static class Utils
 
     public static Stream LoadFile2ReadStream(string filePath)
     {
-        FileStream fs = new FileStream(
+        var fs = new FileStream(
             filePath,
             FileMode.Open,
             FileAccess.Read,
@@ -86,9 +112,10 @@ public static class Utils
     {
         using var fs = LoadFile2ReadStream(filePath);
         byte[] bt = new byte[fs.Length];
-        await fs.ReadAsync(bt, 0, bt.Length);
+        var mem = new Memory<Byte>(bt);
+        await fs.ReadAsync(mem);
         fs.Close();
-        return bt;
+        return mem.ToArray();
     }
 
     public static string GetDesc(object? value)
@@ -170,7 +197,7 @@ public static class Utils
 
     public static string RandomStr(int length, bool URLparameter = false)
     {
-        Random r = new Random(DateTime.Now.Millisecond + DateTime.Now.Second + DateTime.Now.Minute);
+        Random r = new(DateTime.Now.Millisecond + DateTime.Now.Second + DateTime.Now.Minute);
         string s = "",
             str = "";
         str += "0123456789";
@@ -225,8 +252,8 @@ public static class Utils
         minute = duration / 60;
         second = duration % 60;
         if (hour > 0)
-            return $"{hour}:{minute.ToString("00")}:{second.ToString("00")}";
-        return $"{minute}:{second.ToString("00")}";
+            return $"{hour}:{minute:00}:{second:00}";
+        return $"{minute}:{second:00}";
     }
 
     // 全角转半角
@@ -246,26 +273,6 @@ public static class Utils
         return new String(c);
     }
 
-    public static string ParseAt(string input)
-    {
-        string pattern = @"@.*?#(\d*)";
-        RegexOptions options = RegexOptions.Multiline;
-        var matches = Regex.Matches(input, pattern, options);
-        foreach (Match m in matches.Reverse())
-        {
-            input = input.Remove(m.Index, m.Value.Length);
-            input = input.Insert(m.Index, $"kaiheila={m.Groups[1].Value}");
-        }
-        pattern = @"\[CQ:at,qq=(\d*)\]";
-        matches = Regex.Matches(input, pattern, options);
-        foreach (Match m in matches.Reverse())
-        {
-            input = input.Remove(m.Index, m.Value.Length);
-            input = input.Insert(m.Index, $"qq={m.Groups[1].Value}");
-        }
-        return input;
-    }
-
     public static bool IsUrl(string str)
     {
         try
@@ -279,7 +286,7 @@ public static class Utils
         }
     }
 
-    public static string newYearMessage()
+    public static string NewYearMessage()
     {
         Random r = new();
         int i = r.Next(1, 26);
@@ -372,7 +379,7 @@ public static class Utils
                 t2[i] = "*";
             }
             t2[0] = t1[0][0].ToString();
-            t2[t1[0].Length - 1] = t1[0][t1[0].Length - 1].ToString();
+            t2[t1[0].Length - 1] = t1[0][^1].ToString();
             string ret = "";
             foreach (string s in t2)
             {
@@ -385,7 +392,7 @@ public static class Utils
                 t2[i] = "*";
             }
             t2[0] = t1[1][0].ToString();
-            t2[t1[1].Length - 1] = t1[1][t1[1].Length - 1].ToString();
+            t2[t1[1].Length - 1] = t1[1][^1].ToString();
             t2[t1[1].IndexOf(".")] = ".";
             foreach (string s in t2)
             {
@@ -448,12 +455,11 @@ public static class Utils
         return (pic, format);
     }
 
-
     public static double ToLinear(double color) =>
         color <= 0.04045 ? color / 12.92 : Math.Pow((color + 0.055) / 1.055, 0.8);
 
     public static Vector4 ToLinear(this Vector4 colour) =>
-        new Vector4(
+        new(
             (float)ToLinear(colour.X),
             (float)ToLinear(colour.Y),
             (float)ToLinear(colour.Z),
@@ -549,7 +555,13 @@ public static class Utils
 
     public static int RandomNum(int min, int max)
     {
-        var r = new Random(DateTime.Now.Millisecond + DateTime.Now.Second + DateTime.Now.Minute + DateTime.Now.Microsecond + DateTime.Now.Nanosecond);
+        var r = new Random(
+            DateTime.Now.Millisecond
+                + DateTime.Now.Second
+                + DateTime.Now.Minute
+                + DateTime.Now.Microsecond
+                + DateTime.Now.Nanosecond
+        );
         return r.Next(min, max);
     }
 }

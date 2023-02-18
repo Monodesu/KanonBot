@@ -22,7 +22,7 @@ public static class Toml
 
 internal static class Settings
 {
-    public static readonly JsonSerializerSettings Json = new JsonSerializerSettings
+    public static readonly JsonSerializerSettings Json = new()
     {
         MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
         DateParseHandling = DateParseHandling.None,

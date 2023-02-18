@@ -24,13 +24,13 @@ public partial class Discord
             // 处理 content
             var segList = new List<(Match m, IMsgSegment seg)>();
             RegexOptions options = RegexOptions.Multiline;
-            foreach (Match m in Regex.Matches(MessageData.Content, AtPattern, options))
+            foreach (Match m in Regex.Matches(MessageData.Content, AtPattern, options).Cast<Match>())
             {
                 segList.Add((m, new AtSegment(m.Groups[1].Value, Platform.KOOK)));
             }
-            foreach (Match m in Regex.Matches(MessageData.Content, AtAdminPattern, options))
+            foreach (Match m in Regex.Matches(MessageData.Content, AtAdminPattern, options).Cast<Match>())
             {
-                segList.Add((m, new RawSegment("KOOK AT ADMIN", m.Groups[1].Value)));
+                segList.Add((m, new RawSegment("DISCORD AT ADMIN", m.Groups[1].Value)));
             }
             var AddText = (string text) =>
             {
@@ -56,13 +56,13 @@ public partial class Discord
                 {
                     if (pos < x.m.Index)
                     {
-                        AddText(MessageData.Content.Substring(pos, x.m.Index - pos));
+                        AddText(MessageData.Content[pos..x.m.Index]);
                     }
                     chain.Add(x.seg);
                     pos = x.m.Index + x.m.Length;
                 });
             if (pos < MessageData.Content.Length)
-                AddText(MessageData.Content.Substring(pos));
+                AddText(MessageData.Content[pos..]);
 
             return chain;
         }

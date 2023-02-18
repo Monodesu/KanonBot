@@ -89,8 +89,10 @@ namespace KanonBot.functions.osubot
             #endregion
 
             #region 获取信息
-            LegacyImage.Draw.UserPanelData data = new();
-            data.userInfo = tempOsuInfo!;
+            LegacyImage.Draw.UserPanelData data = new()
+            {
+                userInfo = tempOsuInfo!
+            };
             // 覆写
             data.userInfo.PlayMode = mode!.Value;
             // 查询

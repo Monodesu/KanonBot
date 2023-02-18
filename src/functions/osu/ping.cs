@@ -6,7 +6,7 @@ namespace KanonBot.functions.osubot
 {
     public class Ping
     {
-        public async static Task Execute(Target target, string cmd)
+        public async static Task Execute(Target target)
         {
             await target.reply("meow~");
         }

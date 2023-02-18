@@ -25,9 +25,10 @@ impl From<Mode> for GameMode {
 
 #[ffi_type]
 #[repr(C)]
-#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq, Default)]
 pub enum Mode {
     /// osu!standard
+    #[default]
     Osu = 0,
     /// osu!taiko
     Taiko = 1,
@@ -37,15 +38,9 @@ pub enum Mode {
     Mania = 3,
 }
 
-impl Default for Mode {
-    fn default() -> Self {
-        Mode::Osu
-    }
-}
-
 impl std::fmt::Display for Mode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("{}", self))
+        f.write_fmt(format_args!("{self}"))
     }
 }
 

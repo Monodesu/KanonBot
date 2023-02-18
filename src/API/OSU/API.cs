@@ -56,7 +56,7 @@ namespace KanonBot.API
                 Log.Information("正在获取OSUApiV2_Token");
                 if (await GetToken())
                 {
-                    Log.Information($"获取成功, Token: {Token.Substring(0, Utils.TryGetConsoleWidth() - 38) + "..."}");
+                    Log.Information(string.Concat("获取成功, Token: ", Token.AsSpan(Utils.TryGetConsoleWidth() - 38), "..."));
                     Log.Information($"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(TokenExpireTime).DateTime.ToLocalTime()}");
                 }
             }
@@ -65,7 +65,7 @@ namespace KanonBot.API
                 Log.Information("OSUApiV2_Token已过期, 正在重新获取");
                 if (await GetToken())
                 {
-                    Log.Information($"获取成功, Token: {Token.Substring(0, Utils.TryGetConsoleWidth() - 38) + "..."}");
+                    Log.Information(string.Concat("获取成功, Token: ", Token.AsSpan(Utils.TryGetConsoleWidth() - 38), "..."));
                     Log.Information($"Token过期时间: {DateTimeOffset.FromUnixTimeSeconds(TokenExpireTime).DateTime.ToLocalTime()}");
                 }
             }
@@ -96,8 +96,8 @@ namespace KanonBot.API
                 .SetQueryParams(new
                 {
                     include_fails = includeFails ? 1 : 0,
-                    limit = limit,
-                    offset = offset,
+                    limit,
+                    offset,
                     mode = mode.ToStr()
                 })
                 .GetAsync();
@@ -224,8 +224,7 @@ namespace KanonBot.API
         {
             var url = $"https://api.sayobot.cn/v2/beatmapinfo?K={sid}";
             var body = await url.GetJsonAsync<JObject>()!;
-            if (fileName == null)
-                fileName = $"{bid}.png";
+            fileName ??= $"{bid}.png";
 
             foreach (var item in body["data"]!["bid_data"]!)
             {
@@ -248,7 +247,7 @@ namespace KanonBot.API
                 .SetQueryParams(new
                 {
                     mode = "user",
-                    query = "userName"
+                    query = userName
                 })
                 .GetJsonAsync<JObject>();
             return body["user"] as JObject;
@@ -277,18 +276,20 @@ namespace KanonBot.API
         async public static Task<Models.PPlusData> GetUserPlusData(long uid)
         {
             var res = await $"https://syrin.me/pp+/api/user/{uid}/".GetJsonAsync<JObject>();
-            var data = new Models.PPlusData();
-            data.User = res["user_data"]!.ToObject<Models.PPlusData.UserData>()!;
-            data.Performances = res["user_performances"]!["total"]!.ToObject<Models.PPlusData.UserPerformances[]>();
+            var data = new Models.PPlusData() {
+                User = res["user_data"]!.ToObject<Models.PPlusData.UserData>()!,
+                Performances = res["user_performances"]!["total"]!.ToObject<Models.PPlusData.UserPerformances[]>()
+            };
             return data;
         }
 
         async public static Task<Models.PPlusData> GetUserPlusData(string username)
         {
             var res = await $"https://syrin.me/pp+/api/user/{username}/".GetJsonAsync<JObject>();
-            var data = new Models.PPlusData();
-            data.User = res["user_data"]!.ToObject<Models.PPlusData.UserData>()!;
-            data.Performances = res["user_performances"]!["total"]!.ToObject<Models.PPlusData.UserPerformances[]>();
+            var data = new Models.PPlusData() {
+                User = res["user_data"]!.ToObject<Models.PPlusData.UserData>()!,
+                Performances = res["user_performances"]!["total"]!.ToObject<Models.PPlusData.UserPerformances[]>()
+            };
             return data;
         }
 

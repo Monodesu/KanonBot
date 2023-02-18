@@ -28,8 +28,10 @@ namespace KanonBot
         /// <returns>返回的字符串</returns>
         public static async Task<HttpStatusCode> PutAsync(string url, string data, Dictionary<string, string> header = null)
         {
-            HttpClient client = new(new HttpClientHandler() { UseCookies = false });
-            client.Timeout = Timeout.InfiniteTimeSpan;
+            HttpClient client = new(new HttpClientHandler() { UseCookies = false })
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             HttpContent content = new StringContent(data);
             if (header != null)
             {
@@ -50,8 +52,10 @@ namespace KanonBot
         /// <returns>返回的字符串</returns>
         public static async Task<ResponseResult> DeleteAsync(string url, Dictionary<string, string> header = null)
         {
-            HttpClient client = new(new HttpClientHandler() { UseCookies = false });
-            client.Timeout = Timeout.InfiniteTimeSpan;
+            HttpClient client = new(new HttpClientHandler() { UseCookies = false })
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             if (header != null)
             {
                 client.DefaultRequestHeaders.Clear();
@@ -71,8 +75,10 @@ namespace KanonBot
 
         public static async Task<ResponseResult> KHLPostAsyncFile(string url, byte[] filedata, string filename, Dictionary<string, string> header = null)
         {
-            HttpClient client = new();
-            client.Timeout = Timeout.InfiniteTimeSpan;
+            HttpClient client = new()
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             if (header != null)
             {
                 client.DefaultRequestHeaders.Clear();
@@ -82,8 +88,10 @@ namespace KanonBot
                 }
             }
             client.DefaultRequestHeaders.Add("Accept", "application/json");
-            var DataContent = new MultipartFormDataContent();
-            DataContent.Add(new ByteArrayContent(filedata), "file", filename);
+            var DataContent = new MultipartFormDataContent
+            {
+                { new ByteArrayContent(filedata), "file", filename }
+            };
             //multipartFromDataContent.Headers.ContentType = new MediaTypeHeaderValue("form-data");
             HttpResponseMessage response = await client.PostAsync(url, DataContent);
             // response.EnsureSuccessStatusCode();
@@ -103,8 +111,10 @@ namespace KanonBot
         /// <returns>返回的字符串</returns>
         public static async Task<ResponseResult> PostAsync(string url, Dictionary<string, string> postData, Dictionary<string, string> header = null)
         {
-            HttpClient client = new();
-            client.Timeout = Timeout.InfiniteTimeSpan;
+            HttpClient client = new()
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             if (header != null)
             {
                 client.DefaultRequestHeaders.Clear();
@@ -140,8 +150,10 @@ namespace KanonBot
         /// <returns>返回的字符串</returns>
         public static async Task<ResponseResult> PostAsync(string url, JObject json, Dictionary<string, string> header = null)
         {
-            HttpClient client = new();
-            client.Timeout = Timeout.InfiniteTimeSpan;
+            HttpClient client = new()
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             if (header != null)
             {
                 client.DefaultRequestHeaders.Clear();
@@ -171,8 +183,10 @@ namespace KanonBot
         /// <returns>返回的字符串</returns>
         public static async Task<ResponseResult> PostAsync(string url, string data, Dictionary<string, string> header = null)
         {
-            HttpClient client = new(new HttpClientHandler() { UseCookies = false });
-            client.Timeout = Timeout.InfiniteTimeSpan;
+            HttpClient client = new(new HttpClientHandler() { UseCookies = false })
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             HttpContent content = new StringContent(data);
             if (header != null)
             {
@@ -199,8 +213,10 @@ namespace KanonBot
         /// <returns>返回的字符串</returns>
         public static async Task<ResponseResult> GetAsync(string url, Dictionary<string, string> header = null)
         {
-            HttpClient client = new(new HttpClientHandler() { UseCookies = false });
-            client.Timeout = Timeout.InfiniteTimeSpan;
+            HttpClient client = new(new HttpClientHandler() { UseCookies = false })
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             if (header != null)
             {
                 client.DefaultRequestHeaders.Clear();
@@ -222,8 +238,10 @@ namespace KanonBot
         public static async Task<ResponseResultByte> GetAsyncByte(string url, Dictionary<string, string> header = null)
         {
 
-            HttpClient client = new(new HttpClientHandler() { UseCookies = false });
-            client.Timeout = Timeout.InfiniteTimeSpan;
+            HttpClient client = new(new HttpClientHandler() { UseCookies = false })
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            };
             if (header != null)
             {
                 client.DefaultRequestHeaders.Clear();
