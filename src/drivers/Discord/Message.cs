@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Discord;
 using Discord.WebSocket;
 using KanonBot.Message;
 
@@ -37,13 +38,13 @@ public partial class Discord
             {
                 var x = text.Trim();
                 // 匹配一下attacment
-                foreach (var Attachment in MessageData.Attachments)
+                foreach (var Embeds in MessageData.Embeds)
                 {
-                    if (Attachment.ContentType == "image")
+                    if (Embeds.Type == EmbedType.Image)
                     {
                         // 添加图片，删除文本
-                        chain.Add(new ImageSegment(Attachment.Url, ImageSegment.Type.Url));
-                        x = x.Replace(Attachment.Url, "");
+                        chain.Add(new ImageSegment(Embeds.Image!.Value.Url, ImageSegment.Type.Url));
+                        x = x.Replace(Embeds.Image.Value.Url, "");
                     }
                 }
                 if (x.Length != 0)

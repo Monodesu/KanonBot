@@ -60,6 +60,9 @@ public partial class Discord : ISocket, IDriver
 
     private void Parse(SocketMessage message)
     {
+        if (message.Author.Id == this.instance.CurrentUser.Id)
+            return;
+
         // 过滤掉bot消息和系统消息
         if (message.Source != MessageSource.User)
         {
@@ -72,7 +75,7 @@ public partial class Discord : ISocket, IDriver
         {
             this.msgAction?.Invoke(new Target()
             {
-                platform = Platform.KOOK,
+                platform = Platform.Discord,
                 sender = message.Author.Id.ToString(),
                 selfAccount = this.selfID,
                 msg = Message.Parse(message),
@@ -80,6 +83,7 @@ public partial class Discord : ISocket, IDriver
                 socket = this
             });
         }
+        message.Channel.SendMessageAsync("hello");
 
     }
 

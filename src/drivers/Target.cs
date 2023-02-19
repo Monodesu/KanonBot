@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using libKook = Kook;
+using libDiscord = Discord;
 using Msg = KanonBot.Message;
 
 namespace KanonBot.Drivers;
@@ -47,13 +48,21 @@ public class Target
     {
         switch (this.socket!)
         {
-            case Kook s:
-                var rawMessage = (this.raw as libKook.WebSocket.SocketMessage);
+            case Discord d:
+                var discordRawMessage = this.raw as libDiscord.WebSocket.SocketMessage;
                 try
                 {
-                    await s.api.SendChannelMessage(rawMessage!.Channel.Id.ToString(), msgChain, rawMessage.Id);
+                    await d.api.SendMessage(discordRawMessage!.Channel, msgChain);
                 }
-                catch (Exception ex) { Log.Warning("发送KOOK消息失败 ↓\n{ex}", ex); return false; }
+                catch (Exception ex) { Log.Warning("发送Discord消息失败 ↓\n{ex}", ex); return false; }
+                break;
+            case Kook s:
+                var KookRawMessage = this.raw as libKook.WebSocket.SocketMessage;
+                try
+                {
+                    await s.api.SendChannelMessage(KookRawMessage!.Channel.Id.ToString(), msgChain, KookRawMessage.Id);
+                }
+                catch (Exception ex) { Log.Warning("发送Kook消息失败 ↓\n{ex}", ex); return false; }
                 break;
             case Guild s:
                 var GuildMessageData = (this.raw as Guild.Models.MessageData)!;
