@@ -10,7 +10,8 @@ public enum Platform
     OneBot,
     Guild,
     KOOK,
-    Discord
+    Discord,
+    OSU
 }
 
 public interface IDriver

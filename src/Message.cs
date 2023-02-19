@@ -66,6 +66,14 @@ public class AtSegment : IMsgSegment
 
     public string Build()
     {
+        var platform = this.platform switch
+        {
+            Platform.OneBot => "qq",
+            Platform.Guild => "gulid",
+            Platform.Discord => "discord",
+            Platform.KOOK => "kook",
+            _ => "unknown",
+        };
         return $"{platform}={value}";
     }
 }

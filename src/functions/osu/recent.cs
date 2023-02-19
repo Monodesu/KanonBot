@@ -7,6 +7,7 @@ using KanonBot.functions.osu.rosupp;
 using System.IO;
 using KanonBot.functions.osu;
 using static KanonBot.API.OSU.Models;
+using LanguageExt.UnsafeValueAccess;
 
 namespace KanonBot.functions.osubot
 {
@@ -14,17 +15,20 @@ namespace KanonBot.functions.osubot
     {
         async public static Task Execute(Target target, string cmd, bool includeFails = false)
         {
-            var is_bounded = false;
-            OSU.Models.User? OnlineOsuInfo;
-            Database.Model.UserOSU DBOsuInfo;
+            long? osuID = null;
+            OSU.Enums.Mode? mode;
+            Database.Model.User? DBUser = null;
+            Database.Model.UserOSU? DBOsuInfo = null;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Recent);
+            mode = command.osu_mode;
+
+            // 解析指令
             if (command.self_query)
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                Database.Model.User? DBUser;
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
@@ -32,62 +36,82 @@ namespace KanonBot.functions.osubot
                     await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
                     return;
                 }
-
-                // 验证osu信息
-                var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
-                DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
+                // 验证账号信息
+                DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
                 if (DBOsuInfo == null)
                 {
                     await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
                     return;
                 }
 
-                // 验证osu信息
-                command.osu_mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode);
-
-                // 验证osu信息
-                OnlineOsuInfo = await OSU.GetUser(DBOsuInfo.osu_uid, command.osu_mode!.Value);
-                is_bounded = true;
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
+                osuID = DBOsuInfo.osu_uid;
             }
             else
             {
-                // 验证osu信息
-                OnlineOsuInfo = await OSU.GetUser(command.osu_username);
-                is_bounded = false;
+                // 查询用户是否绑定
+                // 这里先按照at方法查询，查询不到就是普通用户查询
+                var (atOSU, atDBUser) = await Accounts.ParseAt(command.osu_username);
+                if (atOSU.IsNone && !atDBUser.IsNone) {
+                    await target.reply("ta还没有绑定osu账户呢。");
+                    return;
+                } else if (!atOSU.IsNone && atDBUser.IsNone) {
+                    var _osuinfo = atOSU.ValueUnsafe();
+                    mode ??= _osuinfo.PlayMode;
+                    osuID = _osuinfo.Id;
+                } else if (!atOSU.IsNone && !atDBUser.IsNone) {
+                    DBUser = atDBUser.ValueUnsafe();
+                    DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
+                    var _osuinfo = atOSU.ValueUnsafe();
+                    mode ??= OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value ;
+                    osuID = _osuinfo.Id;
+                } else {
+                    // 普通查询
+                    var OnlineOsuInfo = await OSU.GetUser(
+                        command.osu_username,
+                        command.osu_mode ?? OSU.Enums.Mode.OSU
+                    );
+                    if (OnlineOsuInfo != null)
+                    {
+                        DBOsuInfo = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
+                        if (DBOsuInfo != null)
+                        {
+                            DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
+                            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
+                        }
+                        mode ??= OnlineOsuInfo.PlayMode;
+                        osuID = OnlineOsuInfo.Id;
+                    }
+                    else
+                    {
+                        // 直接取消查询，简化流程
+                        await target.reply("猫猫没有找到此用户。");
+                        return;
+                    }
+                }
             }
 
+
             // 验证osu信息
-            if (OnlineOsuInfo == null)
+            var tempOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
+            if (tempOsuInfo == null)
             {
-                if (is_bounded)
-                {
+                if (DBOsuInfo != null)
                     await target.reply("被办了。");
-                    return;
-                }
-                await target.reply("猫猫没有找到此用户。");
+                else
+                    await target.reply("猫猫没有找到此用户。");
+                // 中断查询
                 return;
             }
 
-            if (!is_bounded) // 未绑定用户回数据库查询找模式
-            {
-                var temp_uid = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
-                DBOsuInfo = (await Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid))!;
-                if (DBOsuInfo != null)
-                {
-                    //is_bounded = true;
-                    command.osu_mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode);
-                }
-            }
 
-            // 判断给定的序号是否在合法的范围内
-            // if (command.order_number == -1) { await target.reply("猫猫找不到该最近游玩的成绩。"); return; }
 
             //var scorePanelData = new LegacyImage.Draw.ScorePanelData();
             var scoreInfos = await OSU.GetUserScores(
-                OnlineOsuInfo.Id,
+                osuID!.Value,
                 OSU.Enums.UserScoreType.Recent,
-                command.osu_mode ?? OSU.Enums.Mode.OSU,
-                50,　//default was 1, due to seasonalpass set it to 50
+                mode!.Value,
+                50, //default was 1, due to seasonalpass set it to 50
                 command.order_number - 1,
                 includeFails
             );
@@ -119,18 +143,18 @@ namespace KanonBot.functions.osubot
                         data = await PerformanceCalculator.CalculatePanelData(x);
 
                         //季票信息
-                        if (is_bounded)
+                        if (DBOsuInfo != null)
                         {
                             bool temp_abletoinsert = true;
                             foreach (var c in x.Mods)
                             {
-                                if (c.ToUpper() == "AP") temp_abletoinsert = false;
-                                if (c.ToUpper() == "RX") temp_abletoinsert = false;
+                                if (c.ToUpper() == "AP")
+                                    temp_abletoinsert = false;
+                                if (c.ToUpper() == "RX")
+                                    temp_abletoinsert = false;
                             }
                             if (temp_abletoinsert)
-                                await Seasonalpass.Update(
-                                OnlineOsuInfo.Id,
-                                data);
+                                await Seasonalpass.Update(osuID!.Value, data);
                         }
                         //std推图
                         if (x.Mode == OSU.Enums.Mode.OSU)
@@ -139,26 +163,27 @@ namespace KanonBot.functions.osubot
                                 x.Beatmap!.Status == OSU.Enums.Status.ranked
                                 || x.Beatmap!.Status == OSU.Enums.Status.approved
                             )
-                                if (x.Rank.ToUpper() == "XH" ||
-                                    x.Rank.ToUpper() == "X" ||
-                                    x.Rank.ToUpper() == "SH" ||
-                                    x.Rank.ToUpper() == "S" ||
-                                    x.Rank.ToUpper() == "A")
+                                if (
+                                    x.Rank.ToUpper() == "XH"
+                                    || x.Rank.ToUpper() == "X"
+                                    || x.Rank.ToUpper() == "SH"
+                                    || x.Rank.ToUpper() == "S"
+                                    || x.Rank.ToUpper() == "A"
+                                )
                                 {
                                     await Database.Client.InsertOsuStandardBeatmapTechData(
-                                                                        x.Beatmap!.BeatmapId,
-                                                                        data.ppInfo.star,
-                                                                        (int)data.ppInfo.ppStats![0].total,
-                                                                        (int)data.ppInfo.ppStats![0].acc!,
-                                                                        (int)data.ppInfo.ppStats![0].speed!,
-                                                                        (int)data.ppInfo.ppStats![0].aim!,
-                                                                        (int)data.ppInfo.ppStats![1].total,
-                                                                        (int)data.ppInfo.ppStats![2].total,
-                                                                        (int)data.ppInfo.ppStats![3].total,
-                                                                        (int)data.ppInfo.ppStats![4].total,
-                                                                        x.Mods
-                                                                    );
-
+                                        x.Beatmap!.BeatmapId,
+                                        data.ppInfo.star,
+                                        (int)data.ppInfo.ppStats![0].total,
+                                        (int)data.ppInfo.ppStats![0].acc!,
+                                        (int)data.ppInfo.ppStats![0].speed!,
+                                        (int)data.ppInfo.ppStats![0].aim!,
+                                        (int)data.ppInfo.ppStats![1].total,
+                                        (int)data.ppInfo.ppStats![2].total,
+                                        (int)data.ppInfo.ppStats![3].total,
+                                        (int)data.ppInfo.ppStats![4].total,
+                                        x.Mods
+                                    );
                                 }
                         }
                     }

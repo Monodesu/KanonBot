@@ -4,6 +4,8 @@ using KanonBot.API;
 using KanonBot.Drivers;
 using KanonBot.functions.osu;
 using KanonBot.Message;
+using LanguageExt.SomeHelp;
+using LanguageExt.UnsafeValueAccess;
 
 namespace KanonBot.functions
 {
@@ -253,6 +255,52 @@ namespace KanonBot.functions
             {
                 await target.reply("请按照以下格式进行绑定。\n!bind osu 您的osu用户名 "); return;
             }
+        }
+        public static async Task<(Option<OSU.Models.User>, Option<Database.Model.User>)> ParseAt(string atmsg) {
+            var res = SplitKvp(atmsg);
+            if (res.IsNone)
+                return (None, None);
+
+            var (k, v) = res.Value();
+            if (k == "osu") {
+                var uid = parseLong(v).IfNone(() => 0);
+                if (uid == 0)
+                    return (None, None);
+                
+                var osuacc_ = await OSU.GetUser(uid);
+                if (osuacc_ is null)
+                    return (None, None);
+
+                var dbuser_ = await GetAccountByOsuUid(uid);
+                if (dbuser_ is null)
+                    return (Some(osuacc_!), None);
+                else
+                    return (Some(osuacc_!), Some(dbuser_!));
+            }
+
+            var platform =  k switch {
+                "qq" => Platform.OneBot,
+                "gulid" => Platform.Guild,
+                "discord" => Platform.Discord,
+                "kook" => Platform.KOOK,
+                _ => Platform.Unknown
+            };
+            if (platform == Platform.Unknown)
+                return (None, None);
+            
+            var dbuser = await GetAccount(v, platform);
+            if (dbuser is null)
+                return (None, None);
+
+            var dbosu = await CheckOsuAccount(dbuser.uid);
+            if (dbosu is null)
+                return (None, Some(dbuser!));
+
+            var osuacc = await OSU.GetUser(dbosu.osu_uid);
+            if (osuacc is null)
+                return (None, Some(dbuser!));
+            else
+                return (Some(osuacc!), Some(dbuser!));
         }
 
         public static async Task<Database.Model.User?> GetAccount(string uid, Platform platform)

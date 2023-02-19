@@ -40,9 +40,16 @@ public static partial class Utils
         }
     } // 获取失败返回80
 
-    public static Option<String> ParseAt(String msg)
+    public static Option<(String, String)> SplitKvp(String msg)
     {
-        if (msg.Contains('=')) { }
+        if (msg.Filter((c) => c == '=').Count() == 1) { 
+            var p = msg.Split('=');
+            
+            var (k, v) = (p[0], p[1]);
+            if (string.IsNullOrWhiteSpace(k) || string.IsNullOrWhiteSpace(v))
+                return None;
+            return Some((k, v));
+        }
         return None;
     }
 

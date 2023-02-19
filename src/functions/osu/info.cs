@@ -4,6 +4,7 @@ using KanonBot.Drivers;
 using KanonBot.functions.osu;
 using KanonBot.functions.osu.rosupp;
 using KanonBot.Message;
+using LanguageExt.UnsafeValueAccess;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using static LinqToDB.Common.Configuration;
@@ -37,8 +38,7 @@ namespace KanonBot.functions.osubot
                     return;
                 }
                 // 验证账号信息
-                var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
-                DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
+                DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
                 if (DBOsuInfo == null)
                 {
                     await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
@@ -51,26 +51,44 @@ namespace KanonBot.functions.osubot
             else
             {
                 // 查询用户是否绑定
-                var OnlineOsuInfo = await OSU.GetUser(
-                    command.osu_username,
-                    command.osu_mode ?? OSU.Enums.Mode.OSU
-                );
-                if (OnlineOsuInfo != null)
-                {
-                    DBOsuInfo = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
-                    if (DBOsuInfo != null)
-                    {
-                        DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
-                        mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
-                    }
-                    mode ??= OnlineOsuInfo.PlayMode;
-                    osuID = OnlineOsuInfo.Id;
-                }
-                else
-                {
-                    // 直接取消查询，简化流程
-                    await target.reply("猫猫没有找到此用户。");
+                // 这里先按照at方法查询，查询不到就是普通用户查询
+                var (atOSU, atDBUser) = await Accounts.ParseAt(command.osu_username);
+                if (atOSU.IsNone && !atDBUser.IsNone) {
+                    await target.reply("ta还没有绑定osu账户呢。");
                     return;
+                } else if (!atOSU.IsNone && atDBUser.IsNone) {
+                    var _osuinfo = atOSU.ValueUnsafe();
+                    mode ??= _osuinfo.PlayMode;
+                    osuID = _osuinfo.Id;
+                } else if (!atOSU.IsNone && !atDBUser.IsNone) {
+                    DBUser = atDBUser.ValueUnsafe();
+                    DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
+                    var _osuinfo = atOSU.ValueUnsafe();
+                    mode ??= OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value ;
+                    osuID = _osuinfo.Id;
+                } else {
+                    // 普通查询
+                    var OnlineOsuInfo = await OSU.GetUser(
+                        command.osu_username,
+                        command.osu_mode ?? OSU.Enums.Mode.OSU
+                    );
+                    if (OnlineOsuInfo != null)
+                    {
+                        DBOsuInfo = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
+                        if (DBOsuInfo != null)
+                        {
+                            DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
+                            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
+                        }
+                        mode ??= OnlineOsuInfo.PlayMode;
+                        osuID = OnlineOsuInfo.Id;
+                    }
+                    else
+                    {
+                        // 直接取消查询，简化流程
+                        await target.reply("猫猫没有找到此用户。");
+                        return;
+                    }
                 }
             }
 

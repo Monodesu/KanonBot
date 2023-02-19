@@ -8,6 +8,7 @@ using RosuPP;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using System.IO;
+using LanguageExt.UnsafeValueAccess;
 
 namespace KanonBot.functions.osubot
 {
@@ -15,17 +16,21 @@ namespace KanonBot.functions.osubot
     {
         async public static Task Execute(Target target, string cmd)
         {
-            var is_bounded = false;
-            OSU.Models.User? OnlineOsuInfo;
-            Database.Model.UserOSU DBOsuInfo;
+            #region 验证
+            long? osuID = null;
+            OSU.Enums.Mode? mode;
+            Database.Model.User? DBUser = null;
+            Database.Model.UserOSU? DBOsuInfo = null;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.BestPerformance);
+            mode = command.osu_mode;
+
+            // 解析指令
             if (command.self_query)
             {
                 // 验证账户
                 var AccInfo = Accounts.GetAccInfo(target);
-                Database.Model.User? DBUser;
                 DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
@@ -33,59 +38,79 @@ namespace KanonBot.functions.osubot
                     await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
                     return;
                 }
-                // 验证osu信息
-                var _u = await Database.Client.GetUsersByUID(AccInfo.uid, AccInfo.platform);
-                DBOsuInfo = (await Accounts.CheckOsuAccount(_u!.uid))!;
+                // 验证账号信息
+                DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
                 if (DBOsuInfo == null)
                 {
                     await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
                     return;
                 }
 
-                // 验证osu信息
-                command.osu_mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode);
-
-                // 验证osu信息
-                OnlineOsuInfo = await OSU.GetUser(DBOsuInfo.osu_uid, command.osu_mode!.Value);
-                is_bounded = true;
+                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
+                osuID = DBOsuInfo.osu_uid;
             }
             else
             {
-                // 验证osu信息
-                OnlineOsuInfo = await OSU.GetUser(
-                    command.osu_username,
-                    command.osu_mode ?? OSU.Enums.Mode.OSU
-                );
-                is_bounded = false;
+                // 查询用户是否绑定
+                // 这里先按照at方法查询，查询不到就是普通用户查询
+                var (atOSU, atDBUser) = await Accounts.ParseAt(command.osu_username);
+                if (atOSU.IsNone && !atDBUser.IsNone) {
+                    await target.reply("ta还没有绑定osu账户呢。");
+                    return;
+                } else if (!atOSU.IsNone && atDBUser.IsNone) {
+                    var _osuinfo = atOSU.ValueUnsafe();
+                    mode ??= _osuinfo.PlayMode;
+                    osuID = _osuinfo.Id;
+                } else if (!atOSU.IsNone && !atDBUser.IsNone) {
+                    DBUser = atDBUser.ValueUnsafe();
+                    DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
+                    var _osuinfo = atOSU.ValueUnsafe();
+                    mode ??= OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value ;
+                    osuID = _osuinfo.Id;
+                } else {
+                    // 普通查询
+                    var OnlineOsuInfo = await OSU.GetUser(
+                        command.osu_username,
+                        command.osu_mode ?? OSU.Enums.Mode.OSU
+                    );
+                    if (OnlineOsuInfo != null)
+                    {
+                        DBOsuInfo = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
+                        if (DBOsuInfo != null)
+                        {
+                            DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
+                            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
+                        }
+                        mode ??= OnlineOsuInfo.PlayMode;
+                        osuID = OnlineOsuInfo.Id;
+                    }
+                    else
+                    {
+                        // 直接取消查询，简化流程
+                        await target.reply("猫猫没有找到此用户。");
+                        return;
+                    }
+                }
             }
 
             // 验证osu信息
-            if (OnlineOsuInfo == null)
+            var tempOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
+            if (tempOsuInfo == null)
             {
-                if (is_bounded)
-                {
+                if (DBOsuInfo != null)
                     await target.reply("被办了。");
-                    return;
-                }
-                await target.reply("猫猫没有找到此用户。");
+                else
+                    await target.reply("猫猫没有找到此用户。");
+                // 中断查询
                 return;
             }
 
-            if (!is_bounded) // 未绑定用户回数据库查询找模式
-            {
-                var temp_uid = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
-                DBOsuInfo = (await Accounts.CheckOsuAccount(temp_uid == null ? -1 : temp_uid.uid))!;
-                if (DBOsuInfo != null)
-                {
-                    //is_bounded = true;
-                    command.osu_mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode);
-                }
-            }
+            #endregion
 
             var scores = await OSU.GetUserScores(
-                OnlineOsuInfo.Id,
+                osuID!.Value,
                 OSU.Enums.UserScoreType.Best,
-                command.osu_mode ?? OSU.Enums.Mode.OSU,
+                mode!.Value,
                 1,
                 command.order_number - 1
             );

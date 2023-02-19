@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.IO;
 using System.Runtime.InteropServices;
 using KanonBot.API;
@@ -25,10 +26,14 @@ namespace KanonBot.functions.osu.rosupp
             public CalculateResult Calculate(ScoreParams scoreParams) =>
                 this.calculator.Calculate(scoreParams.Context);
         }
-        public static List<string> mods_str = new(){ "NF", "EZ", "TD", "HD", "HR", "SD", "DT", "RX",
-                                                    "HT", "NC", "FL", "AU", "SO", "AP", "PF", "K4",
-                                                    "K5", "K6", "K7", "K8", "FI", "RD", "CN", "TG",
-                                                    "K9", "KC", "K1", "K3", "K2", "S2", "MR" };
+
+        public static readonly ImmutableArray<string> mods_str = new() { 
+            "NF", "EZ", "TD", "HD", "HR", "SD", "DT", "RX",
+            "HT", "NC", "FL", "AU", "SO", "AP", "PF", "K4",
+            "K5", "K6", "K7", "K8", "FI", "RD", "CN", "TG",
+            "K9", "KC", "K1", "K3", "K2", "S2", "MR" 
+        };
+
         public struct PPInfo
         {
             public required double star,
