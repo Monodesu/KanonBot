@@ -338,6 +338,12 @@ namespace KanonBot.functions
                         return new AccInfo() { platform = Platform.KOOK, uid = k.Author.Id.ToString() };
                     }
                     break;
+                case Platform.Discord:
+                    if (target.raw is Discord.WebSocket.SocketMessage d)
+                    {
+                        return new AccInfo() { platform = Platform.Discord, uid = d.Author.Id.ToString() };
+                    }
+                    break;
             }
             return new() { platform = Platform.Unknown, uid = "" };
         }

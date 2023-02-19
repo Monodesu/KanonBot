@@ -69,49 +69,10 @@ public class Client
     static public async Task<bool> IsRegd(string mailAddr)
     {
         using var db = GetInstance();
-        var li = await db.User.Where(it => it.email == mailAddr).Select(it => it.uid).ToListAsync();
-        if (li.Count > 0)
+        var li = db.User.Where(it => it.email == mailAddr).Select(it => it.uid);
+        if (await li.CountAsync() > 0)
             return true;
         return false;
-    }
-
-    static public async Task<bool> IsRegd(string uid, Platform platform)
-    {
-        using var db = GetInstance();
-        switch (platform)
-        {
-            case Platform.OneBot:
-                var qid = long.Parse(uid);
-                var li1 = await db.User
-                    .Where(it => it.qq_id == qid)
-                    .Select(it => it.uid)
-                    .ToListAsync();
-                if (li1.Count > 0)
-                    return true;
-                return false;
-            case Platform.Guild:
-                var li2 = await db.User
-                    .Where(it => it.qq_guild_uid == uid)
-                    .Select(it => it.uid)
-                    .ToListAsync();
-                if (li2.Count > 0)
-                    return true;
-                return false;
-            case Platform.KOOK:
-                var li3 = await db.User
-                    .Where(it => it.kook_uid == uid)
-                    .Select(it => it.uid)
-                    .ToListAsync();
-                if (li3.Count > 0)
-                    return true;
-                return false;
-            // case "discord":
-            //     var li4 = db.Queryable<Model.Users>().Where(it => it.qq_guild_uid == uid).Select(it => it.uid).ToList();
-            //     if (li4.Count > 0) return true;
-            //     return false;
-            default:
-                return true;
-        }
     }
 
     static public async Task<Model.User?> GetUser(string mailAddr)
@@ -132,25 +93,16 @@ public class Client
         switch (platform)
         {
             case Platform.OneBot:
-                var qid = long.Parse(UID);
-                var li1 = await db.User.Where(it => it.qq_id == qid).ToListAsync();
-                if (li1.Count > 0)
-                    return li1[0];
-                return null;
+                if (long.TryParse(UID, out var qid))
+                    return await db.User.Where(it => it.qq_id == qid).FirstOrDefaultAsync();
+                else
+                    return null;
             case Platform.Guild:
-                var li2 = await db.User.Where(it => it.qq_guild_uid == UID).ToListAsync();
-                if (li2.Count > 0)
-                    return li2[0];
-                return null;
+                return await db.User.Where(it => it.qq_guild_uid == UID).FirstOrDefaultAsync();
             case Platform.KOOK:
-                var li3 = await db.User.Where(it => it.kook_uid == UID).ToListAsync();
-                if (li3.Count > 0)
-                    return li3[0];
-                return null;
-            // case "discord":  // 还没写
-            //     var li4 = db.Queryable<Model.Users>().Where(it => it.discord_uid == UID).ToList();
-            //     if (li4.Count > 0) return li4[0];
-            //     return null;
+                return await db.User.Where(it => it.kook_uid == UID).FirstOrDefaultAsync();
+            case Platform.Discord: // 还没写
+                return await db.User.Where(it => it.discord_uid == UID).FirstOrDefaultAsync();
             default:
                 return null;
         }
@@ -378,11 +330,7 @@ public class Client
         if (data == null)
             return (-1, null);
 
-        ui.Statistics = new()
-        {
-            GradeCounts = new(),
-            Level = new()
-        };
+        ui.Statistics = new() { GradeCounts = new(), Level = new() };
         ui.Id = oid;
         ui.Statistics.TotalScore = data.total_score;
         ui.Statistics.TotalHits = data.total_hit;
@@ -423,11 +371,8 @@ public class Client
     {
         //检查数据库中有无信息
         using var db = GetInstance();
-        var db_info = await db.OSUSeasonalPass
-            .Where(it => it.osu_id == oid)
-            .Where(it => it.mode == mode)
-            .ToListAsync();
-        if (db_info.Count > 0)
+        var db_info = db.OSUSeasonalPass.Where(it => it.osu_id == oid).Where(it => it.mode == mode);
+        if (await db_info.CountAsync() > 0)
         {
             return await db.OSUSeasonalPass
                     .Where(it => it.osu_id == oid)
@@ -536,11 +481,10 @@ public class Client
         }
 
         //查找谱面对应的mod数据是否存在
-        var db_info = await db.OsuStandardBeatmapTechData
+        var db_info = db.OsuStandardBeatmapTechData
             .Where(it => it.bid == bid)
-            .Where(it => it.mod == modstring)
-            .ToListAsync();
-        if (db_info.Count == 0)
+            .Where(it => it.mod == modstring);
+        if (await db_info.CountAsync() == 0)
         {
             //不存在再执行添加
             OsuStandardBeatmapTechData t =
@@ -573,22 +517,24 @@ public class Client
             return true;
         }
     }
+
     public static async Task<OSUSeasonalPass?> GetSeasonalPassInfo(long oid, string mode)
     {
         using var db = GetInstance();
-        return await db.OSUSeasonalPass.Where(it => it.osu_id == oid).Where(it => it.mode == mode).FirstOrDefaultAsync();
+        return await db.OSUSeasonalPass
+            .Where(it => it.osu_id == oid)
+            .Where(it => it.mode == mode)
+            .FirstOrDefaultAsync();
     }
 
     //true=数据库不存在，已成功插入数据，可以进行pt计算
     public static async Task<bool> SeasonalPass_Query_Score_Status(string mode, long score_id)
     {
         using var db = GetInstance();
-        var li = await db
-                    .OSUSeasonalPass_ScoreRecords
-                    .Where(it => it.score_id == score_id && it.mode == mode)
-                    .Select(it => it.score_id)
-                    .ToListAsync();
-        if (li.Count > 0)
+        var li = db.OSUSeasonalPass_ScoreRecords
+            .Where(it => it.score_id == score_id && it.mode == mode)
+            .Select(it => it.score_id);
+        if (await li.CountAsync() > 0)
             return false;
 
         //insert
@@ -604,30 +550,44 @@ public class Client
         }
     }
 
-
-    public static async Task<List<OsuStandardBeatmapTechData>> GetOsuStandardBeatmapTechData(int aim, int speed, int acc, int range = 20, bool boost = false)
+    public static async Task<List<OsuStandardBeatmapTechData>> GetOsuStandardBeatmapTechData(
+        int aim,
+        int speed,
+        int acc,
+        int range = 20,
+        bool boost = false
+    )
     {
         using var db = GetInstance();
         var trange = range;
-        if (boost) trange = 50;
-        return await db.OsuStandardBeatmapTechData.Where(it => it.aim > aim - range / 2 && it.aim < aim + trange
-                                                               && it.speed > speed - range / 2 && it.speed < speed + trange
-                                                               && it.acc > acc - range / 2 && it.acc < acc + trange
-                                                               )
-
-                                                      .ToListAsync();
+        if (boost)
+            trange = 50;
+        return await db.OsuStandardBeatmapTechData
+            .Where(
+                it =>
+                    it.aim > aim - range / 2
+                    && it.aim < aim + trange
+                    && it.speed > speed - range / 2
+                    && it.speed < speed + trange
+                    && it.acc > acc - range / 2
+                    && it.acc < acc + trange
+            )
+            .ToListAsync();
     }
 
     //true=成功生成代码
-    public static async Task<bool> CreateBadgeRedemptionCode(int badge_id, string code, bool can_repeatedly, DateTimeOffset expire_at)
+    public static async Task<bool> CreateBadgeRedemptionCode(
+        int badge_id,
+        string code,
+        bool can_repeatedly,
+        DateTimeOffset expire_at
+    )
     {
         using var db = GetInstance();
-        var li = await db
-                    .BadgeRedemptionCode
-                    .Where(it => it.code == code)
-                    .Select(it => it.id)
-                    .ToListAsync();
-        if (li.Count > 0)
+        var li = db.BadgeRedemptionCode
+            .Where(it => it.code == code)
+            .Select(it => it.id);
+        if (await li.CountAsync() > 0)
             return false;
 
         //insert
@@ -654,10 +614,7 @@ public class Client
     public static async Task<BadgeRedemptionCode> RedeemBadgeRedemptionCode(long uid, string code)
     {
         using var db = GetInstance();
-        var li = await db
-                    .BadgeRedemptionCode
-                    .Where(it => it.code == code)
-                    .FirstOrDefaultAsync();
+        var li = await db.BadgeRedemptionCode.Where(it => it.code == code).FirstOrDefaultAsync();
 
         if (li == null)
             return null!;
@@ -666,7 +623,6 @@ public class Client
                 return null!;
 
         return li!;
-
     }
 
     public static async Task<bool> SetBadgeRedemptionCodeStatus(int id, long uid, string code)
@@ -675,7 +631,11 @@ public class Client
         var result = await db.BadgeRedemptionCode
             .Where(it => it.id == id)
             .Set(it => it.redeem_time, DateTime.Now)
-            .Set(it => it.redeem_user, it => it.redeem_user == null ? uid.ToString() : it.redeem_user + "," + uid.ToString())
+            .Set(
+                it => it.redeem_user,
+                it =>
+                    it.redeem_user == null ? uid.ToString() : it.redeem_user + "," + uid.ToString()
+            )
             .Set(it => it.redeem_count, it => it.redeem_count + 1)
             .UpdateAsync();
         if (result > -1)
