@@ -118,13 +118,38 @@ namespace KanonBot.functions
                         }
                     }
                     break;
+                case Platform.Discord:
+                    if (target.raw is Discord.WebSocket.SocketMessage d)
+                    {
+                        uid = d.Author.Id.ToString();
+                        if (is_regd)
+                            if (dbuser.discord_uid == uid) { await target.reply("您提供的邮箱已经与您目前的平台绑定了。"); return; }
+                        var k1 = await Database.Client.GetUsersByUID(uid, Platform.Discord);
+                        if (k1 != null)
+                        {
+                            if (k1.email != null)
+                            {
+                                is_append = true;
+                            }
+                            else
+                            {
+                                await target.reply(new Chain()
+                                    .msg($"您目前的平台账户已经和邮箱为" +
+                                    $"{Utils.HideMailAddr(k1.email ?? "undefined@undefined.undefined")}" +
+                                    $"的用户绑定了。"));
+                                return;
+                            }
+                        }
+                    }
+                    break;
                 default: break;
             }
             var platform = target.platform! switch
             {
                 Platform.Guild => "qguild",
-                Platform.KOOK => "khl",
+                Platform.KOOK => "kook",
                 Platform.OneBot => "qq",
+                Platform.Discord => "discord",
                 _ => throw new NotSupportedException()
             };
 
