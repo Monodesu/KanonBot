@@ -1024,7 +1024,7 @@ namespace KanonBot.API
                 [JsonProperty("percentage")]
                 public double Percentage { get; set; }
 
-                [JsonProperty("pp")]
+                [JsonProperty("pp", NullValueHandling = NullValueHandling.Ignore)]
                 public double PP { get; set; }
             }
 

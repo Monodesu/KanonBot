@@ -102,7 +102,7 @@ namespace KanonBot.API
                 })
                 .GetAsync();
 
-            //Console.WriteLine(await res.GetStringAsync());
+            //Log.Error(await res.GetStringAsync());
             if (res.StatusCode == 404)
                 return null;
             else

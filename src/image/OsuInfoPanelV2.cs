@@ -2308,16 +2308,19 @@ namespace KanonBot.DrawV2
                 textOptions.Font = new Font(TorusRegular, 90);
                 textOptions.HorizontalAlignment = HorizontalAlignment.Center;
                 textOptions.Origin = new PointF(3642, 1670);
+                var bppp = 0.00;
+                try { bppp = allBP![0].PP; }
+                catch { bppp = 0.00; }
                 info.Mutate(
-                    x =>
-                        x.DrawText(
-                            drawOptions,
-                            textOptions,
-                            string.Format("{0:N1}", allBP![0].PP),
-                            new SolidBrush(MainBPppMainColor),
-                            null
-                        )
-                );
+                        x =>
+                            x.DrawText(
+                                drawOptions,
+                                textOptions,
+                                string.Format("{0:N1}", bppp),
+                                new SolidBrush(MainBPppMainColor),
+                                null
+                            )
+                    );
                 var bp1pptextMeasure = TextMeasurer.Measure(
                     string.Format("{0:N1}", allBP![0].PP),
                     textOptions
@@ -2334,55 +2337,63 @@ namespace KanonBot.DrawV2
                             "pp",
                             new SolidBrush(MainBPppTitleColor),
                             null
-                        )
+                            )
                 );
-
                 textOptions.HorizontalAlignment = HorizontalAlignment.Center;
                 textOptions.Font = new Font(TorusRegular, 70);
                 textOptions.Origin = new PointF(3642, 1895);
+                try { bppp = allBP![1].PP; }
+                catch { bppp = 0.00; }
                 info.Mutate(
                     x =>
                         x.DrawText(
                             drawOptions,
                             textOptions,
-                            string.Format("{0:N0}pp", allBP![1].PP),
+                            string.Format("{0:N0}pp", bppp),
                             new SolidBrush(SubBp2ndBPppMainColor),
                             null
-                        )
-                );
+                            )
+                        );
                 textOptions.Origin = new PointF(3642, 2081);
+                try { bppp = allBP![2].PP; }
+                catch { bppp = 0.00; }
                 info.Mutate(
                     x =>
                         x.DrawText(
                             drawOptions,
                             textOptions,
-                            string.Format("{0:N0}pp", allBP![2].PP),
+                            string.Format("{0:N0}pp", bppp),
                             new SolidBrush(SubBp3rdBPppMainColor),
                             null
-                        )
-                );
+                            )
+                        );
                 textOptions.Origin = new PointF(3642, 2266);
+                try { bppp = allBP![3].PP; }
+                catch { bppp = 0.00; }
                 info.Mutate(
-                    x =>
-                        x.DrawText(
-                            drawOptions,
-                            textOptions,
-                            string.Format("{0:N0}pp", allBP![3].PP),
-                            new SolidBrush(SubBp4thBPppMainColor),
-                            null
-                        )
-                );
+                        x =>
+                            x.DrawText(
+                                drawOptions,
+                                textOptions,
+                                string.Format("{0:N0}pp", bppp),
+                                new SolidBrush(SubBp4thBPppMainColor),
+                                null
+                                )
+                            );
+
                 textOptions.Origin = new PointF(3642, 2450);
+                try { bppp = allBP![4].PP; }
+                catch { bppp = 0.00; }
                 info.Mutate(
-                    x =>
-                        x.DrawText(
-                            drawOptions,
-                            textOptions,
-                            string.Format("{0:N0}pp", allBP![4].PP),
-                            new SolidBrush(SubBp5thBPppMainColor),
-                            null
-                        )
-                );
+                        x =>
+                            x.DrawText(
+                                drawOptions,
+                                textOptions,
+                                string.Format("{0:N0}pp", bppp),
+                                new SolidBrush(SubBp5thBPppMainColor),
+                                null
+                                )
+                            );
                 #endregion
             }
             else
