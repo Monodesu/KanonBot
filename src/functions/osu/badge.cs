@@ -477,8 +477,8 @@ namespace KanonBot.functions.osubot
             //检查badge图片是否符合要求规范 https://desu.life/test/test_badge.png
             //下载图片
             var randomstr = Utils.RandomStr(50);
-            await img_url.DownloadFileAsync(@$".\work\tmp\", $"{randomstr}.png");
-            var filepath = @$".\work\tmp\{randomstr}.png";
+            await img_url.DownloadFileAsync(@$"./work/tmp/", $"{randomstr}.png");
+            var filepath = @$"./work/tmp/{randomstr}.png";
             using var source = await Img.LoadAsync(filepath);
             if (source.Width / 21.5 != source.Height / 10)
             {
@@ -489,7 +489,7 @@ namespace KanonBot.functions.osubot
 
             //保存badge图片&数据库插入新的badge
             var db_badgeid = await Database.Client.InsertBadge(args[1], args[2], args[3]);
-            source.Save($"./work/badges/{db_badgeid}.png");
+            //source.Save($"./work/badges/{db_badgeid}.png");
             await source.SaveAsync($"./work/badges/{db_badgeid}.png", new PngEncoder());
             await target.reply($"图片成功上传，新的badgeID为{db_badgeid}");
             File.Delete(filepath);

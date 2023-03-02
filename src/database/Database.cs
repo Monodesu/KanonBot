@@ -364,7 +364,8 @@ public class Client
                 name_chinese = CHN_NAME,
                 description = CHN_DECS
             };
-        return await db.InsertAsync(bl);
+        return await db.InsertWithInt32IdentityAsync(bl);
+        
     }
 
     public static async Task<bool> UpdateSeasonalPass(long oid, string mode, int add_point)

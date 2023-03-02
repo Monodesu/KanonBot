@@ -206,7 +206,7 @@ namespace KanonBot.functions.osu
             {
                 case -1:
                     //send list
-                    var files = Directory.GetFiles(@".\work\legacy\v1_infopanel\verify\");
+                    var files = Directory.GetFiles(@"./work/legacy/v1_infopanel/verify/");
                     if (files.Length > 0)
                     {
                         var msg = new Chain();
@@ -231,12 +231,12 @@ namespace KanonBot.functions.osu
                     return;
                 case 0:
                     //approve all
-                    var filesall = Directory.GetFiles(@".\work\legacy\v1_infopanel\verify\");
+                    var filesall = Directory.GetFiles(@"./work/legacy/v1_infopanel/verify/");
                     if (filesall.Length > 0)
                     {
                         foreach (var file in filesall)
                         {
-                            var destpath = @".\work\legacy\v1_infopanel\" + Path.GetFileName(file);
+                            var destpath = @"./work/legacy/v1_infopanel/" + Path.GetFileName(file);
                             if (File.Exists(destpath))
                                 File.Delete(destpath);
                             File.Move(file, destpath);
@@ -248,13 +248,13 @@ namespace KanonBot.functions.osu
                     return;
                 case 1:
                     //approve
-                    if (File.Exists(@$".\work\legacy\v1_infopanel\verify\{cmd}.png"))
+                    if (File.Exists(@$"./work/legacy/v1_infopanel/verify/{cmd}.png"))
                     {
-                        if (File.Exists(@$".\work\legacy\v1_infopanel\{cmd}.png"))
-                            File.Delete(@$".\work\legacy\v1_infopanel\{cmd}.png");
+                        if (File.Exists(@$"./work/legacy/v1_infopanel/{cmd}.png"))
+                            File.Delete(@$"./work/legacy/v1_infopanel/{cmd}.png");
                         File.Move(
-                            @$".\work\legacy\v1_infopanel\verify\{cmd}.png",
-                            @$".\work\legacy\v1_infopanel\{cmd}.png"
+                            @$"./work/legacy/v1_infopanel/verify/{cmd}.png",
+                            @$"./work/legacy/v1_infopanel/{cmd}.png"
                         );
                         await target.reply("approved.");
                         return;
@@ -263,9 +263,9 @@ namespace KanonBot.functions.osu
                     return;
                 case 2:
                     //reject
-                    if (File.Exists(@$".\work\legacy\v1_infopanel\verify\{cmd}.png"))
+                    if (File.Exists(@$"./work/legacy/v1_infopanel/verify/{cmd}.png"))
                     {
-                        File.Delete(@$".\work\legacy\v1_infopanel\verify\{cmd}.png");
+                        File.Delete(@$"./work/legacy/v1_infopanel/verify/{cmd}.png");
                         await target.reply("rejected.");
                         return;
                     }
@@ -284,7 +284,7 @@ namespace KanonBot.functions.osu
             {
                 case -1:
                     //send list
-                    var files = Directory.GetFiles(@".\work\panelv2\user_infopanel\verify\");
+                    var files = Directory.GetFiles(@"./work/panelv2/user_infopanel/verify/");
                     if (files.Length > 0)
                     {
                         var msg = new Chain();
@@ -309,13 +309,13 @@ namespace KanonBot.functions.osu
                     return;
                 case 0:
                     //approve all
-                    var filesall = Directory.GetFiles(@".\work\panelv2\user_infopanel\verify\");
+                    var filesall = Directory.GetFiles(@"./work/panelv2/user_infopanel/verify/");
                     if (filesall.Length > 0)
                     {
                         foreach (var file in filesall)
                         {
                             var destpath =
-                                @".\work\panelv2\user_infopanel\" + Path.GetFileName(file);
+                                @"./work/panelv2/user_infopanel/" + Path.GetFileName(file);
                             if (File.Exists(destpath))
                                 File.Delete(destpath);
                             File.Move(file, destpath);
@@ -327,13 +327,13 @@ namespace KanonBot.functions.osu
                     return;
                 case 1:
                     //approve
-                    if (File.Exists(@$".\work\panelv2\user_infopanel\verify\{cmd}.png"))
+                    if (File.Exists(@$"./work/panelv2/user_infopanel/verify/{cmd}.png"))
                     {
-                        if (File.Exists(@$".\work\panelv2\user_infopanel\{cmd}.png"))
-                            File.Delete(@$".\work\panelv2\user_infopanel\{cmd}.png");
+                        if (File.Exists(@$"./work/panelv2/user_infopanel/{cmd}.png"))
+                            File.Delete(@$"./work/panelv2/user_infopanel/{cmd}.png");
                         File.Move(
-                            @$".\work\panelv2\user_infopanel\verify\{cmd}.png",
-                            @$".\work\panelv2\user_infopanel\{cmd}.png"
+                            @$"./work/panelv2/user_infopanel/verify/{cmd}.png",
+                            @$"./work/panelv2/user_infopanel/{cmd}.png"
                         );
                         await target.reply("approved.");
                         return;
@@ -342,9 +342,9 @@ namespace KanonBot.functions.osu
                     return;
                 case 2:
                     //reject
-                    if (File.Exists(@$".\work\panelv2\user_infopanel\verify\{cmd}.png"))
+                    if (File.Exists(@$"./work/panelv2/user_infopanel/verify/{cmd}.png"))
                     {
-                        File.Delete(@$".\work\panelv2\user_infopanel\verify\{cmd}.png");
+                        File.Delete(@$"./work/panelv2/user_infopanel/verify/{cmd}.png");
                         await target.reply("rejected.");
                         return;
                     }
@@ -363,7 +363,7 @@ namespace KanonBot.functions.osu
             {
                 case -1:
                     //send list
-                    var files = Directory.GetFiles(@".\work\panelv2\user_customimg\verify\");
+                    var files = Directory.GetFiles(@"./work/panelv2/user_customimg/verify/");
                     if (files.Length > 0)
                     {
                         var msg = new Chain();
@@ -388,12 +388,12 @@ namespace KanonBot.functions.osu
                     return;
                 case 0:
                     //approve all
-                    var filesall = Directory.GetFiles(@".\work\panelv2\user_customimg\verify\");
+                    var filesall = Directory.GetFiles(@"./work/panelv2/user_customimg/verify/");
                     if (filesall.Length > 0)
                     {
                         foreach (var x in filesall)
                         {
-                            var destpath = @".\work\panelv2\user_customimg\" + Path.GetFileName(x);
+                            var destpath = @"./work/panelv2/user_customimg/" + Path.GetFileName(x);
                             if (File.Exists(destpath))
                                 File.Delete(destpath);
                             File.Move(x, destpath);
@@ -405,13 +405,13 @@ namespace KanonBot.functions.osu
                     return;
                 case 1:
                     //approve
-                    if (File.Exists(@$".\work\panelv2\user_customimg\verify\{cmd}.png"))
+                    if (File.Exists(@$"./work/panelv2/user_customimg/verify/{cmd}.png"))
                     {
-                        if (File.Exists(@$".\work\panelv2\user_customimg\{cmd}.png"))
-                            File.Delete(@$".\work\panelv2\user_customimg\{cmd}.png");
+                        if (File.Exists(@$"./work/panelv2/user_customimg/{cmd}.png"))
+                            File.Delete(@$"./work/panelv2/user_customimg/{cmd}.png");
                         File.Move(
-                            @$".\work\panelv2\user_customimg\verify\{cmd}.png",
-                            @$".\work\panelv2\user_customimg\{cmd}.png"
+                            @$"./work/panelv2/user_customimg/verify/{cmd}.png",
+                            @$"./work/panelv2/user_customimg/{cmd}.png"
                         );
                         await target.reply("approved.");
                         return;
@@ -420,9 +420,9 @@ namespace KanonBot.functions.osu
                     return;
                 case 2:
                     //reject
-                    if (File.Exists(@$".\work\panelv2\user_customimg\verify\{cmd}.png"))
+                    if (File.Exists(@$"./work/panelv2/user_customimg/verify/{cmd}.png"))
                     {
-                        File.Delete(@$".\work\panelv2\user_customimg\verify\{cmd}.png");
+                        File.Delete(@$"./work/panelv2/user_customimg/verify/{cmd}.png");
                         await target.reply("rejected.");
                         return;
                     }
@@ -441,7 +441,7 @@ namespace KanonBot.functions.osu
             {
                 case -1:
                     //send list
-                    var files = Directory.GetFiles(@".\work\legacy\v1_cover\custom\verify\");
+                    var files = Directory.GetFiles(@"./work/legacy/v1_cover/custom/verify/");
                     if (files.Length > 0)
                     {
                         var msg = new Chain();
@@ -466,12 +466,12 @@ namespace KanonBot.functions.osu
                     return;
                 case 0:
                     //approve all
-                    var filesall = Directory.GetFiles(@".\work\legacy\v1_cover\custom\verify\");
+                    var filesall = Directory.GetFiles(@"./work/legacy/v1_cover/custom/verify/");
                     if (filesall.Length > 0)
                     {
                         foreach (var x in filesall)
                         {
-                            var destpath = @".\work\legacy\v1_cover\custom\" + Path.GetFileName(x);
+                            var destpath = @"./work/legacy/v1_cover/custom/" + Path.GetFileName(x);
                             if (File.Exists(destpath))
                                 File.Delete(destpath);
                             File.Move(x, destpath);
@@ -483,13 +483,13 @@ namespace KanonBot.functions.osu
                     return;
                 case 1:
                     //approve
-                    if (File.Exists(@$".\work\legacy\v1_cover\custom\verify\{cmd}.png"))
+                    if (File.Exists(@$"./work/legacy/v1_cover/custom/verify/{cmd}.png"))
                     {
-                        if (File.Exists(@$".\work\legacy\v1_cover\custom\{cmd}.png"))
-                            File.Delete(@$".\work\legacy\v1_cover\custom\{cmd}.png");
+                        if (File.Exists(@$"./work/legacy/v1_cover/custom/{cmd}.png"))
+                            File.Delete(@$"./work/legacy/v1_cover/custom/{cmd}.png");
                         File.Move(
-                            @$".\work\legacy\v1_cover\custom\verify\{cmd}.png",
-                            @$".\work\legacy\v1_cover\custom\{cmd}.png"
+                            @$"./work/legacy/v1_cover/custom/verify/{cmd}.png",
+                            @$"./work/legacy/v1_cover/custom/{cmd}.png"
                         );
                         await target.reply("approved.");
                         return;
@@ -498,9 +498,9 @@ namespace KanonBot.functions.osu
                     return;
                 case 2:
                     //reject
-                    if (File.Exists(@$".\work\legacy\v1_cover\custom\verify\{cmd}.png"))
+                    if (File.Exists(@$"./work/legacy/v1_cover/custom/verify/{cmd}.png"))
                     {
-                        File.Delete(@$".\work\legacy\v1_cover\custom\verify\{cmd}.png");
+                        File.Delete(@$"./work/legacy/v1_cover/custom/verify/{cmd}.png");
                         await target.reply("rejected.");
                         return;
                     }
