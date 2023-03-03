@@ -12,6 +12,7 @@ using KanonBot.Drivers;
 using KanonBot.Message;
 using LanguageExt;
 using Microsoft.CodeAnalysis;
+using Org.BouncyCastle.Asn1.X509;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
@@ -20,14 +21,16 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using static KanonBot.API.OSU.Legacy;
 using static KanonBot.functions.Accounts;
+using static LinqToDB.Common.Configuration;
 using Img = SixLabors.ImageSharp.Image;
 
 namespace KanonBot.functions.osubot
 {
     public class Badge
     {
-        public static async Task Execute(Target target, string cmd)
+        public static async Task Execute(Drivers.Target target, string cmd)
         {
             // 验证账户
             var AccInfo = GetAccInfo(target);
@@ -74,7 +77,7 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        private static async Task SudoExecute(Target target, string cmd, AccInfo accinfo)
+        private static async Task SudoExecute(Drivers.Target target, string cmd, AccInfo accinfo)
         {
             var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
             List<string> permissions = new();
@@ -163,13 +166,20 @@ namespace KanonBot.functions.osubot
                     else
                         await SudoCreateBadgeRedemptionCode(target, childCmd);
                     return;
+                case "runvaildcheckjob":
+                    if (permissions_flag < 3)
+                        await target.reply("权限不足。");
+                    await target.reply("开始任务。");
+                    await CheckBadgeIsVaild_Job();
+                    await target.reply("已完成。");
+                    return;
                 default:
                     return;
             }
         }
 
         //注：没有完全适配多徽章安装，需要等新面板后再做适配
-        private static async Task Set(Target target, string cmd, AccInfo accinfo)
+        private static async Task Set(Drivers.Target target, string cmd, AccInfo accinfo)
         {
             //获取用户信息
             var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
@@ -348,7 +358,7 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        private static async Task Info(Target target, string cmd, AccInfo accinfo)
+        private static async Task Info(Drivers.Target target, string cmd, AccInfo accinfo)
         {
             if (int.TryParse(cmd, out int badgeNum))
             {
@@ -418,7 +428,7 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        private static async Task List(Target target, AccInfo accinfo)
+        private static async Task List(Drivers.Target target, AccInfo accinfo)
         {
             var userinfo = await Database.Client.GetUsersByUID(accinfo.uid, accinfo.platform);
             if (userinfo == null)
@@ -457,21 +467,21 @@ namespace KanonBot.functions.osubot
             await target.reply(msg);
         }
 
-        private static async Task SudoCreate(Target target, string cmd)
+        private static async Task SudoCreate(Drivers.Target target, string cmd)
         {
             //badge sudo create IMG_URL#英文名称#中文名称#详细信息
             //检查参数数量
             var args = cmd.Split("#");
-            if (args.Length < 4)
+            if (args.Length < 5)
             {
-                await target.reply("缺少参数。[!badge sudo create IMG_URL#英文名称#中文名称#详细信息]");
+                await target.reply("缺少参数。[!badge sudo create IMG_URL#英文名称#中文名称#详细信息#过期天数]");
                 return;
             }
             //检查URL
             var img_url = args[0].Trim();
             if (!Utils.IsUrl(img_url))
             {
-                await target.reply("提供的IMG_URL不正确。[!badge sudo create IMG_URL#英文名称#中文名称#详细信息]");
+                await target.reply("提供的IMG_URL不正确。[!badge sudo create IMG_URL#英文名称#中文名称#详细信息#过期天数]");
                 return;
             }
             //检查badge图片是否符合要求规范 https://desu.life/test/test_badge.png
@@ -488,22 +498,34 @@ namespace KanonBot.functions.osubot
             source.Mutate(x => x.Resize(688, 320));
 
             //保存badge图片&数据库插入新的badge
-            var db_badgeid = await Database.Client.InsertBadge(args[1], args[2], args[3]);
+            var db_badgeid = await Database.Client.InsertBadge(args[1], args[2], args[3], int.Parse(args[4]) > 0 ? DateTimeOffset.Now.AddDays(int.Parse(args[4])) : DateTime.Parse("1970-01-01 00:00:00"));
             //source.Save($"./work/badges/{db_badgeid}.png");
             await source.SaveAsync($"./work/badges/{db_badgeid}.png", new PngEncoder());
             await target.reply($"图片成功上传，新的badgeID为{db_badgeid}");
+            Mail.MailStruct ms = new()
+            {
+                MailTo = new string[] { "mono@desu.life", "fantasyzhjk@qq.com" },
+                Subject = "desu.life - 有新的徽章被创建",
+                Body = $"有新的徽章兑换码被使用\n\nENG_name: {args[1]}\nCHN_name: {args[2]}\nDISC: {args[3]}\nExpire at: {(int.Parse(args[4]) > 0 ? DateTimeOffset.Now.AddDays(int.Parse(args[4])) : "never")}",
+                IsBodyHtml = false
+            };
+            try
+            {
+                Mail.Send(ms);
+            }
+            catch { }
             File.Delete(filepath);
         }
 
-        private static void SudoDelete(Target target, string cmd)
+        private static void SudoDelete(Drivers.Target target, string cmd)
         {
             //不是真正的删除，而是禁用某个badge，使其无法被检索到
             //以后再说 到真正需要此功能的时候再写
         }
 
-        private static void SudoGetUser(Target target, string cmd) { }
+        private static void SudoGetUser(Drivers.Target target, string cmd) { }
 
-        private static async Task SudoAdd(Target target, string cmd, int addMethod)
+        private static async Task SudoAdd(Drivers.Target target, string cmd, int addMethod)
         {
             var args = cmd.Split("#"); //args[0]=badge id      args[1]=user(s)
             var badgeid = args[0].Trim();
@@ -709,11 +731,11 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        private static void SudoRemove(Target target, string cmd) { }
+        private static void SudoRemove(Drivers.Target target, string cmd) { }
 
-        private static void SudoList(Target target, string cmd) { }
+        private static void SudoList(Drivers.Target target, string cmd) { }
 
-        private static async Task RedeemBadge(Target target, string cmd, long uid)
+        private static async Task RedeemBadge(Drivers.Target target, string cmd, long uid)
         {
             if (cmd.Length < 2)
             {
@@ -740,6 +762,11 @@ namespace KanonBot.functions.osubot
                     //添加badge
                     var userInfo = await Database.Client.GetUser((int)uid);
                     if (userInfo == null) return;
+
+                    //获取badge信息
+                    var badgeinfo = await Database.Client.GetBadgeInfo(data.badge_id.ToString());
+                    var bet_info = await Database.Client.GetBadgeExpirationTime((int)userInfo.uid, data.badge_id);
+
                     //获取已拥有的牌子
                     List<string> owned_badges = new();
                     if (userInfo.owned_badge_ids != null && userInfo.owned_badge_ids != "") //用户没有badge的情况下，直接写入
@@ -762,8 +789,11 @@ namespace KanonBot.functions.osubot
                         {
                             if (xx.Contains(data.badge_id.ToString()))
                             {
-                                await target.reply("您已经拥有此badge了，无法再继续兑换了。");
-                                return;
+                                if (bet_info == null)
+                                {
+                                    await target.reply("您已经拥有此badge了，无法再继续兑换了。");
+                                    return;
+                                }
                             }
                         }
                     }
@@ -781,31 +811,59 @@ namespace KanonBot.functions.osubot
                         await target.reply("数据库发生了错误，无法兑换badge，请联系管理员处理。(2)");
                         return;
                     }
-                    //添加
-                    owned_badges.Add(data.badge_id.ToString());
-                    string t = "";
-                    foreach (var xxx in owned_badges)
-                    {
-                        t += xxx + ",";
-                    }
 
-                    if (!await Database.Client.SetOwnedBadge((int)userInfo.uid, t[..^1]))
+                    //设置badge有效期
+
+                    if (!await Database.Client.UpdateBadgeExpirationTime((int)userInfo.uid, data.badge_id, data.badge_expiration_day))
                     {
-                        await target.reply($"数据库发生了错误，无法兑换badge，请联系管理员处理。(3)");
+                        await target.reply("数据库发生了错误，无法兑换badge，请联系管理员处理。(3)");
                         return;
                     }
 
-                    var badgeinfo = await Database.Client.GetBadgeInfo(data.badge_id.ToString());
+                    //添加
+                    if (bet_info == null) //非期限制badge，期限制badge已更新时间，无需再处理
+                    {
+                        owned_badges.Add(data.badge_id.ToString());
+                        string t = "";
+                        foreach (var xxx in owned_badges)
+                        {
+                            t += xxx + ",";
+                        }
+
+                        if (!await Database.Client.SetOwnedBadge((int)userInfo.uid, t[..^1]))
+                        {
+                            await target.reply($"数据库发生了错误，无法兑换badge，请联系管理员处理。(4)");
+                            return;
+                        }
+                    }
+
+
+
 
                     var rtmsg = new Chain();
                     using var stream = new MemoryStream();
                     var badge_img = await ReadImageRgba($"./work/badges/{badgeinfo!.id}.png");
                     await badge_img.SaveAsync(stream, new PngEncoder());
-                    rtmsg.image(Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length), ImageSegment.Type.Base64).msg($"已成功兑换徽章。\n" +
+                    var rtmsg_s = $"已成功兑换徽章。\n" +
                         $"徽章信息如下：\n" +
                         $"名称：{badgeinfo!.name}({badgeinfo.id})\n" +
                         $"中文名称: {badgeinfo.name_chinese}\n" +
-                        $"描述: {badgeinfo.description}");
+                        $"描述: {badgeinfo.description}";
+                    if (badgeinfo.expire_at.DateTime != new DateTime(1970, 1, 1))
+                        rtmsg_s += $"\n*注意：此徽章将于 {badgeinfo.expire_at.Date} 过期，在此日期后徽章将会被删除。";
+
+
+                    if (bet_info != null)
+                    {
+                        rtmsg_s += $"\n*注意：此徽章将于 {bet_info.expire_at.Date.AddDays(data.badge_expiration_day)} 后过期，在此日期后徽章将会被删除。";
+                    }
+                    else
+                    {
+                        if (data.badge_expiration_day > 0)
+                            rtmsg_s += $"\n*注意：此徽章自兑换之日起 {data.badge_expiration_day} 日后过期，在此日期后徽章将会被删除。";
+                    }
+
+                    rtmsg.image(Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length), ImageSegment.Type.Base64).msg(rtmsg_s);
 
                     Mail.MailStruct ms = new()
                     {
@@ -836,9 +894,9 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        private static async Task SudoCreateBadgeRedemptionCode(Target target, string cmd)
+        private static async Task SudoCreateBadgeRedemptionCode(Drivers.Target target, string cmd)
         {
-            //badgeid#amount#can_repeatedly(true/false)#expire_at(num of days later)
+            //badgeid#amount#can_repeatedly(true/false)#expire_at(num of days later)#badge_expire_days
             try
             {
                 var tmp_op = cmd.Split("#"); //0=badgeid 1=how many codes need to be generated(amount)
@@ -846,8 +904,9 @@ namespace KanonBot.functions.osubot
                 var amount = int.Parse(tmp_op[1]);
                 bool can_repeatedly = bool.TryParse(tmp_op[2], out bool crt) && crt;
                 var expire_at = int.Parse(tmp_op[3]);
+                var badge_expire_days = int.Parse(tmp_op[4]);
 
-                if (amount < 0)
+                if (amount < 1)
                 {
                     await target.reply("amount必须大于0。");
                     return;
@@ -857,10 +916,10 @@ namespace KanonBot.functions.osubot
                 for (int i = 0; i < amount; i++)
                 {
                     var error_count = 0;
-                    var code = RandomStr(50, false);
                     while (error_count < 4)
                     {
-                        var status = await Database.Client.CreateBadgeRedemptionCode(badge_id, code, can_repeatedly, DateTimeOffset.Parse(DateTime.Now.AddDays(expire_at).ToString()));
+                        var code = RandomStr(50, false);
+                        var status = await Database.Client.CreateBadgeRedemptionCode(badge_id, code, can_repeatedly, DateTimeOffset.Parse(DateTime.Now.AddDays(expire_at).ToString()), badge_expire_days);
                         if (status)
                         {
                             codes.Add(code);
@@ -868,7 +927,7 @@ namespace KanonBot.functions.osubot
                         }
                         else
                         {
-                            await Task.Delay(100);
+                            await Task.Delay(200);
                             error_count++;
                         }
                     }
@@ -876,8 +935,9 @@ namespace KanonBot.functions.osubot
                 var badgeinfo = await Database.Client.GetBadgeInfo(badge_id.ToString());
                 string str = "";
                 str += $"此次操作生成了id为 {badge_id} 的徽章\n\n";
-                if (can_repeatedly) str += $"注意：此徽章可被重复兑换\n";
-                str += $"此徽章将于{DateTime.Parse(DateTime.Now.AddDays(expire_at).ToString())}过期，在此时间后将不能再被兑换。\n" +
+                if (can_repeatedly) str += $"注意：此兑换码可被重复兑换\n";
+                if (badge_expire_days > 0) str += $"注意：此徽章在兑换后将于自兑换之日起 {badge_expire_days}日后过期\n";
+                str += $"此兑换码将于{DateTime.Parse(DateTime.Now.AddDays(expire_at).ToString())}过期，在此时间后将不能再被兑换。\n" +
                     $"徽章信息如下：\n" +
                     $"名称：{badgeinfo!.name}({badgeinfo.id})\n" +
                     $"中文名称: {badgeinfo.name_chinese}\n" +
@@ -912,9 +972,164 @@ namespace KanonBot.functions.osubot
             }
             catch
             {
-                await target.reply("发生了错误。[!badge sudo createbadgeredemptioncode badge_id#amount]");
+                await target.reply("发生了错误。[!badge sudo createbadgeredemptioncode badge_id#amount#can_repeatedly(true/false)#code_expire_at#badge_expire_days]");
                 return;
             }
+        }
+
+        private static async Task<bool> RemoveBadge(int userid, int badgeid)
+        {
+
+            var userInfo = await Database.Client.GetUser(userid);
+            if (userInfo == null)
+                return false;
+            if (userInfo.owned_badge_ids == null)
+                return false;
+
+            //check owned
+            if (!userInfo.owned_badge_ids.Contains(','))
+            {
+                if (userInfo.owned_badge_ids != "")
+                    if (userInfo.owned_badge_ids.Trim() == badgeid.ToString())
+                    {
+                        if (!await Database.Client.SetOwnedBadge(userid, null))
+                            return false;
+                    }
+            }
+            else
+            {
+                //用户有2个或以上badge的情况下，先删除badge后写入
+                var owned_badges_temp1 = userInfo.owned_badge_ids.Split(",");
+                var badge_text = "";
+                foreach (var xx in owned_badges_temp1)
+                    if (xx != badgeid.ToString()) badge_text += xx + ",";
+                if (!await Database.Client.SetOwnedBadge(userid, badge_text[..^1]))
+                    return false;
+            }
+
+            //check displayed
+            if (userInfo.displayed_badge_ids != null)
+                if (!userInfo.displayed_badge_ids.Contains(','))
+                {
+                    if (userInfo.displayed_badge_ids != "")
+                        if (userInfo.displayed_badge_ids.Trim() == badgeid.ToString())
+                            await Database.Client.SetDisplayedBadge(userid.ToString(), "-1");
+                }
+                else
+                {
+                    //用户有2个或以上badge的情况下，先删除badge后写入
+                    var displayed_badges_temp1 = userInfo.displayed_badge_ids.Split(",");
+                    var badge_text = "";
+                    foreach (var xx in displayed_badges_temp1)
+                        if (xx != badgeid.ToString()) badge_text += xx + ",";
+                        else badge_text += $"-9,";
+                    await Database.Client.SetDisplayedBadge(userid.ToString(), badge_text[..^1]);
+                }
+
+
+            return true;
+        }
+
+        public static async Task CheckBadgeIsVaild_Job()
+        {
+            //获取全部徽章信息
+            var allBadges = await Database.Client.GetAllBadges();
+            var allBadges_s = await Database.Client.GetAllBadgeExpirationTime();
+            var users = await Database.Client.GetAllUsersWhoHadBadge();
+
+            //创建徽章字典 badgeid,datetime
+            Dictionary<int, DateTimeOffset> badges = new();
+            #region 全局badge
+            foreach (var badge in allBadges)
+            {
+                if (badge.expire_at.DateTime != new DateTime(1970, 1, 1))
+                    badges.Add(badge.id, badge.expire_at.DateTime);
+            }
+            //检查徽章是否在有效期内
+            foreach (var user in users)
+            {
+                //if (user.owned_badge_ids == null) // don't need this
+
+
+                //获取已拥有的牌子
+                List<string> owned_badges;
+                if (user.owned_badge_ids!.Contains(','))
+                {
+                    owned_badges = user.owned_badge_ids.Split(',').ToList();
+                }
+                else
+                {
+                    owned_badges = new()
+                                        {
+                                            user.owned_badge_ids.Trim()
+                                        };
+                }
+
+
+                //检查
+                string mailmsg = "你有徽章过期了，以下是详细信息\n";
+                bool hadbadgeexpired = false;
+                for (int i = 0; i < owned_badges.Count; i++)
+                    if (badges.TryGetValue(int.Parse(owned_badges[i]), out var value))
+                        if (value.DateTime < DateTime.Now) //expired
+                        {
+                            hadbadgeexpired = true;
+                            var badgeinfo = await Database.Client.GetBadgeInfo(owned_badges[i]);
+                            mailmsg += $"\n{badgeinfo!.name_chinese} ({badgeinfo.name})";
+                            await RemoveBadge((int)user.uid, int.Parse(owned_badges[i]));
+                            Log.Information($"用户 {user.uid} 的徽章({owned_badges[i]}) 已过期，已移除。");
+                        }
+                mailmsg += "\n\n desu.life";
+                if (hadbadgeexpired && user.email!.Length > 5)
+                {
+                    SendMail(user.email!, "desu.life - 徽章过期通知", mailmsg, false);
+                    Log.Information($"已向用户 {user.uid} 发送徽章过期通知邮件。");
+                }
+            }
+            #endregion
+            #region 独立badge
+            if (allBadges_s == null)
+            {
+                Log.Information("没有需要验证的数据，跳过。");
+                return;
+            }
+            foreach (var badge in allBadges_s)
+            {
+                if (badge.expire_at.DateTime < DateTime.Now)
+                {
+                    var user = await Database.Client.GetUser(badge.uid);
+                    List<string> owned_badges;
+                    if (user!.owned_badge_ids!.Contains(','))
+                    {
+                        owned_badges = user.owned_badge_ids.Split(',').ToList();
+                    }
+                    else
+                    {
+                        owned_badges = new()
+                                        {
+                                            user.owned_badge_ids.Trim()
+                                        };
+                    }
+
+
+                    //检查
+                    string mailmsg = "你有徽章过期了，以下是详细信息\n";
+
+                    var badgeinfo = await Database.Client.GetBadgeInfo(badge.badge_id.ToString());
+                    mailmsg += $"\n{badgeinfo!.name_chinese} ({badgeinfo.name})";
+                    await RemoveBadge((int)user.uid, badge.badge_id);
+                    await Database.Client.RemoveBadgeExpirationRecord((int)user.uid, badge.badge_id);
+                    Log.Information($"用户 {user.uid} 的徽章({badge.badge_id}) 已过期，已移除。");
+
+                    mailmsg += "\n\n desu.life";
+                    if (user.email!.Length > 5)
+                    {
+                        SendMail(user.email!, "desu.life - 徽章过期通知", mailmsg, false);
+                        Log.Information($"已向用户 {user.uid} 发送徽章过期通知邮件。");
+                    }
+                }
+            }
+            #endregion
         }
     }
 }

@@ -18,6 +18,7 @@ using Tomlyn.Model;
 using static KanonBot.API.OSU.Enums;
 using static KanonBot.API.OSU.Models;
 using static KanonBot.Database.Model;
+using static LinqToDB.Reflection.Methods.LinqToDB.Insert;
 
 namespace KanonBot.Database;
 
@@ -223,7 +224,7 @@ public class Client
         return await db.BadgeList.Where(it => it.id == int.Parse(badgeid)).FirstOrDefaultAsync();
     }
 
-    static public async Task<bool> SetOwnedBadge(string email, string owned_ids)
+    static public async Task<bool> SetOwnedBadge(string email, string? owned_ids)
     {
         using var db = GetInstance();
         var data = await db.User.FirstOrDefaultAsync(it => it.email == email);
@@ -232,7 +233,7 @@ public class Client
         return res > -1;
     }
 
-    static public async Task<bool> SetOwnedBadge(int uid, string owned_ids)
+    static public async Task<bool> SetOwnedBadge(int uid, string? owned_ids)
     {
         using var db = GetInstance();
         var data = await db.User.FirstOrDefaultAsync(it => it.uid == uid);
@@ -241,7 +242,7 @@ public class Client
         return res > -1;
     }
 
-    static public async Task<bool> SetOwnedBadgeByOsuUid(string osu_uid, string owned_ids)
+    static public async Task<bool> SetOwnedBadgeByOsuUid(string osu_uid, string? owned_ids)
     {
         var user = await GetOsuUser(long.Parse(osu_uid));
         if (user == null)
@@ -354,7 +355,7 @@ public class Client
     }
 
     //return badge_id
-    public static async Task<int> InsertBadge(string ENG_NAME, string CHN_NAME, string CHN_DECS)
+    public static async Task<int> InsertBadge(string ENG_NAME, string CHN_NAME, string CHN_DECS, DateTimeOffset expire_at)
     {
         using var db = GetInstance();
         BadgeList bl =
@@ -362,10 +363,11 @@ public class Client
             {
                 name = ENG_NAME,
                 name_chinese = CHN_NAME,
-                description = CHN_DECS
+                description = CHN_DECS,
+                expire_at = expire_at
             };
         return await db.InsertWithInt32IdentityAsync(bl);
-        
+
     }
 
     public static async Task<bool> UpdateSeasonalPass(long oid, string mode, int add_point)
@@ -376,8 +378,7 @@ public class Client
         if (await db_info.CountAsync() > 0)
         {
             return await db.OSUSeasonalPass
-                    .Where(it => it.osu_id == oid)
-                    .Where(it => it.mode == mode)
+                    .Where(it => it.osu_id == oid && it.mode == mode)
                     .Set(it => it.point, it => it.point + add_point)
                     .UpdateAsync() > -1;
         }
@@ -581,7 +582,8 @@ public class Client
         int badge_id,
         string code,
         bool can_repeatedly,
-        DateTimeOffset expire_at
+        DateTimeOffset expire_at,
+        int badge_expire_days
     )
     {
         using var db = GetInstance();
@@ -598,7 +600,8 @@ public class Client
             gen_time = DateTime.Now,
             code = code,
             can_repeatedly = can_repeatedly,
-            expire_at = expire_at
+            expire_at = expire_at,
+            badge_expiration_day = badge_expire_days
         };
         try
         {
@@ -642,5 +645,75 @@ public class Client
         if (result > -1)
             return true;
         return false;
+    }
+
+    public static async Task<BadgeExpirationDateRec?> GetBadgeExpirationTime(int userid, int badgeid)
+    {
+        using var db = GetInstance();
+        return await db.BadgeExpirationDateRec.Where(it => it.uid == userid && it.badge_id == badgeid).FirstOrDefaultAsync();
+    }
+
+    public static async Task<List<BadgeExpirationDateRec>?> GetAllBadgeExpirationTime()
+    {
+        using var db = GetInstance();
+        return await db.BadgeExpirationDateRec.ToListAsync();
+    }
+
+    public static async Task<bool> UpdateBadgeExpirationTime(int userid, int badgeid, int daysneedtobeadded)
+    {
+        using var db = GetInstance();
+        var result = await db.BadgeExpirationDateRec.Where(it => it.uid == userid && it.badge_id == badgeid).FirstOrDefaultAsync();
+        if (result == null)
+        {
+            try
+            {
+                BadgeExpirationDateRec bed = new()
+                {
+                    badge_id = badgeid,
+                    uid = userid,
+                    expire_at = DateTimeOffset.Now.AddDays(daysneedtobeadded)
+                };
+                await db.InsertAsync(bed);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        else
+        {
+            try
+            {
+                result.expire_at.AddDays(daysneedtobeadded);
+                _ = await db.BadgeExpirationDateRec
+                    .Where(it => it.uid == userid && it.badge_id == badgeid)
+                    .Set(it => it.expire_at, it => it.expire_at.DateTime.AddDays(daysneedtobeadded))
+                    .UpdateAsync() > -1;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
+    public static async Task<List<Model.User>> GetAllUsersWhoHadBadge()
+    {
+        using var db = GetInstance();
+        return await db.User.Where(it => it.owned_badge_ids != null).ToListAsync();
+    }
+
+    public static async Task<List<Model.BadgeList>> GetAllBadges()
+    {
+        using var db = GetInstance();
+        return await db.BadgeList.ToListAsync();
+    }
+
+    public static async Task<int> RemoveBadgeExpirationRecord(int userid, int badgeid)
+    {
+        using var db = GetInstance();
+        return await db.BadgeExpirationDateRec.Where(x => x.uid == userid && x.badge_id == badgeid).DeleteAsync();
     }
 }

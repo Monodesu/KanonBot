@@ -25,6 +25,7 @@ public class Model
         public ITable<MailVerify> MailVerify => this.GetTable<MailVerify>();
         public ITable<Bottle> Bottle => this.GetTable<Bottle>();
         public ITable<BadgeRedemptionCode> BadgeRedemptionCode => this.GetTable<BadgeRedemptionCode>();
+        public ITable<BadgeExpirationDateRec> BadgeExpirationDateRec => this.GetTable<BadgeExpirationDateRec>();
 
         // ... other tables ...
     }
@@ -57,6 +58,9 @@ public class Model
 
         [Column]
         public string? code { get; set; }
+
+        [Column]
+        public int badge_expiration_day { get; set; }
     }
     [Table("bottle")]
     public class Bottle
@@ -309,6 +313,9 @@ public class Model
 
         [Column]
         public string? description { get; set; }
+
+        [Column]
+        public DateTimeOffset expire_at { get; set; }
     }
 
     [Table("mail_verify")]
@@ -322,5 +329,18 @@ public class Model
 
         [Column]
         public string? gen_time { get; set; }
+    }
+
+    [Table("badge_expiration_date_rec")]
+    public class BadgeExpirationDateRec
+    {
+        [Column]
+        public int uid { get; set; }
+
+        [Column]
+        public int badge_id { get; set; }
+
+        [Column]
+        public DateTimeOffset expire_at { get; set; }
     }
 }

@@ -39,6 +39,9 @@ namespace KanonBot.functions.osu
                 Log.Information("开始每日用户数据更新");
                 var (count, span) = await UpdateUsers();
                 Log.Information("更新完毕，总花费时间 {0}s", span.TotalSeconds);
+                Log.Information("启动检查徽章有效期任务");
+                await osubot.Badge.CheckBadgeIsVaild_Job();
+                Log.Information("检查徽章有效期任务完成");
             }, "DailyUpdate", "0 4 * * *"));   // 每天早上4点运行的意思，具体参考https://crontab.cronhub.io/
             daemon.Start(CancellationToken.None);
         }
