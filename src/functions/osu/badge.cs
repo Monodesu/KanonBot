@@ -813,12 +813,12 @@ namespace KanonBot.functions.osubot
                     }
 
                     //设置badge有效期
-
-                    if (!await Database.Client.UpdateBadgeExpirationTime((int)userInfo.uid, data.badge_id, data.badge_expiration_day))
-                    {
-                        await target.reply("数据库发生了错误，无法兑换badge，请联系管理员处理。(3)");
-                        return;
-                    }
+                    if (data.badge_expiration_day > 0)
+                        if (!await Database.Client.UpdateBadgeExpirationTime((int)userInfo.uid, data.badge_id, data.badge_expiration_day))
+                        {
+                            await target.reply("数据库发生了错误，无法兑换badge，请联系管理员处理。(3)");
+                            return;
+                        }
 
                     //添加
                     if (bet_info == null) //非期限制badge，期限制badge已更新时间，无需再处理
