@@ -53,20 +53,27 @@ namespace KanonBot.functions.osubot
                 // 查询用户是否绑定
                 // 这里先按照at方法查询，查询不到就是普通用户查询
                 var (atOSU, atDBUser) = await Accounts.ParseAt(command.osu_username);
-                if (atOSU.IsNone && !atDBUser.IsNone) {
+                if (atOSU.IsNone && !atDBUser.IsNone)
+                {
                     await target.reply("ta还没有绑定osu账户呢。");
                     return;
-                } else if (!atOSU.IsNone && atDBUser.IsNone) {
+                }
+                else if (!atOSU.IsNone && atDBUser.IsNone)
+                {
                     var _osuinfo = atOSU.ValueUnsafe();
                     mode ??= _osuinfo.PlayMode;
                     osuID = _osuinfo.Id;
-                } else if (!atOSU.IsNone && !atDBUser.IsNone) {
+                }
+                else if (!atOSU.IsNone && !atDBUser.IsNone)
+                {
                     DBUser = atDBUser.ValueUnsafe();
                     DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
                     var _osuinfo = atOSU.ValueUnsafe();
-                    mode ??= OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value ;
+                    mode ??= OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value;
                     osuID = _osuinfo.Id;
-                } else {
+                }
+                else
+                {
                     // 普通查询
                     var OnlineOsuInfo = await OSU.GetUser(
                         command.osu_username,
@@ -284,7 +291,8 @@ namespace KanonBot.functions.osubot
                         v2Options,
                         DBOsuInfo != null,
                         false,
-                        isDataOfDayAvaiavle
+                        isDataOfDayAvaiavle,
+                        command.res
                     );
                     await img.SaveAsync(stream, new PngEncoder());
                     break;

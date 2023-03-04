@@ -749,7 +749,8 @@ namespace KanonBot.DrawV2
             InfoCustom v2Options,
             bool isBonded = false,
             bool eventmode = false,
-            bool isDataOfDayAvaiavle = true
+            bool isDataOfDayAvaiavle = true,
+            bool output4k = false
         )
         {
             var ColorMode = data.customMode;
