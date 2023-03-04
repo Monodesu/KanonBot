@@ -123,7 +123,9 @@ namespace KanonBot.functions.osubot
             {
                 var data = await PerformanceCalculator.CalculatePanelData(scores![0]);
                 using var stream = new MemoryStream();
-                using var img = await LegacyImage.Draw.DrawScore(data);
+    
+                using var img = (Config.inner != null && Config.inner.debug) ? await DrawV3.OsuScorePanelV3.Draw(data) : await LegacyImage.Draw.DrawScore(data);
+
                 await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
                 await target.reply(
                     new Chain().image(

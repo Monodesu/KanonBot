@@ -2928,7 +2928,7 @@ namespace KanonBot.DrawV2
                                 x =>
                                     x.Resize(236, 110)
                                         .Brightness(BadgeBrightness)
-                                        .RoundCorner(new Size(108, 50), 9.2f)
+                                        .RoundCorner(new Size(108, 50), 6.0f)
                             );
 
                                 badge.Mutate(
@@ -3170,12 +3170,13 @@ namespace KanonBot.DrawV2
             */
 
             //resize to 1920x?
-            info.Mutate(
-            x =>
-                x.Resize(
-                    new ResizeOptions() { Size = new Size(1920, 0), Mode = ResizeMode.Max }
-                )
-        );
+            if (!output4k)
+                info.Mutate(
+                x =>
+                    x.Resize(
+                        new ResizeOptions() { Size = new Size(1920, 0), Mode = ResizeMode.Max }
+                    )
+            );
             return info;
         }
 
