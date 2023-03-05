@@ -263,6 +263,20 @@ public static partial class Utils
         return $"{minute}:{second:00}";
     }
 
+    public static string Duration2TimeString_ForScoreV3(long duration)
+    {
+        long hour,
+            minute,
+            second;
+        hour = duration / 3600;
+        duration %= 3600;
+        minute = duration / 60;
+        second = duration % 60;
+        if (hour > 0)
+            return $"{hour}H,{minute:00}M,{second:00}S";
+        return $"{minute}M,{second:00}S";
+    }
+
     // 全角转半角
     public static string ToDBC(string input)
     {

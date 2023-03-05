@@ -2723,79 +2723,79 @@ namespace KanonBot.DrawV2
                     otherbp_mods_pos_y += 186;
 
                     //mode_icon
-                    using var osuscoremode_icon = await ReadImageRgba(
-                        $"./work/panelv2/icons/mode_icon/score/{data.userInfo.PlayMode.ToStr()}.png"
-                    );
-                    osuscoremode_icon.Mutate(x => x.Resize(92, 92));
-                    if (FixedScoreModeIconColor)
-                    {
-                        //固定
-                        osuscoremode_icon.Mutate(
-                            x =>
-                                x.ProcessPixelRowsAsVector4(row =>
-                                {
-                                    for (int p = 0; p < row.Length; p++)
-                                    {
-                                        row[p].X = ((Vector4)modeC).X;
-                                        row[p].Y = ((Vector4)modeC).Y;
-                                        row[p].Z = ((Vector4)modeC).Z;
-                                        switch (i)
-                                        {
-                                            case 1:
-                                                if (Score1ModeIconAlpha)
-                                                    if (row[p].W > 0.0f)
-                                                        row[p].W =
-                                                            row[p].W
-                                                            * ((Vector4)SubBp2ndModeColor).W;
-                                                break;
-                                            case 2:
-                                                if (Score2ModeIconAlpha)
-                                                    if (row[p].W > 0.0f)
-                                                        row[p].W =
-                                                            row[p].W
-                                                            * ((Vector4)SubBp3rdModeColor).W;
-                                                break;
-                                            case 3:
-                                                if (Score3ModeIconAlpha)
-                                                    if (row[p].W > 0.0f)
-                                                        row[p].W =
-                                                            row[p].W
-                                                            * ((Vector4)SubBp4thModeColor).W;
-                                                break;
-                                            case 4:
-                                                if (Score4ModeIconAlpha)
-                                                    if (row[p].W > 0.0f)
-                                                        row[p].W =
-                                                            row[p].W
-                                                            * ((Vector4)SubBp5thModeColor).W;
-                                                break;
-                                        }
-                                    }
-                                })
-                        );
-                    }
-                    else
-                    {
-                        //随难度渐变
-                        modeC = Utils.ForStarDifficulty(0.01);
-                        osuscoremode_icon.Mutate(
-                            x =>
-                                x.ProcessPixelRowsAsVector4(row =>
-                                {
-                                    for (int p = 0; p < row.Length; p++)
-                                    {
-                                        row[p].X = ((Vector4)modeC).X;
-                                        row[p].Y = ((Vector4)modeC).Y;
-                                        row[p].Z = ((Vector4)modeC).Z;
-                                    }
-                                })
-                        );
-                    }
-                    info.Mutate(
-                        x =>
-                            x.DrawImage(osuscoremode_icon, new Point(1558, score_mode_iconpos_y), 1)
-                    );
-                    score_mode_iconpos_y += 186;
+                    //using var osuscoremode_icon = await ReadImageRgba(
+                    //    $"./work/panelv2/icons/mode_icon/score/{data.userInfo.PlayMode.ToStr()}.png"
+                    //);
+                    //osuscoremode_icon.Mutate(x => x.Resize(92, 92));
+                    //if (FixedScoreModeIconColor)
+                    //{
+                    //    //固定
+                    //    osuscoremode_icon.Mutate(
+                    //        x =>
+                    //            x.ProcessPixelRowsAsVector4(row =>
+                    //            {
+                    //                for (int p = 0; p < row.Length; p++)
+                    //                {
+                    //                    row[p].X = ((Vector4)modeC).X;
+                    //                    row[p].Y = ((Vector4)modeC).Y;
+                    //                    row[p].Z = ((Vector4)modeC).Z;
+                    //                    switch (i)
+                    //                    {
+                    //                        case 1:
+                    //                            if (Score1ModeIconAlpha)
+                    //                                if (row[p].W > 0.0f)
+                    //                                    row[p].W =
+                    //                                        row[p].W
+                    //                                        * ((Vector4)SubBp2ndModeColor).W;
+                    //                            break;
+                    //                        case 2:
+                    //                            if (Score2ModeIconAlpha)
+                    //                                if (row[p].W > 0.0f)
+                    //                                    row[p].W =
+                    //                                        row[p].W
+                    //                                        * ((Vector4)SubBp3rdModeColor).W;
+                    //                            break;
+                    //                        case 3:
+                    //                            if (Score3ModeIconAlpha)
+                    //                                if (row[p].W > 0.0f)
+                    //                                    row[p].W =
+                    //                                        row[p].W
+                    //                                        * ((Vector4)SubBp4thModeColor).W;
+                    //                            break;
+                    //                        case 4:
+                    //                            if (Score4ModeIconAlpha)
+                    //                                if (row[p].W > 0.0f)
+                    //                                    row[p].W =
+                    //                                        row[p].W
+                    //                                        * ((Vector4)SubBp5thModeColor).W;
+                    //                            break;
+                    //                    }
+                    //                }
+                    //            })
+                    //    );
+                    //}
+                    //else
+                    //{
+                    //    //随难度渐变
+                    //    modeC = Utils.ForStarDifficulty(0.01);
+                    //    osuscoremode_icon.Mutate(
+                    //        x =>
+                    //            x.ProcessPixelRowsAsVector4(row =>
+                    //            {
+                    //                for (int p = 0; p < row.Length; p++)
+                    //                {
+                    //                    row[p].X = ((Vector4)modeC).X;
+                    //                    row[p].Y = ((Vector4)modeC).Y;
+                    //                    row[p].Z = ((Vector4)modeC).Z;
+                    //                }
+                    //            })
+                    //    );
+                    //}
+                    //info.Mutate(
+                    //    x =>
+                    //        x.DrawImage(osuscoremode_icon, new Point(1558, score_mode_iconpos_y), 1)
+                    //);
+                    //score_mode_iconpos_y += 186;
                 }
 
                 //all pp
