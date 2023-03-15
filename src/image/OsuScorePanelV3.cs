@@ -184,7 +184,7 @@ namespace KanonBot.DrawV3
                 }
             }
             textOptions.Font = new Font(TorusSemiBold, 100);
-            textOptions.Origin = new PointF(769, 162);
+            textOptions.Origin = new PointF(769, 160);
             scoreimg.Mutate(
                 x => x.DrawText(drawOptions, textOptions, temp_string, new SolidBrush(Color.ParseHex("#404040")), null)
             );
@@ -250,7 +250,7 @@ namespace KanonBot.DrawV3
             var stars = $"Stars: {data.ppInfo.star:0.##}";
             var stars_measure = TextMeasurer.Measure(stars, textOptions);
 
-            textOptions.Origin = new PointF(924, 443);
+            textOptions.Origin = new PointF(924, 442);
             scoreimg.Mutate(
                 x =>
                     x.DrawText(
@@ -420,8 +420,8 @@ namespace KanonBot.DrawV3
 
 
             //length graph 70x? -50    max 2708
-            textOptions.Font = new Font(TorusSemiBold, 36);
-            textOptions.Origin = new PointF(2750, 751);
+            textOptions.Font = new Font(TorusRegular, 30);
+            textOptions.Origin = new PointF(2750, 747);
             var beatmap_length_text = Duration2TimeString_ForScoreV3(data.scoreInfo.Beatmap.TotalLength);
             var beatmap_length_text_measure = TextMeasurer.Measure(beatmap_length_text, textOptions);
             var length_graph_length = 2708;
@@ -479,18 +479,18 @@ namespace KanonBot.DrawV3
                         drawOptions,
                         textOptions,
                         beatmap_length_text,
-                        new SolidBrush(Color.ParseHex("#3d3d3d")),
+                        new SolidBrush(data.scoreInfo.Passed ? Color.ParseHex("#311314") : Color.ParseHex("#3d3d3d")),
                         null
                     )
             );
-            textOptions.Origin = new PointF(2750, 749);
+            textOptions.Origin = new PointF(2750, 746);
             scoreimg.Mutate(
                 x =>
                     x.DrawText(
                         drawOptions,
                         textOptions,
                         beatmap_length_text,
-                        new SolidBrush(Color.ParseHex("#333333")),
+                        new SolidBrush(data.scoreInfo.Passed ? Color.ParseHex("#585858") : Color.ParseHex("#333333")),
                         null
                     )
             );
@@ -511,7 +511,7 @@ namespace KanonBot.DrawV3
             }
             textOptions.HorizontalAlignment = HorizontalAlignment.Left;
             textOptions.Font = new Font(TorusRegular, 30);
-            textOptions.Origin = new PointF(90, 748);
+            textOptions.Origin = new PointF(90, 747);
             scoreimg.Mutate(
                 x =>
                     x.DrawText(
@@ -530,10 +530,198 @@ namespace KanonBot.DrawV3
                         drawOptions,
                         textOptions,
                         data.scoreInfo.Passed ? "Finish" : "Fail",
-                        new SolidBrush(data.scoreInfo.Passed? Color.ParseHex("#585858") : Color.ParseHex("#e6e6e6")),
+                        new SolidBrush(data.scoreInfo.Passed ? Color.ParseHex("#585858") : Color.ParseHex("#e6e6e6")),
                         null
                     )
             );
+
+            //main pp details
+            var mainpp_details_pos_base = 2196;
+            var pp_details_posy_base = 938; //942
+            textOptions.Font = new Font(TorusSemiBold, 50);
+            textOptions.Origin = new PointF(mainpp_details_pos_base, pp_details_posy_base);
+            //aim
+            var mainpp_text = ((int)data.ppInfo.ppStat.aim!).ToString();
+            scoreimg.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        mainpp_text,
+                        new SolidBrush(Color.ParseHex("#fc65a9")),
+                        null
+                    )
+            );
+
+            pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+            textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
+            scoreimg.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        "pp",
+                        new SolidBrush(Color.ParseHex("#cf93ae")),
+                        null
+                    )
+            );
+
+            //spd
+            mainpp_details_pos_base = 2401;
+            mainpp_text = ((int)data.ppInfo.ppStat.speed!).ToString();
+            textOptions.Origin = new PointF(mainpp_details_pos_base, pp_details_posy_base);
+            scoreimg.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        mainpp_text,
+                        new SolidBrush(Color.ParseHex("#fc65a9")),
+                        null
+                    )
+            );
+
+            pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+            textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
+            scoreimg.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        "pp",
+                        new SolidBrush(Color.ParseHex("#cf93ae")),
+                        null
+                    )
+            );
+
+            //spd
+            mainpp_details_pos_base = 2596;
+            mainpp_text = ((int)data.ppInfo.ppStat.acc!).ToString();
+            textOptions.Origin = new PointF(mainpp_details_pos_base, pp_details_posy_base);
+            scoreimg.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        mainpp_text,
+                        new SolidBrush(Color.ParseHex("#fc65a9")),
+                        null
+                    )
+            );
+
+            pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+            textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
+            scoreimg.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        "pp",
+                        new SolidBrush(Color.ParseHex("#cf93ae")),
+                        null
+                    )
+            );
+
+            //prediction pps
+            mainpp_details_pos_base = 108;
+
+            for (int i = 0; i < 5; i++)
+            {
+                mainpp_text = ((int)data.ppInfo.ppStats![4 - i].total).ToString();
+                textOptions.Origin = new PointF(mainpp_details_pos_base, pp_details_posy_base);
+                scoreimg.Mutate(
+                    x =>
+                        x.DrawText(
+                            drawOptions,
+                            textOptions,
+                            mainpp_text,
+                            new SolidBrush(Color.ParseHex("#fc65a9")),
+                            null
+                        )
+                );
+
+                pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+                textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
+                scoreimg.Mutate(
+                    x =>
+                        x.DrawText(
+                            drawOptions,
+                            textOptions,
+                            "pp",
+                            new SolidBrush(Color.ParseHex("#cf93ae")),
+                            null
+                        )
+                );
+                mainpp_details_pos_base += 204;
+            }
+
+            //if fc
+            textOptions.Font = new Font(TorusRegular, 36);
+            mainpp_details_pos_base = 178;
+            pp_details_posy_base = 831;
+            mainpp_text = ((int)data.ppInfo.ppStats![5].total).ToString();
+            textOptions.Origin = new PointF(mainpp_details_pos_base, pp_details_posy_base);
+            scoreimg.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        mainpp_text,
+                        new SolidBrush(Color.ParseHex("#3b3b3b")),
+                        null
+                    )
+            );
+
+            pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+            textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
+            scoreimg.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        "pp",
+                        new SolidBrush(Color.ParseHex("#3b3b3b")),
+                        null
+                    )
+            );
+            pp_details_posy_base = 830;
+            mainpp_text = ((int)data.ppInfo.ppStats![5].total).ToString();
+            textOptions.Origin = new PointF(mainpp_details_pos_base, pp_details_posy_base);
+            scoreimg.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        mainpp_text,
+                        new SolidBrush(Color.ParseHex("#fc65a9")),
+                        null
+                    )
+            );
+
+            pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+            textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
+            scoreimg.Mutate(
+                x =>
+                    x.DrawText(
+                        drawOptions,
+                        textOptions,
+                        "pp",
+                        new SolidBrush(Color.ParseHex("#cf93ae")),
+                        null
+                    )
+            );
+
+
+
+
+
+
+
+
+
+
+
+
 
             return scoreimg;
         }

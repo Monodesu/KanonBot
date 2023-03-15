@@ -21,7 +21,6 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using static KanonBot.API.OSU.Legacy;
 using static KanonBot.functions.Accounts;
 using static LinqToDB.Common.Configuration;
 using Img = SixLabors.ImageSharp.Image;
@@ -1076,7 +1075,12 @@ namespace KanonBot.functions.osubot
                             hadbadgeexpired = true;
                             var badgeinfo = await Database.Client.GetBadgeInfo(owned_badges[i]);
                             mailmsg += $"\n{badgeinfo!.name_chinese} ({badgeinfo.name})";
-                            await RemoveBadge((int)user.uid, int.Parse(owned_badges[i]));
+                            try
+                            {
+                                await RemoveBadge((int)user.uid, int.Parse(owned_badges[i]));
+                                await Database.Client.RemoveBadgeExpirationRecord((int)user.uid, int.Parse(owned_badges[i]));
+                            }
+                            catch { }
                             Log.Information($"用户 {user.uid} 的徽章({owned_badges[i]}) 已过期，已移除。");
                         }
                 mailmsg += "\n\n desu.life";
@@ -1117,8 +1121,12 @@ namespace KanonBot.functions.osubot
 
                     var badgeinfo = await Database.Client.GetBadgeInfo(badge.badge_id.ToString());
                     mailmsg += $"\n{badgeinfo!.name_chinese} ({badgeinfo.name})";
-                    await RemoveBadge((int)user.uid, badge.badge_id);
-                    await Database.Client.RemoveBadgeExpirationRecord((int)user.uid, badge.badge_id);
+                    try
+                    {
+                        await RemoveBadge((int)user.uid, badge.badge_id);
+                        await Database.Client.RemoveBadgeExpirationRecord((int)user.uid, badge.badge_id);
+                    }
+                    catch { }
                     Log.Information($"用户 {user.uid} 的徽章({badge.badge_id}) 已过期，已移除。");
 
                     mailmsg += "\n\n desu.life";
