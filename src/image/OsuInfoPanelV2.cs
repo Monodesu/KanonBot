@@ -2926,8 +2926,8 @@ namespace KanonBot.DrawV2
                                 //bottom
                                 badge.Mutate(
                                 x =>
-                                    x.Resize(236, 110)
-                                        .Brightness(BadgeBrightness)
+                                    x.Brightness(BadgeBrightness)
+                                        .Resize(108, 50)
                                         //.RoundCorner(new Size(108, 50), 6.0f)
                             );
 
