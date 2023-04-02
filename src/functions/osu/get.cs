@@ -1386,7 +1386,7 @@ namespace KanonBot.functions.osubot
             )!;
             if (seasonalpassinfo == null)
             {
-                await target.reply("数据库中无此用户的季票信息，请稍后再试。");
+                await target.reply("用户在本季度暂无季票信息。");
                 return;
             }
 

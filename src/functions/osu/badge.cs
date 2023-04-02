@@ -150,6 +150,9 @@ namespace KanonBot.functions.osubot
                 case "getuser":
                     SudoGetUser(target, childCmd);
                     return;
+                case "remove":
+                    await SudoRemove(target, childCmd);
+                    return;
                 case "list":
                     //await List(target, accinfo);
                     return;
@@ -730,7 +733,50 @@ namespace KanonBot.functions.osubot
             }
         }
 
-        private static void SudoRemove(Drivers.Target target, string cmd) { }
+        private static async Task SudoRemove(Drivers.Target target, string cmd)
+        {
+            try
+            {
+                var temp = cmd.Split("#");
+                var badge_id = int.Parse(temp[0]);
+                var user_id = -999;
+                if (temp[1] != "all") user_id = int.Parse(temp[1]);
+                if (user_id == -999)
+                {
+                    //all
+                    var users = await Database.Client.GetAllUsersWhoHadBadge();
+                    foreach (var user in users)
+                    {
+                        //获取拥有的牌子信息
+                        List<string> owned_badges;
+                        if (user.owned_badge_ids!.Contains(','))
+                        {
+                            owned_badges = user.owned_badge_ids.Split(',').ToList();
+                        }
+                        else
+                        {
+                            owned_badges = new()
+                                        {
+                                            user.owned_badge_ids.Trim()
+                                        };
+                        }
+
+                        //检查
+                        await RemoveBadge((int)user.uid, badge_id);
+                    }
+                    await target.reply($"已为全部desu.life用户移除了badge_id为 {badge_id} 的徽章。");
+                }
+                else
+                {
+                    await RemoveBadge(user_id, badge_id);
+                    await target.reply($"已为desu.life用户 {user_id} 移除了badge_id为 {badge_id} 的徽章。");
+                }
+            }
+            catch
+            {
+                await target.reply("!badge sudo remove badgeid#uid");
+            }
+        }
 
         private static void SudoList(Drivers.Target target, string cmd) { }
 
