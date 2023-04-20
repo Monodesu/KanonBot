@@ -832,7 +832,7 @@ namespace KanonBot.functions.osubot
                         //添加之前先查重
                         foreach (var xx in owned_badges)
                         {
-                            if (xx.Contains(data.badge_id.ToString()))
+                            if (xx == data.badge_id.ToString())
                             {
                                 if (bet_info == null)
                                 {
