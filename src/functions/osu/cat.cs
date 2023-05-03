@@ -65,11 +65,17 @@ namespace KanonBot.functions.osubot
             }
             else
                 chatbot_premission = true;
-
-            if (chatbot_premission)
-                await target.reply(OpenAI.Chat(cmd, target.sender!, isadmin));
-            else
-                await target.reply("你没有使用chatbot的权限呢T^T");
+            try
+            {
+                if (chatbot_premission)
+                    await target.reply(OpenAI.Chat(cmd, target.sender!));
+                else
+                    await target.reply("你没有使用chatbot的权限呢T^T");
+            }
+            catch
+            {
+                await target.reply("目前无法访问API T^T");
+            }
         }
 
     }

@@ -9,11 +9,13 @@ namespace KanonBot.API
     public partial class OpenAI
     {
         private static Config.Base config = Config.inner!;
-        private static OpenAIAPI? api;
-        private static Conversation? chat;
+        private static List<string> ChatHistory = new();
+        private static readonly int ChatBotMemorySpan = 10;
 
-        public static void Init()
+        public static string Chat(string chatmsg, string name)
         {
+            OpenAIAPI? api;
+            Conversation? chat;
             api = new OpenAIAPI(config.openai!.Key);
             chat = api.Chat.CreateConversation();
             chat.Model = Model.ChatGPTTurbo;
@@ -21,16 +23,23 @@ namespace KanonBot.API
             chat.RequestParameters.TopP = config.openai.Top_p;
             chat.RequestParameters.MaxTokens = config.openai.MaxTokens;
             chat.RequestParameters.NumChoicesPerMessage = 1;
-            var t = config.openai!.PreDefine!.Split("#");
-            foreach (var item in t) chat!.AppendSystemMessage(item);
-        }
-
-        public static string Chat(string chatmsg, string name, bool admin)
-        {
-            if (admin)
-                chat!.AppendSystemMessage(chatmsg);
+            if (config.openai!.PreDefine!.IndexOf("#") > 0)
+            {
+                chat!.AppendSystemMessage(config.openai!.PreDefine!);
+            }
             else
-                chat!.AppendUserInputWithName(name, chatmsg);
+            {
+                var t = config.openai!.PreDefine!.Split("#");
+                foreach (var item in t) chat!.AppendSystemMessage(item);
+            }
+            if (ChatHistory.Count < ChatBotMemorySpan)
+                ChatHistory.Add(chatmsg);
+            else
+            {
+                ChatHistory.RemoveAt(0);
+                ChatHistory.Add(chatmsg);
+            }
+            chat!.AppendUserInputWithName(name, chatmsg);
             return chat.GetResponseFromChatbotAsync().Result;
         }
     }
