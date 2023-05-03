@@ -30,6 +30,9 @@ FlurlHttp.GlobalSettings.Redirects.ForwardAuthorizationHeader = true;
 FlurlHttp.GlobalSettings.Redirects.AllowSecureToInsecure = true;
 var config = Config.inner!;
 
+//ChatBot
+KanonBot.API.OpenAI.Init();
+
 // var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] { }, API.OSU.Enums.Mode.Mania).Result!;
 // score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
 // var attr = API.OSU.GetBeatmapAttributes(score.Score.Beatmap!.BeatmapId, new string[] { }, API.OSU.Enums.Mode.Mania).Result;

@@ -817,12 +817,21 @@ namespace KanonBot.functions.osubot
                 return Math.Round(cost, 2);
             }
 
-            static double zkfccost(User userInfo)
+            static double zkfccost(User userInfo, OSU.Models.Score score)
             {
                 //formula  cost=bp1pp*0.6+(bp1pp-bp100pp)*0.4+tth/175+PPTotal*0.05      !!!!not this one
                 //formula  cost=pp/1831+tth/13939393  !!!!current
-                return (double)userInfo.Statistics.PP / 1831.0
-                    + (double)userInfo.Statistics.TotalHits / 13939393.0;
+                double t = 0.0;
+                try
+                {
+                    t = (double)score.PP / 125.0;
+                }
+                catch
+                {
+                    t = 0.0;
+                }
+                return (double)userInfo.Statistics.PP / 1200.0
+                    + (double)userInfo.Statistics.TotalHits / 1333333.0 + t;
             }
             #region 验证
             long? osuID = null;
@@ -1004,9 +1013,24 @@ namespace KanonBot.functions.osubot
                     break;
                 ////////////////////////////////////////////////////////////////////////////////////////
                 case "zkfc":
-                    await target.reply(
-                        $"在ZKFC S1中，{OnlineOsuInfo.Username} 的cost为：{Math.Round(zkfccost(OnlineOsuInfo), 2)}"
-                    );
+                    var scores = await OSU.GetUserScores(
+                                                         osuID!.Value,
+                                                         OSU.Enums.UserScoreType.Best,
+                                                         OSU.Enums.Mode.OSU,
+                                                         1,
+                                                         command.order_number - 1
+                                                        );
+                    if (scores == null)
+                    {
+                        await target.reply("查询成绩时出错。");
+                        return;
+                    }
+                    if (scores!.Length > 0)
+                    {
+                        await target.reply(
+                            $"在ZKFC S2中，{OnlineOsuInfo.Username} 的cost为：{Math.Round(zkfccost(OnlineOsuInfo, scores[0]), 2)}"
+                        );
+                    }
                     break;
                 ////////////////////////////////////////////////////////////////////////////////////////
                 default:

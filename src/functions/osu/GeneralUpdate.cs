@@ -42,6 +42,7 @@ namespace KanonBot.functions.osu
                 Log.Information("启动检查徽章有效期任务");
                 await osubot.Badge.CheckBadgeIsVaild_Job();
                 Log.Information("检查徽章有效期任务完成");
+                Environment.Exit(0);
             }, "DailyUpdate", "0 4 * * *"));   // 每天早上4点运行的意思，具体参考https://crontab.cronhub.io/
             daemon.Start(CancellationToken.None);
         }
@@ -68,7 +69,6 @@ namespace KanonBot.functions.osu
             //删除头像以及osu!web缓存
             try { try { var files = Directory.GetFiles($@".\work\avatar\"); foreach (var file in files) try { File.Delete(file); } catch { } } catch { } } catch { }
             try { try { var files = Directory.GetFiles($@".\work\legacy\v1_cover\osu!web\"); foreach (var file in files) try { File.Delete(file); } catch { } } catch { } } catch { }
-            Environment.Exit(0);
             return (userList.Count, stopwatch.Elapsed);
         }
 

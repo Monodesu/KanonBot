@@ -2,6 +2,7 @@
 using System.IO;
 using Flurl.Util;
 using KanonBot.Drivers;
+using KanonBot.functions.osubot;
 using KanonBot.Message;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;

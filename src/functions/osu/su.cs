@@ -1,5 +1,6 @@
 using Flurl.Util;
 using KanonBot.Drivers;
+using KanonBot.functions.osubot;
 using static KanonBot.functions.Accounts;
 
 namespace KanonBot.functions.osu
@@ -31,6 +32,7 @@ namespace KanonBot.functions.osu
                 }
                 //检查用户权限
                 int permissions_flag = -1;
+
                 foreach (var x in permissions)
                 {
                     switch (x)
@@ -54,7 +56,6 @@ namespace KanonBot.functions.osu
                             permissions_flag = -2;
                             break;
                         default:
-                            permissions_flag = -1;
                             break;
                     }
 
@@ -74,6 +75,9 @@ namespace KanonBot.functions.osu
 
                 switch (rootCmd.ToLower())
                 {
+                    case "cat":
+                        await ChatBot.Execute(target, childCmd, true);
+                        return;
                     case "updateall":
                         await SuDailyUpdateAsync(target);
                         return;

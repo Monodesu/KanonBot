@@ -1,13 +1,25 @@
 #pragma warning disable IDE1006 // 命名样式
 
 using System.IO;
+using KanonBot.Database;
 using KanonBot.Serializer;
+using LanguageExt.UnitsOfMeasure;
 using Tomlyn.Model;
 
 namespace KanonBot;
 public class Config
 {
     public static Base? inner;
+    public class OpenAI : ITomlMetadataProvider
+    {
+        public string? Key { get; set; }
+        public int MaxTokens { get; set; } //def 16.
+        //OpenAI generally recommend altering Temperature or top_p but not both.
+        public double Temperature { get; set; } //def 1
+        public double Top_p { get; set; } //def 1
+        public string? PreDefine { get; set; }
+        TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
+    }
     public class Mail : ITomlMetadataProvider
     {
         public string? smtpHost { get; set; }
@@ -78,6 +90,7 @@ public class Config
         public OSS? oss { get; set; }
         public Database? database { get; set; }
         public Mail? mail { get; set; }
+        public OpenAI? openai { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
         public static Base Default()
         {
@@ -132,6 +145,14 @@ public class Config
                     smtpPort = 587,
                     userName = "",
                     passWord = ""
+                },
+                openai = new()
+                {
+                    Key = "",
+                    MaxTokens = 16,
+                    Temperature = 0,
+                    Top_p = 1,
+                    PreDefine = ""
                 }
             };
         }
