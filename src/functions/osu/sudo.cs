@@ -64,7 +64,6 @@ namespace KanonBot.functions.osu
                             permissions_flag = -2;
                             break;
                         default:
-                            permissions_flag = -1;
                             break;
                     }
                 }
