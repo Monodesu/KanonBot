@@ -75,9 +75,6 @@ namespace KanonBot.functions.osu
 
                 switch (rootCmd.ToLower())
                 {
-                    case "cat":
-                        await ChatBot.Execute(target, childCmd, true);
-                        return;
                     case "updateall":
                         await SuDailyUpdateAsync(target);
                         return;

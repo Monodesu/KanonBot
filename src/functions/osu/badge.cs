@@ -117,7 +117,6 @@ namespace KanonBot.functions.osubot
                         permissions_flag = -2;
                         break;
                     default:
-                        permissions_flag = -1;
                         break;
                 }
             }
@@ -500,7 +499,7 @@ namespace KanonBot.functions.osubot
             source.Mutate(x => x.Resize(688, 320));
 
             //保存badge图片&数据库插入新的badge
-            var db_badgeid = await Database.Client.InsertBadge(args[1], args[2], args[3], int.Parse(args[4]) > 0 ? DateTimeOffset.Now.AddDays(int.Parse(args[4])) : DateTime.Parse("1970-01-01 00:00:00"));
+            var db_badgeid = await Database.Client.InsertBadge(args[1], args[2], args[3], int.Parse(args[4]) > 0 ? DateTimeOffset.Now.AddDays(int.Parse(args[4])) : DateTimeOffset.Parse("1970-01-01 00:00:00"));
             //source.Save($"./work/badges/{db_badgeid}.png");
             await source.SaveAsync($"./work/badges/{db_badgeid}.png", new PngEncoder());
             await target.reply($"图片成功上传，新的badgeID为{db_badgeid}");
@@ -1087,7 +1086,7 @@ namespace KanonBot.functions.osubot
             #region 全局badge
             foreach (var badge in allBadges)
             {
-                if (badge.expire_at.DateTime != new DateTime(1970, 1, 1))
+                if (badge.expire_at.DateTime > new DateTime(1990, 1, 1))
                     badges.Add(badge.id, badge.expire_at.DateTime);
             }
             //检查徽章是否在有效期内
@@ -1130,7 +1129,7 @@ namespace KanonBot.functions.osubot
                             Log.Information($"用户 {user.uid} 的徽章({owned_badges[i]}) 已过期，已移除。");
                         }
                 mailmsg += "\n\n desu.life";
-                if (hadbadgeexpired && user.email!.Length > 5)
+                if (hadbadgeexpired && user.email!.Length > 4)
                 {
                     SendMail(user.email!, "desu.life - 徽章过期通知", mailmsg, false);
                     Log.Information($"已向用户 {user.uid} 发送徽章过期通知邮件。");

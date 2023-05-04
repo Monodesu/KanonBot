@@ -26,9 +26,26 @@ public class Model
         public ITable<Bottle> Bottle => this.GetTable<Bottle>();
         public ITable<BadgeRedemptionCode> BadgeRedemptionCode => this.GetTable<BadgeRedemptionCode>();
         public ITable<BadgeExpirationDateRec> BadgeExpirationDateRec => this.GetTable<BadgeExpirationDateRec>();
+        public ITable<ChatBot> ChatBot => this.GetTable<ChatBot>();
 
         // ... other tables ...
     }
+    [Table("chatbot")]
+    public class ChatBot
+    {
+        [PrimaryKey]
+        public int uid { get; set; }
+
+        [Column]
+        public string? botdefine { get; set; }
+
+        [Column]
+        public string? openaikey { get; set; }
+
+        [Column]
+        public string? organization { get; set; }
+    }
+
     [Table("badge_redemption_code")]
     public class BadgeRedemptionCode
     {

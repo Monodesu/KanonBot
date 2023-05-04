@@ -168,7 +168,7 @@ namespace KanonBot.command_parser
                             await PPvs.Execute(target, childCmd);
                             return;
                         case "cat":
-                            await ChatBot.Execute(target, childCmd, false);
+                            await ChatBot.Execute(target, childCmd);
                             return;
                         // Admin
                         case "sudo": //管理员

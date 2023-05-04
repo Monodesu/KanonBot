@@ -716,4 +716,26 @@ public class Client
         using var db = GetInstance();
         return await db.BadgeExpirationDateRec.Where(x => x.uid == userid && x.badge_id == badgeid).DeleteAsync();
     }
+
+    static public async Task<bool> UpdateChatBotInfo(long uid, string botdefine, string openaikey, string organization)
+    {
+        using var db = GetInstance();
+        var data = await db.ChatBot.FirstOrDefaultAsync(it => it.uid == uid);
+        var result = await db.InsertOrReplaceAsync(
+            new Model.ChatBot()
+            {
+                uid = (int)uid,
+                botdefine = botdefine,
+                openaikey = openaikey,
+                organization = organization
+            }
+        );
+        return result > -1;
+    }
+
+    static public async Task<Model.ChatBot?> GetChatBotInfo(long uid)
+    {
+        using var db = GetInstance();
+        return await db.ChatBot.Where(it => it.uid == uid).FirstOrDefaultAsync();
+    }
 }
