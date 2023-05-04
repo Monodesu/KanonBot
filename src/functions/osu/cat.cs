@@ -95,11 +95,11 @@ namespace KanonBot.functions.osubot
                                     foreach (var item in t)
                                     {
                                         if (item.StartsWith("define"))
-                                            botdefine = item[item.IndexOf("=")..];
+                                            botdefine = item[(item.IndexOf("=") + 1)..];
                                         if (item.StartsWith("openaikey"))
-                                            openaikey = item[item.IndexOf("=")..];
+                                            openaikey = item[(item.IndexOf("=") + 1)..];
                                         if (item.StartsWith("organization"))
-                                            organization = item[item.IndexOf("=")..];
+                                            organization = item[(item.IndexOf("=") + 1)..];
                                     }
                                 }
                                 catch
@@ -110,11 +110,11 @@ namespace KanonBot.functions.osubot
                             else
                             {
                                 if (childCmd.StartsWith("define"))
-                                    botdefine = childCmd[childCmd.IndexOf("=")..];
+                                    botdefine = childCmd[(childCmd.IndexOf("=") + 1)..];
                                 if (childCmd.StartsWith("openaikey"))
-                                    openaikey = childCmd[childCmd.IndexOf("=")..];
+                                    openaikey = childCmd[(childCmd.IndexOf("=") + 1)..];
                                 if (childCmd.StartsWith("organization"))
-                                    organization = childCmd[childCmd.IndexOf("=")..];
+                                    organization = childCmd[(childCmd.IndexOf("=") + 1)..];
                             }
 
                             if (botdefine == "")
