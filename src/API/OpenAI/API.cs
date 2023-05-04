@@ -28,7 +28,7 @@ namespace KanonBot.API
                 else
                     api = new OpenAIAPI(config.openai!.Key);
                 chat = api.Chat.CreateConversation();
-                if (dbinfo.botdefine != "" || dbinfo.botdefine != "default")
+                if (dbinfo.botdefine != "" && dbinfo.botdefine != "default")
                 {
                     if (dbinfo.botdefine!.IndexOf("#") > 0)
                     {
