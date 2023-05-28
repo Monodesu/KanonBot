@@ -962,7 +962,7 @@ namespace KanonBot.functions.osubot
                     var error_count = 0;
                     while (error_count < 4)
                     {
-                        var code = RandomStr(50, false);
+                        var code = RandomRedemptionCode();
                         var status = await Database.Client.CreateBadgeRedemptionCode(badge_id, code, can_repeatedly, DateTimeOffset.Parse(DateTime.Now.AddDays(expire_at).ToString()), badge_expire_days);
                         if (status)
                         {

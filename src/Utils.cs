@@ -42,9 +42,10 @@ public static partial class Utils
 
     public static Option<(String, String)> SplitKvp(String msg)
     {
-        if (msg.Filter((c) => c == '=').Count() == 1) { 
+        if (msg.Filter((c) => c == '=').Count() == 1)
+        {
             var p = msg.Split('=');
-            
+
             var (k, v) = (p[0], p[1]);
             if (string.IsNullOrWhiteSpace(k) || string.IsNullOrWhiteSpace(v))
                 return None;
@@ -215,6 +216,25 @@ public static partial class Utils
         for (int i = 0; i < length; i++)
         {
             s += str.Substring(r.Next(0, str.Length - 1), 1);
+        }
+        return s;
+    }
+
+    public static string RandomRedemptionCode()
+    {
+        Random r = new(DateTime.Now.Millisecond + DateTime.Now.Second + DateTime.Now.Minute);
+        string s = "",
+            str = "";
+        str += "0123456789";
+        //str += "abcdefghijklmnopqrstuvwxyz";
+        str += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        for (int o = 0; o < 5; ++o)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                s += str.Substring(r.Next(0, str.Length - 1), 1);
+            }
+            if (o < 4) s += "-";
         }
         return s;
     }
