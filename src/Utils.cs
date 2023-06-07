@@ -245,7 +245,7 @@ public static partial class Utils
                 int randomIndex = randomBytes[i] % str.Length;
                 sb.Append(str[randomIndex]);
             }
-            if (o < 4) sb.Append('-');
+            if (o < 6) sb.Append('-');
         }
         return sb.ToString();
     }
