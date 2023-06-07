@@ -226,7 +226,7 @@ public static partial class Utils
         StringBuilder sb = new();
         for (int i = 0; i < length; i++)
         {
-            byte[] randomBytes = GenerateRandomBytes(20);
+            byte[] randomBytes = GenerateRandomBytes(100);
             int randomIndex = randomBytes[i] % str.Length;
             sb.Append(str[randomIndex]);
         }
