@@ -2,8 +2,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
+using System.Text;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography;
 using KanonBot.API;
 using Kook;
 using LanguageExt;
@@ -19,6 +21,16 @@ namespace KanonBot;
 
 public static partial class Utils
 {
+    private static RandomNumberGenerator rng = RandomNumberGenerator.Create();
+
+    public static byte[] GenerateRandomBytes(int length)
+    {
+        byte[] randomBytes = new byte[length];
+        rng.GetBytes(randomBytes);
+        return randomBytes;
+    }
+
+
     public static async Task<Option<T>> TimeOut<T>(this Task<T> task, TimeSpan delay)
     {
         var timeOutTask = Task.Delay(delay); // 设定超时任务
@@ -205,38 +217,37 @@ public static partial class Utils
 
     public static string RandomStr(int length, bool URLparameter = false)
     {
-        Random r = new(DateTime.Now.Millisecond + DateTime.Now.Second + DateTime.Now.Minute);
-        string s = "",
-            str = "";
+        string str = "";
         str += "0123456789";
         str += "abcdefghijklmnopqrstuvwxyz";
         str += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         if (!URLparameter)
             str += "!_-@#$%+^&()[]'~`";
+        StringBuilder sb = new();
         for (int i = 0; i < length; i++)
         {
-            s += str.Substring(r.Next(0, str.Length - 1), 1);
+            byte[] randomBytes = GenerateRandomBytes(20);
+            int randomIndex = randomBytes[i] % str.Length;
+            sb.Append(str[randomIndex]);
         }
-        return s;
+        return sb.ToString();
     }
 
     public static string RandomRedemptionCode()
     {
-        Random r = new(DateTime.Now.Millisecond + DateTime.Now.Second + DateTime.Now.Minute);
-        string s = "",
-            str = "";
-        str += "0123456789";
-        //str += "abcdefghijklmnopqrstuvwxyz";
-        str += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        for (int o = 0; o < 5; ++o)
+        StringBuilder sb = new();
+        string str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        for (int o = 0; o < 7; o++)
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 7; i++)
             {
-                s += str.Substring(r.Next(0, str.Length - 1), 1);
+                byte[] randomBytes = GenerateRandomBytes(255);
+                int randomIndex = randomBytes[i] % str.Length;
+                sb.Append(str[randomIndex]);
             }
-            if (o < 4) s += "-";
+            if (o < 4) sb.Append('-');
         }
-        return s;
+        return sb.ToString();
     }
 
     public static string Duration2String(long duration)
