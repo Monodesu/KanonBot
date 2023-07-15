@@ -1443,7 +1443,7 @@ namespace KanonBot.functions.osubot
 
             string str;
             str =
-                $"{OnlineOsuInfo.Username}\n自2023年4月1日以来\n您在{OnlineOsuInfo!.PlayMode!.ToStr()}模式下的等级为{levelcount}级 "
+                $"{OnlineOsuInfo.Username}\n自2023年7月15日以来\n您在{OnlineOsuInfo!.PlayMode!.ToStr()}模式下的等级为{levelcount}级 "
                 + $"({t}%)"
                 + $"\n共获得了了{seasonalpassinfo.point}pt\n距离升级大约还需要{Math.Abs(temppoint)}pt";
             await target.reply(str);

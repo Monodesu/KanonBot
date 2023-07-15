@@ -148,7 +148,7 @@ public class Model
         public string? mode { get; set; }
     }
 
-    [Table("seasonalpass_2023_s1")]
+    [Table("seasonalpass_2023_s2")]
     public class OSUSeasonalPass
     {
         [Column]
