@@ -97,14 +97,14 @@ namespace KanonBot.functions.osu
                         await InfoImageV1(target, -1, childCmd); await Task.Delay(1000);
                         await InfoPanelV1(target, -1, childCmd); await Task.Delay(1000);
                         await InfoImageV2(target, -1, childCmd); await Task.Delay(1000);
-                        await InfoImageV2(target, -1, childCmd);
+                        await InfoPanelV2(target, -1, childCmd);
                         return;
                     //approve all items
                     case "vall":
                         await InfoImageV1(target, 0, childCmd); await Task.Delay(1000);
                         await InfoPanelV1(target, 0, childCmd); await Task.Delay(1000);
                         await InfoImageV2(target, 0, childCmd); await Task.Delay(1000);
-                        await InfoImageV2(target, 0, childCmd);
+                        await InfoPanelV2(target, 0, childCmd);
                         return;
                     //v1infoImg
                     case "v1imagelist":
