@@ -92,6 +92,20 @@ namespace KanonBot.functions.osu
 
                 switch (rootCmd.ToLower())
                 {
+                    //get all queued items
+                    case "listall":
+                        await InfoImageV1(target, -1, childCmd); await Task.Delay(1000);
+                        await InfoPanelV1(target, -1, childCmd); await Task.Delay(1000);
+                        await InfoImageV2(target, -1, childCmd); await Task.Delay(1000);
+                        await InfoImageV2(target, -1, childCmd);
+                        return;
+                    //approve all items
+                    case "vall":
+                        await InfoImageV1(target, 0, childCmd); await Task.Delay(1000);
+                        await InfoPanelV1(target, 0, childCmd); await Task.Delay(1000);
+                        await InfoImageV2(target, 0, childCmd); await Task.Delay(1000);
+                        await InfoImageV2(target, 0, childCmd);
+                        return;
                     //v1infoImg
                     case "v1imagelist":
                         await InfoImageV1(target, -1, childCmd);
@@ -227,7 +241,7 @@ namespace KanonBot.functions.osu
                         await target.reply(msg);
                         return;
                     }
-                    await target.reply("暂时没有待审核的内容。");
+                    await target.reply("[panelv1]暂时没有待审核的内容。");
                     return;
                 case 0:
                     //approve all
@@ -244,7 +258,7 @@ namespace KanonBot.functions.osu
                         await target.reply("approved.");
                         return;
                     }
-                    await target.reply("暂时没有待审核的内容。");
+                    await target.reply("[panelv1]暂时没有待审核的内容。");
                     return;
                 case 1:
                     //approve
@@ -259,7 +273,7 @@ namespace KanonBot.functions.osu
                         await target.reply("approved.");
                         return;
                     }
-                    await target.reply("指定内容不存在，请重新检查。");
+                    await target.reply("[panelv1]指定内容不存在，请重新检查。");
                     return;
                 case 2:
                     //reject
@@ -269,11 +283,11 @@ namespace KanonBot.functions.osu
                         await target.reply("rejected.");
                         return;
                     }
-                    await target.reply("要审核的内容不存在，请重新检查。");
+                    await target.reply("[panelv1]要审核的内容不存在，请重新检查。");
                     return;
                 default:
                     //do nothing
-                    await target.reply("无效的指令，请重新检查。");
+                    await target.reply("[panelv1]无效的指令，请重新检查。");
                     return;
             }
         }
@@ -305,7 +319,7 @@ namespace KanonBot.functions.osu
                         await target.reply(msg);
                         return;
                     }
-                    await target.reply("暂时没有待审核的内容。");
+                    await target.reply("[panelv2]暂时没有待审核的内容。");
                     return;
                 case 0:
                     //approve all
@@ -323,7 +337,7 @@ namespace KanonBot.functions.osu
                         await target.reply("approved.");
                         return;
                     }
-                    await target.reply("暂时没有待审核的内容。");
+                    await target.reply("[panelv2]暂时没有待审核的内容。");
                     return;
                 case 1:
                     //approve
@@ -338,7 +352,7 @@ namespace KanonBot.functions.osu
                         await target.reply("approved.");
                         return;
                     }
-                    await target.reply("指定内容不存在，请重新检查。");
+                    await target.reply("[panelv2]指定内容不存在，请重新检查。");
                     return;
                 case 2:
                     //reject
@@ -348,11 +362,11 @@ namespace KanonBot.functions.osu
                         await target.reply("rejected.");
                         return;
                     }
-                    await target.reply("要审核的内容不存在，请重新检查。");
+                    await target.reply("[panelv2]要审核的内容不存在，请重新检查。");
                     return;
                 default:
                     //do nothing
-                    await target.reply("无效的指令，请重新检查。");
+                    await target.reply("[panelv2]无效的指令，请重新检查。");
                     return;
             }
         }
@@ -384,7 +398,7 @@ namespace KanonBot.functions.osu
                         await target.reply(msg);
                         return;
                     }
-                    await target.reply("暂时没有待审核的内容。");
+                    await target.reply("[coverv2]暂时没有待审核的内容。");
                     return;
                 case 0:
                     //approve all
@@ -401,7 +415,7 @@ namespace KanonBot.functions.osu
                         await target.reply("approved.");
                         return;
                     }
-                    await target.reply("暂时没有待审核的内容。");
+                    await target.reply("[coverv2]暂时没有待审核的内容。");
                     return;
                 case 1:
                     //approve
@@ -416,7 +430,7 @@ namespace KanonBot.functions.osu
                         await target.reply("approved.");
                         return;
                     }
-                    await target.reply("指定内容不存在，请重新检查。");
+                    await target.reply("[coverv2]指定内容不存在，请重新检查。");
                     return;
                 case 2:
                     //reject
@@ -426,11 +440,11 @@ namespace KanonBot.functions.osu
                         await target.reply("rejected.");
                         return;
                     }
-                    await target.reply("要审核的内容不存在，请重新检查。");
+                    await target.reply("[coverv2]要审核的内容不存在，请重新检查。");
                     return;
                 default:
                     //do nothing
-                    await target.reply("无效的指令，请重新检查。");
+                    await target.reply("[coverv2]无效的指令，请重新检查。");
                     return;
             }
         }
@@ -462,7 +476,7 @@ namespace KanonBot.functions.osu
                         await target.reply(msg);
                         return;
                     }
-                    await target.reply("暂时没有待审核的内容。");
+                    await target.reply("[coverv1]暂时没有待审核的内容。");
                     return;
                 case 0:
                     //approve all
@@ -479,7 +493,7 @@ namespace KanonBot.functions.osu
                         await target.reply("approved.");
                         return;
                     }
-                    await target.reply("暂时没有待审核的内容。");
+                    await target.reply("[coverv1]暂时没有待审核的内容。");
                     return;
                 case 1:
                     //approve
@@ -494,7 +508,7 @@ namespace KanonBot.functions.osu
                         await target.reply("approved.");
                         return;
                     }
-                    await target.reply("指定内容不存在，请重新检查。");
+                    await target.reply("[coverv1]指定内容不存在，请重新检查。");
                     return;
                 case 2:
                     //reject
@@ -504,11 +518,11 @@ namespace KanonBot.functions.osu
                         await target.reply("rejected.");
                         return;
                     }
-                    await target.reply("要审核的内容不存在，请重新检查。");
+                    await target.reply("[coverv1]要审核的内容不存在，请重新检查。");
                     return;
                 default:
                     //do nothing
-                    await target.reply("无效的指令，请重新检查。");
+                    await target.reply("[coverv1]无效的指令，请重新检查。");
                     return;
             }
         }
