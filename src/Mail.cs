@@ -2,6 +2,7 @@
 #pragma warning disable CS8602 // 解引用可能出现空引用。
 #pragma warning disable CS8604 // 解引用可能出现空引用。
 
+using System.Net;
 using System.Net.Mail;
 
 namespace KanonBot;
@@ -31,6 +32,7 @@ public static class Mail
             Credentials = new System.Net.NetworkCredential(config.mail.userName, config.mail.passWord), //设置邮箱用户名与密码
             EnableSsl = true //启用SSL
         }; //设置邮件服务器
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         client.Send(message); //发送
     }
 }
