@@ -6,6 +6,7 @@ using KanonBot.functions.osu;
 using KanonBot.Message;
 using LanguageExt.SomeHelp;
 using LanguageExt.UnsafeValueAccess;
+using System.Net;
 
 namespace KanonBot.functions
 {
@@ -155,17 +156,18 @@ namespace KanonBot.functions
 
 
 
-
+            string read_html = System.IO.File.ReadAllText("./mail_desu_life_mailaddr_verify_template.txt");
+           
             if (is_regd) //检查此邮箱是否已存在于数据库中
             {
                 // 如果存在，执行绑定
-
+                read_html = read_html.Replace("{{{{mailaddress}}}}", mailAddr).Replace("{{{{veritylink}}}}", $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=2");
                 Mail.MailStruct ms = new()
                 {
                     MailTo = new string[] { mailAddr },
-                    Subject = "desu.life - 请验证您的邮箱",
-                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=2",
-                    IsBodyHtml = false
+                    Subject = "[来自desu.life自动发送的邮件]请验证您的邮箱",
+                    Body = read_html,
+                    IsBodyHtml = true
                 };
                 try
                 {
@@ -173,20 +175,22 @@ namespace KanonBot.functions
                     await target.reply("绑定验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。");
                     await Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Log.Logger.Error("Error: " + ex.ToString());
                     await target.reply("发送验证邮件失败，请联系管理员。");
                 }
             }
             else if (!is_append)
             {
                 //如果不存在，新建
+                read_html = read_html.Replace("{{{{mailaddress}}}}", mailAddr).Replace("{{{{veritylink}}}}", $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=1");
                 Mail.MailStruct ms = new()
                 {
                     MailTo = new string[] { mailAddr },
-                    Subject = "desu.life - 请验证您的邮箱",
-                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=1",
-                    IsBodyHtml = false
+                    Subject = "[来自desu.life自动发送的邮件]请验证您的邮箱",
+                    Body = read_html,
+                    IsBodyHtml = true
                 };
                 try
                 {
@@ -194,20 +198,22 @@ namespace KanonBot.functions
                     await target.reply("注册验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。");
                     await Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Log.Logger.Error("Error: " + ex.ToString());
                     await target.reply("发送验证邮件失败，请联系管理员。");
                 }
             }
             else
             {
                 //追加邮箱信息
+                read_html = read_html.Replace("{{{{mailaddress}}}}", mailAddr).Replace("{{{{veritylink}}}}", $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=3");
                 Mail.MailStruct ms = new()
                 {
                     MailTo = new string[] { mailAddr },
-                    Subject = "desu.life - 请验证您的邮箱",
-                    Body = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=3",
-                    IsBodyHtml = false
+                    Subject = "[来自desu.life自动发送的邮件]请验证您的邮箱",
+                    Body = read_html,
+                    IsBodyHtml = true
                 };
                 try
                 {
@@ -215,8 +221,9 @@ namespace KanonBot.functions
                     await target.reply("电子邮箱追加验证邮件发送成功，请继续从邮箱内操作，注意检查垃圾箱。");
                     await Database.Client.SetVerifyMail(mailAddr, verifyCode); //设置临时验证码
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Log.Logger.Error("Error: " + ex.ToString());
                     await target.reply("发送验证邮件失败，请联系管理员。");
                 }
             }
