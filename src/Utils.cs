@@ -502,10 +502,8 @@ public static partial class Utils
     async public static Task<(Image<Rgba32>, IImageFormat)> ReadImageRgbaWithFormat(string path)
     {
         using var s = Utils.LoadFile2ReadStream(path);
-        var (temppic, format) = await Img.LoadWithFormatAsync(s);
-        var pic = temppic.CloneAs<Rgba32>();
-        temppic.Dispose();
-        return (pic, format);
+        var img = await Img.LoadAsync<Rgba32>(s);
+        return (img, img.Metadata.DecodedImageFormat!);
     }
 
     public static double ToLinear(double color) =>

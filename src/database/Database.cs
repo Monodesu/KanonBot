@@ -26,10 +26,9 @@ public class Client
 {
     private static Config.Base config = Config.inner!;
 
-    static private DB GetInstance()
+    private static DB GetInstance()
     {
-        var builder = new LinqToDBConnectionOptionsBuilder();
-        builder.UseMySqlConnector(
+        var options = new DataOptions().UseMySqlConnector(
             new MySqlConnectionStringBuilder
             {
                 Server = config.database.host,
@@ -42,11 +41,10 @@ public class Client
             }.ConnectionString
         );
         // 暂时只有Mysql
-        var db = new DB(builder.Build());
-        return db;
+        return new DB(options);
     }
 
-    static public async Task<bool> SetVerifyMail(string mailAddr, string verify)
+    public static async Task<bool> SetVerifyMail(string mailAddr, string verify)
     {
         using var db = GetInstance();
         var newverify = new Model.MailVerify()
@@ -67,7 +65,7 @@ public class Client
         }
     }
 
-    static public async Task<bool> IsRegd(string mailAddr)
+    public static async Task<bool> IsRegd(string mailAddr)
     {
         using var db = GetInstance();
         var li = db.User.Where(it => it.email == mailAddr).Select(it => it.uid);
@@ -76,19 +74,19 @@ public class Client
         return false;
     }
 
-    static public async Task<Model.User?> GetUser(string mailAddr)
+    public static async Task<Model.User?> GetUser(string mailAddr)
     {
         using var db = GetInstance();
         return await db.User.Where(it => it.email == mailAddr).FirstOrDefaultAsync();
     }
 
-    static public async Task<Model.User?> GetUser(int uid)
+    public static async Task<Model.User?> GetUser(int uid)
     {
         using var db = GetInstance();
         return await db.User.Where(it => it.uid == uid).FirstOrDefaultAsync();
     }
 
-    static public async Task<Model.User?> GetUsersByUID(string UID, Platform platform)
+    public static async Task<Model.User?> GetUsersByUID(string UID, Platform platform)
     {
         using var db = GetInstance();
         switch (platform)
@@ -109,7 +107,7 @@ public class Client
         }
     }
 
-    static public async Task<Model.User?> GetUserByOsuUID(long osu_uid)
+    public static async Task<Model.User?> GetUserByOsuUID(long osu_uid)
     {
         using var db = GetInstance();
         var user = await GetOsuUser(osu_uid);
@@ -120,19 +118,19 @@ public class Client
         return await db.User.Where(it => it.uid == user.uid).FirstOrDefaultAsync();
     }
 
-    static public async Task<Model.UserOSU?> GetOsuUser(long osu_uid)
+    public static async Task<Model.UserOSU?> GetOsuUser(long osu_uid)
     {
         using var db = GetInstance();
         return await db.UserOSU.Where(it => it.osu_uid == osu_uid).FirstOrDefaultAsync();
     }
 
-    static public async Task<Model.UserOSU?> GetOsuUserByUID(long kanon_uid)
+    public static async Task<Model.UserOSU?> GetOsuUserByUID(long kanon_uid)
     {
         using var db = GetInstance();
         return await db.UserOSU.Where(it => it.uid == kanon_uid).FirstOrDefaultAsync();
     }
 
-    static public async Task<bool> InsertOsuUser(
+    public static async Task<bool> InsertOsuUser(
         long kanon_uid,
         long osu_uid,
         int customBannerStatus
@@ -158,7 +156,7 @@ public class Client
         }
     }
 
-    static public async Task<API.OSU.Models.PPlusData.UserData?> GetOsuPPlusData(long osu_uid)
+    public static async Task<API.OSU.Models.PPlusData.UserData?> GetOsuPPlusData(long osu_uid)
     {
         using var db = GetInstance();
         var data = await db.OsuPPlus.FirstOrDefaultAsync(it => it.uid == osu_uid && it.pp != 0);
@@ -183,7 +181,7 @@ public class Client
         }
     }
 
-    static public async Task<bool> UpdateOsuPPlusData(
+    public static async Task<bool> UpdateOsuPPlusData(
         API.OSU.Models.PPlusData.UserData ppdata,
         long osu_uid
     )
@@ -206,7 +204,7 @@ public class Client
         return result > -1;
     }
 
-    static public async Task<bool> SetDisplayedBadge(string userid, string displayed_ids)
+    public static async Task<bool> SetDisplayedBadge(string userid, string displayed_ids)
     {
         using var db = GetInstance();
         var data = await db.User.FirstOrDefaultAsync(it => it.uid == long.Parse(userid));
@@ -218,13 +216,13 @@ public class Client
         return res > -1;
     }
 
-    static public async Task<Model.BadgeList?> GetBadgeInfo(string badgeid)
+    public static async Task<Model.BadgeList?> GetBadgeInfo(string badgeid)
     {
         using var db = GetInstance();
         return await db.BadgeList.Where(it => it.id == int.Parse(badgeid)).FirstOrDefaultAsync();
     }
 
-    static public async Task<bool> SetOwnedBadge(string email, string? owned_ids)
+    public static async Task<bool> SetOwnedBadge(string email, string? owned_ids)
     {
         using var db = GetInstance();
         var data = await db.User.FirstOrDefaultAsync(it => it.email == email);
@@ -233,7 +231,7 @@ public class Client
         return res > -1;
     }
 
-    static public async Task<bool> SetOwnedBadge(int uid, string? owned_ids)
+    public static async Task<bool> SetOwnedBadge(int uid, string? owned_ids)
     {
         using var db = GetInstance();
         var data = await db.User.FirstOrDefaultAsync(it => it.uid == uid);
@@ -242,7 +240,7 @@ public class Client
         return res > -1;
     }
 
-    static public async Task<bool> SetOwnedBadgeByOsuUid(string osu_uid, string? owned_ids)
+    public static async Task<bool> SetOwnedBadgeByOsuUid(string osu_uid, string? owned_ids)
     {
         var user = await GetOsuUser(long.Parse(osu_uid));
         if (user == null)
@@ -256,20 +254,20 @@ public class Client
         return res > -1;
     }
 
-    static public async Task<List<long>> GetOsuUserList()
+    public static async Task<List<long>> GetOsuUserList()
     {
         using var db = GetInstance();
         return await db.UserOSU.Select(it => it.osu_uid).ToListAsync();
     }
 
-    static public async Task<int> InsertOsuUserData(OsuArchivedRec rec, bool is_newuser)
+    public static async Task<int> InsertOsuUserData(OsuArchivedRec rec, bool is_newuser)
     {
         using var db = GetInstance();
         rec.lastupdate = is_newuser ? DateTime.Today.AddDays(-1) : DateTime.Today;
         return await db.InsertAsync(rec);
     }
 
-    static public async Task<bool> SetOsuUserMode(long osu_uid, API.OSU.Enums.Mode mode)
+    public static async Task<bool> SetOsuUserMode(long osu_uid, API.OSU.Enums.Mode mode)
     {
         using var db = GetInstance();
         var result = await db.UserOSU
@@ -355,7 +353,12 @@ public class Client
     }
 
     //return badge_id
-    public static async Task<int> InsertBadge(string ENG_NAME, string CHN_NAME, string CHN_DECS, DateTimeOffset expire_at)
+    public static async Task<int> InsertBadge(
+        string ENG_NAME,
+        string CHN_NAME,
+        string CHN_DECS,
+        DateTimeOffset expire_at
+    )
     {
         using var db = GetInstance();
         BadgeList bl =
@@ -367,7 +370,6 @@ public class Client
                 expire_at = expire_at
             };
         return await db.InsertWithInt32IdentityAsync(bl);
-
     }
 
     public static async Task<bool> UpdateSeasonalPass(long oid, string mode, int add_point)
@@ -397,7 +399,7 @@ public class Client
         return t;
     }
 
-    static public async Task<bool> SetOsuInfoPanelVersion(long osu_uid, int ver)
+    public static async Task<bool> SetOsuInfoPanelVersion(long osu_uid, int ver)
     {
         using var db = GetInstance();
         var result = await db.UserOSU
@@ -407,7 +409,7 @@ public class Client
         return result > -1;
     }
 
-    static public async Task<bool> SetOsuInfoPanelV2ColorMode(long osu_uid, int ver)
+    public static async Task<bool> SetOsuInfoPanelV2ColorMode(long osu_uid, int ver)
     {
         using var db = GetInstance();
         var result = await db.UserOSU
@@ -427,7 +429,7 @@ public class Client
         return result > -1;
     }
 
-    static public async Task<bool> SetOsuUserPermissionByOid(long osu_uid, string permission)
+    public static async Task<bool> SetOsuUserPermissionByOid(long osu_uid, string permission)
     {
         var DBUser = await GetUserByOsuUID(osu_uid);
         using var db = GetInstance();
@@ -438,7 +440,7 @@ public class Client
         return result > -1;
     }
 
-    static public async Task<bool> SetOsuUserPermissionByEmail(string email, string permission)
+    public static async Task<bool> SetOsuUserPermissionByEmail(string email, string permission)
     {
         using var db = GetInstance();
         var result = await db.User
@@ -587,9 +589,7 @@ public class Client
     )
     {
         using var db = GetInstance();
-        var li = db.BadgeRedemptionCode
-            .Where(it => it.code == code)
-            .Select(it => it.id);
+        var li = db.BadgeRedemptionCode.Where(it => it.code == code).Select(it => it.id);
         if (await li.CountAsync() > 0)
             return false;
 
@@ -647,10 +647,15 @@ public class Client
         return false;
     }
 
-    public static async Task<BadgeExpirationDateRec?> GetBadgeExpirationTime(int userid, int badgeid)
+    public static async Task<BadgeExpirationDateRec?> GetBadgeExpirationTime(
+        int userid,
+        int badgeid
+    )
     {
         using var db = GetInstance();
-        return await db.BadgeExpirationDateRec.Where(it => it.uid == userid && it.badge_id == badgeid).FirstOrDefaultAsync();
+        return await db.BadgeExpirationDateRec
+            .Where(it => it.uid == userid && it.badge_id == badgeid)
+            .FirstOrDefaultAsync();
     }
 
     public static async Task<List<BadgeExpirationDateRec>?> GetAllBadgeExpirationTime()
@@ -659,20 +664,27 @@ public class Client
         return await db.BadgeExpirationDateRec.ToListAsync();
     }
 
-    public static async Task<bool> UpdateBadgeExpirationTime(int userid, int badgeid, int daysneedtobeadded)
+    public static async Task<bool> UpdateBadgeExpirationTime(
+        int userid,
+        int badgeid,
+        int daysneedtobeadded
+    )
     {
         using var db = GetInstance();
-        var result = await db.BadgeExpirationDateRec.Where(it => it.uid == userid && it.badge_id == badgeid).FirstOrDefaultAsync();
+        var result = await db.BadgeExpirationDateRec
+            .Where(it => it.uid == userid && it.badge_id == badgeid)
+            .FirstOrDefaultAsync();
         if (result == null)
         {
             try
             {
-                BadgeExpirationDateRec bed = new()
-                {
-                    badge_id = badgeid,
-                    uid = userid,
-                    expire_at = DateTimeOffset.Now.AddDays(daysneedtobeadded)
-                };
+                BadgeExpirationDateRec bed =
+                    new()
+                    {
+                        badge_id = badgeid,
+                        uid = userid,
+                        expire_at = DateTimeOffset.Now.AddDays(daysneedtobeadded)
+                    };
                 await db.InsertAsync(bed);
                 return true;
             }
@@ -686,10 +698,14 @@ public class Client
             try
             {
                 result.expire_at.AddDays(daysneedtobeadded);
-                _ = await db.BadgeExpirationDateRec
-                    .Where(it => it.uid == userid && it.badge_id == badgeid)
-                    .Set(it => it.expire_at, it => it.expire_at.DateTime.AddDays(daysneedtobeadded))
-                    .UpdateAsync() > -1;
+                _ =
+                    await db.BadgeExpirationDateRec
+                        .Where(it => it.uid == userid && it.badge_id == badgeid)
+                        .Set(
+                            it => it.expire_at,
+                            it => it.expire_at.DateTime.AddDays(daysneedtobeadded)
+                        )
+                        .UpdateAsync() > -1;
                 return true;
             }
             catch
@@ -714,10 +730,17 @@ public class Client
     public static async Task<int> RemoveBadgeExpirationRecord(int userid, int badgeid)
     {
         using var db = GetInstance();
-        return await db.BadgeExpirationDateRec.Where(x => x.uid == userid && x.badge_id == badgeid).DeleteAsync();
+        return await db.BadgeExpirationDateRec
+            .Where(x => x.uid == userid && x.badge_id == badgeid)
+            .DeleteAsync();
     }
 
-    static public async Task<bool> UpdateChatBotInfo(long uid, string botdefine, string openaikey, string organization)
+    public static async Task<bool> UpdateChatBotInfo(
+        long uid,
+        string botdefine,
+        string openaikey,
+        string organization
+    )
     {
         using var db = GetInstance();
         var data = await db.ChatBot.FirstOrDefaultAsync(it => it.uid == uid);
@@ -733,7 +756,7 @@ public class Client
         return result > -1;
     }
 
-    static public async Task<Model.ChatBot?> GetChatBotInfo(long uid)
+    public static async Task<Model.ChatBot?> GetChatBotInfo(long uid)
     {
         using var db = GetInstance();
         return await db.ChatBot.Where(it => it.uid == uid).FirstOrDefaultAsync();

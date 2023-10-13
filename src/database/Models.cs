@@ -11,7 +11,7 @@ public class Model
 {
     public class DB : LinqToDB.Data.DataConnection
     {
-        public DB(LinqToDBConnectionOptions options) : base(options) { }
+        public DB(DataOptions options) : base(options) { }
 
         public ITable<OsuStandardBeatmapTechData> OsuStandardBeatmapTechData =>
             this.GetTable<OsuStandardBeatmapTechData>();

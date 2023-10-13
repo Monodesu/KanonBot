@@ -131,7 +131,7 @@ public class Helper
                         opts.Text!,
                         opts.Image_Name!,
                         opts.Font!,
-                        Color.ParseHex(opts.Font_Color),
+                        Color.ParseHex(opts.Font_Color!),
                         opts.Font_Size!.Value,
                         int.Parse(temp[0]),
                         int.Parse(temp[1]),

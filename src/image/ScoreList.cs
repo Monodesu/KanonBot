@@ -37,7 +37,7 @@ namespace KanonBot.image
         )
         {
             //设定textOption/drawOption
-            var textOptions = new TextOptions(new Font(TorusSemiBold, 120))
+            var textOptions = new RichTextOptions(new Font(TorusSemiBold, 120))
             {
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = HorizontalAlignment.Left
@@ -168,7 +168,7 @@ namespace KanonBot.image
             foreach (char c in TBP[0].Beatmapset!.Title)
             {
                 title += c;
-                var m = TextMeasurer.Measure(title, textOptions);
+                var m = TextMeasurer.MeasureSize(title, textOptions);
                 if (m.Width > 725)
                 {
                     title += "...";
@@ -189,7 +189,7 @@ namespace KanonBot.image
             if (TBP[0].Mods.Length > 0)
             {
                 textOptions.Origin = new PointF(
-                    485 + TextMeasurer.Measure(title, textOptions).Width + 25,
+                    485 + TextMeasurer.MeasureSize(title, textOptions).Width + 25,
                     530
                 );
                 textOptions.Font = new Font(TorusRegular, 40);
@@ -210,7 +210,7 @@ namespace KanonBot.image
             else
             {
                 textOptions.Origin = new PointF(
-                    485 + TextMeasurer.Measure(title, textOptions).Width + 25,
+                    485 + TextMeasurer.MeasureSize(title, textOptions).Width + 25,
                     530
                 );
                 textOptions.Font = new Font(TorusRegular, 40);
@@ -234,7 +234,7 @@ namespace KanonBot.image
             foreach (char c in TBP[0].Beatmapset!.Artist)
             {
                 artist += c;
-                var m = TextMeasurer.Measure(artist, textOptions);
+                var m = TextMeasurer.MeasureSize(artist, textOptions);
                 if (m.Width > 205)
                 {
                     artist += "...";
@@ -258,7 +258,7 @@ namespace KanonBot.image
             foreach (char c in TBP[0].Beatmapset!.Creator)
             {
                 creator += c;
-                var m = TextMeasurer.Measure(creator, textOptions);
+                var m = TextMeasurer.MeasureSize(creator, textOptions);
                 if (m.Width > 145)
                 {
                     creator += "...";
@@ -343,7 +343,7 @@ namespace KanonBot.image
                         null
                     )
             );
-            var bp1pptextMeasure = TextMeasurer.Measure(
+            var bp1pptextMeasure = TextMeasurer.MeasureSize(
                 string.Format("{0:N1}", TBP[0].PP),
                 textOptions
             );
@@ -394,7 +394,7 @@ namespace KanonBot.image
                 foreach (char c in TBP[i].Beatmapset!.Title)
                 {
                     title += c;
-                    var m = TextMeasurer.Measure(title, textOptions);
+                    var m = TextMeasurer.MeasureSize(title, textOptions);
                     if (m.Width > 710)
                     {
                         title += "...";
@@ -426,7 +426,7 @@ namespace KanonBot.image
                         )
                 );
                 var textMeasurePos =
-                    204 + TextMeasurer.Measure($"#{Rank[i]}", textOptions).Width + 5;
+                    204 + TextMeasurer.MeasureSize($"#{Rank[i]}", textOptions).Width + 5;
 
                 //split
                 textOptions.Origin = new PointF(textMeasurePos, 138);
@@ -441,14 +441,14 @@ namespace KanonBot.image
                         )
                 );
                 textMeasurePos =
-                    textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                    textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                 //version
                 title = "";
                 foreach (char c in TBP[i].Beatmap!.Version)
                 {
                     title += c;
-                    var m = TextMeasurer.Measure(title, textOptions);
+                    var m = TextMeasurer.MeasureSize(title, textOptions);
                     if (m.Width > 130)
                     {
                         title += "...";
@@ -467,7 +467,7 @@ namespace KanonBot.image
                         )
                 );
                 textMeasurePos =
-                    textMeasurePos + TextMeasurer.Measure(title, textOptions).Width + 5;
+                    textMeasurePos + TextMeasurer.MeasureSize(title, textOptions).Width + 5;
 
                 //split
                 textOptions.Origin = new PointF(textMeasurePos, 138);
@@ -482,7 +482,7 @@ namespace KanonBot.image
                         )
                 );
                 textMeasurePos =
-                    textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                    textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                 //bid
                 textOptions.Origin = new PointF(textMeasurePos, 138);
@@ -498,7 +498,7 @@ namespace KanonBot.image
                 );
                 textMeasurePos =
                     textMeasurePos
-                    + TextMeasurer.Measure(TBP[i].Beatmap!.BeatmapId.ToString(), textOptions).Width
+                    + TextMeasurer.MeasureSize(TBP[i].Beatmap!.BeatmapId.ToString(), textOptions).Width
                     + 5;
 
                 //split
@@ -514,7 +514,7 @@ namespace KanonBot.image
                         )
                 );
                 textMeasurePos =
-                    textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                    textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                 //star
                 textOptions.Origin = new PointF(textMeasurePos, 138);
@@ -530,7 +530,7 @@ namespace KanonBot.image
                 );
                 textMeasurePos =
                     textMeasurePos
-                    + TextMeasurer.Measure(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions).Width
+                    + TextMeasurer.MeasureSize(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions).Width
                     + 5;
 
                 //split
@@ -546,7 +546,7 @@ namespace KanonBot.image
                         )
                 );
                 textMeasurePos =
-                    textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                    textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                 //acc
                 textOptions.Origin = new PointF(textMeasurePos, 138);
@@ -562,7 +562,7 @@ namespace KanonBot.image
                 );
                 textMeasurePos =
                     textMeasurePos
-                    + TextMeasurer.Measure(TBP[i].Accuracy.ToString("0.##%"), textOptions).Width
+                    + TextMeasurer.MeasureSize(TBP[i].Accuracy.ToString("0.##%"), textOptions).Width
                     + 5;
 
                 //split
@@ -578,7 +578,7 @@ namespace KanonBot.image
                         )
                 );
                 textMeasurePos =
-                    textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                    textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                 //ranking
                 textOptions.Origin = new PointF(textMeasurePos, 138);

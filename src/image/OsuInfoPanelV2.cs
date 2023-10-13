@@ -878,7 +878,7 @@ namespace KanonBot.DrawV2
             var prevStatistics = data.prevUserInfo?.Statistics ?? data.userInfo.Statistics; // 没有就为当前数据
 
             //设定textOption/drawOption
-            var textOptions = new TextOptions(new Font(TorusSemiBold, 120))
+            var textOptions = new RichTextOptions(new Font(TorusSemiBold, 120))
             {
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = HorizontalAlignment.Left
@@ -1603,7 +1603,7 @@ namespace KanonBot.DrawV2
                             null
                         )
                 );
-                var m = TextMeasurer.Measure(text, textOptions);
+                var m = TextMeasurer.MeasureSize(text, textOptions);
                 indicator_icon_increase.Mutate(
                     x =>
                         x.ProcessPixelRowsAsVector4(row =>
@@ -1645,7 +1645,7 @@ namespace KanonBot.DrawV2
                             null
                         )
                 );
-                m = TextMeasurer.Measure(text, textOptions);
+                m = TextMeasurer.MeasureSize(text, textOptions);
                 indicator_icon_increase.Mutate(
                     x =>
                         x.ProcessPixelRowsAsVector4(row =>
@@ -1687,7 +1687,7 @@ namespace KanonBot.DrawV2
                             null
                         )
                 );
-                m = TextMeasurer.Measure(text, textOptions);
+                m = TextMeasurer.MeasureSize(text, textOptions);
                 indicator_icon_increase.Mutate(
                     x =>
                         x.ProcessPixelRowsAsVector4(row =>
@@ -1729,7 +1729,7 @@ namespace KanonBot.DrawV2
                             null
                         )
                 );
-                m = TextMeasurer.Measure(text, textOptions);
+                m = TextMeasurer.MeasureSize(text, textOptions);
                 indicator_icon_increase.Mutate(
                     x =>
                         x.ProcessPixelRowsAsVector4(row =>
@@ -1768,7 +1768,7 @@ namespace KanonBot.DrawV2
                 foreach (char c in allBP![0].Beatmapset!.Title)
                 {
                     title += c;
-                    var m = TextMeasurer.Measure(title, textOptions);
+                    var m = TextMeasurer.MeasureSize(title, textOptions);
                     if (m.Width > 725)
                     {
                         title += "...";
@@ -1789,7 +1789,7 @@ namespace KanonBot.DrawV2
                 if (allBP![0].Mods.Length > 0)
                 {
                     textOptions.Origin = new PointF(
-                        1945 + TextMeasurer.Measure(title, textOptions).Width + 25,
+                        1945 + TextMeasurer.MeasureSize(title, textOptions).Width + 25,
                         1611
                     );
                     textOptions.Font = new Font(TorusRegular, 40);
@@ -1815,7 +1815,7 @@ namespace KanonBot.DrawV2
                 foreach (char c in allBP![0].Beatmapset!.Artist)
                 {
                     artist += c;
-                    var m = TextMeasurer.Measure(artist, textOptions);
+                    var m = TextMeasurer.MeasureSize(artist, textOptions);
                     if (m.Width > 205)
                     {
                         artist += "...";
@@ -1839,7 +1839,7 @@ namespace KanonBot.DrawV2
                 foreach (char c in allBP![0].Beatmapset!.Creator)
                 {
                     creator += c;
-                    var m = TextMeasurer.Measure(creator, textOptions);
+                    var m = TextMeasurer.MeasureSize(creator, textOptions);
                     if (m.Width > 145)
                     {
                         creator += "...";
@@ -1922,7 +1922,7 @@ namespace KanonBot.DrawV2
                     foreach (char c in allBP![i].Beatmapset!.Title)
                     {
                         title += c;
-                        var m = TextMeasurer.Measure(title, textOptions);
+                        var m = TextMeasurer.MeasureSize(title, textOptions);
                         if (m.Width > 710)
                         {
                             title += "...";
@@ -2044,7 +2044,7 @@ namespace KanonBot.DrawV2
                     foreach (char c in allBP![i].Beatmap!.Version)
                     {
                         title += c;
-                        var m = TextMeasurer.Measure(title, textOptions);
+                        var m = TextMeasurer.MeasureSize(title, textOptions);
                         if (m.Width > 130)
                         {
                             title += "...";
@@ -2067,7 +2067,7 @@ namespace KanonBot.DrawV2
                     );
                     var textMeasurePos =
                         MainTitleAndDifficultyTitlePos_X
-                        + TextMeasurer.Measure(title, textOptions).Width
+                        + TextMeasurer.MeasureSize(title, textOptions).Width
                         + 5;
                     //split
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2082,7 +2082,7 @@ namespace KanonBot.DrawV2
                             )
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                     //bid
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2099,7 +2099,7 @@ namespace KanonBot.DrawV2
                     textMeasurePos =
                         textMeasurePos
                         + TextMeasurer
-                            .Measure(allBP![i].Beatmap!.BeatmapId.ToString(), textOptions)
+                            .MeasureSize(allBP![i].Beatmap!.BeatmapId.ToString(), textOptions)
                             .Width
                         + 5;
 
@@ -2116,7 +2116,7 @@ namespace KanonBot.DrawV2
                             )
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                     //star
                     var ppinfo1 = await PerformanceCalculator.CalculatePanelData(allBP[i]);
@@ -2134,7 +2134,7 @@ namespace KanonBot.DrawV2
                     textMeasurePos =
                         textMeasurePos
                         + TextMeasurer
-                            .Measure(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions)
+                            .MeasureSize(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions)
                             .Width
                         + 5;
 
@@ -2151,7 +2151,7 @@ namespace KanonBot.DrawV2
                             )
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                     //acc
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2168,7 +2168,7 @@ namespace KanonBot.DrawV2
                     textMeasurePos =
                         textMeasurePos
                         + TextMeasurer
-                            .Measure(allBP![i].Accuracy.ToString("0.##%"), textOptions)
+                            .MeasureSize(allBP![i].Accuracy.ToString("0.##%"), textOptions)
                             .Width
                         + 5;
 
@@ -2185,7 +2185,7 @@ namespace KanonBot.DrawV2
                             )
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                     //ranking
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2322,7 +2322,7 @@ namespace KanonBot.DrawV2
                                 null
                             )
                     );
-                var bp1pptextMeasure = TextMeasurer.Measure(
+                var bp1pptextMeasure = TextMeasurer.MeasureSize(
                     string.Format("{0:N1}", allBP![0].PP),
                     textOptions
                 );
@@ -2629,7 +2629,7 @@ namespace KanonBot.DrawV2
                     );
                     var textMeasurePos =
                         MainTitleAndDifficultyTitlePos_X
-                        + TextMeasurer.Measure("-", textOptions).Width
+                        + TextMeasurer.MeasureSize("-", textOptions).Width
                         + 5;
                     //split
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2644,7 +2644,7 @@ namespace KanonBot.DrawV2
                             )
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                     //bid
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2652,7 +2652,7 @@ namespace KanonBot.DrawV2
                         x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(bidC), null)
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure("-", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize("-", textOptions).Width + 5;
 
                     //split
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2667,7 +2667,7 @@ namespace KanonBot.DrawV2
                             )
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                     //star
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2675,7 +2675,7 @@ namespace KanonBot.DrawV2
                         x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(starC), null)
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure("-", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize("-", textOptions).Width + 5;
 
                     //split
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2690,7 +2690,7 @@ namespace KanonBot.DrawV2
                             )
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                     //acc
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2698,7 +2698,7 @@ namespace KanonBot.DrawV2
                         x => x.DrawText(drawOptions, textOptions, "-", new SolidBrush(accC), null)
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure("-", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize("-", textOptions).Width + 5;
 
                     //split
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2713,7 +2713,7 @@ namespace KanonBot.DrawV2
                             )
                     );
                     textMeasurePos =
-                        textMeasurePos + TextMeasurer.Measure(" | ", textOptions).Width + 5;
+                        textMeasurePos + TextMeasurer.MeasureSize(" | ", textOptions).Width + 5;
 
                     //ranking
                     textOptions.Origin = new PointF(textMeasurePos, 1925 + 186 * (i - 1));
@@ -2812,7 +2812,7 @@ namespace KanonBot.DrawV2
                             null
                         )
                 );
-                var bp1pptextMeasure = TextMeasurer.Measure("-", textOptions);
+                var bp1pptextMeasure = TextMeasurer.MeasureSize("-", textOptions);
                 int bp1pptextpos = 3642 - (int)bp1pptextMeasure.Width / 2;
                 textOptions.Font = new Font(TorusRegular, 40);
                 textOptions.Origin = new PointF(bp1pptextpos, 1610);
@@ -3040,7 +3040,7 @@ namespace KanonBot.DrawV2
             textOptions.Font = new Font(TorusRegular, 55);
             textOptions.VerticalAlignment = VerticalAlignment.Center;
             textOptions.HorizontalAlignment = HorizontalAlignment.Left;
-            var osuprofilemode_text_measure = TextMeasurer.Measure(
+            var osuprofilemode_text_measure = TextMeasurer.MeasureSize(
                 osuprofilemode_text,
                 textOptions
             );
@@ -3224,15 +3224,15 @@ namespace KanonBot.DrawV2
             for (int i = 0; i < DataCount; i++)
             {
                 PointF[] p = { new Point(xPos[i], yPos[i]), new Point(xPos[i], Height + 20) };
-                IPen pen = Pens.Dash(DashColor, 3f);
-                image.Mutate(x => x.DrawLines(pen, p));
+                var pen = Pens.Dash(DashColor, 3f);
+                image.Mutate(x => x.DrawLine(pen, p));
             }
 
             //绘制线
             for (int i = 0; i < DataCount - 1; i++)
             {
                 PointF[] p = { new Point(xPos[i], yPos[i]), new Point(xPos[i + 1], yPos[i + 1]) };
-                image.Mutate(x => x.DrawLines(ChartLineColor, LineThickness, p));
+                image.Mutate(x => x.DrawLine(ChartLineColor, LineThickness, p));
             }
 
             //绘制点
@@ -3256,7 +3256,7 @@ namespace KanonBot.DrawV2
             //绘制差异数值
             if (DrawDiff)
             {
-                var textOptions = new TextOptions(new Font(TorusSemiBold, 120))
+                var textOptions = new RichTextOptions(new Font(TorusSemiBold, 120))
                 {
                     VerticalAlignment = VerticalAlignment.Center,
                     HorizontalAlignment = HorizontalAlignment.Center

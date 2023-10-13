@@ -85,7 +85,7 @@ public class Processor
         var fonts = new FontCollection();
         FontFamily ff = fonts.Add($"./work/fonts/{font}");
 
-        var textOptions = new TextOptions(new Font(ff, size))
+        var textOptions = new RichTextOptions(new Font(ff, size))
         {
             VerticalAlignment = VerticalAlignment.Bottom,
             Origin = new Point(pos_x, pos_y),
@@ -115,7 +115,7 @@ public class Processor
             }
         };
 
-        IBrush brush = new SolidBrush(color); //IPen pen = new Pen(color, size);
+        var brush = new SolidBrush(color); //IPen pen = new Pen(color, size);
 
         //构建图像
         WorkList[name].Mutate(x => x.DrawText(drawOptions, textOptions, text, brush, null));
@@ -149,7 +149,7 @@ public class Processor
     /// <param name="direction">LR RL UD DU(left to right / up to down)</param>
     public void AutomaticDisplacementImage(string dest_name, string source_name, int pos_x, int pos_y, int value, float alpha, string direction) //LevelBar
     {
-        var source_img_size = WorkList[source_name].Size();
+        var source_img_size = WorkList[source_name].Size;
         var point = Get_ADIP_Pos(pos_x, pos_y, source_img_size.Width, source_img_size.Height, value, direction);
 
         WorkList[dest_name].Mutate(x => x.DrawImage(WorkList[source_name], point, alpha));

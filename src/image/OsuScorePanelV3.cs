@@ -161,7 +161,7 @@ namespace KanonBot.DrawV3
 
 
             //设定textOption/drawOption
-            var textOptions = new TextOptions(new Font(TorusSemiBold, 120))
+            var textOptions = new RichTextOptions(new Font(TorusSemiBold, 120))
             {
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = HorizontalAlignment.Left
@@ -176,7 +176,7 @@ namespace KanonBot.DrawV3
             foreach (char c in data.scoreInfo.Beatmapset!.Title)
             {
                 temp_string += c;
-                var m = TextMeasurer.Measure(temp_string, textOptions);
+                var m = TextMeasurer.MeasureSize(temp_string, textOptions);
                 if (m.Width > 1130)
                 {
                     temp_string += "...";
@@ -198,7 +198,7 @@ namespace KanonBot.DrawV3
             foreach (char c in data.scoreInfo.Beatmapset.Creator)
             {
                 temp_string += c;
-                var m = TextMeasurer.Measure(temp_string, textOptions);
+                var m = TextMeasurer.MeasureSize(temp_string, textOptions);
                 if (m.Width > 810)
                 {
                     temp_string += "...";
@@ -217,7 +217,7 @@ namespace KanonBot.DrawV3
             foreach (char c in data.scoreInfo.Beatmapset.Artist)
             {
                 temp_string += c;
-                var m = TextMeasurer.Measure(temp_string, textOptions);
+                var m = TextMeasurer.MeasureSize(temp_string, textOptions);
                 if (m.Width > 450)
                 {
                     temp_string += "...";
@@ -248,7 +248,7 @@ namespace KanonBot.DrawV3
             textOptions.Font = new Font(TorusSemiBold, 50);
 
             var stars = $"Stars: {data.ppInfo.star:0.##}";
-            var stars_measure = TextMeasurer.Measure(stars, textOptions);
+            var stars_measure = TextMeasurer.MeasureSize(stars, textOptions);
 
             textOptions.Origin = new PointF(924, 442);
             scoreimg.Mutate(
@@ -309,7 +309,7 @@ namespace KanonBot.DrawV3
             foreach (char c in data.scoreInfo.Beatmap.Version)
             {
                 temp_string += c;
-                var m = TextMeasurer.Measure(temp_string, textOptions);
+                var m = TextMeasurer.MeasureSize(temp_string, textOptions);
                 if (m.Width > 740)
                 {
                     temp_string += "...";
@@ -372,8 +372,8 @@ namespace KanonBot.DrawV3
             //draw mods
             if (data.scoreInfo.Mods.Length > 0)
             {
-                var username_measure = TextMeasurer.Measure(data.scoreInfo.User!.Username, textOptions);
-                var archived_time_measure = TextMeasurer.Measure(data.scoreInfo.CreatedAt.AddHours(8).ToString("yyyy/MM/dd HH:mm"), textOptions);
+                var username_measure = TextMeasurer.MeasureSize(data.scoreInfo.User!.Username, textOptions);
+                var archived_time_measure = TextMeasurer.MeasureSize(data.scoreInfo.CreatedAt.AddHours(8).ToString("yyyy/MM/dd HH:mm"), textOptions);
                 var ModAreaStartPos = 90 + 198 + (int)Math.Max(username_measure.Width, archived_time_measure.Width);
                 foreach (var x in data.scoreInfo.Mods)
                 {
@@ -405,7 +405,7 @@ namespace KanonBot.DrawV3
                         null
                     )
             );
-            var pp_measure = TextMeasurer.Measure("pp", textOptions);
+            var pp_measure = TextMeasurer.MeasureSize("pp", textOptions);
             textOptions.Origin = new PointF(2745 - pp_measure.Width, 655);
             scoreimg.Mutate(
                 x =>
@@ -423,7 +423,7 @@ namespace KanonBot.DrawV3
             textOptions.Font = new Font(TorusRegular, 30);
             textOptions.Origin = new PointF(2750, 747);
             var beatmap_length_text = Duration2TimeString_ForScoreV3(data.scoreInfo.Beatmap.TotalLength);
-            var beatmap_length_text_measure = TextMeasurer.Measure(beatmap_length_text, textOptions);
+            var beatmap_length_text_measure = TextMeasurer.MeasureSize(beatmap_length_text, textOptions);
             var length_graph_length = 2708;
 
             if (!data.scoreInfo.Passed)
@@ -553,7 +553,7 @@ namespace KanonBot.DrawV3
                     )
             );
 
-            pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+            pp_measure = TextMeasurer.MeasureSize(mainpp_text, textOptions);
             textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
             scoreimg.Mutate(
                 x =>
@@ -581,7 +581,7 @@ namespace KanonBot.DrawV3
                     )
             );
 
-            pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+            pp_measure = TextMeasurer.MeasureSize(mainpp_text, textOptions);
             textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
             scoreimg.Mutate(
                 x =>
@@ -609,7 +609,7 @@ namespace KanonBot.DrawV3
                     )
             );
 
-            pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+            pp_measure = TextMeasurer.MeasureSize(mainpp_text, textOptions);
             textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
             scoreimg.Mutate(
                 x =>
@@ -640,7 +640,7 @@ namespace KanonBot.DrawV3
                         )
                 );
 
-                pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+                pp_measure = TextMeasurer.MeasureSize(mainpp_text, textOptions);
                 textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
                 scoreimg.Mutate(
                     x =>
@@ -672,7 +672,7 @@ namespace KanonBot.DrawV3
                     )
             );
 
-            pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+            pp_measure = TextMeasurer.MeasureSize(mainpp_text, textOptions);
             textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
             scoreimg.Mutate(
                 x =>
@@ -698,7 +698,7 @@ namespace KanonBot.DrawV3
                     )
             );
 
-            pp_measure = TextMeasurer.Measure(mainpp_text, textOptions);
+            pp_measure = TextMeasurer.MeasureSize(mainpp_text, textOptions);
             textOptions.Origin = new PointF(mainpp_details_pos_base + pp_measure.Width, pp_details_posy_base);
             scoreimg.Mutate(
                 x =>

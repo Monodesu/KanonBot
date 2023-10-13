@@ -25,7 +25,7 @@ public partial class Kook : ISocket, IDriver
         client.Log += LogAsync;
 
         // client.MessageUpdated += this.Parse;
-        client.DirectMessageReceived += msg => Task.Run(() =>
+        client.DirectMessageReceived += (msg, user, channel) => Task.Run(() =>
         {
             try
             {
@@ -33,7 +33,7 @@ public partial class Kook : ISocket, IDriver
             }
             catch (Exception ex) { Log.Error("未捕获的异常 ↓\n{ex}", ex); }
         });
-        client.MessageReceived += msg => Task.Run(() =>
+        client.MessageReceived += (msg, user, channel) => Task.Run(() =>
         {
             try
             {

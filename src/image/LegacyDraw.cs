@@ -209,7 +209,7 @@ namespace KanonBot.LegacyImage
                 using var pppImg = Hexagram.Draw(ppd, multi, exp, hi);
                 info.Mutate(x => x.DrawImage(pppImg, new Point(132, 626), 1));
                 var f = new Font(Exo2Regular, 18);
-                var pppto = new TextOptions(f)
+                var pppto = new RichTextOptions(f)
                 {
                     VerticalAlignment = VerticalAlignment.Bottom,
                     HorizontalAlignment = HorizontalAlignment.Left,
@@ -240,7 +240,7 @@ namespace KanonBot.LegacyImage
             }
 
             // time
-            var textOptions = new TextOptions(new Font(Exo2Regular, 20))
+            var textOptions = new RichTextOptions(new Font(Exo2Regular, 20))
             {
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = HorizontalAlignment.Left,
@@ -258,7 +258,7 @@ namespace KanonBot.LegacyImage
             );
             if (data.daysBefore > 1)
             {
-                textOptions = new TextOptions(new Font(HarmonySans, 20))
+                textOptions = new RichTextOptions(new Font(HarmonySans, 20))
                 {
                     VerticalAlignment = VerticalAlignment.Bottom,
                     HorizontalAlignment = HorizontalAlignment.Left,
@@ -819,7 +819,7 @@ namespace KanonBot.LegacyImage
             {
                 GraphicsOptions = new GraphicsOptions { Antialias = true }
             };
-            var textOptions = new TextOptions(new Font(font, 60))
+            var textOptions = new RichTextOptions(new Font(font, 60))
             {
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = HorizontalAlignment.Left
@@ -829,7 +829,7 @@ namespace KanonBot.LegacyImage
             foreach (char c in data.scoreInfo.Beatmapset!.Title)
             {
                 title += c;
-                var m = TextMeasurer.Measure(title, textOptions);
+                var m = TextMeasurer.MeasureSize(title, textOptions);
                 if (m.Width > 725)
                 {
                     title += "...";
@@ -850,7 +850,7 @@ namespace KanonBot.LegacyImage
             foreach (char c in data.scoreInfo.Beatmapset.Artist)
             {
                 artist += c;
-                var m = TextMeasurer.Measure(artist, textOptions);
+                var m = TextMeasurer.MeasureSize(artist, textOptions);
                 if (m.Width > 205)
                 {
                     artist += "...";
@@ -870,7 +870,7 @@ namespace KanonBot.LegacyImage
             foreach (char c in data.scoreInfo.Beatmapset.Creator)
             {
                 creator += c;
-                var m = TextMeasurer.Measure(creator, textOptions);
+                var m = TextMeasurer.MeasureSize(creator, textOptions);
                 if (m.Width > 145)
                 {
                     creator += "...";
@@ -1002,7 +1002,7 @@ namespace KanonBot.LegacyImage
             foreach (char c in data.scoreInfo.Beatmap.Version)
             {
                 version += c;
-                var m = TextMeasurer.Measure(version, textOptions);
+                var m = TextMeasurer.MeasureSize(version, textOptions);
                 if (m.Width > 140)
                 {
                     version += "...";
@@ -1071,7 +1071,7 @@ namespace KanonBot.LegacyImage
                 pptext = "-";
             else
                 pptext = ppInfo.ppStat.aim.Value.ToString("0");
-            var metric = TextMeasurer.Measure(pptext, textOptions);
+            var metric = TextMeasurer.MeasureSize(pptext, textOptions);
             textOptions.Origin = new PointF(1532, 638);
             score.Mutate(
                 x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null)
@@ -1084,7 +1084,7 @@ namespace KanonBot.LegacyImage
                 pptext = "-";
             else
                 pptext = ppInfo.ppStat.speed.Value.ToString("0");
-            metric = TextMeasurer.Measure(pptext, textOptions);
+            metric = TextMeasurer.MeasureSize(pptext, textOptions);
             textOptions.Origin = new PointF(1672, 638);
             score.Mutate(
                 x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null)
@@ -1097,7 +1097,7 @@ namespace KanonBot.LegacyImage
                 pptext = "-";
             else
                 pptext = ppInfo.ppStat.acc.Value.ToString("0");
-            metric = TextMeasurer.Measure(pptext, textOptions);
+            metric = TextMeasurer.MeasureSize(pptext, textOptions);
             textOptions.Origin = new PointF(1812, 638);
             score.Mutate(
                 x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null)
@@ -1110,7 +1110,7 @@ namespace KanonBot.LegacyImage
             // if (data.scoreInfo.Mode is OSU.Enums.Mode.Mania)
             // {
             //     pptext = "-";
-            //     metric = TextMeasurer.Measure(pptext, textOptions);
+            //     metric = TextMeasurer.MeasureSize(pptext, textOptions);
             //     for (var i = 0; i < 5; i++)
             //     {
             //         textOptions.Origin = new PointF(50 + 139 * i, 638);
@@ -1133,7 +1133,7 @@ namespace KanonBot.LegacyImage
                 {
                     pptext = "-";
                 }
-                metric = TextMeasurer.Measure(pptext, textOptions);
+                metric = TextMeasurer.MeasureSize(pptext, textOptions);
                 textOptions.Origin = new PointF(50 + 139 * i, 638);
                 score.Mutate(
                     x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null)
@@ -1154,7 +1154,7 @@ namespace KanonBot.LegacyImage
             {
                 pptext = "-";
             }
-            metric = TextMeasurer.Measure(pptext, textOptions);
+            metric = TextMeasurer.MeasureSize(pptext, textOptions);
             textOptions.Origin = new PointF(99, 562);
             score.Mutate(
                 x => x.DrawText(drawOptions, textOptions, pptext, new SolidBrush(ppColor), null)
@@ -1697,7 +1697,7 @@ namespace KanonBot.LegacyImage
 
             // 打印用户名
             var font = new Font(avenirLTStdMedium, 36);
-            var textOptions = new TextOptions(font)
+            var textOptions = new RichTextOptions(font)
             {
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = HorizontalAlignment.Left,
@@ -1715,7 +1715,7 @@ namespace KanonBot.LegacyImage
             // 打印每个用户数据
             var y_offset = new int[6] { 1485, 1150, 1066, 1234, 1318, 1403 }; // pp+数据的y轴坐标
             font = new Font(avenirLTStdMedium, 32);
-            textOptions = new TextOptions(font)
+            textOptions = new RichTextOptions(font)
             {
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = HorizontalAlignment.Left,
@@ -1864,13 +1864,13 @@ namespace KanonBot.LegacyImage
         public static Img DrawString(string str, float fontSize)
         {
             var font = new Font(HarmonySans, fontSize);
-            var textOptions = new TextOptions(new Font(HarmonySans, fontSize))
+            var textOptions = new RichTextOptions(new Font(HarmonySans, fontSize))
             {
                 VerticalAlignment = VerticalAlignment.Top,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Origin = new PointF(fontSize / 2, fontSize / 2)
             };
-            var m = TextMeasurer.Measure(str, textOptions);
+            var m = TextMeasurer.MeasureSize(str, textOptions);
 
             var img = new Image<Rgba32>((int)(m.Width + fontSize), (int)(m.Height + fontSize));
             img.Mutate(x => x.Fill(Color.White));

@@ -71,7 +71,7 @@ impl ScoreParams {
         self.nKatu = Some(n_katu).into();
     }
 
-    #[ffi_service_method(on_panic = "return_default")]
+    #[ffi_service_method(on_panic = "undefined_behavior")]
     pub fn passed_objects(&mut self, passed_objects: u32) {
         self.passedObjects = Some(passed_objects).into();
     }
