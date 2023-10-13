@@ -7,21 +7,21 @@ using Flurl.Http;
 using RosuPP;
 using System.IO;
 
-namespace KanonBot.functions.osubot
+namespace KanonBot.Functions.osubot
 {
     public class Leeway
     {
         async public static Task Execute(Target target, string cmd)
         {
-            OSU.Models.User? OnlineOsuInfo;
+            API.OSU.Models.User? OnlineOsuInfo;
             Database.Model.UserOSU DBOsuInfo;
 
             // 解析指令
             var command = BotCmdHelper.CmdParser(cmd, BotCmdHelper.FuncType.Leeway);
 
             // 解析模式
-            command.osu_mode ??= OSU.Enums.Mode.OSU;
-            if (command.osu_mode is not OSU.Enums.Mode.OSU) { await target.reply("Leeway仅支持osu!std模式。"); return; }
+            command.osu_mode ??= API.OSU.Enums.Mode.OSU;
+            if (command.osu_mode is not API.OSU.Enums.Mode.OSU) { await target.reply("Leeway仅支持osu!std模式。"); return; }
 
             // 验证账户
             var AccInfo = Accounts.GetAccInfo(target);
@@ -38,7 +38,7 @@ namespace KanonBot.functions.osubot
             { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
             // 验证osu信息
-            OnlineOsuInfo = await OSU.GetUser(DBOsuInfo.osu_uid);
+            OnlineOsuInfo = await API.OSU.GetUser(DBOsuInfo.osu_uid);
             //}
             //else
             //{
@@ -59,7 +59,7 @@ namespace KanonBot.functions.osubot
             long bid;
             if (command.order_number == 0) // 检查玩家是否指定bid
             {
-                var scoreInfos = await OSU.GetUserScores(OnlineOsuInfo.Id, OSU.Enums.UserScoreType.Recent, command.osu_mode ?? OSU.Enums.Mode.OSU, 1, command.order_number - 1, true);
+                var scoreInfos = await API.OSU.GetUserScores(OnlineOsuInfo.Id, API.OSU.Enums.UserScoreType.Recent, command.osu_mode ?? API.OSU.Enums.Mode.OSU, 1, command.order_number - 1, true);
                 if (scoreInfos == null) {await target.reply("获取成绩时出错。"); return;};    // 正常是找不到玩家，但是上面有验证，这里做保险
                 if (scoreInfos!.Length > 0) { bid = scoreInfos[0].Beatmap!.BeatmapId; }
                 else { await target.reply("猫猫找不到你最近游玩的成绩。"); return; }
@@ -72,7 +72,7 @@ namespace KanonBot.functions.osubot
             // 尝试寻找玩家在该谱面的最高成绩
             long score;
             var empty_mods = System.Array.Empty<string>(); // 要的是最高分，直接给传一个空集合得了
-            var scoreData = await OSU.GetUserBeatmapScore(OnlineOsuInfo.Id, bid, empty_mods, command.osu_mode ?? OSU.Enums.Mode.OSU);
+            var scoreData = await API.OSU.GetUserBeatmapScore(OnlineOsuInfo.Id, bid, empty_mods, command.osu_mode ?? API.OSU.Enums.Mode.OSU);
             if (scoreData == null)
             {
                 await target.reply("猫猫找不到你的成绩。"); return;
@@ -81,7 +81,7 @@ namespace KanonBot.functions.osubot
             {
                 score = scoreData.Score.Scores;
             }
-            if (scoreData.Score.Mode is not OSU.Enums.Mode.OSU) { await target.reply("Leeway仅支持osu!std模式。"); return; } // 检查谱面是否是std
+            if (scoreData.Score.Mode is not API.OSU.Enums.Mode.OSU) { await target.reply("Leeway仅支持osu!std模式。"); return; } // 检查谱面是否是std
 
 
             // LeewayCalculator
@@ -90,7 +90,7 @@ namespace KanonBot.functions.osubot
             try
             {
                 // 下载谱面
-                await OSU.BeatmapFileChecker(bid);
+                await API.OSU.BeatmapFileChecker(bid);
                 beatmap = File.ReadAllText($"./work/beatmap/{bid}.osu");
             }
             catch (Exception)

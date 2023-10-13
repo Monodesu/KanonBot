@@ -3,11 +3,11 @@ using KanonBot.Message;
 using KanonBot.API;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using KanonBot.functions.osu.rosupp;
+using KanonBot.Functions.OSU.RosuPP;
 using System.IO;
 using LanguageExt.UnsafeValueAccess;
 
-namespace KanonBot.functions.osubot
+namespace KanonBot.Functions.osubot
 {
     public class Score
     {
@@ -15,7 +15,7 @@ namespace KanonBot.functions.osubot
         {
             #region 验证
             long? osuID = null;
-            OSU.Enums.Mode? mode;
+            API.OSU.Enums.Mode? mode;
             Database.Model.User? DBUser = null;
             Database.Model.UserOSU? DBOsuInfo = null;
 
@@ -43,7 +43,7 @@ namespace KanonBot.functions.osubot
                     return;
                 }
 
-                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
+                mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
@@ -62,13 +62,13 @@ namespace KanonBot.functions.osubot
                     DBUser = atDBUser.ValueUnsafe();
                     DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
                     var _osuinfo = atOSU.ValueUnsafe();
-                    mode ??= OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value ;
+                    mode ??= API.OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value ;
                     osuID = _osuinfo.Id;
                 } else {
                     // 普通查询
-                    var OnlineOsuInfo = await OSU.GetUser(
+                    var OnlineOsuInfo = await API.OSU.GetUser(
                         command.osu_username,
-                        command.osu_mode ?? OSU.Enums.Mode.OSU
+                        command.osu_mode ?? API.OSU.Enums.Mode.OSU
                     );
                     if (OnlineOsuInfo != null)
                     {
@@ -76,7 +76,7 @@ namespace KanonBot.functions.osubot
                         if (DBOsuInfo != null)
                         {
                             DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
-                            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
+                            mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
                         }
                         mode ??= OnlineOsuInfo.PlayMode;
                         osuID = OnlineOsuInfo.Id;
@@ -91,7 +91,7 @@ namespace KanonBot.functions.osubot
             }
 
             // 验证osu信息
-            var tempOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
+            var tempOsuInfo = await API.OSU.GetUser(osuID!.Value, mode!.Value);
             if (tempOsuInfo == null)
             {
                 if (DBOsuInfo != null)
@@ -122,7 +122,7 @@ namespace KanonBot.functions.osubot
                 return;
             }
 
-            var scoreData = await OSU.GetUserBeatmapScore(
+            var scoreData = await API.OSU.GetUserBeatmapScore(
                 osuID!.Value,
                 command.order_number,
                 mods.ToArray(),
@@ -138,7 +138,7 @@ namespace KanonBot.functions.osubot
                 return;
             }
             //ppy的getscore api不会返回beatmapsets信息，需要手动获取
-            var beatmapSetInfo = await OSU.GetBeatmap(scoreData!.Score.Beatmap!.BeatmapId);
+            var beatmapSetInfo = await API.OSU.GetBeatmap(scoreData!.Score.Beatmap!.BeatmapId);
             scoreData.Score.Beatmapset = beatmapSetInfo!.Beatmapset;
 
             var data = await PerformanceCalculator.CalculatePanelData(scoreData.Score);

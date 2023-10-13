@@ -2,7 +2,7 @@ using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
 
-namespace KanonBot.functions.osubot
+namespace KanonBot.Functions.osubot
 {
     public class Help
     {

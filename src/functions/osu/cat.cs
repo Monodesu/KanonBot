@@ -2,9 +2,9 @@
 using Flurl.Util;
 using KanonBot.API;
 using KanonBot.Drivers;
-using static KanonBot.functions.Accounts;
+using static KanonBot.Functions.Accounts;
 
-namespace KanonBot.functions.osubot
+namespace KanonBot.Functions.osubot
 {
     public class ChatBot
     {

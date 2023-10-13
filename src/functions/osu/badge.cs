@@ -21,11 +21,11 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using static KanonBot.functions.Accounts;
+using static KanonBot.Functions.Accounts;
 using static LinqToDB.Common.Configuration;
 using Img = SixLabors.ImageSharp.Image;
 
-namespace KanonBot.functions.osubot
+namespace KanonBot.Functions.osubot
 {
     public class Badge
     {

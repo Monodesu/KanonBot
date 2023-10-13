@@ -5,7 +5,7 @@ using KanonBot.Serializer;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using System.IO;
 
-namespace KanonBot.functions.osubot
+namespace KanonBot.Functions.osubot
 {
     public class PPvs
     {
@@ -32,14 +32,14 @@ namespace KanonBot.functions.osubot
                 { await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。"); return; }
 
                 // 分别获取两位的信息
-                var userSelf = await OSU.GetUser(DBOsuInfo.osu_uid);
+                var userSelf = await API.OSU.GetUser(DBOsuInfo.osu_uid);
                 if (userSelf == null)
                 {
                     await target.reply("被办了。");
                     return;
                 }
 
-                var user2 = await OSU.GetUser(cmds[0]);
+                var user2 = await API.OSU.GetUser(cmds[0]);
                 if (user2 == null)
                 {
                     await target.reply("猫猫没有找到此用户。");
@@ -92,14 +92,14 @@ namespace KanonBot.functions.osubot
                 }
 
                 // 分别获取两位的信息
-                var user1 = await OSU.GetUser(cmds[0]);
+                var user1 = await API.OSU.GetUser(cmds[0]);
                 if (user1 == null)
                 {
                     await target.reply($"猫猫没有找到叫 {cmds[0]} 用户。");
                     return;
                 }
 
-                var user2 = await OSU.GetUser(cmds[1]);
+                var user2 = await API.OSU.GetUser(cmds[1]);
                 if (user2 == null)
                 {
                     await target.reply($"猫猫没有找到叫 {cmds[1]} 用户。");

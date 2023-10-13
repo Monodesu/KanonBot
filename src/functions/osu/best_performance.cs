@@ -3,14 +3,14 @@ using KanonBot.Message;
 using KanonBot.API;
 using System.Security.Cryptography;
 using static KanonBot.API.OSU.Enums;
-using KanonBot.functions.osu.rosupp;
+using KanonBot.Functions.OSU.RosuPP;
 using RosuPP;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using System.IO;
 using LanguageExt.UnsafeValueAccess;
 
-namespace KanonBot.functions.osubot
+namespace KanonBot.Functions.osubot
 {
     public class BestPerformance
     {
@@ -18,7 +18,7 @@ namespace KanonBot.functions.osubot
         {
             #region 验证
             long? osuID = null;
-            OSU.Enums.Mode? mode;
+            API.OSU.Enums.Mode? mode;
             Database.Model.User? DBUser = null;
             Database.Model.UserOSU? DBOsuInfo = null;
 
@@ -46,7 +46,7 @@ namespace KanonBot.functions.osubot
                     return;
                 }
 
-                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
+                mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
@@ -65,13 +65,13 @@ namespace KanonBot.functions.osubot
                     DBUser = atDBUser.ValueUnsafe();
                     DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
                     var _osuinfo = atOSU.ValueUnsafe();
-                    mode ??= OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value ;
+                    mode ??= API.OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value ;
                     osuID = _osuinfo.Id;
                 } else {
                     // 普通查询
-                    var OnlineOsuInfo = await OSU.GetUser(
+                    var OnlineOsuInfo = await API.OSU.GetUser(
                         command.osu_username,
-                        command.osu_mode ?? OSU.Enums.Mode.OSU
+                        command.osu_mode ?? API.OSU.Enums.Mode.OSU
                     );
                     if (OnlineOsuInfo != null)
                     {
@@ -79,7 +79,7 @@ namespace KanonBot.functions.osubot
                         if (DBOsuInfo != null)
                         {
                             DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
-                            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
+                            mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
                         }
                         mode ??= OnlineOsuInfo.PlayMode;
                         osuID = OnlineOsuInfo.Id;
@@ -94,7 +94,7 @@ namespace KanonBot.functions.osubot
             }
 
             // 验证osu信息
-            var tempOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
+            var tempOsuInfo = await API.OSU.GetUser(osuID!.Value, mode!.Value);
             if (tempOsuInfo == null)
             {
                 if (DBOsuInfo != null)
@@ -107,9 +107,9 @@ namespace KanonBot.functions.osubot
 
             #endregion
 
-            var scores = await OSU.GetUserScores(
+            var scores = await API.OSU.GetUserScores(
                 osuID!.Value,
-                OSU.Enums.UserScoreType.Best,
+                API.OSU.Enums.UserScoreType.Best,
                 mode!.Value,
                 1,
                 command.order_number - 1
@@ -133,11 +133,11 @@ namespace KanonBot.functions.osubot
                         ImageSegment.Type.Base64
                     )
                 );
-                if (scores![0].Mode == OSU.Enums.Mode.OSU)
+                if (scores![0].Mode == API.OSU.Enums.Mode.OSU)
                 {
                     if (
-                        scores[0].Beatmap!.Status == OSU.Enums.Status.ranked
-                        || scores[0].Beatmap!.Status == OSU.Enums.Status.approved
+                        scores[0].Beatmap!.Status == API.OSU.Enums.Status.ranked
+                        || scores[0].Beatmap!.Status == API.OSU.Enums.Status.approved
                     )
                     {
                         await Database.Client.InsertOsuStandardBeatmapTechData(

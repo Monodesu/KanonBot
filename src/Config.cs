@@ -83,6 +83,7 @@ public class Config
     public class Base : ITomlMetadataProvider
     {
         public bool debug { get; set; }
+        public bool dev { get; set; }
         public OSU? osu { get; set; }
         public OneBot? onebot { get; set; }
         public Guild? guild { get; set; }
@@ -97,6 +98,7 @@ public class Config
             return new Base()
             {
                 debug = true,
+                dev = true,
                 osu = new()
                 {
                     clientId = 0,

@@ -1,8 +1,8 @@
 using Flurl.Util;
 using KanonBot.Drivers;
-using KanonBot.functions;
-using KanonBot.functions.osu;
-using KanonBot.functions.osubot;
+using KanonBot.Functions;
+using KanonBot.Functions.OSU;
+using KanonBot.Functions.osubot;
 using KanonBot.Message;
 using LanguageExt;
 using LanguageExt.ClassInstances;
@@ -17,33 +17,33 @@ namespace KanonBot.command_parser
 {
     public static class Universal
     {
-        private static ConcurrentDictionary<string, string> CommandList = new();
-
-        private static bool ReduplicateTargetChecker_Lock(Target target)
+        public class ReduplicateTargetChecker
         {
-            // 确认此消息是否已被处理
-            if (!CommandList.ContainsKey(target.sender!))
+            private ConcurrentDictionary<string, Target> CommandList = new();
+
+            public bool Lock(Target target)
             {
-                if (CommandList.TryAdd(target.sender!, target.msg.ToString()))
-                    return true;
-                return false;
+                return CommandList.TryAdd(target.sender!, target);
             }
-            else
+
+            public bool Contains(Target target)
             {
-                // 判断是否为同一条指令，如果是，继续返回false，否则继续执行
+                // 检查消息是否已被处理并判断是否为同一条指令
                 if (CommandList.TryGetValue(target.sender!, out var value))
                 {
-                    if (value != target.msg.ToString())
+                    if (value.msg.Equals(target.msg))
                         return true;
                 }
+                return false;
             }
-            return false;
+
+            public void TryUnlock(Target target)
+            {
+                CommandList.TryRemove(target.sender!, out _);
+            }
         }
 
-        public static void TargetChecker_RemoveElement(Target target)
-        {
-            CommandList.TryRemove(target.sender!, out _);
-        }
+        public static ReduplicateTargetChecker reduplicateTargetChecker = new();
 
         public static async Task Parser(Target target)
         {
@@ -63,7 +63,10 @@ namespace KanonBot.command_parser
             if (msg.StartsWith("!") || msg.StartsWith("/") || msg.StartsWith("！"))
             {
                 // 检测相同指令重复
-                if (!ReduplicateTargetChecker_Lock(target)) return;
+                if (reduplicateTargetChecker.Contains(target))
+                    return;
+                else
+                    reduplicateTargetChecker.Lock(target);
 
                 cmd = msg.Build();
                 cmd = cmd[1..]; //删除命令唤起符

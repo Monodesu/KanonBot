@@ -4,12 +4,12 @@ using Newtonsoft.Json.Linq;
 
 namespace KanonBot.Message;
 
-public interface IMsgSegment
+public interface IMsgSegment : IEquatable<IMsgSegment>
 {
     string Build();
 }
 
-public class RawSegment : IMsgSegment
+public class RawSegment : IMsgSegment, IEquatable<RawSegment>
 {
     public Object value { get; set; }
     public string type { get; set; }
@@ -26,8 +26,21 @@ public class RawSegment : IMsgSegment
             _ => $"<raw;{type}={value}>",
         };
     }
+
+    public bool Equals(RawSegment? other)
+    {
+        return other != null && this.type == other.type && this.value == other.value;
+    }
+
+    public bool Equals(IMsgSegment? other)
+    {
+        if (other is RawSegment r)
+            return this.Equals(r);
+        else
+            return false;
+    }
 }
-public class TextSegment : IMsgSegment
+public class TextSegment : IMsgSegment, IEquatable<TextSegment>
 {
     public string value { get; set; }
     public TextSegment(string msg)
@@ -39,8 +52,21 @@ public class TextSegment : IMsgSegment
     {
         return value.ToString();
     }
+
+    public bool Equals(TextSegment? other)
+    {
+        return other != null && this.value == other.value;
+    }
+
+    public bool Equals(IMsgSegment? other)
+    {
+        if (other is TextSegment r)
+            return this.Equals(r);
+        else
+            return false;
+    }
 }
-public class EmojiSegment : IMsgSegment
+public class EmojiSegment : IMsgSegment, IEquatable<EmojiSegment>
 {
     public string value { get; set; }
     public EmojiSegment(string value)
@@ -52,8 +78,21 @@ public class EmojiSegment : IMsgSegment
     {
         return $"<Face;id={value}>";
     }
+
+    public bool Equals(EmojiSegment? other)
+    {
+        return other != null && this.value == other.value;
+    }
+
+    public bool Equals(IMsgSegment? other)
+    {
+        if (other is EmojiSegment r)
+            return this.Equals(r);
+        else
+            return false;
+    }
 }
-public class AtSegment : IMsgSegment
+public class AtSegment : IMsgSegment, IEquatable<AtSegment>
 {
     public Platform platform { get; set; }
     // all 表示全体成员
@@ -76,9 +115,22 @@ public class AtSegment : IMsgSegment
         };
         return $"{platform}={value}";
     }
+
+    public bool Equals(AtSegment? other)
+    {
+        return other != null && this.value == other.value && this.platform == other.platform;
+    }
+
+    public bool Equals(IMsgSegment? other)
+    {
+        if (other is AtSegment r)
+            return this.Equals(r);
+        else
+            return false;
+    }
 }
 
-public class ImageSegment : IMsgSegment
+public class ImageSegment : IMsgSegment, IEquatable<ImageSegment>
 {
     public enum Type
     {
@@ -105,9 +157,22 @@ public class ImageSegment : IMsgSegment
             _ => "",
         };
     }
+
+    public bool Equals(ImageSegment? other)
+    {
+        return other != null && this.value == other.value && this.t == other.t;
+    }
+
+    public bool Equals(IMsgSegment? other)
+    {
+        if (other is ImageSegment r)
+            return this.Equals(r);
+        else
+            return false;
+    }
 }
 
-public class Chain
+public class Chain: IEquatable<Chain>
 {
     List<IMsgSegment> msgList { get; set; }
     public Chain()
@@ -180,4 +245,18 @@ public class Chain
 
     public T? Find<T>() where T : class, IMsgSegment =>
         this.msgList.Find(t => t is T) as T;
+
+    public bool Equals(Chain? other)
+    {
+        if (other == null)
+            return false;
+        if (this.msgList.Count != other.msgList.Count)
+            return false;
+        for (int i = 0; i < this.msgList.Count; i++)
+        {
+            if (!this.msgList[i].Equals(other.msgList[i]))
+                return false;
+        }
+        return true;
+    }
 }

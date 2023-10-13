@@ -1,9 +1,9 @@
 using Flurl.Util;
 using KanonBot.Drivers;
-using KanonBot.functions.osubot;
-using static KanonBot.functions.Accounts;
+using KanonBot.Functions.osubot;
+using static KanonBot.Functions.Accounts;
 
-namespace KanonBot.functions.osu
+namespace KanonBot.Functions.OSU
 {
     public static class Su
     {

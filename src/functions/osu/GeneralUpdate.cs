@@ -11,7 +11,7 @@ using static KanonBot.Database.Model;
 using CronNET.Impl;
 using System.IO;
 
-namespace KanonBot.functions.osu
+namespace KanonBot.Functions.OSU
 {
     public static class GeneralUpdate
     {
@@ -74,11 +74,11 @@ namespace KanonBot.functions.osu
 
         async public static Task UpdateUser(long userID, bool is_newuser)
         {
-            var modes = new OSU.Enums.Mode[] { OSU.Enums.Mode.OSU, OSU.Enums.Mode.Taiko, OSU.Enums.Mode.Fruits, OSU.Enums.Mode.Mania };
+            var modes = new API.OSU.Enums.Mode[] { API.OSU.Enums.Mode.OSU, API.OSU.Enums.Mode.Taiko, API.OSU.Enums.Mode.Fruits, API.OSU.Enums.Mode.Mania };
             foreach (var mode in modes)
             {
                 Log.Information($"正在更新用户数据....[{userID}/{mode}]");
-                var userInfo = await OSU.GetUser(userID, mode);
+                var userInfo = await API.OSU.GetUser(userID, mode);
                 OsuArchivedRec rec = new()
                 {
                     uid = (int)userInfo!.Id,

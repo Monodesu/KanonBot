@@ -2,14 +2,14 @@
 using System.IO;
 using Flurl.Util;
 using KanonBot.Drivers;
-using KanonBot.functions.osubot;
+using KanonBot.Functions.osubot;
 using KanonBot.Message;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
-using static KanonBot.functions.Accounts;
+using static KanonBot.Functions.Accounts;
 
-namespace KanonBot.functions.osu
+namespace KanonBot.Functions.OSU
 {
     public static class Sudo
     {

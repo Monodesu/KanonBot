@@ -37,15 +37,17 @@ public class Drivers
     {
         this.driverList = new();
     }
-    public void append(IDriver n)
+    public Drivers append(IDriver n)
     {
         this.driverList.Add(n);
+        return this;
     }
 
-    public void StartAll()
+    public Drivers StartAll()
     {
         foreach (var driver in this.driverList)
             driver.Start();
+        return this;
     }
 
     public void StopAll()

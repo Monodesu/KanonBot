@@ -5,7 +5,7 @@ using KanonBot.API;
 using KanonBot.LegacyImage;
 using RosuPP;
 
-namespace KanonBot.functions.osu.rosupp
+namespace KanonBot.Functions.OSU.RosuPP
 {
     public static class PerformanceCalculator
     {
@@ -133,7 +133,7 @@ namespace KanonBot.functions.osu.rosupp
 
         public struct Params
         {
-            public required OSU.Enums.Mode mode;
+            public required API.OSU.Enums.Mode mode;
             public string[]? mods;
             public double? acc;
             public uint? n300,
@@ -150,10 +150,10 @@ namespace KanonBot.functions.osu.rosupp
                 p.Mode(
                     mode switch
                     {
-                        OSU.Enums.Mode.OSU => Mode.Osu,
-                        OSU.Enums.Mode.Taiko => Mode.Taiko,
-                        OSU.Enums.Mode.Fruits => Mode.Catch,
-                        OSU.Enums.Mode.Mania => Mode.Mania,
+                        API.OSU.Enums.Mode.OSU => Mode.Osu,
+                        API.OSU.Enums.Mode.Taiko => Mode.Taiko,
+                        API.OSU.Enums.Mode.Fruits => Mode.Catch,
+                        API.OSU.Enums.Mode.Mania => Mode.Mania,
                         _ => throw new ArgumentException()
                     }
                 );
@@ -176,7 +176,7 @@ namespace KanonBot.functions.osu.rosupp
             }
         }
 
-        async public static Task<Draw.ScorePanelData> CalculatePanelData(OSU.Models.Score score)
+        async public static Task<Draw.ScorePanelData> CalculatePanelData(API.OSU.Models.Score score)
         {
             var data = new Draw.ScorePanelData
             {
@@ -187,7 +187,7 @@ namespace KanonBot.functions.osu.rosupp
             try
             {
                 // 下载谱面
-                await OSU.BeatmapFileChecker(score.Beatmap!.BeatmapId);
+                await API.OSU.BeatmapFileChecker(score.Beatmap!.BeatmapId);
                 // 读取铺面
                 beatmap = new Beatmap(
                     await File.ReadAllBytesAsync(

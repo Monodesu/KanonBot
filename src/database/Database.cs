@@ -4,7 +4,7 @@ using System;
 using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography;
 using KanonBot.Drivers;
-using KanonBot.functions.osubot;
+using KanonBot.Functions.osubot;
 using LinqToDB;
 using LinqToDB.Configuration;
 using LinqToDB.Data;

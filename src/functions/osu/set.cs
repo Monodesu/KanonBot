@@ -5,7 +5,7 @@ using Flurl.Http;
 using Flurl.Util;
 using KanonBot.API;
 using KanonBot.Drivers;
-using KanonBot.functions.osu.rosupp;
+using KanonBot.Functions.OSU.RosuPP;
 using KanonBot.Image;
 using KanonBot.LegacyImage;
 using KanonBot.Message;
@@ -24,7 +24,7 @@ using static KanonBot.LegacyImage.Draw;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 
-namespace KanonBot.functions.osubot
+namespace KanonBot.Functions.osubot
 {
     public class Setter
     {
@@ -198,7 +198,7 @@ namespace KanonBot.functions.osubot
 
             cmd = cmd.ToLower().Trim();
 
-            var mode = OSU.Enums.String2Mode(cmd);
+            var mode = API.OSU.Enums.String2Mode(cmd);
             if (mode == null)
             {
                 await target.reply("提供的模式不正确，请重新确认 (osu/taiko/fruits/mania)");

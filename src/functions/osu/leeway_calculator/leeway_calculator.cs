@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace KanonBot.functions.osubot;
+namespace KanonBot.Functions.osubot;
 
 public partial class Leeway_Calculator
 {

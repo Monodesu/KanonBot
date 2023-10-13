@@ -1,15 +1,15 @@
 ﻿using System.IO;
 using KanonBot.API;
 using KanonBot.Drivers;
-using KanonBot.functions.osu;
-using KanonBot.functions.osu.rosupp;
+using KanonBot.Functions.OSU;
+using KanonBot.Functions.OSU.RosuPP;
 using KanonBot.Message;
 using LanguageExt.UnsafeValueAccess;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using static LinqToDB.Common.Configuration;
 
-namespace KanonBot.functions.osubot
+namespace KanonBot.Functions.osubot
 {
     public class Info
     {
@@ -17,7 +17,7 @@ namespace KanonBot.functions.osubot
         {
             #region 验证
             long? osuID = null;
-            OSU.Enums.Mode? mode;
+            API.OSU.Enums.Mode? mode;
             Database.Model.User? DBUser = null;
             Database.Model.UserOSU? DBOsuInfo = null;
 
@@ -45,7 +45,7 @@ namespace KanonBot.functions.osubot
                     return;
                 }
 
-                mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
+                mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value; // 从数据库解析，理论上不可能错
                 osuID = DBOsuInfo.osu_uid;
             }
             else
@@ -69,15 +69,15 @@ namespace KanonBot.functions.osubot
                     DBUser = atDBUser.ValueUnsafe();
                     DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
                     var _osuinfo = atOSU.ValueUnsafe();
-                    mode ??= OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value;
+                    mode ??= API.OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value;
                     osuID = _osuinfo.Id;
                 }
                 else
                 {
                     // 普通查询
-                    var OnlineOsuInfo = await OSU.GetUser(
+                    var OnlineOsuInfo = await API.OSU.GetUser(
                         command.osu_username,
-                        command.osu_mode ?? OSU.Enums.Mode.OSU
+                        command.osu_mode ?? API.OSU.Enums.Mode.OSU
                     );
                     if (OnlineOsuInfo != null)
                     {
@@ -85,7 +85,7 @@ namespace KanonBot.functions.osubot
                         if (DBOsuInfo != null)
                         {
                             DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
-                            mode ??= OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
+                            mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
                         }
                         mode ??= OnlineOsuInfo.PlayMode;
                         osuID = OnlineOsuInfo.Id;
@@ -100,7 +100,7 @@ namespace KanonBot.functions.osubot
             }
 
             // 验证osu信息
-            var tempOsuInfo = await OSU.GetUser(osuID!.Value, mode!.Value);
+            var tempOsuInfo = await API.OSU.GetUser(osuID!.Value, mode!.Value);
             if (tempOsuInfo == null)
             {
                 if (DBOsuInfo != null)
@@ -258,7 +258,7 @@ namespace KanonBot.functions.osubot
             using var stream = new MemoryStream();
             //info默认输出高质量图片？
             SixLabors.ImageSharp.Image img;
-            OSU.Models.Score[]? allBP = System.Array.Empty<OSU.Models.Score>();
+            API.OSU.Models.Score[]? allBP = System.Array.Empty<API.OSU.Models.Score>();
             switch (custominfoengineVer) //0=null 1=v1 2=v2
             {
                 case 1:
@@ -278,9 +278,9 @@ namespace KanonBot.functions.osubot
                         LegacyImage.Draw.UserPanelData.CustomMode.Dark => DrawV2.OsuInfoPanelV2.InfoCustom.DarkDefault,
                         _ => throw new ArgumentOutOfRangeException("未知的自定义模式")
                     };
-                    allBP = await OSU.GetUserScores(
+                    allBP = await API.OSU.GetUserScores(
                         data.userInfo.Id,
-                        OSU.Enums.UserScoreType.Best,
+                        API.OSU.Enums.UserScoreType.Best,
                         data.userInfo.PlayMode,
                         100,
                         0
@@ -311,15 +311,15 @@ namespace KanonBot.functions.osubot
             );
             try
             {
-                if (data.userInfo.PlayMode == OSU.Enums.Mode.OSU) //只存std的
+                if (data.userInfo.PlayMode == API.OSU.Enums.Mode.OSU) //只存std的
                     if (allBP!.Length > 0)
                         await InsertBeatmapTechInfo(allBP);
                     else
                     {
-                        allBP = await OSU.GetUserScores(
+                        allBP = await API.OSU.GetUserScores(
                         data.userInfo.Id,
-                        OSU.Enums.UserScoreType.Best,
-                        OSU.Enums.Mode.OSU,
+                        API.OSU.Enums.UserScoreType.Best,
+                        API.OSU.Enums.Mode.OSU,
                         100,
                         0
                     );
@@ -330,7 +330,7 @@ namespace KanonBot.functions.osubot
             catch { }
         }
 
-        async public static Task InsertBeatmapTechInfo(OSU.Models.Score[] allbp)
+        async public static Task InsertBeatmapTechInfo(API.OSU.Models.Score[] allbp)
         {
             foreach (var score in allbp)
             {

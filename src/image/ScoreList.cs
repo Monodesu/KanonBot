@@ -16,7 +16,7 @@ using SixLabors.ImageSharp.Processing;
 using static KanonBot.LegacyImage.Draw;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
-using static KanonBot.functions.osu.rosupp.PerformanceCalculator;
+using static KanonBot.Functions.OSU.RosuPP.PerformanceCalculator;
 
 namespace KanonBot.image
 {

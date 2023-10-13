@@ -2,13 +2,13 @@
 using Flurl.Util;
 using KanonBot.API;
 using KanonBot.Drivers;
-using KanonBot.functions.osu;
+using KanonBot.Functions.OSU;
 using KanonBot.Message;
 using LanguageExt.SomeHelp;
 using LanguageExt.UnsafeValueAccess;
 using System.Net;
 
-namespace KanonBot.functions
+namespace KanonBot.Functions
 {
     public static class Accounts
     {
@@ -249,8 +249,8 @@ namespace KanonBot.functions
             if (childCmd_1 == "osu")
             {
                 // 先检查查询的用户是否有效
-                OSU.Models.User? online_osu_userinfo;
-                online_osu_userinfo = await OSU.GetUser(childCmd_2);
+                API.OSU.Models.User? online_osu_userinfo;
+                online_osu_userinfo = await API.OSU.GetUser(childCmd_2);
                 if (online_osu_userinfo == null) { await target.reply($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。"); return; }
 
                 // 检查要绑定的osu是否没有被Kanon用户绑定过
@@ -288,7 +288,7 @@ namespace KanonBot.functions
                 await target.reply("请按照以下格式进行绑定。\n!bind osu 您的osu用户名 "); return;
             }
         }
-        public static async Task<(Option<OSU.Models.User>, Option<Database.Model.User>)> ParseAt(string atmsg) {
+        public static async Task<(Option<API.OSU.Models.User>, Option<Database.Model.User>)> ParseAt(string atmsg) {
             var res = SplitKvp(atmsg);
             if (res.IsNone)
                 return (None, None);
@@ -299,7 +299,7 @@ namespace KanonBot.functions
                 if (uid == 0)
                     return (None, None);
                 
-                var osuacc_ = await OSU.GetUser(uid);
+                var osuacc_ = await API.OSU.GetUser(uid);
                 if (osuacc_ is null)
                     return (None, None);
 
@@ -328,7 +328,7 @@ namespace KanonBot.functions
             if (dbosu is null)
                 return (None, Some(dbuser!));
 
-            var osuacc = await OSU.GetUser(dbosu.osu_uid);
+            var osuacc = await API.OSU.GetUser(dbosu.osu_uid);
             if (osuacc is null)
                 return (None, Some(dbuser!));
             else
