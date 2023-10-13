@@ -2,7 +2,7 @@ using Flurl.Util;
 using KanonBot.Drivers;
 using KanonBot.Functions;
 using KanonBot.Functions.OSU;
-using KanonBot.Functions.osubot;
+using KanonBot.Functions.OSUBot;
 using KanonBot.Message;
 using LanguageExt;
 using LanguageExt.ClassInstances;

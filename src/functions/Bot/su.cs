@@ -1,6 +1,6 @@
 using Flurl.Util;
 using KanonBot.Drivers;
-using KanonBot.Functions.osubot;
+using KanonBot.Functions.OSUBot;
 using static KanonBot.Functions.Accounts;
 
 namespace KanonBot.Functions.OSU

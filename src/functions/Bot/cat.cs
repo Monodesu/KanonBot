@@ -4,7 +4,7 @@ using KanonBot.API;
 using KanonBot.Drivers;
 using static KanonBot.Functions.Accounts;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class ChatBot
     {

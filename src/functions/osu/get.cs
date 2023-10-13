@@ -20,7 +20,7 @@ using SixLabors.ImageSharp.Formats.Png;
 using static KanonBot.API.OSU.Models;
 using static KanonBot.API.OSU.Models.PPlusData;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class Get
     {

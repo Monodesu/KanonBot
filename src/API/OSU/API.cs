@@ -72,6 +72,19 @@ namespace KanonBot.API
 
 
         // 获取特定谱面信息
+        async public static Task<Models.BeatmapSearchResult?> SearchBeatmap(string filters)
+        {
+            var res = await http()
+                .AppendPathSegments(new object[] { "beatmapsets", "search", filters })
+                .GetAsync();
+
+            if (res.StatusCode == 404)
+                return null;
+            else
+                return await res.GetJsonAsync<Models.BeatmapSearchResult>();
+        }
+
+        // 获取特定谱面信息
         async public static Task<Models.Beatmap?> GetBeatmap(long bid)
         {
             var res = await http()

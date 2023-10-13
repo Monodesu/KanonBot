@@ -10,7 +10,7 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using System.IO;
 using LanguageExt.UnsafeValueAccess;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class BestPerformance
     {

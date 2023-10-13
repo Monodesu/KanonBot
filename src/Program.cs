@@ -30,24 +30,36 @@ FlurlHttp.GlobalSettings.Redirects.ForwardAuthorizationHeader = true;
 FlurlHttp.GlobalSettings.Redirects.AllowSecureToInsecure = true;
 var config = Config.inner!;
 
-var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] { }, API.OSU.Enums.Mode.Mania).Result!;
-score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
-var attr = API.OSU.GetBeatmapAttributes(score.Score.Beatmap!.BeatmapId, new string[] { }, API.OSU.Enums.Mode.Mania).Result;
-Console.WriteLine("beatmap attr {0}", Json.Serialize(attr));
-API.OSU.BeatmapFileChecker(score.Score.Beatmap!.BeatmapId).Wait();
-Console.WriteLine("pp {0}", score.Score.PP);
-Console.WriteLine("acc {0}", score.Score.Accuracy);
-var data = PerformanceCalculator.CalculatePanelData(score.Score).Result;
-Console.WriteLine("cal pp {0}", data.ppInfo.ppStat.total);
-Console.WriteLine("cal data {0}", Json.Serialize(data.ppInfo));
-
-var log = new LoggerConfiguration().WriteTo
-    .Async(a => a.Console())
-    .WriteTo.Async(a => a.File("logs/log-.log", rollingInterval: RollingInterval.Day));
-if (config.debug)
+if (config.dev)
+{
+    var log = new LoggerConfiguration().WriteTo.Async(a => a.Console());
     log = log.MinimumLevel.Debug();
-Log.Logger = log.CreateLogger();
+    Log.Logger = log.CreateLogger();
+}
+else
+{
+    var log = new LoggerConfiguration().WriteTo
+        .Async(a => a.Console())
+        .WriteTo.Async(a => a.File("logs/log-.log", rollingInterval: RollingInterval.Day));
+    if (config.debug)
+        log = log.MinimumLevel.Debug();
+    Log.Logger = log.CreateLogger();
+}
 Log.Information("初始化成功 {@config}", config);
+
+
+// var res = API.OSU.SearchBeatmap("exit this ato").Result;
+// Log.Information("{@res}", res);
+// var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] { }, API.OSU.Enums.Mode.Mania).Result!;
+// score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
+// var attr = API.OSU.GetBeatmapAttributes(score.Score.Beatmap!.BeatmapId, new string[] { }, API.OSU.Enums.Mode.Mania).Result;
+// Console.WriteLine("beatmap attr {0}", Json.Serialize(attr));
+// API.OSU.BeatmapFileChecker(score.Score.Beatmap!.BeatmapId).Wait();
+// Console.WriteLine("pp {0}", score.Score.PP);
+// Console.WriteLine("acc {0}", score.Score.Accuracy);
+// var data = PerformanceCalculator.CalculatePanelData(score.Score).Result;
+// Console.WriteLine("cal pp {0}", data.ppInfo.ppStat.total);
+// Console.WriteLine("cal data {0}", Json.Serialize(data.ppInfo));
 
 Log.Information("注册用户数据更新事件");
 GeneralUpdate.DailyUpdate();

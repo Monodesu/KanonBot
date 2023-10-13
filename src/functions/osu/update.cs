@@ -5,7 +5,7 @@ using KanonBot.Functions.OSU;
 using System.IO;
 using LanguageExt.UnsafeValueAccess;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class Update
     {

@@ -24,7 +24,7 @@ using static KanonBot.LegacyImage.Draw;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class Setter
     {

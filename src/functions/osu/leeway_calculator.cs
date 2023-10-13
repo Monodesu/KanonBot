@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace KanonBot.Functions.osubot;
+namespace KanonBot.Functions.OSUBot;
 
-public partial class Leeway_Calculator
+public partial class LeewayCalculator
 {
     private const double DT = 1.5f;
 

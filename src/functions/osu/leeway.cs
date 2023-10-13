@@ -7,7 +7,7 @@ using Flurl.Http;
 using RosuPP;
 using System.IO;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class Leeway
     {
@@ -100,7 +100,7 @@ namespace KanonBot.Functions.osubot
                 await target.reply("无法获取铺面信息。"); return;
             }
 
-            Leeway_Calculator lc = new(); // 实例化
+            LeewayCalculator lc = new(); // 实例化
 
             string[] mods = lc.GetMods(command.osu_mods.ToUpper()); // 获取mods
             int maxScore = lc.CalculateMaxScore(beatmap, mods); // 计算理论值

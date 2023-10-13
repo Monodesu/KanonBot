@@ -19,7 +19,7 @@ using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 using System.Collections.Generic;
 using SixLabors.ImageSharp.Diagnostics;
-using KanonBot.Functions.osubot;
+using KanonBot.Functions.OSUBot;
 using static KanonBot.API.OSU.Models;
 using LanguageExt.ClassInstances;
 

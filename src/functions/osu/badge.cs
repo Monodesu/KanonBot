@@ -25,7 +25,7 @@ using static KanonBot.Functions.Accounts;
 using static LinqToDB.Common.Configuration;
 using Img = SixLabors.ImageSharp.Image;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class Badge
     {

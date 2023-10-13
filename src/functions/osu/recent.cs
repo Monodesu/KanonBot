@@ -9,7 +9,7 @@ using KanonBot.Functions.OSU;
 using static KanonBot.API.OSU.Models;
 using LanguageExt.UnsafeValueAccess;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class Recent
     {

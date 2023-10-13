@@ -7,7 +7,7 @@ using KanonBot.Functions.OSU.RosuPP;
 using System.IO;
 using LanguageExt.UnsafeValueAccess;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class Score
     {

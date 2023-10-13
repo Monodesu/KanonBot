@@ -5,7 +5,7 @@ using KanonBot.Serializer;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using System.IO;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class PPvs
     {

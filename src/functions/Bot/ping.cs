@@ -2,7 +2,7 @@ using KanonBot.Drivers;
 using KanonBot.Message;
 using KanonBot.API;
 
-namespace KanonBot.Functions.osubot
+namespace KanonBot.Functions.OSUBot
 {
     public class Ping
     {
