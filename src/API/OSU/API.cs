@@ -75,7 +75,17 @@ namespace KanonBot.API
         async public static Task<Models.BeatmapSearchResult?> SearchBeatmap(string filters)
         {
             var res = await http()
-                .AppendPathSegments(new object[] { "beatmapsets", "search", filters })
+                .AppendPathSegments(new object[] { "beatmapsets", "search" })
+                .SetQueryParams(new
+                {
+                    q = filters,
+                    // limit = 1,
+                    // offset = 0,
+                    // sort = "ranked",
+                    // m = 0,
+                    // s = "favourite",
+                    // a = "false"
+                })
                 .GetAsync();
 
             if (res.StatusCode == 404)

@@ -678,7 +678,7 @@ namespace KanonBot.LegacyImage
                     {
                         var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
                         Log.Error(msg);
-                        throw;
+                        throw; // 下载失败直接抛出error
                     }
                     return await ReadImageRgba(avatarPath); // 下载后再读取
                 });

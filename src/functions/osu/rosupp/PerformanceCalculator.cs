@@ -176,6 +176,82 @@ namespace KanonBot.Functions.OSU.RosuPP
             }
         }
 
+        async public static Task<Draw.ScorePanelData> CalculatePanelSSData(API.OSU.Models.Beatmap map)
+        {
+            
+            Beatmap beatmap;
+            try
+            {
+                // 下载谱面
+                await API.OSU.BeatmapFileChecker(map.BeatmapId);
+                // 读取铺面
+                beatmap = new Beatmap(
+                    await File.ReadAllBytesAsync(
+                        $"./work/beatmap/{map.BeatmapId}.osu"
+                    )
+                );
+            }
+            catch (Exception)
+            {
+                // 加载失败，删除重新抛异常
+                File.Delete($"./work/beatmap/{map.BeatmapId}.osu");
+                throw;
+            }
+
+            var p = ScoreParams.New();
+            p.Acc(100);
+            // 开始计算
+            var res = beatmap.Calculate(p);
+            var data = new Draw.ScorePanelData
+            {
+                scoreInfo = new API.OSU.Models.Score
+                {
+                    Accuracy = 1.0,
+                    Beatmap = map,
+                    MaxCombo = (uint)map.MaxCombo,
+                    Statistics = new API.OSU.Models.ScoreStatistics 
+                    {
+                        CountGreat = (uint)(map.CountCircles + map.CountSliders),
+                        CountMeh = 0,
+                        CountMiss = 0,
+                        CountKatu = 0,
+                        CountOk = 0,
+                    },
+                    Mods = new string[0],
+                    Mode = map.Mode,
+                    Scores = 1000000,
+                    Passed = true,
+                    Rank = "X",
+                }
+            };
+            var statistics = data.scoreInfo.Statistics;
+            data.ppInfo = res.ToPPInfo();
+
+            double[] accs =
+            {
+                100.00,
+                99.00,
+                98.00,
+                97.00,
+                95.00,
+                data.scoreInfo.Accuracy * 100.00
+            };
+            data.ppInfo.ppStats = accs.Select(acc =>
+                {
+                    var p = ScoreParams.New();
+                    new Params
+                    {
+                        mode = data.scoreInfo.Mode,
+                        mods = data.scoreInfo.Mods,
+                        acc = acc,
+                    }.build(ref p);
+                    return beatmap.Calculate(p).ToPPInfo().ppStat;
+                })
+                .ToList();
+
+            return data;
+        }
+
         async public static Task<Draw.ScorePanelData> CalculatePanelData(API.OSU.Models.Score score)
         {
             var data = new Draw.ScorePanelData

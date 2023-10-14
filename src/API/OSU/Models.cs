@@ -430,6 +430,8 @@ namespace KanonBot.API
 
                 [JsonProperty(PropertyName = "ratings")]
                 public long[] Ratings { get; set; }
+                [JsonProperty(PropertyName = "beatmaps", NullValueHandling = NullValueHandling.Ignore)]
+                public Beatmap[]? Beatmaps { get; set; }
 
                 // [JsonProperty(PropertyName = "track_id")]
                 // public JObject TrackId { get; set; }

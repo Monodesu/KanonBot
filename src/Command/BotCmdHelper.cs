@@ -21,6 +21,7 @@ namespace KanonBot
             public bool self_query;
             public Option<int> StartAt;
             public Option<int> EndAt;
+            public string extra_args;
         }
 
         public enum FuncType
@@ -198,6 +199,7 @@ namespace KanonBot
                             {
                                 var index = int.Parse(arg1);
                                 param.order_number = index < 1 ? -1 : index;
+                                param.extra_args = arg1;
                             }
                             catch
                             {
@@ -216,6 +218,7 @@ namespace KanonBot
                             {
                                 var index = int.Parse(arg3[1..]);
                                 param.order_number = index < 1 ? -1 : index;
+                                param.extra_args = arg3[1..];
                             }
                             catch
                             {
