@@ -4,12 +4,15 @@ using libDiscord = Discord;
 using Msg = KanonBot.Message;
 
 namespace KanonBot.Drivers;
+
 // 消息target封装
 // 暂时还不知道怎么写
 public class Target
 {
-    public static Atom<List<(Target, ChannelWriter<Target>)>> Waiters { get; set; } = Atom<List<(Target, ChannelWriter<Target>)>>(new());
-    async public Task<Option<Target>> prompt(TimeSpan timeout)
+    public static Atom<List<(Target, ChannelWriter<Target>)>> Waiters { get; set; } =
+        Atom<List<(Target, ChannelWriter<Target>)>>(new());
+
+    public async Task<Option<Target>> prompt(TimeSpan timeout)
     {
         var channel = Channel.CreateBounded<Target>(1);
         Waiters.Swap(l =>
@@ -25,6 +28,7 @@ public class Target
         });
         return ret;
     }
+
     public required Msg.Chain msg { get; init; }
 
     // account和sender为用户ID字符串，可以是qq号，khl号，等等
@@ -38,13 +42,12 @@ public class Target
     // 原平台接口
     public required ISocket socket { get; init; }
 
-
     public Task<bool> reply(string m)
     {
         return this.reply(new Msg.Chain().msg(m));
     }
 
-    async public Task<bool> reply(Msg.Chain msgChain)
+    public async Task<bool> reply(Msg.Chain msgChain)
     {
         switch (this.socket!)
         {
@@ -54,27 +57,46 @@ public class Target
                 {
                     await d.api.SendMessage(discordRawMessage!.Channel, msgChain);
                 }
-                catch (Exception ex) { Log.Warning("发送Discord消息失败 ↓\n{ex}", ex); return false; }
+                catch (Exception ex)
+                {
+                    Log.Warning("发送Discord消息失败 ↓\n{ex}", ex);
+                    return false;
+                }
                 break;
             case Kook s:
                 var KookRawMessage = this.raw as libKook.WebSocket.SocketMessage;
                 try
                 {
-                    await s.api.SendChannelMessage(KookRawMessage!.Channel.Id.ToString(), msgChain, KookRawMessage.Id);
+                    await s.api.SendChannelMessage(
+                        KookRawMessage!.Channel.Id.ToString(),
+                        msgChain,
+                        KookRawMessage.Id
+                    );
                 }
-                catch (Exception ex) { Log.Warning("发送Kook消息失败 ↓\n{ex}", ex); return false; }
+                catch (Exception ex)
+                {
+                    Log.Warning("发送Kook消息失败 ↓\n{ex}", ex);
+                    return false;
+                }
                 break;
             case Guild s:
                 var GuildMessageData = (this.raw as Guild.Models.MessageData)!;
                 try
                 {
-                    await s.api.SendMessage(GuildMessageData.ChannelID, new Guild.Models.SendMessageData()
-                    {
-                        MessageId = GuildMessageData.ID,
-                        MessageReference = new() { MessageId = GuildMessageData.ID }
-                    }.Build(msgChain));
+                    await s.api.SendMessage(
+                        GuildMessageData.ChannelID,
+                        new Guild.Models.SendMessageData()
+                        {
+                            MessageId = GuildMessageData.ID,
+                            MessageReference = new() { MessageId = GuildMessageData.ID }
+                        }.Build(msgChain)
+                    );
                 }
-                catch (Exception ex) { Log.Warning("发送QQ频道消息失败 ↓\n{ex}", ex); return false; }
+                catch (Exception ex)
+                {
+                    Log.Warning("发送QQ频道消息失败 ↓\n{ex}", ex);
+                    return false;
+                }
                 break;
             case OneBot.Client s:
                 switch (this.raw)
@@ -117,9 +139,12 @@ public class Target
                 }
                 break;
             default:
+                if (this.socket is IReply r)
+                    r.Reply(this, msgChain);
+                else
+                    socket.Send(msgChain.ToString());
                 break;
         }
         return true;
     }
-
 }

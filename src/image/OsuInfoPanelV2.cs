@@ -1193,10 +1193,7 @@ namespace KanonBot.DrawV2
             if (isBonded)
             {
                 if (
-                    Math.Abs(
-                        data.userInfo.Statistics.CountryRank
-                            - prevStatistics.CountryRank
-                    ) >= 1
+                    Math.Abs(data.userInfo.Statistics.CountryRank - prevStatistics.CountryRank) >= 1
                 )
                 {
                     textOptions.HorizontalAlignment = HorizontalAlignment.Right;
@@ -1222,12 +1219,7 @@ namespace KanonBot.DrawV2
                         $"./work/panelv2/icons/indicator.png"
                     );
                     cr_indicator_icon_increase.Mutate(x => x.Resize(36, 36));
-                    if (
-                        (
-                            data.userInfo.Statistics.CountryRank
-                            - prevStatistics.CountryRank
-                        ) > 0
-                    )
+                    if ((data.userInfo.Statistics.CountryRank - prevStatistics.CountryRank) > 0)
                         cr_indicator_icon_increase.Mutate(x => x.Rotate(180));
                     cr_indicator_icon_increase.Mutate(
                         x =>
@@ -1279,10 +1271,7 @@ namespace KanonBot.DrawV2
                                 textOptions,
                                 string.Format(
                                     "{0:N0}",
-                                    Math.Abs(
-                                        data.userInfo.Statistics.PP
-                                            - prevStatistics.PP
-                                    )
+                                    Math.Abs(data.userInfo.Statistics.PP - prevStatistics.PP)
                                 ),
                                 new SolidBrush(ppDiffColor),
                                 null
@@ -1332,10 +1321,8 @@ namespace KanonBot.DrawV2
             if (isBonded)
             {
                 if (
-                    Math.Abs(
-                        data.userInfo.Statistics.HitAccuracy
-                            - prevStatistics.HitAccuracy
-                    ) >= 0.01
+                    Math.Abs(data.userInfo.Statistics.HitAccuracy - prevStatistics.HitAccuracy)
+                    >= 0.01
                 )
                 {
                     textOptions.HorizontalAlignment = HorizontalAlignment.Right;
@@ -1359,12 +1346,7 @@ namespace KanonBot.DrawV2
                         $"./work/panelv2/icons/indicator.png"
                     );
                     acc_indicator_icon_increase.Mutate(x => x.Resize(36, 36));
-                    if (
-                        (
-                            data.userInfo.Statistics.HitAccuracy
-                            - prevStatistics.HitAccuracy
-                        ) < 0.0
-                    )
+                    if ((data.userInfo.Statistics.HitAccuracy - prevStatistics.HitAccuracy) < 0.0)
                         acc_indicator_icon_increase.Mutate(x => x.Rotate(180));
                     acc_indicator_icon_increase.Mutate(
                         x =>
@@ -2310,18 +2292,24 @@ namespace KanonBot.DrawV2
                 textOptions.HorizontalAlignment = HorizontalAlignment.Center;
                 textOptions.Origin = new PointF(3642, 1670);
                 var bppp = 0.00;
-                try { bppp = allBP![0].PP; }
-                catch { bppp = 0.00; }
+                try
+                {
+                    bppp = allBP![0].PP;
+                }
+                catch
+                {
+                    bppp = 0.00;
+                }
                 info.Mutate(
-                        x =>
-                            x.DrawText(
-                                drawOptions,
-                                textOptions,
-                                string.Format("{0:N1}", bppp),
-                                new SolidBrush(MainBPppMainColor),
-                                null
-                            )
-                    );
+                    x =>
+                        x.DrawText(
+                            drawOptions,
+                            textOptions,
+                            string.Format("{0:N1}", bppp),
+                            new SolidBrush(MainBPppMainColor),
+                            null
+                        )
+                );
                 var bp1pptextMeasure = TextMeasurer.MeasureSize(
                     string.Format("{0:N1}", allBP![0].PP),
                     textOptions
@@ -2338,13 +2326,19 @@ namespace KanonBot.DrawV2
                             "pp",
                             new SolidBrush(MainBPppTitleColor),
                             null
-                            )
+                        )
                 );
                 textOptions.HorizontalAlignment = HorizontalAlignment.Center;
                 textOptions.Font = new Font(TorusRegular, 70);
                 textOptions.Origin = new PointF(3642, 1895);
-                try { bppp = allBP![1].PP; }
-                catch { bppp = 0.00; }
+                try
+                {
+                    bppp = allBP![1].PP;
+                }
+                catch
+                {
+                    bppp = 0.00;
+                }
                 info.Mutate(
                     x =>
                         x.DrawText(
@@ -2353,11 +2347,17 @@ namespace KanonBot.DrawV2
                             string.Format("{0:N0}pp", bppp),
                             new SolidBrush(SubBp2ndBPppMainColor),
                             null
-                            )
-                        );
+                        )
+                );
                 textOptions.Origin = new PointF(3642, 2081);
-                try { bppp = allBP![2].PP; }
-                catch { bppp = 0.00; }
+                try
+                {
+                    bppp = allBP![2].PP;
+                }
+                catch
+                {
+                    bppp = 0.00;
+                }
                 info.Mutate(
                     x =>
                         x.DrawText(
@@ -2366,35 +2366,47 @@ namespace KanonBot.DrawV2
                             string.Format("{0:N0}pp", bppp),
                             new SolidBrush(SubBp3rdBPppMainColor),
                             null
-                            )
-                        );
+                        )
+                );
                 textOptions.Origin = new PointF(3642, 2266);
-                try { bppp = allBP![3].PP; }
-                catch { bppp = 0.00; }
+                try
+                {
+                    bppp = allBP![3].PP;
+                }
+                catch
+                {
+                    bppp = 0.00;
+                }
                 info.Mutate(
-                        x =>
-                            x.DrawText(
-                                drawOptions,
-                                textOptions,
-                                string.Format("{0:N0}pp", bppp),
-                                new SolidBrush(SubBp4thBPppMainColor),
-                                null
-                                )
-                            );
+                    x =>
+                        x.DrawText(
+                            drawOptions,
+                            textOptions,
+                            string.Format("{0:N0}pp", bppp),
+                            new SolidBrush(SubBp4thBPppMainColor),
+                            null
+                        )
+                );
 
                 textOptions.Origin = new PointF(3642, 2450);
-                try { bppp = allBP![4].PP; }
-                catch { bppp = 0.00; }
+                try
+                {
+                    bppp = allBP![4].PP;
+                }
+                catch
+                {
+                    bppp = 0.00;
+                }
                 info.Mutate(
-                        x =>
-                            x.DrawText(
-                                drawOptions,
-                                textOptions,
-                                string.Format("{0:N0}pp", bppp),
-                                new SolidBrush(SubBp5thBPppMainColor),
-                                null
-                                )
-                            );
+                    x =>
+                        x.DrawText(
+                            drawOptions,
+                            textOptions,
+                            string.Format("{0:N0}pp", bppp),
+                            new SolidBrush(SubBp5thBPppMainColor),
+                            null
+                        )
+                );
                 #endregion
             }
             else
@@ -2884,28 +2896,37 @@ namespace KanonBot.DrawV2
                     {
                         for (int i = 0; i < data.badgeId.Count; ++i)
                         {
-                            if (data.badgeId[i] == -9) continue;
+                            if (data.badgeId[i] == -9)
+                                continue;
                             var (_badge, format) = await ReadImageRgbaWithFormat(
-                            $"./work/badges/{data.badgeId[i]}.png"
-                        );
+                                $"./work/badges/{data.badgeId[i]}.png"
+                            );
                             using var badge = _badge;
                             //检测上传的badge format是否正确，否则重新格式化
                             if (format.DefaultMimeType.Trim().ToLower()[..3] != "png")
                             {
                                 File.Delete($"./work/badges/{data.badgeId[i]}.png");
-                                badge.Save($"./work/badges/{data.badgeId[i]}.png", new PngEncoder());
+                                badge.Save(
+                                    $"./work/badges/{data.badgeId[i]}.png",
+                                    new PngEncoder()
+                                );
                             }
+
+                            // var roundedCorner = true;
+                            // badge.ProcessPixelRows(row =>
+                            // {
+                            //     roundedCorner = row.GetRowSpan(0)[0] == Rgba32.ParseHex("#000000");
+                            // });
+                            // if (!roundedCorner)
+                            //     badge.Mutate(x => x.RoundCorner(badge.Size, 20));
 
                             //绘制
                             if (i < 5)
                             {
                                 //top
                                 badge.Mutate(
-                                x =>
-                                    x.Resize(236, 110)
-                                        .Brightness(BadgeBrightness)
-                                        //.RoundCorner(new Size(236, 110), 20)
-                            );
+                                    x => x.Resize(236, 110).Brightness(BadgeBrightness)
+                                );
 
                                 badge.Mutate(
                                     x =>
@@ -2917,19 +2938,21 @@ namespace KanonBot.DrawV2
                                         })
                                 );
                                 if (data.userInfo.IsSupporter && DisplaySupporterStatus)
-                                    info.Mutate(x => x.DrawImage(badge, new Point(3420 - i * 276, 93), 1));
+                                    info.Mutate(
+                                        x => x.DrawImage(badge, new Point(3420 - i * 276, 93), 1)
+                                    );
                                 else
-                                    info.Mutate(x => x.DrawImage(badge, new Point(3566 - i * 276, 93), 1));
+                                    info.Mutate(
+                                        x => x.DrawImage(badge, new Point(3566 - i * 276, 93), 1)
+                                    );
                             }
                             else
                             {
                                 //bottom
                                 badge.Mutate(
-                                x =>
-                                    x.Brightness(BadgeBrightness)
-                                        .Resize(108, 50)
-                                        //.RoundCorner(new Size(108, 50), 6.0f)
-                            );
+                                    x => x.Brightness(BadgeBrightness).Resize(108, 50)
+                                //.RoundCorner(new Size(108, 50), 6.0f)
+                                );
 
                                 badge.Mutate(
                                     x =>
@@ -2941,11 +2964,24 @@ namespace KanonBot.DrawV2
                                         })
                                 );
                                 if (data.userInfo.IsSupporter && DisplaySupporterStatus)
-                                    info.Mutate(x => x.DrawImage(badge, new Point(3414 - (i - 6) * 132, 223), 1));
+                                    info.Mutate(
+                                        x =>
+                                            x.DrawImage(
+                                                badge,
+                                                new Point(3414 - (i - 6) * 132, 223),
+                                                1
+                                            )
+                                    );
                                 else
-                                    info.Mutate(x => x.DrawImage(badge, new Point(3560 - (i - 6) * 132, 223), 1));
+                                    info.Mutate(
+                                        x =>
+                                            x.DrawImage(
+                                                badge,
+                                                new Point(3560 - (i - 6) * 132, 223),
+                                                1
+                                            )
+                                    );
                             }
-
                         }
                     }
 
@@ -3172,11 +3208,11 @@ namespace KanonBot.DrawV2
             //resize to 1920x?
             if (!output4k)
                 info.Mutate(
-                x =>
-                    x.Resize(
-                        new ResizeOptions() { Size = new Size(1920, 0), Mode = ResizeMode.Max }
-                    )
-            );
+                    x =>
+                        x.Resize(
+                            new ResizeOptions() { Size = new Size(1920, 0), Mode = ResizeMode.Max }
+                        )
+                );
             return info;
         }
 

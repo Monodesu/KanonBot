@@ -116,7 +116,6 @@ namespace KanonBot.command_parser
                     rootCmd = cmd;
                 }
 
-                //Console.WriteLine(target.account + target.platform);
                 try
                 {
                     switch (rootCmd.ToLower())

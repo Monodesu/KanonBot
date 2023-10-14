@@ -143,7 +143,14 @@ namespace KanonBot.LegacyImage
                     {
                         if (data.badgeId[i] > -1)
                         {
-                            using var badge = await Img.LoadAsync($"./work/badges/{data.badgeId[i]}.png");
+                            using var badge = await Img.LoadAsync<Rgba32>($"./work/badges/{data.badgeId[i]}.png");
+                            // var roundedCorner = true;
+                            // badge.ProcessPixelRows(row =>
+                            // {
+                            //     roundedCorner = row.GetRowSpan(0)[0] == Rgba32.ParseHex("#000000");
+                            // });
+                            // if (!roundedCorner)
+                            //     badge.Mutate(x => x.RoundCorner(badge.Size, 20));
                             badge.Mutate(x => x.Resize(86, 40));//.RoundCorner(new Size(86, 40), 5));
                             info.Mutate(x => x.DrawImage(badge, new Point(272 + (dbcountl * 100), 152), 1));
                             ++dbcountl;

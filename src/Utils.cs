@@ -117,6 +117,15 @@ public static partial class Utils
         return stream;
     }
 
+    public static string Byte2File(string fileName, byte[] buffer)
+    {
+        using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+        {
+            fs.Write(buffer, 0, buffer.Length);
+        }
+        return Path.GetFullPath(fileName);;
+    }
+
     public static Stream LoadFile2ReadStream(string filePath)
     {
         var fs = new FileStream(

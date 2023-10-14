@@ -30,6 +30,11 @@ public interface ISocket
     void Send(Object obj) => Send(Json.Serialize(obj));
 }
 
+public interface IReply
+{
+    void Reply(Target target, Message.Chain msg);
+}
+
 public class Drivers
 {
     List<IDriver> driverList;
