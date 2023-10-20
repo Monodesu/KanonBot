@@ -1,271 +1,120 @@
-#pragma warning disable CS8625 // 无法将 null 字面量转换为非 null 的引用类型。
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
+using System.Text;
 using Newtonsoft.Json.Linq;
 
 namespace KanonBot
 {
     public class Http
     {
-        public struct ResponseResult
-        {
-            public required HttpStatusCode Status;
-            public required string Body;
-        }
-        public struct ResponseResultByte
-        {
-            public required HttpStatusCode Status;
-            public required byte[] Body;
-        }
+        public record ResponseResult(HttpStatusCode Status, string Body);
 
-        /// <summary>
-        /// 使用put方法异步请求
-        /// </summary>
-        /// <param name="url">目标链接</param>
-        /// <param name="data">发送的参数字符串</param>
-        /// <returns>返回的字符串</returns>
-        public static async Task<HttpStatusCode> PutAsync(string url, string data, Dictionary<string, string> header = null)
+        public record ResponseResultByte(HttpStatusCode Status, byte[] Body);
+
+        private static readonly HttpClient client = new(new HttpClientHandler() { UseCookies = false })
         {
-            HttpClient client = new(new HttpClientHandler() { UseCookies = false })
-            {
-                Timeout = Timeout.InfiniteTimeSpan
-            };
-            HttpContent content = new StringContent(data);
-            if (header != null)
+            Timeout = Timeout.InfiniteTimeSpan
+        };
+
+        private static void AddHeaders(Dictionary<string, string>? headers)
+        {
+            if (headers != null)
             {
                 client.DefaultRequestHeaders.Clear();
-                foreach (var item in header)
+                foreach (var item in headers)
                 {
                     client.DefaultRequestHeaders.Add(item.Key, item.Value);
                 }
             }
-            HttpResponseMessage response = await client.PutAsync(url, content);
+        }
+
+        public static async Task<HttpStatusCode> PutAsync(string url, string data, Dictionary<string, string>? headers = null)
+        {
+            AddHeaders(headers);
+            using var content = new StringContent(data);
+            var response = await client.PutAsync(url, content);
             return response.StatusCode;
         }
 
-        /// <summary>
-        /// 使用Delete方法异步请求
-        /// </summary>
-        /// <param name="url">目标链接</param>
-        /// <returns>返回的字符串</returns>
-        public static async Task<ResponseResult> DeleteAsync(string url, Dictionary<string, string> header = null)
+        public static async Task<ResponseResult> DeleteAsync(string url, Dictionary<string, string>? headers = null)
         {
-            HttpClient client = new(new HttpClientHandler() { UseCookies = false })
-            {
-                Timeout = Timeout.InfiniteTimeSpan
-            };
-            if (header != null)
-            {
-                client.DefaultRequestHeaders.Clear();
-                foreach (var item in header)
-                {
-                    client.DefaultRequestHeaders.Add(item.Key, item.Value);
-                }
-            }
-            HttpResponseMessage response = await client.DeleteAsync(url);
-            // response.EnsureSuccessStatusCode();//用来抛异常的
-            ResponseResult result = new() {
-                Status = response.StatusCode,
-                Body = await response.Content.ReadAsStringAsync()
-            };
-            return result;
+            AddHeaders(headers);
+            var response = await client.DeleteAsync(url);
+            var body = await response.Content.ReadAsStringAsync();
+            return new ResponseResult(response.StatusCode, body);
         }
 
-        public static async Task<ResponseResult> KHLPostAsyncFile(string url, byte[] filedata, string filename, Dictionary<string, string> header = null)
+        public static async Task<ResponseResult> PostWithFileAsync(string url, byte[] fileData, string filename, Dictionary<string, string>? headers = null)
         {
-            HttpClient client = new()
+            AddHeaders(headers);
+            using var content = new MultipartFormDataContent
             {
-                Timeout = Timeout.InfiniteTimeSpan
+                { new ByteArrayContent(fileData), "file", filename }
             };
-            if (header != null)
-            {
-                client.DefaultRequestHeaders.Clear();
-                foreach (var item in header)
-                {
-                    client.DefaultRequestHeaders.Add(item.Key, item.Value);
-                }
-            }
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-            var DataContent = new MultipartFormDataContent
-            {
-                { new ByteArrayContent(filedata), "file", filename }
-            };
-            //multipartFromDataContent.Headers.ContentType = new MediaTypeHeaderValue("form-data");
-            HttpResponseMessage response = await client.PostAsync(url, DataContent);
-            // response.EnsureSuccessStatusCode();
-            ResponseResult result = new()
-            {
-                Status = response.StatusCode,
-                Body = await response.Content.ReadAsStringAsync()
-            };
-            return result;
+            var response = await client.PostAsync(url, content);
+            var body = await response.Content.ReadAsStringAsync();
+            return new ResponseResult(response.StatusCode, body);
         }
 
-        /// <summary>
-        /// 使用post方法异步请求
-        /// </summary>
-        /// <param name="url">目标链接</param>
-        /// <param name="postData">要发送的数据 ContentType为application/x-www-form-urlencoded</param>
-        /// <returns>返回的字符串</returns>
-        public static async Task<ResponseResult> PostAsync(string url, Dictionary<string, string> postData, Dictionary<string, string> header = null)
+        public static async Task<ResponseResult> PostAsync(string url, Dictionary<string, string> postData, Dictionary<string, string>? headers = null)
         {
-            HttpClient client = new()
-            {
-                Timeout = Timeout.InfiniteTimeSpan
-            };
-            if (header != null)
-            {
-                client.DefaultRequestHeaders.Clear();
-                foreach (var item in header)
-                {
-                    client.DefaultRequestHeaders.Add(item.Key, item.Value);
-                }
-            }
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-            HttpContent content = new FormUrlEncodedContent(postData);
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-            HttpResponseMessage response = new();
-            for (int i = 0; i < 3; ++i)
-            {
-                try { response = await client.PostAsync(url, content); break; }
-                catch { if (i == 2) throw new Exception("postAsync错误, A task was canceled."); else Thread.Sleep(1000); }
-            }
-            // response.EnsureSuccessStatusCode();
-            ResponseResult result = new()
-            {
-                Status = response.StatusCode,
-                Body = await response.Content.ReadAsStringAsync()
-            };
-            return result;
-
+            AddHeaders(headers);
+            using var content = new FormUrlEncodedContent(postData);
+            HttpResponseMessage response =
+                await RetryHelper.RetryOnExceptionAsync
+                (
+                    times: 3,
+                    delay: TimeSpan.FromSeconds(1),
+                    operation: () => client.PostAsync(url, content)
+                );
+            var body = await response.Content.ReadAsStringAsync();
+            return new ResponseResult(response.StatusCode, body);
         }
 
-        /// <summary>
-        /// 使用post方法异步请求
-        /// </summary>
-        /// <param name="url">目标链接</param>
-        /// <param name="json">要发送的json</param>
-        /// <returns>返回的字符串</returns>
-        public static async Task<ResponseResult> PostAsync(string url, JObject json, Dictionary<string, string> header = null)
+        public static async Task<ResponseResult> PostAsync(string url, JObject json, Dictionary<string, string>? headers = null)
         {
-            HttpClient client = new()
-            {
-                Timeout = Timeout.InfiniteTimeSpan
-            };
-            if (header != null)
-            {
-                client.DefaultRequestHeaders.Clear();
-                foreach (var item in header)
-                {
-                    client.DefaultRequestHeaders.Add(item.Key, item.Value);
-                }
-            }
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-            HttpContent content = new StringContent(json.ToString());
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            HttpResponseMessage response = await client.PostAsync(url, content);
-            // response.EnsureSuccessStatusCode();
-            ResponseResult result = new()
-            {
-                Status = response.StatusCode,
-                Body = await response.Content.ReadAsStringAsync()
-            };
-            return result;
+            AddHeaders(headers);
+            using var content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, content);
+            var body = await response.Content.ReadAsStringAsync();
+            return new ResponseResult(response.StatusCode, body);
         }
 
-        /// <summary>
-        /// 使用post方法异步请求
-        /// </summary>
-        /// <param name="url">目标链接</param>
-        /// <param name="data">发送的参数字符串</param>
-        /// <returns>返回的字符串</returns>
-        public static async Task<ResponseResult> PostAsync(string url, string data, Dictionary<string, string> header = null)
+        public static async Task<ResponseResult> PostAsync(string url, string data, Dictionary<string, string>? headers = null)
         {
-            HttpClient client = new(new HttpClientHandler() { UseCookies = false })
-            {
-                Timeout = Timeout.InfiniteTimeSpan
-            };
-            HttpContent content = new StringContent(data);
-            if (header != null)
-            {
-                client.DefaultRequestHeaders.Clear();
-                foreach (var item in header)
-                {
-                    client.DefaultRequestHeaders.Add(item.Key, item.Value);
-                }
-            }
-            HttpResponseMessage response = await client.PostAsync(url, content);
-            // response.EnsureSuccessStatusCode();
-            ResponseResult result = new()
-            {
-                Status = response.StatusCode,
-                Body = await response.Content.ReadAsStringAsync()
-            };
-            return result;
+            AddHeaders(headers);
+            using var content = new StringContent(data);
+            var response = await client.PostAsync(url, content);
+            var body = await response.Content.ReadAsStringAsync();
+            return new ResponseResult(response.StatusCode, body);
         }
 
-        /// <summary>
-        /// 使用get方法异步请求
-        /// </summary>
-        /// <param name="url">目标链接</param>
-        /// <returns>返回的字符串</returns>
-        public static async Task<ResponseResult> GetAsync(string url, Dictionary<string, string> header = null)
+        public static async Task<ResponseResult> GetAsync(string url, Dictionary<string, string>? headers = null)
         {
-            HttpClient client = new(new HttpClientHandler() { UseCookies = false })
-            {
-                Timeout = Timeout.InfiniteTimeSpan
-            };
-            if (header != null)
-            {
-                client.DefaultRequestHeaders.Clear();
-                foreach (var item in header)
-                {
-                    client.DefaultRequestHeaders.Add(item.Key, item.Value);
-                }
-            }
-            HttpResponseMessage response = await client.GetAsync(url);
-            // response.EnsureSuccessStatusCode();//用来抛异常的
-            ResponseResult result = new()
-            {
-                Status = response.StatusCode,
-                Body = await response.Content.ReadAsStringAsync()
-            };
-            return result;
+            AddHeaders(headers);
+            var response = await client.GetAsync(url);
+            var body = await response.Content.ReadAsStringAsync();
+            return new ResponseResult(response.StatusCode, body);
         }
 
-        public static async Task<ResponseResultByte> GetAsyncByte(string url, Dictionary<string, string> header = null)
+        public static async Task<ResponseResultByte> GetAsyncByte(string url, Dictionary<string, string>? headers = null)
         {
-
-            HttpClient client = new(new HttpClientHandler() { UseCookies = false })
-            {
-                Timeout = Timeout.InfiniteTimeSpan
-            };
-            if (header != null)
-            {
-                client.DefaultRequestHeaders.Clear();
-                foreach (var item in header)
-                {
-                    client.DefaultRequestHeaders.Add(item.Key, item.Value);
-                }
-            }
-            HttpResponseMessage response = await client.GetAsync(url);
-            // response.EnsureSuccessStatusCode();//用来抛异常的
-            ResponseResultByte result = new()
-            {
-                Status = response.StatusCode,
-                Body = await response.Content.ReadAsByteArrayAsync()
-            };
-            return result;
+            AddHeaders(headers);
+            var response = await client.GetAsync(url);
+            var body = await response.Content.ReadAsByteArrayAsync();
+            return new ResponseResultByte(response.StatusCode, body);
         }
-        async public static Task<string> DownloadFile(string url, string filePath)
+
+        public static async Task<string> DownloadFileAsync(string url, string filePath)
         {
-            var result = await url.GetBytesAsync();
-            using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write)) {
-                await fs.WriteAsync(result!);
-                fs.Close();
-            }
+            var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode(); // 如果失败这里会抛出异常，需要捕获处理
+
+            await using var fileStream = new FileStream(filePath, FileMode.CreateNew);
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            await stream.CopyToAsync(fileStream);
+
             return filePath;
         }
     }

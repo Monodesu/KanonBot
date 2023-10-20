@@ -95,7 +95,7 @@ if (config.dev)
 }
 
 Log.Information("注册用户数据更新事件");
-GeneralUpdate.DailyUpdate();
+//GeneralUpdate.DailyUpdate();
 
 //这个东西很占资源，先注释了
 //MemoryDiagnostics.UndisposedAllocation += allocationStackTrace =>
