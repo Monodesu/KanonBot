@@ -6,16 +6,18 @@ using System.Text;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
-using KanonBot.API;
+//using KanonBot.API;
 using Kook;
 using LanguageExt;
 using Newtonsoft.Json.Linq;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
-using static KanonBot.LegacyImage.Draw;
+//using static KanonBot.LegacyImage.Draw;
 using Color = SixLabors.ImageSharp.Color;
 using Img = SixLabors.ImageSharp.Image;
+using Org.BouncyCastle.Cms;
+using System.Reactive.Subjects;
 
 namespace KanonBot;
 
@@ -470,34 +472,20 @@ public static partial class Utils
 
     public static void SendDebugMail(string mailto, string body)
     {
-        Mail.MailStruct ms =
-            new()
-            {
-                MailTo = Array(mailto),
-                Subject = $"KanonBot 错误自动上报 - 发生于 {DateTime.Now}",
-                Body = body,
-                IsBodyHtml = false
-            };
+        var mailContent = new Mail.MailContent(new List<string> { mailto }, $"KanonBot 错误自动上报 - 发生于 {DateTime.Now}", body, false);
         try
         {
-            Mail.Send(ms);
+            Mail.Send(mailContent);
         }
         catch { }
     }
 
     public static void SendMail(string mailto, string title, string body, bool isBodyHtml)
     {
-        Mail.MailStruct ms =
-            new()
-            {
-                MailTo = Array(mailto),
-                Subject = title,
-                Body = body,
-                IsBodyHtml = isBodyHtml
-            };
+        var mailContent = new Mail.MailContent(new List<string> { mailto }, title, body, isBodyHtml);
         try
         {
-            Mail.Send(ms);
+            Mail.Send(mailContent);
         }
         catch { }
     }

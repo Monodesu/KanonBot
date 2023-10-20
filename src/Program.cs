@@ -1,16 +1,15 @@
+using System.CommandLine;
 using System.IO;
-using KanonBot.command_parser;
+using KanonBot.Command;
 using KanonBot.Drivers;
 using KanonBot.Event;
-using KanonBot.Functions.OSU;
-using KanonBot.Functions.OSU.RosuPP;
 using KanonBot.Serializer;
 using LanguageExt.UnsafeValueAccess;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RosuPP;
-using SixLabors.ImageSharp.Diagnostics;
-using API = KanonBot.API;
+using static KanonBot.Command.CommandSystem;
+using static KanonBot.Command.CommandRegister;
 using Msg = KanonBot.Message;
 
 #region 初始化
@@ -50,19 +49,6 @@ Log.Information("初始化成功 {@config}", config);
 
 if (config.dev)
 {
-    // var res = API.OSU.SearchBeatmap("exit this ato").Result;
-    // Log.Information("{@res}", res);
-    // var score = API.OSU.GetUserBeatmapScore(1646397, 992512, new string[] { }, API.OSU.Enums.Mode.Mania).Result!;
-    // score.Score.Beatmapset = API.OSU.GetBeatmap(score.Score.Beatmap!.BeatmapId).Result!.Beatmapset!;
-    // var attr = API.OSU.GetBeatmapAttributes(score.Score.Beatmap!.BeatmapId, new string[] { }, API.OSU.Enums.Mode.Mania).Result;
-    // Console.WriteLine("beatmap attr {0}", Json.Serialize(attr));
-    // API.OSU.BeatmapFileChecker(score.Score.Beatmap!.BeatmapId).Wait();
-    // Console.WriteLine("pp {0}", score.Score.PP);
-    // Console.WriteLine("acc {0}", score.Score.Accuracy);
-    // var data = PerformanceCalculator.CalculatePanelData(score.Score).Result;
-    // Console.WriteLine("cal pp {0}", data.ppInfo.ppStat.total);
-    // Console.WriteLine("cal data {0}", Json.Serialize(data.ppInfo));
-
     var sender = parseInt(Environment.GetEnvironmentVariable("KANONBOT_TEST_USER_ID"));
     sender.IfNone(() =>
     {
@@ -71,37 +57,58 @@ if (config.dev)
         Environment.Exit(1);
     });
 
-    while (true) {
+    while (true)
+    {
         Log.Warning("请输入消息: ");
         var input = Console.ReadLine();
         if (string.IsNullOrEmpty(input)) return;
         Log.Warning("解析消息: {0}", input);
-        await Universal.Parser(new Target()
-        {
-            msg = new Msg.Chain().msg(input!.Trim()),
-            sender = $"{sender.Value()}",
-            platform = Platform.OneBot,
-            selfAccount = null,
-            socket = new FakeSocket() {
-                action = (msg) => {
-                    Log.Information("本地测试消息 {0}", msg);
-                }
-            },
-            raw = new OneBot.Models.CQMessageEventBase() {
-                UserId = sender.Value(),
-            }
-        });
+        // Universal.Parser(new Target()
+        //{
+        //    msg = new Msg.Chain().msg(input!.Trim()),
+        //    sender = $"{sender.Value()}",
+        //    platform = Platform.OneBot,
+        //    selfAccount = null,
+        //    socket = new FakeSocket()
+        //    {
+        //        action = (msg) =>
+        //        {
+        //            Log.Information("本地测试消息 {0}", msg);
+        //        }
+        //    },
+        //    raw = new OneBot.Models.CQMessageEventBase()
+        //    {
+        //        UserId = sender.Value(),
+        //    }
+        //});
     }
 }
 
+
+// 注册主指令列表
+Register();
+
+
+
+
+
+// 测试消息处理
+try
+{
+    await ProcessCommand("/info asdf white cat mode=3");
+}
+catch (Exception ex)
+{
+    Log.Warning($"{ex.Message}");
+}
+
+
+await Task.Delay(500);
+Environment.Exit(0);
+
+
 Log.Information("注册用户数据更新事件");
 //GeneralUpdate.DailyUpdate();
-
-//这个东西很占资源，先注释了
-//MemoryDiagnostics.UndisposedAllocation += allocationStackTrace =>
-//{
-//    Log.Warning($@"Undisposed allocation detected at:{Environment.NewLine}{allocationStackTrace}");
-//};
 
 #endregion
 
@@ -118,11 +125,11 @@ var drivers = new Drivers()
                     Log.Debug("↑ OneBot详情 {@0}", target.raw!);
                     try
                     {
-                        await Universal.Parser(target);
+                        //await Universal.Parser(target);
                     }
                     finally
                     {
-                        Universal.reduplicateTargetChecker.TryUnlock(target);
+                        //Universal.reduplicateTargetChecker.TryUnlock(target);
                     }
                 }
             )
@@ -169,7 +176,7 @@ var drivers = new Drivers()
                     // await target.reply(target.msg);
                     try
                     {
-                        await Universal.Parser(target);
+                        //await Universal.Parser(target);
                     }
                     catch (Flurl.Http.FlurlHttpException ex)
                     {
@@ -209,7 +216,7 @@ var drivers = new Drivers()
         new KanonBot.Drivers.Kook(config.kook!.token!, config.kook!.botID!).onMessage(
             async (target) =>
             {
-                await Universal.Parser(target);
+                //await Universal.Parser(target);
             }
         )
     )

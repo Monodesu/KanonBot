@@ -1,5 +1,5 @@
 using Microsoft.VisualBasic.CompilerServices;
-using KanonBot.API;
+//using KanonBot.API;
 using KanonBot.Message;
 
 namespace KanonBot.Drivers;
