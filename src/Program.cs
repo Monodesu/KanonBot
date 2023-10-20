@@ -89,18 +89,15 @@ if (config.dev)
 Register();
 
 
-
-
-
 // 测试消息处理
-try
-{
-    await ProcessCommand("/info asdf white cat mode=3");
-}
-catch (Exception ex)
-{
-    Log.Warning($"{ex.Message}");
-}
+//try
+//{
+//    await ProcessCommand("/info asdf white cat mode=3");
+//}
+//catch (Exception ex)
+//{
+//    Log.Warning($"{ex.Message}");
+//}
 
 
 await Task.Delay(500);
@@ -125,7 +122,7 @@ var drivers = new Drivers()
                     Log.Debug("↑ OneBot详情 {@0}", target.raw!);
                     try
                     {
-                        //await Universal.Parser(target);
+                        await ProcessCommand(target);
                     }
                     finally
                     {
@@ -168,15 +165,9 @@ var drivers = new Drivers()
                     Log.Information("← 收到QQ Guild消息 {0}", target.msg);
                     Log.Debug("↑ QQ Guild详情 {@0}", messageData);
                     Log.Debug("↑ QQ Guild附件 {@0}", Json.Serialize(messageData.Attachments));
-                    // var res = api.SendMessage(messageData.ChannelID, new Guild.Models.SendMessageData() {
-                    //     MessageId = messageData.ID,
-                    //     MessageReference = new() { MessageId = messageData.ID }
-                    // }.Build(target.msg)).Result;
-                    // Log.Information("→ 发送消息ID {@0}", res);
-                    // await target.reply(target.msg);
                     try
                     {
-                        //await Universal.Parser(target);
+                        await ProcessCommand(target);
                     }
                     catch (Flurl.Http.FlurlHttpException ex)
                     {
@@ -216,7 +207,7 @@ var drivers = new Drivers()
         new KanonBot.Drivers.Kook(config.kook!.token!, config.kook!.botID!).onMessage(
             async (target) =>
             {
-                //await Universal.Parser(target);
+                await ProcessCommand(target);
             }
         )
     )

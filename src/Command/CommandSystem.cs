@@ -53,10 +53,11 @@ namespace KanonBot.Command
             currentNode!.AsyncAction = action;
         }
 
-        public static async Task ProcessCommand(string message)
+        public static async Task ProcessCommand(Target target)
         {
+            
             // 分割消息
-            var parts = message.Split(' ');
+            var parts = target.msg.ToString().Split(' ');
 
             if (parts.Length == 0) //防止报错
             {
