@@ -255,7 +255,7 @@ namespace KanonBot.API.OSU
 
         // 获取谱面参数
         public static async Task<Models.BeatmapAttributes?> GetBeatmapAttributes(
-            long bid, string[] mods, 
+            long bid, string[] mods,
             Enums.Mode mode = Enums.Mode.OSU)
         {
             try
@@ -269,7 +269,7 @@ namespace KanonBot.API.OSU
                 var request = await HttpAsync();
 
                 var response = await request
-                    .AppendPathSegments(new object[] {"beatmaps", bid, "attributes"})
+                    .AppendPathSegments(new object[] { "beatmaps", bid, "attributes" })
                     .PostJsonAsync(j);
 
                 if (response.ResponseMessage.StatusCode == HttpStatusCode.NotFound)
@@ -303,7 +303,7 @@ namespace KanonBot.API.OSU
 
                 var response = await request
                     .AppendPathSegments("search")
-                    .SetQueryParams(new{mode = "user",query = userName})
+                    .SetQueryParams(new { mode = "user", query = userName })
                     .GetAsync();
 
                 if (response.ResponseMessage.StatusCode == HttpStatusCode.NotFound)
@@ -317,6 +317,7 @@ namespace KanonBot.API.OSU
                 }
 
                 return (await response.GetJsonAsync<JObject>())["user"] as JObject;
+            }
             catch (Exception ex)
             {
                 Log.Error($"获取谱面信息时出错：{ex.Message}");
