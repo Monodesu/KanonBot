@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using static KanonBot.Command.CommandSystem;
 using static KanonBot.Command.CommandRegister;
 using Msg = KanonBot.Message;
+using static KanonBot.Drivers.OneBot.Models;
 
 #region 初始化
 Console.WriteLine("---KanonBot---");
@@ -63,24 +64,24 @@ if (config.dev)
         var input = Console.ReadLine();
         if (string.IsNullOrEmpty(input)) return;
         Log.Warning("解析消息: {0}", input);
-        // Universal.Parser(new Target()
-        //{
-        //    msg = new Msg.Chain().msg(input!.Trim()),
-        //    sender = $"{sender.Value()}",
-        //    platform = Platform.OneBot,
-        //    selfAccount = null,
-        //    socket = new FakeSocket()
-        //    {
-        //        action = (msg) =>
-        //        {
-        //            Log.Information("本地测试消息 {0}", msg);
-        //        }
-        //    },
-        //    raw = new OneBot.Models.CQMessageEventBase()
-        //    {
-        //        UserId = sender.Value(),
-        //    }
-        //});
+        await ProcessCommand(new Target()
+        {
+            msg = new Msg.Chain().msg(input!.Trim()),
+            sender = $"{sender.Value()}",
+            platform = Platform.OneBot,
+            selfAccount = null,
+            socket = new FakeSocket()
+            {
+                action = (msg) =>
+                {
+                    Log.Information("本地测试消息 {0}", msg);
+                }
+            },
+            raw = new OneBot.Models.CQMessageEventBase()
+            {
+                UserId = sender.Value(),
+            }
+        });
     }
 }
 
@@ -90,14 +91,34 @@ Register();
 
 
 // 测试消息处理
-//try
-//{
-//    await ProcessCommand("/info asdf white cat mode=3");
-//}
-//catch (Exception ex)
-//{
-//    Log.Warning($"{ex.Message}");
-//}
+
+while (true)
+{
+    Log.Warning("请输入消息: ");
+    var input = Console.ReadLine();
+    if (string.IsNullOrEmpty(input)) return;
+    var sender = parseInt("123456789");
+    Log.Warning("解析消息: {0}", input);
+    await ProcessCommand(new Target()
+    {
+
+        msg = new Msg.Chain().msg(input!.Trim()),
+        sender = $"{sender.Value()}",
+        platform = Platform.OneBot,
+        selfAccount = null,
+        socket = new FakeSocket()
+        {
+            action = (msg) =>
+            {
+                Log.Information("本地测试消息 {0}", msg);
+            }
+        },
+        raw = new OneBot.Models.CQMessageEventBase()
+        {
+            UserId = sender.Value(),
+        }
+    });
+}
 
 
 await Task.Delay(500);

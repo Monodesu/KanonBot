@@ -7,21 +7,21 @@ using KanonBot.Drivers;
 
 namespace KanonBot.OSU
 {
-    public static class Function
+    public static partial class Basic
     {
-        public static void info(Target target)
+        public static void info1(Target target)
         {
             Log.Information("you just called info");
         }
 
-        public static void bp(Target target)
+        public static void bp1(Target target)
         {
             Log.Information("you just called bp");
         }
 
-        public static void bestperformance(Target target)
+        public static void bestperformance1(Target target)
         {
-            bp(target);
+            bp1(target);
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace KanonBot.API.OSU
 {
-    static public class Enums
+    public static class Enums
     {
         // 方法部分
         public static string Mode2String(Mode mode)

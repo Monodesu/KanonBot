@@ -22,10 +22,10 @@ namespace KanonBot.Account
             var user = await GetOrCreateUser(mailAddr, target);
 
             // 不处理失败操作
-            if (user.Item1 == null || user.Item2 < 0) return;
+            if (user.Item1 == null || user.Item2 != Enums.Operation.Failed) return;
             var platform = GetPlatformString(target.platform);
 
-            var emailContent = PrepareEmailContent(mailAddr, verifyCode, platform, user.Item3!, user.Item2);
+            var emailContent = PrepareEmailContent(mailAddr, verifyCode, platform, user.Item3!, (int)user.Item2);
 
             SendMail(mailAddr, "[来自desu.life自动发送的邮件]请验证您的邮箱", emailContent, true);
             await target.reply("验证邮件发送成功，请检查您的邮箱。");
@@ -58,7 +58,7 @@ namespace KanonBot.Account
             };
         }
 
-        private static async Task<(Database.Models.User?, int, string?)> GetOrCreateUser(string mailAddr, Target target)
+        private static async Task<(Database.Models.User?, Enums.Operation, string?)> GetOrCreateUser(string mailAddr, Target target)
         {
             // 检测该邮箱是否已注册为基础账户
             bool isRegistered = await Database.Client.IsRegd(mailAddr);
@@ -96,29 +96,29 @@ namespace KanonBot.Account
             if (isAppend)
             {
                 await target.reply(new Chain().msg($"您当前平台的账户已绑定到邮箱 {HideMailAddr(dbuser.email!)}。"));
-                return (dbuser, -1, null); ;
+                return (dbuser, Enums.Operation.Failed, null); ;
             }
 
             // 基本账户存在，但未绑定，执行绑定操作（平台方）
             if (isRegistered && !isAppend)
             {
-                return (dbuser, 2, uid);
+                return (dbuser, Enums.Operation.BindPlatform, uid);
             }
 
             // 基本账户存在，但未绑定，执行追加操作（邮箱）
             if (!isRegistered && isAppend)
             {
-                return (dbuser, 3, uid);
+                return (dbuser, Enums.Operation.AppendMail, uid);
             }
 
             // 基本账户不存在，创建新用户，并默认将当前平台的账户绑定至基本账户上
             if (!isRegistered)
             {
-                return (dbuser, 1, uid);
+                return (dbuser, Enums.Operation.CreateAccount, uid);
             }
 
             // 失败
-            return (null, -1, null);
+            return (null, Enums.Operation.Failed, null);
         }
 
         private static async Task<bool> CheckUserBinding(Database.Models.User dbuser, string? currentUid, string dbUid, Target target)

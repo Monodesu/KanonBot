@@ -1,22 +1,13 @@
-using Flurl.Util;
 using KanonBot.Drivers;
-using KanonBot.Message;
-using LanguageExt;
-using LanguageExt.ClassInstances;
-using Serilog;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Sockets;
-using System.Threading;
 
 namespace KanonBot.Command
 {
-    public class CommandNode(string name, Func<Dictionary<string, string>, Task>? asyncAction = null)
+    public class CommandNode(string name, Func<(Dictionary<string, string>, Target), Task>? asyncAction = null)
     {
         public string Name { get; } = name;
         public Dictionary<string, CommandNode> SubCommands { get; } = new Dictionary<string, CommandNode>(StringComparer.OrdinalIgnoreCase);
-        public Func<Dictionary<string, string>, Task>? AsyncAction { get; set; } = asyncAction;
+        public Func<(Dictionary<string, string>, Target), Task>? AsyncAction { get; set; } = asyncAction;
 
         public void AddSubCommand(CommandNode subCommand)
         {
@@ -50,7 +41,7 @@ namespace KanonBot.Command
 
         private static Dictionary<string, CommandNode> commands = new(StringComparer.OrdinalIgnoreCase);
 
-        public static void RegisterCommand(string[] hierarchy, Func<Dictionary<string, string>, Task> action)
+        public static void RegisterCommand(string[] hierarchy, Func<(Dictionary<string, string>, Target), Task> action)
         {
             if (hierarchy.Length == 0)
             {
@@ -160,11 +151,11 @@ namespace KanonBot.Command
                 // 执行
                 if (currentCommand.AsyncAction != null)
                 {
-                    await currentCommand.AsyncAction(args);
+                    await currentCommand.AsyncAction((args, target)); 
                 }
                 else
                 {
-                    // 没有与此命令关联的动作，记录
+                    // 没有与此命令关联的动作，记录，一般不会出现这个情况
                     Log.Warning($"No action associated with the command: {currentCommand.Name}");
                 }
             }
