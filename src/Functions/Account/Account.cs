@@ -1,13 +1,5 @@
-﻿using Flurl.Util;
-using KanonBot.Drivers;
+﻿using KanonBot.Drivers;
 using KanonBot.Message;
-using LanguageExt.SomeHelp;
-using LanguageExt.UnsafeValueAccess;
-using System.Net;
-using KanonBot.OSU;
-using KanonBot.API;
-using KanonBot.Bot;
-using Microsoft.CodeAnalysis;
 using Platform = KanonBot.Drivers.Platform;
 
 namespace KanonBot.Account
