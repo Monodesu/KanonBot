@@ -396,7 +396,7 @@ namespace KanonBot.API.OSU
             if (!Directory.Exists("./work/beatmap/")) Directory.CreateDirectory("./work/beatmap/");
             if (!File.Exists($"./work/beatmap/{bid}.osu"))
             {
-                await Http.DownloadFileAsync($"http://osu.ppy.sh/osu/{bid}", $"./work/beatmap/{bid}.osu");
+                await $"http://osu.ppy.sh/osu/{bid}".DownloadFileAsync($"./work/beatmap/", $"{bid}.osu");
             }
         }
     }

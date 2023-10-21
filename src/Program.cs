@@ -46,7 +46,13 @@ else
         log = log.MinimumLevel.Debug();
     Log.Logger = log.CreateLogger();
 }
+
+// 注册主指令列表
+Register();
+
 Log.Information("初始化成功 {@config}", config);
+
+
 
 if (config.dev)
 {
@@ -85,9 +91,6 @@ if (config.dev)
     }
 }
 
-
-// 注册主指令列表
-Register();
 
 
 // 测试消息处理

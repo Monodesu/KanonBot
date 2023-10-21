@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using KanonBot.API;
+using KanonBot.Command;
 using KanonBot.Drivers;
 using KanonBot.Functions.OSU;
 using KanonBot.Functions.OSU.RosuPP;
@@ -13,13 +14,20 @@ namespace KanonBot.OSU
 {
     public static partial class Basic
     {
-        public async static Task info(Dictionary<string, string> args, Target target)
+        [Command("info")]
+        public async static Task info(CommandContext args, Target target)
         {
-            // 指令解析部分
-            foreach (var arg in args)
-            {
-                Log.Information($"Key:{arg.Key} Value:{arg.Value}");
-            }
+            var name = args.GetDefault<string>();
+            var mode = args.GetParameter<int>("m");
+            Log.Information($"name:{name} mode:{mode}");
+
+            // // 指令解析部分
+            // foreach (var arg in args.Parameters)
+            // {
+            //     Log.Information($"Key:{arg.Key} Value:{arg.Value}");
+            // }
+
+            await Task.CompletedTask;
         }
     }
 } 

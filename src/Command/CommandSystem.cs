@@ -1,19 +1,63 @@
 using KanonBot.Drivers;
+using LanguageExt.Common;
+using LinqToDB.Extensions;
 using System.Collections.Concurrent;
+using System.Reflection;
 using System.Text;
 
 namespace KanonBot.Command
 {
-    public class CommandNode(string name, Func<(Dictionary<string, string>, Target), Task>? asyncAction = null)
+    public class CommandNode(string name, Func<CommandContext, Target, Task>? asyncAction = null)
     {
         public string Name { get; } = name;
-        public Dictionary<string, CommandNode> SubCommands { get; } = new Dictionary<string, CommandNode>(StringComparer.OrdinalIgnoreCase);
-        public Func<(Dictionary<string, string>, Target), Task>? AsyncAction { get; set; } = asyncAction;
+        public Dictionary<string, CommandNode> SubCommands { get; } =
+            new Dictionary<string, CommandNode>(StringComparer.OrdinalIgnoreCase);
+        public Func<CommandContext, Target, Task>? AsyncAction { get; set; } = asyncAction;
 
         public void AddSubCommand(CommandNode subCommand)
         {
             SubCommands[subCommand.Name] = subCommand;
         }
+    }
+
+    public class CommandContext
+    {
+        public Dictionary<string, object> Parameters { get; }
+
+        public CommandContext(Dictionary<string, object> parameters)
+        {
+            Parameters = parameters;
+        }
+
+        public CommandContext()
+        {
+            Parameters = new();
+        }
+
+        public Option<T> GetParameter<T>(string name)
+        {
+            if (Parameters.TryGetValue(name, out var value))
+            {
+                if (value is T v)
+                {
+                    return v;
+                }
+
+                if (typeof(T).IsIntegerType())
+                {
+                    if (value is string s)
+                    {
+                        if (int.TryParse(s, out int result))
+                        {
+                            return (T)Convert.ChangeType(result, typeof(T));
+                        }
+                    }
+                }
+            }
+            return None;
+        }
+
+        public Option<T> GetDefault<T>() => GetParameter<T>("default");
     }
 
     public static class CommandSystem
@@ -40,9 +84,48 @@ namespace KanonBot.Command
 
         public static ReduplicateTargetChecker reduplicateTargetChecker = new();
 
-        private static Dictionary<string, CommandNode> commands = new(StringComparer.OrdinalIgnoreCase);
+        private static Dictionary<string, CommandNode> commands =
+            new(StringComparer.OrdinalIgnoreCase);
 
-        public static void RegisterCommand(string[] hierarchy, Func<(Dictionary<string, string>, Target), Task> action)
+        public static void RegisterCommandFromRegistry(CommandRegistry reg)
+        {
+            foreach (
+                KeyValuePair<string, Func<CommandContext, Target, Task>> s in reg.commandHandlers
+            )
+            {
+                var hierarchy = s.Key.Split(' ');
+                var method = s.Value;
+                var commandName = hierarchy[^1];
+                var currentLevel = commands;
+                CommandNode? currentNode = null;
+
+                foreach (var level in hierarchy)
+                {
+                    if (!currentLevel.TryGetValue(level, out currentNode))
+                    {
+                        currentNode = new CommandNode(level);
+                        currentLevel[level] = currentNode;
+                    }
+
+                    currentLevel = currentNode.SubCommands;
+                }
+
+                currentNode!.AsyncAction = s.Value;
+            }
+        }
+
+        public static void RegisterCommand(
+            string hierarchy,
+            Func<CommandContext, Target, Task> action
+        )
+        {
+            RegisterCommand(new string[] { hierarchy }, action);
+        }
+
+        public static void RegisterCommand(
+            string[] hierarchy,
+            Func<CommandContext, Target, Task> action
+        )
         {
             if (hierarchy.Length == 0)
             {
@@ -133,7 +216,7 @@ namespace KanonBot.Command
 
             try
             {
-                var args = new Dictionary<string, string>();
+                var context = new CommandContext();
                 int currentPartIndex = 1; // 跳过命令前缀
 
                 // 尝试找到可能的子命令或参数
@@ -141,8 +224,10 @@ namespace KanonBot.Command
                 {
                     var currentPart = parts[currentPartIndex];
 
-                    if (currentCommand.SubCommands.Count > 0 &&
-                        currentCommand.SubCommands.TryGetValue(currentPart, out var subCommand))
+                    if (
+                        currentCommand.SubCommands.Count > 0
+                        && currentCommand.SubCommands.TryGetValue(currentPart, out var subCommand)
+                    )
                     {
                         // 如果找到了一个子命令，沿着子命令继续
                         currentCommand = subCommand;
@@ -166,7 +251,7 @@ namespace KanonBot.Command
                     {
                         if (currentKey != null)
                         {
-                            args[currentKey] = currentValue.Trim();
+                            context.Parameters[currentKey] = currentValue.Trim();
                             currentValue = "";
                         }
 
@@ -184,13 +269,13 @@ namespace KanonBot.Command
 
                 if (currentKey != null)
                 {
-                    args[currentKey] = currentValue.Trim();
+                    context.Parameters[currentKey] = currentValue.Trim();
                 }
 
                 // 执行
                 if (currentCommand.AsyncAction != null)
                 {
-                    await currentCommand.AsyncAction((args, target));
+                    await currentCommand.AsyncAction(context, target);
                 }
                 else
                 {
@@ -206,5 +291,3 @@ namespace KanonBot.Command
         }
     }
 }
-
-

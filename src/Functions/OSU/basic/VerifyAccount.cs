@@ -20,6 +20,7 @@ namespace KanonBot.OSU
             Database.Models.UserOSU? DBOsuInfo = null;
 
 
+
             //if (command.self_query)
             //{
             //    // 验证账户
@@ -118,7 +119,7 @@ namespace KanonBot.OSU
 
 
 
-
+            await Task.CompletedTask;
         }
     }
 }
