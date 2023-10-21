@@ -15,7 +15,11 @@ namespace KanonBot.OSU
     {
         public async static Task info(Dictionary<string, string> args, Target target)
         {
-            Log.Information("you just called info");
+            // 指令解析部分
+            foreach (var arg in args)
+            {
+                Log.Information($"Key:{arg.Key} Value:{arg.Value}");
+            }
         }
     }
-}
+} 

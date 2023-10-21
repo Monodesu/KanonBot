@@ -1,5 +1,6 @@
 using KanonBot.Drivers;
 using System.Collections.Concurrent;
+using System.Text;
 
 namespace KanonBot.Command
 {
@@ -67,8 +68,44 @@ namespace KanonBot.Command
 
         public static async Task ProcessCommand(Target target)
         {
+            // 标记消息中可能参数的前后空格
+            var sb = target.msg.ToString().ToCharArray();
+            for (int i = 0; i < sb.Length; i++)
+            {
+                if (sb[i] == '=')
+                {
+                    // 标记前端空格
+                    for (int j = i - 1; j >= 0; j--)
+                    {
+                        if (sb[j] == ' ')
+                        {
+                            sb[j] = '÷';
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    // 标记后端空格
+                    for (int j = i + 1; j < sb.Length; j++)
+                    {
+                        if (sb[j] == ' ')
+                        {
+                            sb[j] = '÷';
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 处理空格
+            var msg = new string(sb).Replace("÷", "");
+
             // 分割消息
-            var parts = target.msg.ToString().Split(' ');
+            var parts = msg.Split(' ');
 
             if (parts.Length == 0) //防止报错
             {
@@ -121,11 +158,11 @@ namespace KanonBot.Command
                 string? currentKey = null;
                 string currentValue = "";
 
+                // 解析参数
                 for (; currentPartIndex < parts.Length; currentPartIndex++)
                 {
                     var part = parts[currentPartIndex];
-
-                    if (part.Contains('=')) // 猫猫接下来的参数预计使用等号分割，例：mode=osu
+                    if (part.Contains('='))
                     {
                         if (currentKey != null)
                         {
@@ -135,11 +172,13 @@ namespace KanonBot.Command
 
                         var keyValuePair = part.Split(new[] { '=' }, 2);
                         currentKey = keyValuePair[0];
-                        currentValue = keyValuePair.Length > 1 ? keyValuePair[1] : "";
+                        currentValue = keyValuePair.Length > 1 ? keyValuePair[1] : part;
                     }
                     else
                     {
-                        currentValue += (currentValue == "" ? "" : " ") + part;
+                        // 如果没有键，使用默认键
+                        currentKey ??= "default";
+                        currentValue += (string.IsNullOrEmpty(currentValue) ? "" : " ") + part;
                     }
                 }
 
@@ -151,7 +190,7 @@ namespace KanonBot.Command
                 // 执行
                 if (currentCommand.AsyncAction != null)
                 {
-                    await currentCommand.AsyncAction((args, target)); 
+                    await currentCommand.AsyncAction((args, target));
                 }
                 else
                 {
