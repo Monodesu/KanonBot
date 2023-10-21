@@ -68,26 +68,6 @@ public static partial class Utils
         return None;
     }
 
-    // public static string ParseAt(string input)
-    // {
-    //     string pattern = @"@.*?#(\d*)";
-    //     RegexOptions options = RegexOptions.Multiline;
-    //     var matches = Regex.Matches(input, pattern, options);
-    //     foreach (Match m in matches.Reverse())
-    //     {
-    //         input = input.Remove(m.Index, m.Value.Length);
-    //         input = input.Insert(m.Index, $"kaiheila={m.Groups[1].Value}");
-    //     }
-    //     pattern = @"\[CQ:at,qq=(\d*)\]";
-    //     matches = Regex.Matches(input, pattern, options);
-    //     foreach (Match m in matches.Reverse())
-    //     {
-    //         input = input.Remove(m.Index, m.Value.Length);
-    //         input = input.Insert(m.Index, $"qq={m.Groups[1].Value}");
-    //     }
-    //     return input;
-    // }
-
     public static string? GetObjectDescription(Object value)
     {
         foreach (var field in value.GetType().GetFields())
@@ -350,70 +330,6 @@ public static partial class Utils
         }
     }
 
-    public static string NewYearMessage()
-    {
-        Random r = new();
-        int i = r.Next(1, 26);
-        switch (i)
-        {
-            case 1:
-                return "新的一年要保持一个好心态，去年的留下的遗憾，要在今年努力争取改变！";
-            case 2:
-                return "(  )";
-            case 3:
-                return "新的一年要特别注意健康状况喔！";
-            case 4:
-                return "遗憾的事情假如已无法改变，那就勇敢地接受，不要后悔，要继续前进才是！";
-            case 5:
-                return "新的一年也要去勇敢地追求梦想呢~";
-            case 6:
-                return "遗憾不是尽了全力没有成功，而是可能成功却没尽全力。新的一年调整好自己，";
-            case 7:
-                return "把2021的失意揉碎。2022年好好生活，慢慢相遇，保持热爱。";
-            case 8:
-                return "愿岁并谢，与长友兮。";
-            case 9:
-                return "今年你没有压岁钱！";
-            case 10:
-                return "用一句话告别2021，你会说些什么呢？（    ）";
-            case 11:
-                return "さよならがあんたに捧ぐ愛の言葉 ——さよならべいべ(藤井风)";
-            case 12:
-                return "You're just too good to be true, Can't take my eyes off of you.";
-            case 13:
-                return "希望你的未来一片光明≥v≤";
-            case 14:
-                return "或许大家不再和过去认识的一些朋友联系了，但还是会记得那一段美好的时光不是吗？";
-            case 15:
-                return "啊就是不听话！！！就是想放假！！！";
-            case 16:
-                return "没太多计划，不知道要去哪，那就这样一直向前，什么都不管啦！";
-            case 17:
-                return "唱一首心爱的人喜欢的歌曲给自己听好吗";
-            case 18:
-                return "给心爱的人唱一首自己喜欢的歌吧！";
-            case 19:
-                return "没有说得出口的话，没有做得出来的事，或是最终没有争取到的人，那都没有关系。与其痛苦，不如坦然接受，继续向前。";
-            case 20:
-                return "Darling darling 今晚 一定要喝 只要 有你在 就够了 继续 反覆着 那痛苦快乐 不完美 的人生 才动人 —— 八三夭";
-            case 21:
-                return "在过去的一年里，最打动你的一件事是（   ）";
-            case 22:
-                return "朋友之间的抱歉，如果可以好好说出来的话，如今也不会像个傻瓜一样充满后悔与遗憾了吧";
-            case 23:
-                return "愿你不卑不亢不自叹，一生热爱不遗憾。";
-            case 24:
-                return "今年，对自己温柔一些。好吗？";
-            case 25:
-                return "对2021年的自己说一声辛苦了！";
-            case 26:
-                return "答应我，不要再玩OSU了！TAT";
-            default:
-                break;
-        }
-        return "";
-    }
-
     [GeneratedRegex(@"([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,5})+")]
     private static partial Regex EmailRegex();
     public static bool IsMailAddr(string str)
@@ -480,9 +396,9 @@ public static partial class Utils
         catch { }
     }
 
-    public static void SendMail(string mailto, string title, string body, bool isBodyHtml)
+    public static void SendMail(string mailto, string subject, string body, bool isBodyHtml)
     {
-        var mailContent = new Mail.MailContent(new List<string> { mailto }, title, body, isBodyHtml);
+        var mailContent = new Mail.MailContent(new List<string> { mailto }, subject, body, isBodyHtml);
         try
         {
             Mail.Send(mailContent);

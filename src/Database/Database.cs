@@ -209,7 +209,7 @@ namespace KanonBot.Database
         {
             using var db = GetInstance();
             var data = await db.User.FirstOrDefaultAsync(it => it.email == email);
-            data.owned_badge_ids = owned_ids;
+            data!.owned_badge_ids = owned_ids;
             var res = await db.UpdateAsync(data);
             return res > -1;
         }
@@ -218,7 +218,7 @@ namespace KanonBot.Database
         {
             using var db = GetInstance();
             var data = await db.User.FirstOrDefaultAsync(it => it.uid == uid);
-            data.owned_badge_ids = owned_ids;
+            data!.owned_badge_ids = owned_ids;
             var res = await db.UpdateAsync(data);
             return res > -1;
         }
@@ -232,7 +232,7 @@ namespace KanonBot.Database
             }
             using var db = GetInstance();
             var userinfo = await db.User.Where(it => it.uid == user.uid).FirstOrDefaultAsync();
-            userinfo.owned_badge_ids = owned_ids;
+            userinfo!.owned_badge_ids = owned_ids;
             var res = await db.UpdateAsync(userinfo);
             return res > -1;
         }
@@ -417,7 +417,7 @@ namespace KanonBot.Database
             var DBUser = await GetUserByOsuUID(osu_uid);
             using var db = GetInstance();
             var result = await db.User
-                .Where(it => it.uid == DBUser.uid)
+                .Where(it => it.uid == DBUser!.uid)
                 .Set(it => it.permissions, permission)
                 .UpdateAsync();
             return result > -1;
