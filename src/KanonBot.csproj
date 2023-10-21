@@ -48,5 +48,9 @@
 	<ItemGroup>
 	  <ProjectReference Include="../RosuPP/RosuPP.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Functions\OSU\image\" />
+	  <Folder Include="Functions\OSU\basic\" />
+	</ItemGroup>
 	<Import Project="../RosuPP/Rosu.targets" />
 </Project>

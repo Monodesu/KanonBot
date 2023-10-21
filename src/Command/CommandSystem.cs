@@ -26,6 +26,27 @@ namespace KanonBot.Command
 
     public static class CommandSystem
     {
+        public class ReduplicateTargetChecker
+        {
+            private ConcurrentDictionary<(string sender, string msg), Target> CommandList = new();
+
+            public bool TryLock(Target target)
+            {
+                return CommandList.TryAdd((target.sender!, target.msg.ToString()), target);
+            }
+
+            public bool Contains(Target target)
+            {
+                return CommandList.ContainsKey((target.sender!, target.msg.ToString()));
+            }
+
+            public void Unlock(Target target)
+            {
+                CommandList.TryRemove((target.sender!, target.msg.ToString()), out _);
+            }
+        }
+
+        public static ReduplicateTargetChecker reduplicateTargetChecker = new();
 
         private static Dictionary<string, CommandNode> commands = new(StringComparer.OrdinalIgnoreCase);
 
@@ -55,7 +76,6 @@ namespace KanonBot.Command
 
         public static async Task ProcessCommand(Target target)
         {
-            
             // 分割消息
             var parts = target.msg.ToString().Split(' ');
 
@@ -76,67 +96,82 @@ namespace KanonBot.Command
                 return;
             }
 
-            var args = new Dictionary<string, string>();
-            int currentPartIndex = 1; // 跳过命令前缀
-
-            // 尝试找到可能的子命令或参数
-            for (; currentPartIndex < parts.Length; currentPartIndex++)
+            // 上锁
+            if (!reduplicateTargetChecker.TryLock(target))
             {
-                var currentPart = parts[currentPartIndex];
-
-                if (currentCommand.SubCommands.Count > 0 &&
-                    currentCommand.SubCommands.TryGetValue(currentPart, out var subCommand))
-                {
-                    // 如果找到了一个子命令，沿着子命令继续
-                    currentCommand = subCommand;
-                }
-                else
-                {
-                    // 如果没有找到，则剩下的部分是参数
-                    break;
-                }
+                // 如果已经有相同的命令在处理，忽略
+                return;
             }
 
-            // 解析参数
-            string? currentKey = null;
-            string currentValue = "";
-
-            for (; currentPartIndex < parts.Length; currentPartIndex++)
+            try
             {
-                var part = parts[currentPartIndex];
+                var args = new Dictionary<string, string>();
+                int currentPartIndex = 1; // 跳过命令前缀
 
-                if (part.Contains('=')) // 猫猫接下来的参数预计使用等号分割，例：mode=osu
+                // 尝试找到可能的子命令或参数
+                for (; currentPartIndex < parts.Length; currentPartIndex++)
                 {
-                    if (currentKey != null)
+                    var currentPart = parts[currentPartIndex];
+
+                    if (currentCommand.SubCommands.Count > 0 &&
+                        currentCommand.SubCommands.TryGetValue(currentPart, out var subCommand))
                     {
-                        args[currentKey] = currentValue.Trim();
-                        currentValue = "";
+                        // 如果找到了一个子命令，沿着子命令继续
+                        currentCommand = subCommand;
                     }
+                    else
+                    {
+                        // 如果没有找到，则剩下的部分是参数
+                        break;
+                    }
+                }
 
-                    var keyValuePair = part.Split(new[] { '=' }, 2);
-                    currentKey = keyValuePair[0];
-                    currentValue = keyValuePair.Length > 1 ? keyValuePair[1] : "";
+                // 解析参数
+                string? currentKey = null;
+                string currentValue = "";
+
+                for (; currentPartIndex < parts.Length; currentPartIndex++)
+                {
+                    var part = parts[currentPartIndex];
+
+                    if (part.Contains('=')) // 猫猫接下来的参数预计使用等号分割，例：mode=osu
+                    {
+                        if (currentKey != null)
+                        {
+                            args[currentKey] = currentValue.Trim();
+                            currentValue = "";
+                        }
+
+                        var keyValuePair = part.Split(new[] { '=' }, 2);
+                        currentKey = keyValuePair[0];
+                        currentValue = keyValuePair.Length > 1 ? keyValuePair[1] : "";
+                    }
+                    else
+                    {
+                        currentValue += (currentValue == "" ? "" : " ") + part;
+                    }
+                }
+
+                if (currentKey != null)
+                {
+                    args[currentKey] = currentValue.Trim();
+                }
+
+                // 执行
+                if (currentCommand.AsyncAction != null)
+                {
+                    await currentCommand.AsyncAction(args);
                 }
                 else
                 {
-                    currentValue += (currentValue == "" ? "" : " ") + part;
+                    // 没有与此命令关联的动作，记录
+                    Log.Warning($"No action associated with the command: {currentCommand.Name}");
                 }
             }
-
-            if (currentKey != null)
+            finally
             {
-                args[currentKey] = currentValue.Trim();
-            }
-
-            // 执行
-            if (currentCommand.AsyncAction != null)
-            {
-                await currentCommand.AsyncAction(args);
-            }
-            else
-            {
-                // 没有与此命令关联的动作，记录
-                Log.Warning($"No action associated with the command: {currentCommand.Name}");
+                // 执行完毕，解锁
+                reduplicateTargetChecker.Unlock(target);
             }
         }
     }

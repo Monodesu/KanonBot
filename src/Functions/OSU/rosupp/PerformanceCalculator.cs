@@ -143,7 +143,7 @@ namespace KanonBot.Functions.OSU.RosuPP
                 passedObjects,
                 clockRate;
 
-            public void build(ref ScoreParams p)
+            public readonly void build(ref ScoreParams p)
             {
                 p.Mode(
                     mode switch
@@ -215,7 +215,7 @@ namespace KanonBot.Functions.OSU.RosuPP
                         CountKatu = 0,
                         CountOk = 0,
                     },
-                    Mods = new string[0],
+                    Mods = System.Array.Empty<string>(),
                     Mode = map.Mode,
                     Scores = 1000000,
                     Passed = true,
@@ -255,7 +255,7 @@ namespace KanonBot.Functions.OSU.RosuPP
             {
                 scoreInfo = score
             };
-            var statistics = data.scoreInfo.Statistics;
+            var statistics = data.scoreInfo.Statistics!;
             Beatmap beatmap;
             try
             {
