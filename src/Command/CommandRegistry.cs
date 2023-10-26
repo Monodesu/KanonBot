@@ -5,20 +5,44 @@ using System.Reflection;
 
 namespace KanonBot.Command
 {
+    public static class CommandRegister
+    {
+        public static void Register()
+        {
+            var registry = new CommandRegistry();
+            registry.RegisterCommandsInAssembly(Assembly.GetExecutingAssembly());
+            CommandSystem.RegisterCommandFromRegistry(registry);
+        }
+    }
+
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class CommandAttribute : Attribute
     {
-        public string CommandName { get; }
+        public string[] CommandNames { get; }
 
-        public CommandAttribute(string commandName)
+        public CommandAttribute(params string[] commandNames)
         {
-            CommandName = commandName;
+            CommandNames = commandNames;
+        }
+    }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    public class ParamsAttribute : Attribute
+    {
+        public string[] Params { get; }
+
+        public ParamsAttribute(params string[] commandNames)
+        {
+            Params = commandNames;
         }
     }
 
     public class CommandRegistry
     {
-        private readonly Dictionary<string, Func<CommandContext, Target, Task>> _commandHandlers = new();
+        private readonly Dictionary<
+            string,
+            (ParamsAttribute?, Func<CommandContext, Target, Task>)
+        > _commandHandlers = new();
 
         // 通过反射扫描带有 Command 特性的方法，并将它们注册为命令处理程序
         public void RegisterCommandsInAssembly(Assembly assembly)
@@ -39,11 +63,22 @@ namespace KanonBot.Command
                     var commandAttr = method.GetCustomAttribute<CommandAttribute>();
                     if (commandAttr != null)
                     {
+                        var paramsAttr = method.GetCustomAttribute<ParamsAttribute>();
                         var instance = method.IsStatic
-                        ? null
-                        : Activator.CreateInstance(method.DeclaringType!);
-                        _commandHandlers[commandAttr.CommandName] = (Func<CommandContext, Target, Task>)Delegate.CreateDelegate(typeof(Func<CommandContext, Target, Task>), instance, method);
-                        Console.Error.WriteLine(commandAttr.CommandName);
+                            ? null
+                            : Activator.CreateInstance(method.DeclaringType!);
+                        var func =
+                            (Func<CommandContext, Target, Task>)
+                                Delegate.CreateDelegate(
+                                    typeof(Func<CommandContext, Target, Task>),
+                                    instance,
+                                    method
+                                );
+
+                        foreach (var name in commandAttr.CommandNames)
+                        {
+                            _commandHandlers[name] = (paramsAttr, func);
+                        }
                     }
                 }
             }
@@ -55,7 +90,7 @@ namespace KanonBot.Command
             if (_commandHandlers.TryGetValue(commandName, out var method))
             {
                 // 这里简化了实例创建的过程，真正的场景可能更复杂
-                await method.Invoke(context, target);
+                await method.Item2.Invoke(context, target);
             }
             else
             {
@@ -63,6 +98,9 @@ namespace KanonBot.Command
             }
         }
 
-        public Dictionary<string, Func<CommandContext, Target, Task>> commandHandlers => _commandHandlers;
+        public Dictionary<
+            string,
+            (ParamsAttribute?, Func<CommandContext, Target, Task>)
+        > commandHandlers => _commandHandlers;
     }
 }

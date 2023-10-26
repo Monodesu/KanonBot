@@ -14,14 +14,15 @@ namespace KanonBot.OSU
 {
     public static partial class Basic
     {
-        [Command("info")]
+        [Command("info", "stat")]
+        [Params("m", "mode")]
         public async static Task info(CommandContext args, Target target)
         {
             var name = args.GetDefault<string>();
-            var mode = args.GetParameter<int>("m");
+            var mode = args.GetParameters<int>(["m", "mode"]);
             Log.Information($"name:{name} mode:{mode}");
 
-            // // 指令解析部分
+            // 指令解析部分
             // foreach (var arg in args.Parameters)
             // {
             //     Log.Information($"Key:{arg.Key} Value:{arg.Value}");

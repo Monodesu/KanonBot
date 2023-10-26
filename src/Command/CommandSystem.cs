@@ -7,91 +7,35 @@ using System.Text;
 
 namespace KanonBot.Command
 {
-    public class CommandNode(string name, Func<CommandContext, Target, Task>? asyncAction = null)
+    public class ReduplicateTargetChecker
     {
-        public string Name { get; } = name;
-        public Dictionary<string, CommandNode> SubCommands { get; } =
-            new Dictionary<string, CommandNode>(StringComparer.OrdinalIgnoreCase);
-        public Func<CommandContext, Target, Task>? AsyncAction { get; set; } = asyncAction;
+        private ConcurrentDictionary<(string sender, string msg), Target> CommandList = new();
 
-        public void AddSubCommand(CommandNode subCommand)
+        public bool TryLock(Target target)
         {
-            SubCommands[subCommand.Name] = subCommand;
-        }
-    }
-
-    public class CommandContext
-    {
-        public Dictionary<string, object> Parameters { get; }
-
-        public CommandContext(Dictionary<string, object> parameters)
-        {
-            Parameters = parameters;
+            return CommandList.TryAdd((target.sender!, target.msg.ToString()), target);
         }
 
-        public CommandContext()
+        public bool Contains(Target target)
         {
-            Parameters = new();
+            return CommandList.ContainsKey((target.sender!, target.msg.ToString()));
         }
 
-        public Option<T> GetParameter<T>(string name)
+        public void Unlock(Target target)
         {
-            if (Parameters.TryGetValue(name, out var value))
-            {
-                if (value is T v)
-                {
-                    return v;
-                }
-
-                if (typeof(T).IsIntegerType())
-                {
-                    if (value is string s)
-                    {
-                        if (int.TryParse(s, out int result))
-                        {
-                            return (T)Convert.ChangeType(result, typeof(T));
-                        }
-                    }
-                }
-            }
-            return None;
+            CommandList.TryRemove((target.sender!, target.msg.ToString()), out _);
         }
-
-        public Option<T> GetDefault<T>() => GetParameter<T>("default");
     }
 
     public static class CommandSystem
     {
-        public class ReduplicateTargetChecker
-        {
-            private ConcurrentDictionary<(string sender, string msg), Target> CommandList = new();
-
-            public bool TryLock(Target target)
-            {
-                return CommandList.TryAdd((target.sender!, target.msg.ToString()), target);
-            }
-
-            public bool Contains(Target target)
-            {
-                return CommandList.ContainsKey((target.sender!, target.msg.ToString()));
-            }
-
-            public void Unlock(Target target)
-            {
-                CommandList.TryRemove((target.sender!, target.msg.ToString()), out _);
-            }
-        }
-
         public static ReduplicateTargetChecker reduplicateTargetChecker = new();
-
         private static Dictionary<string, CommandNode> commands =
             new(StringComparer.OrdinalIgnoreCase);
 
         public static void RegisterCommandFromRegistry(CommandRegistry reg)
         {
-            foreach (
-                KeyValuePair<string, Func<CommandContext, Target, Task>> s in reg.commandHandlers
-            )
+            foreach (var s in reg.commandHandlers)
             {
                 var hierarchy = s.Key.Split(' ');
                 var method = s.Value;
@@ -110,43 +54,9 @@ namespace KanonBot.Command
                     currentLevel = currentNode.SubCommands;
                 }
 
-                currentNode!.AsyncAction = s.Value;
+                currentNode!.ParamsAttribute = s.Value.Item1;
+                currentNode!.AsyncAction = s.Value.Item2;
             }
-        }
-
-        public static void RegisterCommand(
-            string hierarchy,
-            Func<CommandContext, Target, Task> action
-        )
-        {
-            RegisterCommand(new string[] { hierarchy }, action);
-        }
-
-        public static void RegisterCommand(
-            string[] hierarchy,
-            Func<CommandContext, Target, Task> action
-        )
-        {
-            if (hierarchy.Length == 0)
-            {
-                throw new ArgumentException("Hierarchy cannot be empty.", nameof(hierarchy));
-            }
-
-            var currentLevel = commands;
-            CommandNode? currentNode = null;
-
-            foreach (var level in hierarchy)
-            {
-                if (!currentLevel.TryGetValue(level, out currentNode))
-                {
-                    currentNode = new CommandNode(level);
-                    currentLevel[level] = currentNode;
-                }
-
-                currentLevel = currentNode.SubCommands;
-            }
-
-            currentNode!.AsyncAction = action;
         }
 
         public static async Task ProcessCommand(Target target)
@@ -255,7 +165,7 @@ namespace KanonBot.Command
                             currentValue = "";
                         }
 
-                        var keyValuePair = part.Split(new[] { '=' }, 2);
+                        var keyValuePair = part.Split(['='], 2);
                         currentKey = keyValuePair[0];
                         currentValue = keyValuePair.Length > 1 ? keyValuePair[1] : part;
                     }
