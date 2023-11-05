@@ -59,7 +59,6 @@ namespace KanonBot.Command
 
                 foreach (var method in methods)
                 {
-                    // 如果此方法有 Command 特性，则注册它
                     var commandAttr = method.GetCustomAttribute<CommandAttribute>();
                     if (commandAttr != null)
                     {
@@ -84,12 +83,10 @@ namespace KanonBot.Command
             }
         }
 
-        // 调用对应的命令处理程序
         public async Task HandleCommand(string commandName, CommandContext context, Target target)
         {
             if (_commandHandlers.TryGetValue(commandName, out var method))
             {
-                // 这里简化了实例创建的过程，真正的场景可能更复杂
                 await method.Item2.Invoke(context, target);
             }
             else

@@ -3,20 +3,13 @@ using KanonBot.API;
 using KanonBot.OSU;
 using KanonBot.Drivers;
 using KanonBot.Message;
-using LanguageExt.SomeHelp;
-using LanguageExt.UnsafeValueAccess;
 using System.Net;
+using KanonBot.Command;
 
 namespace KanonBot
 {
-    public static class Accounts
+    public static class BaseAccount
     {
-        public struct AccInfo
-        {
-            public required Platform platform;
-            public required string uid;
-        }
-
         public enum AccountOperation
         {
             None,
@@ -58,9 +51,9 @@ namespace KanonBot
             return target.platform switch
             {
                 Platform.Guild => await HandleGuildAsync(target, dbuser),
-                Platform.OneBot => await HandleOneBot(target, dbuser),
-                Platform.KOOK => await HandleKook(target, dbuser),
-                Platform.Discord => await HandleDiscord(target, dbuser),
+                Platform.OneBot => await HandleOneBotAsync(target, dbuser),
+                Platform.KOOK => await HandleKookAsync(target, dbuser),
+                Platform.Discord => await HandleDiscordAsync(target, dbuser),
                 _ => AccountOperation.None,
             };
         }
@@ -94,7 +87,7 @@ namespace KanonBot
             return AccountOperation.None;
         }
 
-        private static async Task<AccountOperation> HandleOneBot(Target target, Database.Models.User? dbuser)
+        private static async Task<AccountOperation> HandleOneBotAsync(Target target, Database.Models.User? dbuser)
         {
             if (target.raw is OneBot.Models.CQMessageEventBase o)
             {
@@ -123,7 +116,7 @@ namespace KanonBot
             return AccountOperation.None;
         }
 
-        private static async Task<AccountOperation> HandleKook(Target target, Database.Models.User? dbuser)
+        private static async Task<AccountOperation> HandleKookAsync(Target target, Database.Models.User? dbuser)
         {
             if (target.raw is Kook.WebSocket.SocketMessage k)
             {
@@ -151,7 +144,7 @@ namespace KanonBot
             return AccountOperation.None;
         }
 
-        private static async Task<AccountOperation> HandleDiscord(Target target, Database.Models.User? dbuser)
+        private static async Task<AccountOperation> HandleDiscordAsync(Target target, Database.Models.User? dbuser)
         {
             if (target.raw is Discord.WebSocket.SocketMessage d)
             {
@@ -288,191 +281,5 @@ namespace KanonBot
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        async public static Task BindService(Target target, string cmd)
-        {
-            cmd = cmd.Trim();
-            string childCmd_1 = "", childCmd_2 = "";
-            try
-            {
-                var tmp = cmd.SplitOnFirstOccurence(" ");
-                childCmd_1 = tmp[0];
-                childCmd_2 = tmp[1];
-            }
-            catch { }
-
-            var AccInfo = Accounts.GetAccInfo(target);
-            var DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
-            //这里dbuser可空，后面一定要检测
-
-
-            if (childCmd_1 == "osu")
-            {
-                // 先检查查询的用户是否有效
-                API.OSU.Models.User? online_osu_userinfo;
-                online_osu_userinfo = await API.OSU.V2.GetUser(childCmd_2);
-                if (online_osu_userinfo == null) { await target.reply($"没有找到osu用户名为 {childCmd_2} 的osu用户，绑定失败。"); return; }
-
-                // 检查要绑定的osu是否没有被Kanon用户绑定过
-                var db_osu_userinfo = await Database.Client.GetOsuUser(online_osu_userinfo.Id);
-                if (db_osu_userinfo != null)
-                {
-                    if (DBUser != null && DBUser.uid == db_osu_userinfo.uid)
-                    {
-                        await target.reply($"你已绑定该账户。"); return;
-                    }
-                    await target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果这是你的账户，请联系管理员更新账户信息。"); return;
-                }
-
-                // 查询当前kanon账户是否有效
-                if (DBUser == null) { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }
-
-                // 检查用户是否已绑定osu账户
-                var osuuserinfo = await Database.Client.GetOsuUserByUID(DBUser.uid);
-                if (osuuserinfo != null) { await target.reply($"您已经与osu uid为 {osuuserinfo.osu_uid} 的用户绑定过了。"); return; }
-
-                // 通过osu username搜索osu用户id
-                try
-                {
-                    // 没被他人绑定，开始绑定流程
-                    if (await Database.Client.InsertOsuUser(DBUser.uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2))   //?这里url真的能为空吗  我不到啊
-                    {
-                        await target.reply($"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至Kanon账户 {DBUser.uid} 。");
-                        await GeneralUpdate.UpdateUser(online_osu_userinfo.Id, true); //插入用户每日数据记录
-                    }
-                    else { await target.reply($"绑定失败，请稍后再试。"); }
-                }
-                catch { await target.reply($"在绑定用户时出错，请联系猫妈处理.png"); return; }
-            }
-            else
-            {
-                await target.reply("请按照以下格式进行绑定。\n!bind osu 您的osu用户名 "); return;
-            }
-        }
-
-        public static async Task<(Option<API.OSU.Models.User>, Option<Database.Models.User>)> ParseAt(string atmsg)
-        {
-            var res = SplitKvp(atmsg);
-            if (res.IsNone)
-                return (None, None);
-
-            var (k, v) = res.Value();
-            if (k == "osu")
-            {
-                var uid = parseLong(v).IfNone(() => 0);
-                if (uid == 0)
-                    return (None, None);
-
-                var osuacc_ = await API.OSU.V2.GetUser(uid);
-                if (osuacc_ is null)
-                    return (None, None);
-
-                var dbuser_ = await GetAccountByOsuUid(uid);
-                if (dbuser_ is null)
-                    return (Some(osuacc_!), None);
-                else
-                    return (Some(osuacc_!), Some(dbuser_!));
-            }
-
-            var platform = k switch
-            {
-                "qq" => Platform.OneBot,
-                "gulid" => Platform.Guild,
-                "discord" => Platform.Discord,
-                "kook" => Platform.KOOK,
-                _ => Platform.Unknown
-            };
-            if (platform == Platform.Unknown)
-                return (None, None);
-
-            var dbuser = await GetAccount(v, platform);
-            if (dbuser is null)
-                return (None, None);
-
-            var dbosu = await CheckOsuAccount(dbuser.uid);
-            if (dbosu is null)
-                return (None, Some(dbuser!));
-
-            var osuacc = await API.OSU.V2.GetUser(dbosu.osu_uid);
-            if (osuacc is null)
-                return (None, Some(dbuser!));
-            else
-                return (Some(osuacc!), Some(dbuser!));
-        }
-
-        public static async Task<Database.Models.User?> GetAccount(string uid, Platform platform)
-        {
-            return await Database.Client.GetUsersByUID(uid, platform);
-        }
-
-        public static async Task<Database.Models.User?> GetAccountByOsuUid(long osu_uid)
-        {
-            return await Database.Client.GetUserByOsuUID(osu_uid);
-        }
-
-        public static async Task<Database.Models.UserOSU?> CheckOsuAccount(long uid)
-        {
-            return await Database.Client.GetOsuUserByUID(uid);
-        }
-
-        public static AccInfo GetAccInfo(Target target)
-        {
-            switch (target.platform)
-            {
-                case Platform.Guild:
-                    if (target.raw is Guild.Models.MessageData g)
-                    {
-                        return new AccInfo() { platform = Platform.Guild, uid = g.Author.ID };
-                    }
-                    break;
-                case Platform.OneBot:
-                    if (target.raw is OneBot.Models.CQMessageEventBase o)
-                    {
-                        return new AccInfo() { platform = Platform.OneBot, uid = o.UserId.ToString() };
-                    }
-                    break;
-                case Platform.KOOK:
-                    if (target.raw is Kook.WebSocket.SocketMessage k)
-                    {
-                        return new AccInfo() { platform = Platform.KOOK, uid = k.Author.Id.ToString() };
-                    }
-                    break;
-                case Platform.Discord:
-                    if (target.raw is Discord.WebSocket.SocketMessage d)
-                    {
-                        return new AccInfo() { platform = Platform.Discord, uid = d.Author.Id.ToString() };
-                    }
-                    break;
-            }
-            return new() { platform = Platform.Unknown, uid = "" };
-        }
     }
 }

@@ -30,8 +30,8 @@ namespace KanonBot.OSU
             if (command.self_query)
             {
                 // 验证账户
-                var AccInfo = Accounts.GetAccInfo(target);
-                DBUser = await Accounts.GetAccount(AccInfo.uid, AccInfo.platform);
+                var AccInfo = BaseAccount.GetAccInfo(target);
+                DBUser = await BaseAccount.GetAccount(AccInfo.uid, AccInfo.platform);
                 if (DBUser == null)
                 // { await target.reply("您还没有绑定Kanon账户，请使用!reg 您的邮箱来进行绑定或注册。"); return; }    // 这里引导到绑定osu
                 {
@@ -39,7 +39,7 @@ namespace KanonBot.OSU
                     return;
                 }
                 // 验证账号信息
-                DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
+                DBOsuInfo = await BaseAccount.CheckOsuAccount(DBUser.uid);
                 if (DBOsuInfo == null)
                 {
                     await target.reply("您还没有绑定osu账户，请使用!bind osu 您的osu用户名 来绑定您的osu账户。");
@@ -53,7 +53,7 @@ namespace KanonBot.OSU
             {
                 // 查询用户是否绑定
                 // 这里先按照at方法查询，查询不到就是普通用户查询
-                var (atOSU, atDBUser) = await Accounts.ParseAt(command.osu_username);
+                var (atOSU, atDBUser) = await BaseAccount.ParseAt(command.osu_username);
                 if (atOSU.IsNone && !atDBUser.IsNone)
                 {
                     await target.reply("ta还没有绑定osu账户呢。");
@@ -68,7 +68,7 @@ namespace KanonBot.OSU
                 else if (!atOSU.IsNone && !atDBUser.IsNone)
                 {
                     DBUser = atDBUser.ValueUnsafe();
-                    DBOsuInfo = await Accounts.CheckOsuAccount(DBUser.uid);
+                    DBOsuInfo = await BaseAccount.CheckOsuAccount(DBUser.uid);
                     var _osuinfo = atOSU.ValueUnsafe();
                     mode ??= API.OSU.Enums.String2Mode(DBOsuInfo!.osu_mode)!.Value;
                     osuID = _osuinfo.Id;
@@ -85,7 +85,7 @@ namespace KanonBot.OSU
                         DBOsuInfo = await Database.Client.GetOsuUser(OnlineOsuInfo.Id);
                         if (DBOsuInfo != null)
                         {
-                            DBUser = await Accounts.GetAccountByOsuUid(OnlineOsuInfo.Id);
+                            DBUser = await BaseAccount.GetAccountByOsuUid(OnlineOsuInfo.Id);
                             mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
                         }
                         mode ??= OnlineOsuInfo.PlayMode;
