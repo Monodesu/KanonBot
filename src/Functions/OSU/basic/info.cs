@@ -23,15 +23,15 @@ namespace KanonBot.OSU
         public async static Task info(CommandContext args, Target target)
         {
             var osu_username = "";
-            long? osu_uid = null;
+            long osu_uid = 0;
             bool isSelfQuery = false;
-            API.OSU.Enums.Mode? mode = null;
+            API.OSU.Enums.Mode mode = API.OSU.Enums.Mode.Unknown;
 
             args.GetParameters<string>(["m", "mode"]).Match
                 (
                 Some: try_mode =>
                 {
-                    mode = API.OSU.Enums.String2Mode(try_mode);
+                    mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
                 },
                 None: () => { }
                 );
@@ -48,31 +48,26 @@ namespace KanonBot.OSU
                 }
                 );
 
-            if (isSelfQuery)
-            {
-                var (base_uid, osuID, osu_mode) = await VerifyBaseAccount(target);
-                if (osu_uid == 0) return; // 查询失败
-                mode ??= API.OSU.Enums.String2Mode(osu_mode)!.Value;
-                osu_uid = osuID;
-            }
-            else
-            {
-                var (osuID, osu_mode) = await QueryOtherUser(target, osu_username, mode);
-                mode = osu_mode;
-                osu_uid = osuID;
-            }
+
+            var (osuID, osu_mode) = await GetOSUOperationInfo(target, isSelfQuery, osu_username);
+            if (osu_mode == API.OSU.Enums.Mode.Unknown) return; // 查询失败
+            osu_uid = osuID;
+            mode = osu_mode;
 
             // 操作部分
 
+            var OnlineOSUUserInfo = await API.OSU.V2.GetUser(osu_uid, mode);
 
+            Log.Information(
+                $"""
 
-
-
-
-
-
-
-
+                osu!status
+                username: {OnlineOSUUserInfo!.Username}
+                osu_uid: {OnlineOSUUserInfo.Id}
+                osu_mode: {OnlineOSUUserInfo.PlayMode}
+                osu_pp: {OnlineOSUUserInfo!.Statistics!.PP}
+                """
+                );
 
             await Task.CompletedTask;
         }

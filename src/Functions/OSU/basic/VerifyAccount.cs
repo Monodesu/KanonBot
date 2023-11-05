@@ -15,7 +15,29 @@ namespace KanonBot.OSU
 {
     public static partial class Basic
     {
-        async static public Task<(string base_uid, long osu_uid, string? osu_mode)> VerifyBaseAccount(Target target)
+
+        async static public Task<(long osu_uid, API.OSU.Enums.Mode mode)> GetOSUOperationInfo(Target target, bool isSelfQuery, string osu_username)
+        {
+            API.OSU.Enums.Mode? mode = null;
+            long osu_uid = 0;
+            if (isSelfQuery)
+            {
+                var (base_uid, osuID, osu_mode) = await VerifyBaseAccount(target);
+                if (osuID == 0) return (0, API.OSU.Enums.Mode.Unknown); // 查询失败
+                mode ??= API.OSU.Enums.String2Mode(osu_mode)!.Value;
+                osu_uid = osuID;
+            }
+            else
+            {
+                var (osuID, osu_mode) = await QueryOtherUser(target, osu_username, mode);
+                if (osuID == 0) return (0, API.OSU.Enums.Mode.Unknown); // 查询失败
+                mode = osu_mode;
+                osu_uid = osuID;
+            }
+            return (osu_uid, mode.Value);
+        }
+
+        async static private Task<(string base_uid, long osu_uid, string? osu_mode)> VerifyBaseAccount(Target target)
         {
             Database.Models.User? DBUser = null;
             Database.Models.UserOSU? DBOsuInfo = null;
@@ -35,33 +57,7 @@ namespace KanonBot.OSU
             return (DBUser.uid.ToString(), DBOsuInfo.osu_uid, DBOsuInfo.osu_mode);
         }
 
-        async static public Task<(long osu_uid, string? osu_mode)> VerifyOSUAccount(Target target, string osu_username, API.OSU.Enums.Mode? mode)
-        {
-            Database.Models.User? DBUser = null;
-            Database.Models.UserOSU? DBOsuInfo = null;
-
-            var OnlineOSUUserInfo = await API.OSU.V2.GetUser(osu_username, mode ?? API.OSU.Enums.Mode.OSU);
-            if (OnlineOSUUserInfo != null)
-            {
-                DBOsuInfo = await Database.Client.GetOsuUser(OnlineOSUUserInfo.Id);
-                if (DBOsuInfo != null)
-                {
-                    DBUser = await GetBaseAccountByOsuUid(OnlineOSUUserInfo.Id);
-                    mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
-                }
-                mode ??= OnlineOSUUserInfo.PlayMode;
-                return (OnlineOSUUserInfo.Id, OnlineOSUUserInfo.PlayMode.ToString());
-            }
-            else
-            {
-                // 直接取消查询，简化流程
-                await target.reply("猫猫没有找到此用户。");
-            }
-            return (0, "");
-        }
-
-
-        async static public Task<(long osu_uid, API.OSU.Enums.Mode osu_mode)> QueryOtherUser(Target target, string osu_username, API.OSU.Enums.Mode? mode)
+        async static private Task<(long osu_uid, API.OSU.Enums.Mode osu_mode)> QueryOtherUser(Target target, string osu_username, API.OSU.Enums.Mode? mode)
         {
             // 查询用户是否绑定，这里先按照at方法查询，查询不到就是普通用户查询
             Database.Models.User? DBUser = null;
@@ -99,7 +95,30 @@ namespace KanonBot.OSU
             return (osuID, (API.OSU.Enums.Mode)mode);
         }
 
+        async static private Task<(long osu_uid, string? osu_mode)> VerifyOSUAccount(Target target, string osu_username, API.OSU.Enums.Mode? mode)
+        {
+            Database.Models.User? DBUser = null;
+            Database.Models.UserOSU? DBOsuInfo = null;
 
+            var OnlineOSUUserInfo = await API.OSU.V2.GetUser(osu_username, mode ?? API.OSU.Enums.Mode.OSU);
+            if (OnlineOSUUserInfo != null)
+            {
+                DBOsuInfo = await Database.Client.GetOsuUser(OnlineOSUUserInfo.Id);
+                if (DBOsuInfo != null)
+                {
+                    DBUser = await GetBaseAccountByOsuUid(OnlineOSUUserInfo.Id);
+                    mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value;
+                }
+                mode ??= OnlineOSUUserInfo.PlayMode;
+                return (OnlineOSUUserInfo.Id, OnlineOSUUserInfo.PlayMode.ToString());
+            }
+            else
+            {
+                // 直接取消查询，简化流程
+                await target.reply("猫猫没有找到此用户。");
+            }
+            return (0, "");
+        }
 
     }
 }
