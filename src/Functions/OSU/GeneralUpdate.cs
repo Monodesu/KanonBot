@@ -83,15 +83,15 @@ namespace KanonBot.OSU
                 OsuArchivedRec rec = new()
                 {
                     uid = (int)userInfo!.Id,
-                    play_count = (int)userInfo.Statistics.PlayCount,
+                    play_count = (int)userInfo.Statistics!.PlayCount,
                     ranked_score = userInfo.Statistics.RankedScore,
                     total_score = userInfo.Statistics.TotalScore,
                     total_hit = userInfo.Statistics.TotalHits,
-                    level = userInfo.Statistics.Level.Current,
+                    level = userInfo.Statistics.Level!.Current,
                     level_percent = userInfo.Statistics.Level.Progress,
                     performance_point = userInfo.Statistics.PP,
                     accuracy = userInfo.Statistics.HitAccuracy,
-                    count_SSH = userInfo.Statistics.GradeCounts.SSH,
+                    count_SSH = userInfo.Statistics.GradeCounts!.SSH,
                     count_SS = userInfo.Statistics.GradeCounts.SS,
                     count_SH = userInfo.Statistics.GradeCounts.SH,
                     count_S = userInfo.Statistics.GradeCounts.S,

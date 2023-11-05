@@ -23,7 +23,6 @@ namespace KanonBot
         [Params("osu", "steam")]
         public async static Task Bind(CommandContext args, Target target)
         {
-
             var op_osu = args.GetParameter<string>("osu");
 
             await op_osu.Match
@@ -44,7 +43,7 @@ namespace KanonBot
         private async static Task HandleOSULink(Target target, string osu_username)
         {
             var (baseuid, platform) = RetrieveCurrentUserInfo(target);
-            var online_osu_userinfo = await RetrieveOSUUserInfo(osu_username);
+            var online_osu_userinfo = await API.OSU.V2.GetUser(osu_username);
 
             if (online_osu_userinfo == null)
             {
@@ -97,23 +96,18 @@ namespace KanonBot
             }
         }
 
-        private static (string baseuid, Platform platform) RetrieveCurrentUserInfo(Target target)
+        public static (string baseuid, Platform platform) RetrieveCurrentUserInfo(Target target)
         {
             var AccInfo = GetBaseAccInfo(target);
             return (AccInfo.uid, AccInfo.platform);
         }
 
-        private async static Task<API.OSU.Models.User?> RetrieveOSUUserInfo(string osu_username)
-        {
-            return await API.OSU.V2.GetUser(osu_username);
-        }
-
-        private async static Task<Database.Models.UserOSU?> CheckOSUUserBinding(long osuUserId)
+        public async static Task<Database.Models.UserOSU?> CheckOSUUserBinding(long osuUserId)
         {
             return await Database.Client.GetOsuUser(osuUserId);
         }
 
-        private async static Task<Database.Models.UserOSU?> CheckCurrentUserOSUBinding(long base_uid)
+        public async static Task<Database.Models.UserOSU?> CheckCurrentUserOSUBinding(long base_uid)
         {
             return await Database.Client.GetOsuUserByUID(base_uid);
         }
@@ -141,7 +135,7 @@ namespace KanonBot
                 if (osuacc_ is null)
                     return (None, None);
 
-                var dbuser_ = await GetAccountByOsuUid(uid);
+                var dbuser_ = await GetBaseAccountByOsuUid(uid);
                 if (dbuser_ is null)
                     return (Some(osuacc_!), None);
                 else
@@ -159,7 +153,7 @@ namespace KanonBot
             if (platform == Platform.Unknown)
                 return (None, None);
 
-            var dbuser = await GetAccount(v, platform);
+            var dbuser = await GetBaseAccount(v, platform);
             if (dbuser is null)
                 return (None, None);
 
