@@ -161,7 +161,7 @@ namespace KanonBot
             if (dbosu is null)
                 return (None, Some(dbuser!));
 
-            var osuacc = await API.OSU.V2.GetUser(dbosu.osu_uid);
+            var osuacc = await API.OSU.V2.GetUser(dbosu.osu_uid,(API.OSU.Enums.Mode)API.OSU.Enums.String2Mode(dbosu.osu_mode)!);
             if (osuacc is null)
                 return (None, Some(dbuser!));
             else
