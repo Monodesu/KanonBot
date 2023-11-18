@@ -19,6 +19,7 @@ using SixLabors.ImageSharp.Diagnostics;
 using static KanonBot.API.OSU.DataStructure;
 using KanonBot.API.OSU;
 using static KanonBot.Image.OSU.ResourceRegistrar;
+using static KanonBot.Image.OSU.OsuResourceHelper;
 using KanonBot.Image;
 
 namespace KanonBot.Image.OSU
@@ -1012,62 +1013,12 @@ namespace KanonBot.Image.OSU
             );
             info.Mutate(x => x.DrawImage(acc_300, new Point(2358, 611), 1));
 
-            #region junkcodes
-            //acc
-            //var v1infos = await OSU.GetUserWithV1API(data.userInfo!.Id, data.userInfo!.PlayMode);
-            //var v1info = v1infos!.First();
-            //var v1n50 = v1info.Count50;
-            //var v1n100 = v1info.Count100;
-            //var v1n300 = v1info.Count300;
-            //var v1totalhits = v1n50 + v1n100 + v1n300;
-            //50&100
-            //Img acc_background = new Image<Rgba32>(1443, 68);
-            //acc_background.Mutate(x => x.Fill(Color.ParseHex("#c3e7cb")));
-            //acc_background.Mutate(x => x.RoundCorner_Parts(new Size(1443, 68), 10, 10, 20, 20));
-            //info.Mutate(x => x.DrawImage(acc_background, new Point(2358, 611), 1));
-            //only 300
-            //Img acc_100 = new Image<Rgba32>((int)(1443.00 * ((double)v1n300 / (double)v1totalhits)), 68);
-            //acc_100.Mutate(x => x.Fill(Color.ParseHex("#a4d8b1")));
-            //acc_100.Mutate(x => x.RoundCorner_Parts(new Size((int)(1443.0 * ((double)v1n300 / (double)v1totalhits)), 68), 10, 10, 20, 20));
-            //info.Mutate(x => x.DrawImage(acc_100, new Point(2358, 611), 1));
-            /*
-            //100
-            Img acc_100 = new Image<Rgba32>((int)(1443.0 - 1443.00 * ((double)v1n50 / (double)v1totalhits)), 68);
-            acc_100.Mutate(x => x.Fill(Color.ParseHex("#a4d8b1")));
-            acc_100.Mutate(x => x.RoundCorner_Parts(new Size((int)(1443.0 - 1443.0 * ((double)v1n50 / (double)v1totalhits)), 68), 10, 10, 20, 20));
-            info.Mutate(x => x.DrawImage(acc_100, new Point(2358, 611), 1));
-            //300
-            Img acc_300 = new Image<Rgba32>((int)(1443.0 - 1443.0 * (((double)v1n50 + (double)v1n100) / (double)v1totalhits)), 68);
-            acc_300.Mutate(x => x.Fill(Color.ParseHex("#92cca7")));
-            acc_300.Mutate(x => x.RoundCorner_Parts(new Size((int)(1443.0 - 1443.0 * (((double)v1n50 + (double)v1n100) / (double)v1totalhits)), 68), 10, 10, 20, 20));
-            info.Mutate(x => x.DrawImage(acc_300, new Point(2358, 611), 1));
-            */
-            #endregion
-
             //top score image 先绘制top bp图片再覆盖面板
             //download background image
             if (allBP!.Length > 5)
             {
-                var bp1bgPath = $"./work/background/{allBP![0].Beatmap!.BeatmapId}.png";
-                if (!File.Exists(bp1bgPath))
-                {
-                    try
-                    {
-                        bp1bgPath = await V2.SayoDownloadBeatmapBackgroundImg(
-                            allBP![0].Beatmapset!.Id,
-                            allBP![0].Beatmap!.BeatmapId,
-                            "./work/background/"
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        var msg = $"从API下载背景图片时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
-                        Log.Warning(msg);
-                    }
-                }
-                using var bp1bg = await TryAsync(ReadImageRgba(bp1bgPath!))
+                using var bp1bg = await TryAsync(GetBeatmapBackgroundImageAsync(allBP![0].Beatmapset!.Id, allBP![0].Beatmap!.BeatmapId))
                     .IfFail(await ReadImageRgba("./work/legacy/load-failed-img.png"));
-                //bp1bg.Mutate(x => x.Resize(355, 200));
                 bp1bg.Mutate(
                     x =>
                         x.Resize(
@@ -1120,11 +1071,11 @@ namespace KanonBot.Image.OSU
 
 
             //自定义侧图
-            using var sideImg = await OsuUserResourceHelper.GetInfoV2BannerAsync(data.userInfo!.Id, ColorMode, SideImgBrightness);
+            using var sideImg = await GetInfoV2BannerAsync(data.userInfo!.Id, ColorMode, SideImgBrightness);
             info.Mutate(x => x.DrawImage(sideImg, new Point(90, 72), 1));
 
             //用户面板/自定义面板
-            using var panel = await OsuUserResourceHelper.GetInfoV2PanelAsync(data.userInfo!.Id, ColorMode);
+            using var panel = await GetInfoV2PanelAsync(data.userInfo!.Id, ColorMode);
             info.Mutate(x => x.DrawImage(panel, new Point(0, 0), 1));
 
             //rank
@@ -1143,7 +1094,7 @@ namespace KanonBot.Image.OSU
             );
 
             //country(region)_flag
-            using var country_flag = await OsuUserResourceHelper.GetCountryOrRegionFlagAsync(data.userInfo!.Country!.Code!, 2, CountryFlagAlpha, CountryFlagBrightness);
+            using var country_flag = await GetCountryOrRegionFlagAsync(data.userInfo!.Country!.Code!, 2, CountryFlagAlpha, CountryFlagBrightness);
             info.Mutate(x => x.DrawImage(country_flag, new Point(1577, 600), 1));
 
             //country_rank
@@ -2972,26 +2923,7 @@ namespace KanonBot.Image.OSU
             }
 
             //avatar
-            var avatarPath = $"./work/avatar/{data.userInfo!.Id}.png";
-            using var avatar = await TryAsync(ReadImageRgba(avatarPath))
-                .IfFail(async () =>
-                {
-                    try
-                    {
-                        avatarPath = await data.userInfo!.AvatarUrl.DownloadFileAsync(
-                            "./work/avatar/",
-                            $"{data.userInfo!.Id}.png"
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        var msg = $"从API下载用户头像时发生了一处异常\n异常类型: {ex.GetType()}\n异常信息: '{ex.Message}'";
-                        Log.Error(msg);
-                        throw; // 下载失败直接抛出error
-                    }
-                    return await ReadImageRgba(avatarPath); // 下载后再读取
-                });
-
+            using var avatar = await GetUserAvatarAsync(data.userInfo!.Id, data.userInfo!.AvatarUrl!);
             // 亮度
             avatar.Mutate(x => x.Brightness(AvatarBrightness));
             avatar.Mutate(x => x.Resize(200, 200).RoundCorner(new Size(200, 200), 25));

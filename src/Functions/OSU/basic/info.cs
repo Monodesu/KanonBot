@@ -30,6 +30,17 @@ namespace KanonBot.OSU
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
             int lookback = 0;
 
+            args.GetDefault<string>().Match
+                (
+                Some: try_name =>
+                {
+                    osu_username = try_name;
+                },
+                None: () =>
+                {
+                    isSelfQuery = true;
+                }
+                );
             args.GetParameters<string>(["m", "mode"]).Match
                 (
                 Some: try_mode =>
@@ -47,19 +58,7 @@ namespace KanonBot.OSU
                 },
                 None: () => { }
                 );
-
-            args.GetDefault<string>().Match
-                (
-                Some: try_name =>
-                {
-                    osu_username = try_name;
-                },
-                None: () =>
-                {
-                    isSelfQuery = true;
-                }
-                );
-            args.GetDefault<string>().Match
+            args.GetParameters<string>(["q", "quality"]).Match
                 (
                 Some: try_quality =>
                 {
@@ -225,17 +224,16 @@ namespace KanonBot.OSU
             API.OSU.Models.Score[]? allBP = System.Array.Empty<API.OSU.Models.Score>();
             switch (custominfoengineVer) //0=null 1=v1 2=v2
             {
-                case 1:
-                    //img = await LegacyImage.Draw.DrawInfo(
-                    //    data,
-                    //    DBOsuInfo != null,
-                    //    isDataOfDayAvaiavle
-                    //);
-                    //await img.SaveAsync(stream, command.res ? new PngEncoder() : new JpegEncoder());
-                    //await img.SaveAsync(stream, new PngEncoder());
-                    img = await ReadImageRgba(""); //test
-                    break;
                 case 2:
+                    img = await Image.OSU.OsuInfoPanelV1.Draw(
+                        data,
+                        DBOsuInfo != null,
+                        false,
+                        (IsBound && lookback > 0)
+                    );
+                    await img.SaveAsync(stream, new PngEncoder());
+                    break;
+                case 1:
                     var v2Options = data.customMode switch
                     {
                         UserPanelData.CustomMode.Custom => Image.OSU.OsuInfoPanelV2.InfoCustom.ParseColors(data.ColorConfigRaw!, None),
@@ -297,8 +295,6 @@ namespace KanonBot.OSU
             //        }
             //}
             //catch { }
-
-            await Task.CompletedTask;
         }
     }
 }
