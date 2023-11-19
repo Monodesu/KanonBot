@@ -339,6 +339,19 @@ public static partial class Utils
         return false;
     }
 
+    public static bool IsNumber(string str)
+    {
+        try
+        {
+            _ = long.Parse(str);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
     public static string GetTimeStamp(bool isMillisec)
     {
         TimeSpan ts = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);

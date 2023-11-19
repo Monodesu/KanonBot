@@ -19,6 +19,30 @@ namespace KanonBot.OSU
 {
     public static partial class Basic
     {
+        private async static Task<API.OSU.Models.PPlusData.UserData> GetPPlusInfo(API.OSU.Models.User user)
+        {
+            var d = await Database.Client.GetOsuPPlusData(user.Id);
+            if (d != null)
+            {
+                return d;
+            }
+            else
+            {
+                // 异步获取osupp数据，下次请求的时候就有了
+                new Task(async () =>
+                {
+                    try
+                    {
+                        await Database.Client.UpdateOsuPPlusData(
+                            (await API.OSU.V2.TryGetUserPlusData(user!))!.User!,
+                            user!.Id
+                        );
+                    }
+                    catch { } //更新pp+失败，不返回信息
+                }).RunSynchronously();
+                return new();
+            }
+        }
 
         [Command("info", "stat")]
         [Params("m", "mode", "l", "lookback", "q", "quality")]
@@ -72,19 +96,6 @@ namespace KanonBot.OSU
             if (OnlineOSUUserInfo == null) return; // 查询失败
 
             // 操作部分
-
-            Log.Information(
-                $"""
-
-                osu!status
-                username: {OnlineOSUUserInfo!.Username}
-                osu_uid: {OnlineOSUUserInfo.Id}
-                osu_mode: {OnlineOSUUserInfo.PlayMode}
-                osu_pp: {OnlineOSUUserInfo!.Statistics!.PP}
-                """
-                );
-
-
             UserPanelData data = new() { userInfo = OnlineOSUUserInfo };
             data.userInfo.PlayMode = OnlineOSUUserInfo.PlayMode;
             if (IsBound)
@@ -118,30 +129,6 @@ namespace KanonBot.OSU
                         data.daysBefore = 0;
                     }
                 }
-
-                var d = await Database.Client.GetOsuPPlusData(OnlineOSUUserInfo.Id);
-                if (d != null)
-                {
-                    data.pplusInfo = d;
-                }
-                else
-                {
-                    // 设置空数据
-                    data.pplusInfo = new();
-                    // 异步获取osupp数据，下次请求的时候就有了
-                    new Task(async () =>
-                    {
-                        try
-                        {
-                            await Database.Client.UpdateOsuPPlusData(
-                                (await API.OSU.V2.TryGetUserPlusData(OnlineOSUUserInfo!))!.User!,
-                                OnlineOSUUserInfo!.Id
-                            );
-                        }
-                        catch { } //更新pp+失败，不返回信息
-                    }).RunSynchronously();
-                }
-
                 var badgeID = DBUser!.displayed_badge_ids;
                 // 由于v1v2绘制位置以及绘制方向的不同，legacy(v1)只取第一个badge
                 if (badgeID != null)
@@ -169,38 +156,6 @@ namespace KanonBot.OSU
                     data.badgeId = new() { -1 };
                 }
             }
-            else
-            {
-                var d = await Database.Client.GetOsuPPlusData(OnlineOSUUserInfo.Id);
-                if (d != null)
-                {
-                    data.pplusInfo = d;
-                }
-                else
-                {
-                    // 设置空数据
-                    data.pplusInfo = new();
-                    // 异步获取osupp数据，下次请求的时候就有了
-                    new Task(async () =>
-                    {
-                        try
-                        {
-                            var temppppinfo = await API.OSU.V2.TryGetUserPlusData(OnlineOSUUserInfo!);
-                            if (temppppinfo == null)
-                                return;
-                            await Database.Client.UpdateOsuPPlusData(
-                                temppppinfo!.User!,
-                                OnlineOSUUserInfo!.Id
-                            );
-                        }
-                        catch { } //更新pp+失败，不返回信息
-                    }).RunSynchronously();
-                }
-            }
-
-            //var isDataOfDayAvaiavle = false;
-            //if (data.daysBefore > 0)
-            //    isDataOfDayAvaiavle = true;
 
             int custominfoengineVer = 2;
             if (IsBound)
@@ -218,13 +173,15 @@ namespace KanonBot.OSU
                 }
             }
 
+            if(custominfoengineVer == 1)
+                data.pplusInfo = await GetPPlusInfo(OnlineOSUUserInfo);
+            
             using var stream = new MemoryStream();
-            //info默认输出高质量图片？
             SixLabors.ImageSharp.Image img;
             API.OSU.Models.Score[]? allBP = System.Array.Empty<API.OSU.Models.Score>();
             switch (custominfoengineVer) //0=null 1=v1 2=v2
             {
-                case 2:
+                case 1:
                     img = await Image.OSU.OsuInfoPanelV1.Draw(
                         data,
                         DBOsuInfo != null,
@@ -233,7 +190,7 @@ namespace KanonBot.OSU
                     );
                     await img.SaveAsync(stream, new PngEncoder());
                     break;
-                case 1:
+                case 2:
                     var v2Options = data.customMode switch
                     {
                         UserPanelData.CustomMode.Custom => Image.OSU.OsuInfoPanelV2.InfoCustom.ParseColors(data.ColorConfigRaw!, None),
@@ -262,20 +219,15 @@ namespace KanonBot.OSU
                 default:
                     return;
             }
+            img.Dispose(); 
+            await target.reply(
+                new Chain().image(
+                    Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
+                    ImageSegment.Type.Base64
+                ));
 
-            
-            await img.SaveAsPngAsync("./temp/1.png", new PngEncoder());
-            // 关闭流
-            img.Dispose();
 
-            
 
-            //await target.reply(
-            //    new Chain().image(
-            //        Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
-            //        ImageSegment.Type.Base64
-            //    )
-            //);
             //try
             //{
             //    if (data.userInfo.PlayMode == API.OSU.Enums.Mode.OSU) //只存std的
