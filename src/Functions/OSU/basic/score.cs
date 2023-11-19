@@ -34,7 +34,7 @@ namespace KanonBot.OSU
         }
 
         [Command("best", "bp")]
-        [Params("m", "mode", "q", "quality", "u", "username", "i", "index")]
+        [Params("m", "mode", "q", "quality", "u", "user", "username", "i", "index")]
         public async static Task score_best(CommandContext args, Target target)
         {
             var osu_username = "";
@@ -65,6 +65,14 @@ namespace KanonBot.OSU
                 {
                     isSelfQuery = true;
                 }
+                );
+            args.GetParameters<string>(["u", "user", "username"]).Match
+                (
+                Some: try_username =>
+                {
+                    osu_username = try_username;
+                },
+                None: () => { }
                 );
             args.GetParameters<string>(["m", "mode"]).Match
                 (
@@ -102,7 +110,7 @@ namespace KanonBot.OSU
         }
 
         [Command("recent", "re", "passed", "pr")]
-        [Params("m", "mode", "q", "quality", "u", "username", "i", "index")]
+        [Params("m", "mode", "q", "quality", "u", "user", "username", "i", "index")]
         public async static Task score_recent(CommandContext args, Target target)
         {
             var osu_username = "";
@@ -133,6 +141,14 @@ namespace KanonBot.OSU
                 {
                     isSelfQuery = true;
                 }
+                );
+            args.GetParameters<string>(["u", "user", "username"]).Match
+                (
+                Some: try_username =>
+                {
+                    osu_username = try_username;
+                },
+                None: () => { }
                 );
             args.GetParameters<string>(["m", "mode"]).Match
                 (
@@ -170,7 +186,7 @@ namespace KanonBot.OSU
         }
 
         [Command("passed", "pr")]
-        [Params("m", "mode", "q", "quality", "u", "username", "i", "index")]
+        [Params("m", "mode", "q", "quality", "u", "user", "username", "i", "index")]
         public async static Task score_passrecent(CommandContext args, Target target)
         {
             var osu_username = "";
@@ -201,6 +217,14 @@ namespace KanonBot.OSU
                 {
                     isSelfQuery = true;
                 }
+                );
+            args.GetParameters<string>(["u", "user", "username"]).Match
+                (
+                Some: try_username =>
+                {
+                    osu_username = try_username;
+                },
+                None: () => { }
                 );
             args.GetParameters<string>(["m", "mode"]).Match
                 (
@@ -238,7 +262,7 @@ namespace KanonBot.OSU
         }
 
         [Command("score")]
-        [Params("m", "mode", "q", "quality", "md", "mods", "u", "username", "b", "beatmap")]
+        [Params("m", "mode", "q", "quality", "md", "mods", "u", "user", "username", "b", "beatmap")]
         public async static Task score_specific(CommandContext args, Target target)
         {
             var osu_username = "";
@@ -267,7 +291,7 @@ namespace KanonBot.OSU
                     return;
                 }
                 );
-            args.GetParameters<string>(["u", "username"]).Match
+            args.GetParameters<string>(["u", "user", "username"]).Match
                 (
                 Some: try_username =>
                 {

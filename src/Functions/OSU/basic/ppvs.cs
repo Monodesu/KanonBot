@@ -19,34 +19,9 @@ namespace KanonBot.OSU
 {
     public static partial class Basic
     {
-        public async static Task<API.OSU.Models.PPlusData.UserData> GetPPlusInfo(API.OSU.Models.User user)
-        {
-            var d = await Database.Client.GetOsuPPlusData(user.Id);
-            if (d != null)
-            {
-                return d;
-            }
-            else
-            {
-                // 异步获取osupp数据，下次请求的时候就有了
-                new Task(async () =>
-                {
-                    try
-                    {
-                        await Database.Client.UpdateOsuPPlusData(
-                            (await API.OSU.V2.TryGetUserPlusData(user!))!.User!,
-                            user!.Id
-                        );
-                    }
-                    catch { } //更新pp+失败，不返回信息
-                }).RunSynchronously();
-                return new();
-            }
-        }
-
-        [Command("info", "stat")]
-        [Params("m", "mode", "l", "lookback", "q", "quality", "u", "user", "username")]
-        public async static Task info(CommandContext args, Target target)
+        [Command("ppvs")]
+        [Params("u", "user", "username", "c", "compare", "comparewith")]
+        public async static Task ppvs(CommandContext args, Target target)
         {
             var osu_username = "";
             bool isSelfQuery = false;
@@ -234,27 +209,6 @@ namespace KanonBot.OSU
                     ImageSegment.Type.Base64
                 ));
 
-
-
-            //try
-            //{
-            //    if (data.userInfo.PlayMode == API.OSU.Enums.Mode.OSU) //只存std的
-            //        if (allBP!.Length > 0)
-            //            await InsertBeatmapTechInfo(allBP);
-            //        else
-            //        {
-            //            allBP = await API.OSU.GetUserScores(
-            //            data.userInfo.Id,
-            //            API.OSU.Enums.UserScoreType.Best,
-            //            API.OSU.Enums.Mode.OSU,
-            //            100,
-            //            0
-            //        );
-            //            if (allBP!.Length > 0)
-            //                await InsertBeatmapTechInfo(allBP);
-            //        }
-            //}
-            //catch { }
         }
     }
 }
