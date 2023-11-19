@@ -271,6 +271,7 @@ namespace KanonBot.OSU
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
             string mods = "";
             int beatmap = 0;
+            bool shouldContinue = true;
 
             // score在查询指定用户成绩时，必须单独指定用户名，不能使用默认值处理
             await args.GetDefault<string>().Match
@@ -282,13 +283,13 @@ namespace KanonBot.OSU
                     else
                     {
                         await target.reply("谱面id有误，请重新检查。");
-                        return;
+                        shouldContinue = false;
                     }
                 },
                 None: async () =>
                 {
                     await target.reply("没有指定谱面id，请重新检查。");
-                    return;
+                    shouldContinue = false;
                 }
                 );
             args.GetParameters<string>(["u", "user", "username"]).Match
@@ -335,12 +336,13 @@ namespace KanonBot.OSU
                     else
                     {
                         await target.reply("谱面id有误，请重新检查。");
-                        return;
+                        shouldContinue = false;
                     }
                 },
                 None: () => { }
                 );
 
+            if (!shouldContinue) return;
             var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(target, isSelfQuery, osu_username, mode); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
             bool IsBound = DBOsuInfo != null;
             if (OnlineOSUUserInfo == null) return; // 查询失败
