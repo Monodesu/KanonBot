@@ -43,6 +43,14 @@ namespace KanonBot.OSU
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
             int index = 0;
 
+            args.GetParameters<string>(["u", "user", "username"]).Match
+                (
+                Some: try_username =>
+                {
+                    osu_username = try_username;
+                },
+                None: () => { }
+                );
             args.GetDefault<string>().Match
                 (
                 Some: try_default =>
@@ -63,16 +71,8 @@ namespace KanonBot.OSU
                 },
                 None: () =>
                 {
-                    isSelfQuery = true;
+                    if (osu_username == "") isSelfQuery = true;
                 }
-                );
-            args.GetParameters<string>(["u", "user", "username"]).Match
-                (
-                Some: try_username =>
-                {
-                    osu_username = try_username;
-                },
-                None: () => { }
                 );
             args.GetParameters<string>(["m", "mode"]).Match
                 (
@@ -119,6 +119,14 @@ namespace KanonBot.OSU
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
             int index = 0;
 
+            args.GetParameters<string>(["u", "user", "username"]).Match
+                (
+                Some: try_username =>
+                {
+                    osu_username = try_username;
+                },
+                None: () => { }
+                );
             args.GetDefault<string>().Match
                 (
                 Some: try_default =>
@@ -139,16 +147,8 @@ namespace KanonBot.OSU
                 },
                 None: () =>
                 {
-                    isSelfQuery = true;
+                    if (osu_username == "") isSelfQuery = true;
                 }
-                );
-            args.GetParameters<string>(["u", "user", "username"]).Match
-                (
-                Some: try_username =>
-                {
-                    osu_username = try_username;
-                },
-                None: () => { }
                 );
             args.GetParameters<string>(["m", "mode"]).Match
                 (
@@ -195,6 +195,14 @@ namespace KanonBot.OSU
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
             int index = 0;
 
+            args.GetParameters<string>(["u", "user", "username"]).Match
+                (
+                Some: try_username =>
+                {
+                    osu_username = try_username;
+                },
+                None: () => { }
+                );
             args.GetDefault<string>().Match
                 (
                 Some: try_default =>
@@ -215,16 +223,8 @@ namespace KanonBot.OSU
                 },
                 None: () =>
                 {
-                    isSelfQuery = true;
+                    if (osu_username == "") isSelfQuery = true;
                 }
-                );
-            args.GetParameters<string>(["u", "user", "username"]).Match
-                (
-                Some: try_username =>
-                {
-                    osu_username = try_username;
-                },
-                None: () => { }
                 );
             args.GetParameters<string>(["m", "mode"]).Match
                 (

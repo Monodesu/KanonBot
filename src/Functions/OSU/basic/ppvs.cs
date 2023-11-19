@@ -14,6 +14,7 @@ using static KanonBot.BindService;
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 using static KanonBot.API.OSU.DataStructure;
 using SixLabors.ImageSharp;
+using KanonBot.Image.OSU;
 
 namespace KanonBot.OSU
 {
@@ -24,22 +25,10 @@ namespace KanonBot.OSU
         public async static Task ppvs(CommandContext args, Target target)
         {
             var osu_username = "";
+            var compare_username = "";
             bool isSelfQuery = false;
-            bool quality = false;
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
-            int lookback = 0;
 
-            args.GetDefault<string>().Match
-                (
-                Some: try_name =>
-                {
-                    osu_username = try_name;
-                },
-                None: () =>
-                {
-                    isSelfQuery = true;
-                }
-                );
             args.GetParameters<string>(["u", "user", "username"]).Match
                 (
                 Some: try_username =>
@@ -48,167 +37,105 @@ namespace KanonBot.OSU
                 },
                 None: () => { }
                 );
-            args.GetParameters<string>(["m", "mode"]).Match
+            args.GetDefault<string>().Match
                 (
-                Some: try_mode =>
+                Some: try_name =>
                 {
-                    mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
+                    osu_username = try_name;
+                },
+                None: () =>
+                {
+                    if (osu_username == "") isSelfQuery = true;
+                }
+                );
+            args.GetParameters<string>(["c", "compare", "comparewith"]).Match
+                (
+                Some: try_c =>
+                {
+                    compare_username = try_c;
                 },
                 None: () => { }
                 );
 
-            args.GetParameters<string>(["l", "lookback"]).Match
-                (
-                Some: try_lookback =>
-                {
-                    lookback = int.Parse(try_lookback);
-                },
-                None: () => { }
-                );
-            args.GetParameters<string>(["q", "quality"]).Match
-                (
-                Some: try_quality =>
-                {
-                    if (try_quality == "high" || try_quality == "h")
-                        quality = true;
-                },
-                None: () => { });
 
             var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(target, isSelfQuery, osu_username, mode); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
             bool IsBound = DBOsuInfo != null;
             if (OnlineOSUUserInfo == null) return; // 查询失败
 
-            // 操作部分
-            UserPanelData data = new() { userInfo = OnlineOSUUserInfo };
-            data.userInfo.PlayMode = OnlineOSUUserInfo.PlayMode;
-            if (IsBound)
+            if (compare_username == "" && osu_username == "")
             {
-                if (lookback > 0)
-                {
-                    // 从数据库取指定天数前的记录
-                    (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(
-                        OnlineOSUUserInfo.Id,
-                        data.userInfo.PlayMode,
-                        lookback
-                    );
-                    if (data.daysBefore > 0)
-                        ++data.daysBefore;
-                }
-                else
-                {
-                    // 从数据库取最近的一次记录
-                    try
-                    {
-                        (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(
-                            OnlineOSUUserInfo.Id,
-                            data.userInfo.PlayMode,
-                            0
-                        );
-                        if (data.daysBefore > 0)
-                            ++data.daysBefore;
-                    }
-                    catch
-                    {
-                        data.daysBefore = 0;
-                    }
-                }
-                var badgeID = DBUser!.displayed_badge_ids;
-                // 由于v1v2绘制位置以及绘制方向的不同，legacy(v1)只取第一个badge
-                if (badgeID != null)
-                {
-                    try
-                    {
-                        if (badgeID!.IndexOf(",") != -1)
-                        {
-                            var y = badgeID.Split(",");
-                            foreach (var x in y)
-                                data.badgeId.Add(int.Parse(x));
-                        }
-                        else
-                        {
-                            data.badgeId.Add(int.Parse(badgeID!));
-                        }
-                    }
-                    catch
-                    {
-                        data.badgeId = new() { -1 };
-                    }
-                }
-                else
-                {
-                    data.badgeId = new() { -1 };
-                }
+                await target.reply("请指定要比较的对象");
+                return;
             }
 
-            int custominfoengineVer = 2;
-            if (IsBound)
+            API.OSU.Models.User user1 = null!, user2 = null!;
+
+            if ((compare_username != "" && osu_username == "") || (compare_username == "" && osu_username != ""))
             {
-                custominfoengineVer = DBOsuInfo!.customInfoEngineVer;
-                if (Enum.IsDefined(typeof(UserPanelData.CustomMode), DBOsuInfo.InfoPanelV2_Mode))
+                user1 = OnlineOSUUserInfo;
+                var x = await API.OSU.V2.GetUser(compare_username);
+                if (x == null)
                 {
-                    data.customMode = (UserPanelData.CustomMode)DBOsuInfo.InfoPanelV2_Mode;
-                    if (data.customMode == UserPanelData.CustomMode.Custom)
-                        data.ColorConfigRaw = DBOsuInfo.InfoPanelV2_CustomMode!;
+                    await target.reply("要比较的用户不存在哦");
+                    return;
                 }
-                else
-                {
-                    throw new Exception("未知的自定义模式");
-                }
+                user2 = x;
             }
 
-            if (custominfoengineVer == 1)
-                data.pplusInfo = await GetPPlusInfo(OnlineOSUUserInfo);
+            if (compare_username != "" && osu_username != "")
+            {
+                var z = await API.OSU.V2.GetUser(osu_username);
+                if (z == null)
+                {
+                    await target.reply("要比较的用户不存在哦");
+                    return;
+                }
+                var x = await API.OSU.V2.GetUser(compare_username);
+                if (x == null)
+                {
+                    await target.reply("要比较的用户不存在哦");
+                    return;
+                }
+                user1 = z;
+                user2 = x;
+            }
+
+            API.OSU.DataStructure.PPVSPanelData data = new();
+
+            var d1 = await Database.Client.GetOsuPPlusData(user1.Id);
+            if (d1 == null)
+            {
+                var d1temp = await API.OSU.V2.TryGetUserPlusData(user1);
+                if (d1temp == null)
+                {
+                    await target.reply("获取pp+数据时出错，等会儿再试试吧");
+                    return;
+                }
+                d1 = d1temp.User;
+                await Database.Client.UpdateOsuPPlusData(d1, OnlineOSUUserInfo.Id);
+            }
+            data.u2Name = OnlineOSUUserInfo.Username;
+            data.u2 = d1;
+
+            var d2 = await Database.Client.GetOsuPPlusData(user2.Id);
+            if (d2 == null)
+            {
+                var d2temp = await API.OSU.V2.TryGetUserPlusData(user2);
+                if (d2temp == null)
+                {
+                    await target.reply("获取pp+数据时出错，等会儿再试试吧");
+                    return;
+                }
+                d2 = d2temp.User;
+                await Database.Client.UpdateOsuPPlusData(d2, user2.Id);
+            }
+            data.u1Name = user2.Username;
+            data.u1 = d2;
 
             using var stream = new MemoryStream();
-            SixLabors.ImageSharp.Image img;
-            API.OSU.Models.Score[]? allBP = System.Array.Empty<API.OSU.Models.Score>();
-            switch (custominfoengineVer) //0=null 1=v1 2=v2
-            {
-                case 1:
-                    img = await Image.OSU.OsuInfoPanelV1.Draw(
-                        data,
-                        DBOsuInfo != null,
-                        false,
-                        (IsBound && lookback > 0)
-                    );
-                    await img.SaveAsync(stream, new PngEncoder());
-                    break;
-                case 2:
-                    var v2Options = data.customMode switch
-                    {
-                        UserPanelData.CustomMode.Custom => Image.OSU.OsuInfoPanelV2.InfoCustom.ParseColors(data.ColorConfigRaw!, None),
-                        UserPanelData.CustomMode.Light => Image.OSU.OsuInfoPanelV2.InfoCustom.LightDefault,
-                        UserPanelData.CustomMode.Dark => Image.OSU.OsuInfoPanelV2.InfoCustom.DarkDefault,
-                        _ => throw new ArgumentOutOfRangeException("未知的自定义模式")
-                    };
-                    allBP = await API.OSU.V2.GetUserScores(
-                        data.userInfo.Id,
-                        API.OSU.Enums.UserScoreType.Best,
-                        data.userInfo.PlayMode,
-                        100,
-                        0
-                    );
-                    img = await Image.OSU.OsuInfoPanelV2.Draw(
-                        data,
-                        allBP!,
-                        v2Options,
-                        DBOsuInfo != null,
-                        false,
-                        (IsBound && lookback > 0),
-                        quality
-                    );
-                    await img.SaveAsync(stream, new PngEncoder());
-                    break;
-                default:
-                    return;
-            }
-            img.Dispose();
-            await target.reply(
-                new Chain().image(
-                    Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
-                    ImageSegment.Type.Base64
-                ));
-
+            using var img = await OsuPPPVs.Draw(data);
+            await img.SaveAsync(stream, new JpegEncoder());
+            await target.reply(new Chain().image(Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length), ImageSegment.Type.Base64));
         }
     }
 }
