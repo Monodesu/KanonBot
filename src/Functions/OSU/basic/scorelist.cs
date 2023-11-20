@@ -142,8 +142,8 @@ namespace KanonBot.OSU
             }
             else
             {
-                using var image = await OsuScorePanel.Draw(
-                    OsuScorePanel.Type.BPLIST,
+                using var image = await OsuScoreList.Draw(
+                    OsuScoreList.Type.BPLIST,
                     TBP,
                     Rank,
                     OnlineOSUUserInfo

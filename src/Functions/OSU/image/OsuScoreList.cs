@@ -25,7 +25,7 @@ using static KanonBot.Image.OSU.OsuResourceHelper;
 
 namespace KanonBot.Image.OSU
 {
-    public static class OsuScorePanel
+    public static class OsuScoreList
     {
         public enum Type
         {
