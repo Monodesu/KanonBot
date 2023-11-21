@@ -54,50 +54,28 @@ namespace KanonBot.OSU
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
             int lookback = 0;
 
-            args.GetParameters<string>(["u", "user", "username"]).Match
-                (
-                Some: try_username =>
-                {
-                    osu_username = try_username;
-                },
-                None: () => { }
-                );
-            args.GetDefault<string>().Match
-                (
-                Some: try_name =>
-                {
-                    osu_username = try_name;
-                },
-                None: () =>
-                {
-                    if (osu_username == "") isSelfQuery = true;
-                }
-                );
-            args.GetParameters<string>(["m", "mode"]).Match
-                (
-                Some: try_mode =>
-                {
-                    mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
-                },
-                None: () => { }
-                );
+            args.GetParameters<string>(["u", "user", "username"]).IfSome(
+                u => osu_username = u
+            );
 
-            args.GetParameters<string>(["l", "lookback"]).Match
-                (
-                Some: try_lookback =>
-                {
-                    lookback = int.Parse(try_lookback);
-                },
-                None: () => { }
-                );
-            args.GetParameters<string>(["q", "quality"]).Match
-                (
-                Some: try_quality =>
-                {
-                    if (try_quality == "high" || try_quality == "h")
-                        quality = true;
-                },
-                None: () => { });
+            args.GetDefault<string>().IfSome(
+                u => osu_username = u
+            );
+
+            if (osu_username == "") isSelfQuery = true;
+
+            args.GetParameters<string>(["m", "mode"]).IfSome(
+                m => mode = API.OSU.Enums.String2Mode(m) ?? API.OSU.Enums.Mode.OSU
+            );
+
+            args.GetParameters<string>(["l", "lookback"]).IfSome(
+                l => lookback = int.Parse(l)
+            );
+
+            args.GetParameters<string>(["q", "quality"]).IfSome(
+                q => { if (q == "high" || q == "h") quality = true; }
+            );
+
 
             var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(target, isSelfQuery, osu_username, mode); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
             bool IsBound = DBOsuInfo != null;
