@@ -15,9 +15,13 @@ extern "C" {
 
 typedef enum mode
     {
+    /// osu!standard
     MODE_OSU = 0,
+    /// osu!taiko
     MODE_TAIKO = 1,
+    /// osu!catch
     MODE_CATCH = 2,
+    /// osu!mania
     MODE_MANIA = 3,
     } mode;
 
@@ -38,14 +42,18 @@ typedef enum ffierror
 ///Option type containing boolean flag and maybe valid data.
 typedef struct optionf64
     {
+    ///Element that is maybe valid.
     double t;
+    ///Byte where `1` means element `t` is valid.
     uint8_t is_some;
     } optionf64;
 
 ///Option type containing boolean flag and maybe valid data.
 typedef struct optionu32
     {
+    ///Element that is maybe valid.
     uint32_t t;
+    ///Byte where `1` means element `t` is valid.
     uint8_t is_some;
     } optionu32;
 
@@ -85,7 +93,9 @@ typedef struct calculateresult
 ///A pointer to an array of data someone else owns which may not be modified.
 typedef struct sliceu8
     {
+    ///Pointer to start of immutable data.
     const uint8_t* data;
+    ///Number of elements.
     uint64_t len;
     } sliceu8;
 

@@ -10,12 +10,12 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-interoptopus = "0.14.15"
-rosu-pp = "0.9.3"
-thiserror = "1.0.37"
+interoptopus = "0.14.19"
+rosu-pp = "0.10.0"
+thiserror = "1.0.50"
 
 [dev-dependencies]
-interoptopus_backend_csharp = "0.14.15"
-interoptopus_backend_c = "0.14.15"
-interoptopus_backend_cpython = "0.14.15"
+interoptopus_backend_csharp = "0.14.20"
+interoptopus_backend_c = "0.14.18"
+interoptopus_backend_cpython = "0.14.19"
 

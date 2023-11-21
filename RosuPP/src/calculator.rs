@@ -22,15 +22,16 @@ impl Calculator {
     }
 
     #[ffi_service_method(on_panic = "undefined_behavior")]
-    pub fn calculate(&mut self, score_params: *const ScoreParams) -> CalculateResult {
-        let score_params = unsafe {
-            score_params.as_ref().unwrap_or_else(|| {
-                panic!("！！未知的参数，score_params: {score_params:?}")
-            })
-        };
+    pub fn calculate(&mut self, score_params: &ScoreParams) -> CalculateResult {
+        // let score_params = unsafe {
+        //     score_params.as_ref().unwrap_or_else(|| {
+        //         panic!("！！未知的参数，score_params: {score_params:?}")
+        //     })
+        // };
         let mods = score_params.mods;
         let clock_rate = score_params.clockRate;
-        let calculator = score_params.apply(AnyPP::new(&self.inner));
+        let anypp = AnyPP::new(&self.inner);
+        let calculator = score_params.apply(anypp);
         CalculateResult::new(
             calculator.calculate(),
             &self.inner,

@@ -3,7 +3,7 @@ using LinqToDB.Mapping;
 
 namespace KanonBot.Database
 {
-    public static class Models
+    public static partial class Models
     {
         public class DB : LinqToDB.Data.DataConnection
         {

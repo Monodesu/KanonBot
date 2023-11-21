@@ -63,7 +63,7 @@ impl CalculateResult {
             PerformanceAttributes::Taiko(_) => GameMode::Taiko,
         };
 
-        attr_builder.converted(map.mode == GameMode::Osu && mode != GameMode::Osu);
+        attr_builder.converted(map.mode != mode);
 
         let BeatmapAttributes {
             ar,

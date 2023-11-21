@@ -105,6 +105,8 @@ namespace KanonBot.Functions.OSU.RosuPP
             ScoreIncreaseMods = Hidden | HardRock | DoubleTime | Flashlight | FadeIn
         };
 
+        public static void Debug(this CalculateResult result) => Rosu.debug_result(ref result);
+
         public static PPInfo ToPPInfo(this CalculateResult result)
         {
             return new PPInfo()
