@@ -16,22 +16,25 @@ namespace KanonBot.OSU
 {
     public static partial class Basic
     {
+        public static async Task<(
+            Database.Models.User?,
+            Database.Models.UserOSU?,
+            API.OSU.Models.User?
+        )> GetOSUOperationInfo(
+            Target target,
+            bool isSelfQuery,
+            string osu_username,
+            API.OSU.Enums.Mode? mode
+        ) =>
+            isSelfQuery
+                ? await VerifyBaseAccount(target, mode)
+                : await QueryOtherUser(target, osu_username, mode);
 
-        async static public Task<(Database.Models.User?, Database.Models.UserOSU?, API.OSU.Models.User?)> GetOSUOperationInfo(Target target, bool isSelfQuery, string osu_username, API.OSU.Enums.Mode? mode)
-        {
-            if (isSelfQuery)
-            {
-                var (DBUser, DBOsuInfo, OnlineOsuInfo) = await VerifyBaseAccount(target, mode);
-                return (DBUser ?? null, DBOsuInfo ?? null, OnlineOsuInfo ?? null);
-            }
-            else
-            {
-                var (DBUser, DBOsuInfo, OnlineOsuInfo) = await QueryOtherUser(target, osu_username, mode);
-                return (DBUser ?? null, DBOsuInfo ?? null, OnlineOsuInfo ?? null);
-            }
-        }
-
-        async static private Task<(Database.Models.User?, Database.Models.UserOSU?, API.OSU.Models.User?)> VerifyBaseAccount(Target target, API.OSU.Enums.Mode? mode)
+        private static async Task<(
+            Database.Models.User?,
+            Database.Models.UserOSU?,
+            API.OSU.Models.User?
+        )> VerifyBaseAccount(Target target, API.OSU.Enums.Mode? mode)
         {
             Database.Models.User? DBUser = null;
             Database.Models.UserOSU? DBOsuInfo = null;
@@ -41,13 +44,13 @@ namespace KanonBot.OSU
             if (DBUser == null)
             {
                 await target.reply("您还没有绑定desu.life账户，请使用!link email=您的邮箱 来进行绑定或注册。");
-                return (DBUser ?? null, DBOsuInfo ?? null, OnlineOsuInfo ?? null);
+                return (DBUser, DBOsuInfo, OnlineOsuInfo);
             }
             DBOsuInfo = await CheckOsuAccount(DBUser.uid);
             if (DBOsuInfo == null)
             {
                 await target.reply("您还没有绑定osu账户，请使用!link osu=您的osu用户名 来绑定您的osu账户。");
-                return (DBUser ?? null, DBOsuInfo ?? null, OnlineOsuInfo ?? null);
+                return (DBUser, DBOsuInfo, OnlineOsuInfo);
             }
             mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode);
             OnlineOsuInfo = await API.OSU.V2.GetUser(DBOsuInfo.osu_uid, (API.OSU.Enums.Mode)mode!);
@@ -55,12 +58,16 @@ namespace KanonBot.OSU
             {
                 if (DBOsuInfo != null)
                     await target.reply("被办了。");
-                return (DBUser ?? null, DBOsuInfo ?? null, OnlineOsuInfo ?? null);
+                return (DBUser, DBOsuInfo, OnlineOsuInfo);
             }
-            return (DBUser ?? null, DBOsuInfo ?? null, OnlineOsuInfo ?? null);
+            return (DBUser, DBOsuInfo, OnlineOsuInfo);
         }
 
-        async static private Task<(Database.Models.User?, Database.Models.UserOSU?, API.OSU.Models.User?)> QueryOtherUser(Target target, string osu_username, API.OSU.Enums.Mode? mode)
+        private static async Task<(
+            Database.Models.User?,
+            Database.Models.UserOSU?,
+            API.OSU.Models.User?
+        )> QueryOtherUser(Target target, string osu_username, API.OSU.Enums.Mode? mode)
         {
             // 查询用户是否绑定，这里先按照at方法查询，查询不到就是普通用户查询
             Database.Models.User? DBUser = null;
@@ -70,7 +77,7 @@ namespace KanonBot.OSU
             if (atOSU.IsNone && !atDBUser.IsNone)
             {
                 await target.reply("ta还没有绑定osu账户呢。");
-                return (DBUser ?? null, DBOsuInfo ?? null, OnlineOsuInfo ?? null);
+                return (DBUser, DBOsuInfo, OnlineOsuInfo);
             }
             else if (!atOSU.IsNone && atDBUser.IsNone)
             {
@@ -79,7 +86,10 @@ namespace KanonBot.OSU
                 {
                     if (OnlineOsuInfo.PlayMode != (API.OSU.Enums.Mode)mode)
                     {
-                        OnlineOsuInfo = await API.OSU.V2.GetUser(osu_username, (API.OSU.Enums.Mode)mode);
+                        OnlineOsuInfo = await API.OSU.V2.GetUser(
+                            osu_username,
+                            (API.OSU.Enums.Mode)mode
+                        );
                     }
                 }
             }
@@ -92,18 +102,25 @@ namespace KanonBot.OSU
                 {
                     if (OnlineOsuInfo.PlayMode != (API.OSU.Enums.Mode)mode)
                     {
-                        OnlineOsuInfo = await API.OSU.V2.GetUser(osu_username, (API.OSU.Enums.Mode)mode);
+                        OnlineOsuInfo = await API.OSU.V2.GetUser(
+                            osu_username,
+                            (API.OSU.Enums.Mode)mode
+                        );
                     }
                 }
             }
             else
             {
                 // 普通查询
-                var (DBUser_, DBOsuInfo_, OnlineOsuInfo_) = await VerifyOSUAccount(target, osu_username, mode);
+                var (DBUser_, DBOsuInfo_, OnlineOsuInfo_) = await VerifyOSUAccount(
+                    target,
+                    osu_username,
+                    mode
+                );
                 OnlineOsuInfo = OnlineOsuInfo_;
                 DBOsuInfo = DBOsuInfo_;
                 DBUser = DBUser_;
-                return (DBUser ?? null, DBOsuInfo ?? null, OnlineOsuInfo ?? null);
+                return (DBUser, DBOsuInfo, OnlineOsuInfo);
             }
             if (OnlineOsuInfo == null)
             {
@@ -113,10 +130,14 @@ namespace KanonBot.OSU
                     await target.reply("猫猫没有找到此用户。");
                 return (null, null, null);
             }
-            return (DBUser ?? null, DBOsuInfo ?? null, OnlineOsuInfo ?? null);
+            return (DBUser, DBOsuInfo, OnlineOsuInfo);
         }
 
-        async static private Task<(Database.Models.User?, Database.Models.UserOSU?, API.OSU.Models.User?)> VerifyOSUAccount(Target target, string osu_username, API.OSU.Enums.Mode? mode)
+        private static async Task<(
+            Database.Models.User?,
+            Database.Models.UserOSU?,
+            API.OSU.Models.User?
+        )> VerifyOSUAccount(Target target, string osu_username, API.OSU.Enums.Mode? mode)
         {
             Database.Models.User? DBUser = null;
             Database.Models.UserOSU? DBOsuInfo = null;
@@ -137,13 +158,23 @@ namespace KanonBot.OSU
                 if (DBOsuInfo != null)
                 {
                     DBUser = await GetBaseAccountByOsuUid(OnlineOsuInfo.Id);
-                    if (mode == null && API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value != OnlineOsuInfo.PlayMode) // 如果查询的模式與數據庫中用戶保存的不一致，那么就需要重新查询一次
+                    if (
+                        mode == null
+                        && API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value
+                            != OnlineOsuInfo.PlayMode
+                    ) // 如果查询的模式與數據庫中用戶保存的不一致，那么就需要重新查询一次
                     {
-                        OnlineOsuInfo = await API.OSU.V2.GetUser(osu_username, API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value); // 重新获取正確的用户信息
+                        OnlineOsuInfo = await API.OSU.V2.GetUser(
+                            osu_username,
+                            API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value
+                        ); // 重新获取正確的用户信息
                     }
                     else if (mode != null && mode != OnlineOsuInfo.PlayMode)
                     {
-                        OnlineOsuInfo = await API.OSU.V2.GetUser(osu_username, (API.OSU.Enums.Mode)mode); // 重新获取正確的用户信息
+                        OnlineOsuInfo = await API.OSU.V2.GetUser(
+                            osu_username,
+                            (API.OSU.Enums.Mode)mode
+                        ); // 重新获取正確的用户信息
                     }
                 }
                 if (OnlineOsuInfo == null)
@@ -154,7 +185,7 @@ namespace KanonBot.OSU
                         await target.reply("猫猫没有找到此用户。");
                     return (DBUser, null, null);
                 }
-                return (DBUser ?? null, DBOsuInfo ?? null, OnlineOsuInfo ?? null);
+                return (DBUser, DBOsuInfo, OnlineOsuInfo);
             }
             else
             {
@@ -163,6 +194,5 @@ namespace KanonBot.OSU
             }
             return (null, null, null);
         }
-
     }
 }

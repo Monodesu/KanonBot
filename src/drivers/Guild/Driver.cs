@@ -107,7 +107,7 @@ public partial class Guild : ISocket, IDriver
     void Parse(ResponseMessage msg)
     {
         var obj = Json.Deserialize<Models.PayloadBase<JToken>>(msg.Text)!;
-        // Log.Debug("收到消息: {@0} 数据: {1}", obj, obj.Data?.ToString(Formatting.None) ?? null);
+        // Log.Debug("收到消息: {@0} 数据: {1}", obj, obj.Data?.ToString(Formatting.None));
 
         if (obj.Seq != null)
             this.lastSeq = obj.Seq.Value;   // 存储最后一次seq

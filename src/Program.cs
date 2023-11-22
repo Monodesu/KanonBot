@@ -215,7 +215,7 @@ var drivers = new Drivers()
                             Log.Debug(
                                 "收到QQ Guild事件: {@0} 数据: {1}",
                                 data,
-                                data.Data?.ToString(Formatting.None) ?? null
+                                data.Data?.ToString(Formatting.None)
                             );
                             break;
                         case Ready l:
