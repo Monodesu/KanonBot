@@ -4,49 +4,46 @@ using KanonBot.API;
 using KanonBot.Command;
 using KanonBot.Drivers;
 using KanonBot.Functions.OSU;
-
 using KanonBot.Message;
 using LanguageExt.UnsafeValueAccess;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
-using static LinqToDB.Common.Configuration;
-using static KanonBot.BindService;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
 using static KanonBot.API.OSU.DataStructure;
-using SixLabors.ImageSharp;
+using static KanonBot.BindService;
+using static LinqToDB.Common.Configuration;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace KanonBot.OSU
 {
     public static partial class Basic
     {
-        public async static Task<API.OSU.Models.PPlusData.UserData> GetPPlusInfo(API.OSU.Models.User user)
+        public static async Task<API.OSU.Models.PPlusData.UserData> GetPPlusInfo(
+            API.OSU.Models.User user
+        )
         {
             var d = await Database.Client.GetOsuPPlusData(user.Id);
-            if (d != null)
-            {
+            if (d is not null)
                 return d;
-            }
-            else
+
+            // 异步获取osupp数据，下次请求的时候就有了
+            new Task(async () =>
             {
-                // 异步获取osupp数据，下次请求的时候就有了
-                new Task(async () =>
-                {
-                    try
-                    {
-                        await Database.Client.UpdateOsuPPlusData(
+                await TryAsync(
+                    Database
+                        .Client
+                        .UpdateOsuPPlusData(
                             (await API.OSU.V2.TryGetUserPlusData(user!))!.User!,
                             user!.Id
-                        );
-                    }
-                    catch { } //更新pp+失败，不返回信息
-                }).RunSynchronously();
-                return new();
-            }
+                        )
+                ); //更新pp+失败，不返回信息
+            }).RunSynchronously();
+            return new();
         }
 
         [Command("info", "stat")]
         [Params("m", "mode", "l", "lookback", "q", "quality", "u", "user", "username")]
-        public async static Task info(CommandContext args, Target target)
+        public static async Task info(CommandContext args, Target target)
         {
             var osu_username = "";
             bool isSelfQuery = false;
@@ -54,32 +51,34 @@ namespace KanonBot.OSU
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
             int lookback = 0;
 
-            args.GetParameters<string>(["u", "user", "username"]).IfSome(
-                u => osu_username = u
-            );
+            args.GetParameters<string>([ "u", "user", "username" ]).IfSome(u => osu_username = u);
 
-            args.GetDefault<string>().IfSome(
-                u => osu_username = u
-            );
+            args.GetDefault<string>().IfSome(u => osu_username = u);
 
-            if (osu_username == "") isSelfQuery = true;
+            if (osu_username == "")
+                isSelfQuery = true;
 
-            args.GetParameters<string>(["m", "mode"]).IfSome(
-                m => mode = API.OSU.Enums.String2Mode(m) ?? API.OSU.Enums.Mode.OSU
-            );
+            args.GetParameters<string>([ "m", "mode" ])
+                .IfSome(m => mode = API.OSU.Enums.String2Mode(m) ?? API.OSU.Enums.Mode.OSU);
 
-            args.GetParameters<string>(["l", "lookback"]).IfSome(
-                l => lookback = int.Parse(l)
-            );
+            args.GetParameters<string>([ "l", "lookback" ]).IfSome(l => lookback = int.Parse(l));
 
-            args.GetParameters<string>(["q", "quality"]).IfSome(
-                q => { if (q == "high" || q == "h") quality = true; }
-            );
+            args.GetParameters<string>([ "q", "quality" ])
+                .IfSome(q =>
+                {
+                    if (q == "high" || q == "h")
+                        quality = true;
+                });
 
-
-            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(target, isSelfQuery, osu_username, mode); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
+            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(
+                target,
+                isSelfQuery,
+                osu_username,
+                mode
+            ); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
             bool IsBound = DBOsuInfo != null;
-            if (OnlineOSUUserInfo == null) return; // 查询失败
+            if (OnlineOSUUserInfo == null)
+                return; // 查询失败
 
             // 操作部分
             UserPanelData data = new() { userInfo = OnlineOSUUserInfo };
@@ -89,11 +88,9 @@ namespace KanonBot.OSU
                 if (lookback > 0)
                 {
                     // 从数据库取指定天数前的记录
-                    (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(
-                        OnlineOSUUserInfo.Id,
-                        data.userInfo.PlayMode,
-                        lookback
-                    );
+                    (data.daysBefore, data.prevUserInfo) = await Database
+                        .Client
+                        .GetOsuUserData(OnlineOSUUserInfo.Id, data.userInfo.PlayMode, lookback);
                     if (data.daysBefore > 0)
                         ++data.daysBefore;
                 }
@@ -102,11 +99,9 @@ namespace KanonBot.OSU
                     // 从数据库取最近的一次记录
                     try
                     {
-                        (data.daysBefore, data.prevUserInfo) = await Database.Client.GetOsuUserData(
-                            OnlineOSUUserInfo.Id,
-                            data.userInfo.PlayMode,
-                            0
-                        );
+                        (data.daysBefore, data.prevUserInfo) = await Database
+                            .Client
+                            .GetOsuUserData(OnlineOSUUserInfo.Id, data.userInfo.PlayMode, 0);
                         if (data.daysBefore > 0)
                             ++data.daysBefore;
                     }
@@ -134,12 +129,12 @@ namespace KanonBot.OSU
                     }
                     catch
                     {
-                        data.badgeId = new() { -1 };
+                        data.badgeId =  [ -1 ];
                     }
                 }
                 else
                 {
-                    data.badgeId = new() { -1 };
+                    data.badgeId =  [ -1 ];
                 }
             }
 
@@ -168,38 +163,48 @@ namespace KanonBot.OSU
             switch (custominfoengineVer) //0=null 1=v1 2=v2
             {
                 case 1:
-                    img = await Image.OSU.OsuInfoPanelV1.Draw(
-                        data,
-                        DBOsuInfo != null,
-                        false,
-                        (IsBound && lookback > 0)
-                    );
+                    img = await Image
+                        .OSU
+                        .OsuInfoPanelV1
+                        .Draw(data, DBOsuInfo != null, false, (IsBound && lookback > 0));
                     await img.SaveAsync(stream, new PngEncoder());
                     break;
                 case 2:
                     var v2Options = data.customMode switch
                     {
-                        UserPanelData.CustomMode.Custom => Image.OSU.OsuInfoPanelV2.InfoCustom.ParseColors(data.ColorConfigRaw!, None),
-                        UserPanelData.CustomMode.Light => Image.OSU.OsuInfoPanelV2.InfoCustom.LightDefault,
-                        UserPanelData.CustomMode.Dark => Image.OSU.OsuInfoPanelV2.InfoCustom.DarkDefault,
+                        UserPanelData.CustomMode.Custom
+                            => Image
+                                .OSU
+                                .OsuInfoPanelV2
+                                .InfoCustom
+                                .ParseColors(data.ColorConfigRaw!, None),
+                        UserPanelData.CustomMode.Light
+                            => Image.OSU.OsuInfoPanelV2.InfoCustom.LightDefault,
+                        UserPanelData.CustomMode.Dark
+                            => Image.OSU.OsuInfoPanelV2.InfoCustom.DarkDefault,
                         _ => throw new ArgumentOutOfRangeException("未知的自定义模式")
                     };
-                    allBP = await API.OSU.V2.GetUserScores(
-                        data.userInfo.Id,
-                        API.OSU.Enums.UserScoreType.Best,
-                        data.userInfo.PlayMode,
-                        100,
-                        0
-                    );
-                    img = await Image.OSU.OsuInfoPanelV2.Draw(
-                        data,
-                        allBP!,
-                        v2Options,
-                        DBOsuInfo != null,
-                        false,
-                        (IsBound && lookback > 0),
-                        quality
-                    );
+                    allBP = await API.OSU
+                        .V2
+                        .GetUserScores(
+                            data.userInfo.Id,
+                            API.OSU.Enums.UserScoreType.Best,
+                            data.userInfo.PlayMode,
+                            100,
+                            0
+                        );
+                    img = await Image
+                        .OSU
+                        .OsuInfoPanelV2
+                        .Draw(
+                            data,
+                            allBP!,
+                            v2Options,
+                            DBOsuInfo != null,
+                            false,
+                            (IsBound && lookback > 0),
+                            quality
+                        );
                     await img.SaveAsync(stream, new PngEncoder());
                     break;
                 default:
@@ -210,9 +215,8 @@ namespace KanonBot.OSU
                 new Chain().image(
                     Convert.ToBase64String(stream.ToArray(), 0, (int)stream.Length),
                     ImageSegment.Type.Base64
-                ));
-
-
+                )
+            );
 
             //try
             //{

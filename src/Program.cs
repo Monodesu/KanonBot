@@ -8,10 +8,10 @@ using LanguageExt.UnsafeValueAccess;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static KanonBot.Command.CommandSystem;
 using static KanonBot.Command.CommandRegister;
-using Msg = KanonBot.Message;
+using static KanonBot.Command.CommandSystem;
 using static KanonBot.Drivers.OneBot.Models;
+using Msg = KanonBot.Message;
 
 #region 初始化
 Console.WriteLine("---KanonBot---");
@@ -39,9 +39,11 @@ if (config.dev)
 }
 else
 {
-    var log = new LoggerConfiguration().WriteTo
+    var log = new LoggerConfiguration()
+        .WriteTo
         .Async(a => a.Console())
-        .WriteTo.Async(a => a.File("logs/log-.log", rollingInterval: RollingInterval.Day));
+        .WriteTo
+        .Async(a => a.File("logs/log-.log", rollingInterval: RollingInterval.Day));
     if (config.debug)
         log = log.MinimumLevel.Debug();
     Log.Logger = log.CreateLogger();
@@ -51,8 +53,6 @@ else
 Register();
 
 Log.Information("初始化成功 {@config}", config);
-
-
 
 if (config.dev)
 {
@@ -68,9 +68,41 @@ if (config.dev)
     {
         Log.Warning("请输入消息: ");
         var input = Console.ReadLine();
-        if (string.IsNullOrEmpty(input)) return;
+        if (string.IsNullOrEmpty(input))
+            return;
         Log.Warning("解析消息: {0}", input);
-        await ProcessCommand(new Target()
+        await ProcessCommand(
+            new Target()
+            {
+                msg = new Msg.Chain().msg(input!.Trim()),
+                sender = $"{sender.Value()}",
+                platform = Platform.OneBot,
+                selfAccount = null,
+                socket = new FakeSocket()
+                {
+                    action = (msg) =>
+                    {
+                        Log.Information("本地测试消息 {0}", msg);
+                    }
+                },
+                raw = new OneBot.Models.CQMessageEventBase() { UserId = sender.Value(), }
+            }
+        );
+    }
+}
+
+// 测试消息处理
+
+while (true)
+{
+    Log.Warning("请输入消息: ");
+    var input = Console.ReadLine();
+    if (string.IsNullOrEmpty(input))
+        return;
+    var sender = parseInt("123456789");
+    Log.Warning("解析消息: {0}", input);
+    await ProcessCommand(
+        new Target()
         {
             msg = new Msg.Chain().msg(input!.Trim()),
             sender = $"{sender.Value()}",
@@ -83,50 +115,13 @@ if (config.dev)
                     Log.Information("本地测试消息 {0}", msg);
                 }
             },
-            raw = new OneBot.Models.CQMessageEventBase()
-            {
-                UserId = sender.Value(),
-            }
-        });
-    }
-}
-
-
-
-// 测试消息处理
-
-while (true)
-{
-    Log.Warning("请输入消息: ");
-    var input = Console.ReadLine();
-    if (string.IsNullOrEmpty(input)) return;
-    var sender = parseInt("123456789");
-    Log.Warning("解析消息: {0}", input);
-    await ProcessCommand(new Target()
-    {
-
-        msg = new Msg.Chain().msg(input!.Trim()),
-        sender = $"{sender.Value()}",
-        platform = Platform.OneBot,
-        selfAccount = null,
-        socket = new FakeSocket()
-        {
-            action = (msg) =>
-            {
-                Log.Information("本地测试消息 {0}", msg);
-            }
-        },
-        raw = new OneBot.Models.CQMessageEventBase()
-        {
-            UserId = sender.Value(),
+            raw = new OneBot.Models.CQMessageEventBase() { UserId = sender.Value(), }
         }
-    });
+    );
 }
-
 
 await Task.Delay(500);
 Environment.Exit(0);
-
 
 Log.Information("注册用户数据更新事件");
 //GeneralUpdate.DailyUpdate();

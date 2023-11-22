@@ -16,6 +16,7 @@ namespace Tests;
 public class Misc
 {
     private readonly ITestOutputHelper Output;
+
     public Misc(ITestOutputHelper Output)
     {
         this.Output = Output;
@@ -57,7 +58,10 @@ public class Misc
     [Fact]
     public void MsgChain()
     {
-        var c = new Msg.Chain().msg("hello").image("C:\\hello.png", Msg.ImageSegment.Type.Url).msg("test\nhaha");
+        var c = new Msg.Chain()
+            .msg("hello")
+            .image("C:\\hello.png", Msg.ImageSegment.Type.Url)
+            .msg("test\nhaha");
         c.Add(new Msg.RawSegment("Test", new JObject { { "test", "test" } }));
         Assert.True(c.StartsWith("he"));
         Assert.False(c.StartsWith("!"));
@@ -83,4 +87,3 @@ public class Misc
     //     KanonBot.Mail.Send(ms);
     // }
 }
-

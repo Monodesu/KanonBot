@@ -14,10 +14,13 @@ namespace KanonBot.Account
         {
             [Description("")]
             Failed,
+
             [Description("CreateAccount")]
             CreateAccount,
+
             [Description("BindPlatform")]
             BindPlatform,
+
             [Description("AppendMail")]
             AppendMail,
         }

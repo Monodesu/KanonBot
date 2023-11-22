@@ -1,27 +1,26 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using KanonBot.API;
-
+using KanonBot.API.OSU;
+using KanonBot.Functions.OSU;
+using KanonBot.Image;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Diagnostics;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using static KanonBot.API.OSU.DataStructure;
+using static KanonBot.Image.OSU.OsuResourceHelper;
+using static KanonBot.Image.OSU.ResourceRegistrar;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
-using System.Collections.Generic;
-using SixLabors.ImageSharp.Diagnostics;
-using static KanonBot.API.OSU.DataStructure;
-using KanonBot.API.OSU;
-using static KanonBot.Image.OSU.ResourceRegistrar;
-using static KanonBot.Image.OSU.OsuResourceHelper;
-using KanonBot.Image;
-using KanonBot.Functions.OSU;
 
 namespace KanonBot.Image.OSU
 {
@@ -994,7 +993,9 @@ namespace KanonBot.Image.OSU
             info.Mutate(x => x.DrawImage(acc_background, new Point(2358, 611), 1));
 
             //300
-            int acc_front_length = (int)(1443.00 * (data.userInfo!.Statistics!.HitAccuracy / 100.0));
+            int acc_front_length = (int)(
+                1443.00 * (data.userInfo!.Statistics!.HitAccuracy / 100.0)
+            );
             if (acc_front_length < 1)
                 acc_front_length = 1443;
             using var acc_300 = new Image<Rgba32>(acc_front_length, 68);
@@ -1018,7 +1019,12 @@ namespace KanonBot.Image.OSU
             //download background image
             if (allBP!.Length > 5)
             {
-                using var bp1bg = await TryAsync(GetBeatmapBackgroundImageAsync(allBP![0].Beatmapset!.Id, allBP![0].Beatmap!.BeatmapId))
+                using var bp1bg = await TryAsync(
+                        GetBeatmapBackgroundImageAsync(
+                            allBP![0].Beatmapset!.Id,
+                            allBP![0].Beatmap!.BeatmapId
+                        )
+                    )
                     .IfFail(await ReadImageRgba("./work/legacy/load-failed-img.png"));
                 bp1bg.Mutate(
                     x =>
@@ -1070,9 +1076,12 @@ namespace KanonBot.Image.OSU
             levelprogress_background.Mutate(x => x.Rotate(-90));
             info.Mutate(x => x.DrawImage(levelprogress_background, new Point(3900, 72), 1));
 
-
             //自定义侧图
-            using var sideImg = await GetInfoV2BannerAsync(data.userInfo!.Id, ColorMode, SideImgBrightness);
+            using var sideImg = await GetInfoV2BannerAsync(
+                data.userInfo!.Id,
+                ColorMode,
+                SideImgBrightness
+            );
             info.Mutate(x => x.DrawImage(sideImg, new Point(90, 72), 1));
 
             //用户面板/自定义面板
@@ -1095,7 +1104,12 @@ namespace KanonBot.Image.OSU
             );
 
             //country(region)_flag
-            using var country_flag = await GetCountryOrRegionFlagAsync(data.userInfo!.Country!.Code!, 2, CountryFlagAlpha, CountryFlagBrightness);
+            using var country_flag = await GetCountryOrRegionFlagAsync(
+                data.userInfo!.Country!.Code!,
+                2,
+                CountryFlagAlpha,
+                CountryFlagBrightness
+            );
             info.Mutate(x => x.DrawImage(country_flag, new Point(1577, 600), 1));
 
             //country_rank
@@ -1114,7 +1128,8 @@ namespace KanonBot.Image.OSU
             if (isBonded)
             {
                 if (
-                    Math.Abs(data.userInfo!.Statistics!.CountryRank - prevStatistics!.CountryRank) >= 1
+                    Math.Abs(data.userInfo!.Statistics!.CountryRank - prevStatistics!.CountryRank)
+                    >= 1
                 )
                 {
                     textOptions.HorizontalAlignment = HorizontalAlignment.Right;
@@ -1267,7 +1282,9 @@ namespace KanonBot.Image.OSU
                         $"./work/panelv2/icons/indicator.png"
                     );
                     acc_indicator_icon_increase.Mutate(x => x.Resize(36, 36));
-                    if ((data.userInfo!.Statistics!.HitAccuracy - prevStatistics!.HitAccuracy) < 0.0)
+                    if (
+                        (data.userInfo!.Statistics!.HitAccuracy - prevStatistics!.HitAccuracy) < 0.0
+                    )
                         acc_indicator_icon_increase.Mutate(x => x.Rotate(180));
                     acc_indicator_icon_increase.Mutate(
                         x =>
@@ -2845,9 +2862,7 @@ namespace KanonBot.Image.OSU
                             if (i < 5)
                             {
                                 //top
-                                badge.Mutate(
-                                    x => x.Resize(236, 110).Brightness(BadgeBrightness)
-                                );
+                                badge.Mutate(x => x.Resize(236, 110).Brightness(BadgeBrightness));
 
                                 badge.Mutate(
                                     x =>
@@ -2924,7 +2939,10 @@ namespace KanonBot.Image.OSU
             }
 
             //avatar
-            using var avatar = await GetUserAvatarAsync(data.userInfo!.Id, data.userInfo!.AvatarUrl!);
+            using var avatar = await GetUserAvatarAsync(
+                data.userInfo!.Id,
+                data.userInfo!.AvatarUrl!
+            );
             // 亮度
             avatar.Mutate(x => x.Brightness(AvatarBrightness));
             avatar.Mutate(x => x.Resize(200, 200).RoundCorner(new Size(200, 200), 25));

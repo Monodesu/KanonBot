@@ -1,12 +1,13 @@
 #pragma warning disable CS8618 // 非null 字段未初始化
 
-using Newtonsoft.Json;
 using KanonBot.Message;
 using KanonBot.Serializer;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NullValueHandling = Newtonsoft.Json.NullValueHandling;
 
 namespace KanonBot.Drivers;
+
 public partial class Guild
 {
     public class Models
@@ -18,16 +19,19 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "content")]
             public string? Content { get; set; }
+
             /// <summary>
             /// 图片url地址，平台会转存该图片，用于下发图片消息
             /// </summary>
             [JsonProperty(PropertyName = "image")]
             public string? ImageUrl { get; set; }
+
             /// <summary>
             /// 要回复的消息id(Message.id), 在 AT_CREATE_MESSAGE 事件中获取。
             /// </summary>
             [JsonProperty(PropertyName = "msg_id")]
             public string? MessageId { get; set; }
+
             /// <summary>
             /// 引用消息对象
             /// </summary>
@@ -41,6 +45,7 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "embed")]
             public JToken? Embed { get; set; }
+
             /// <summary>
             /// ark消息
             /// </summary>
@@ -49,6 +54,7 @@ public partial class Guild
 
             public SendMessageData Build(Chain msgChain) => Message.Build(this, msgChain);
         }
+
         public class PayloadBase<T>
         {
             /// <summary>
@@ -75,9 +81,7 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "s", NullValueHandling = NullValueHandling.Ignore)]
             public int? Seq { get; set; }
-
         }
-
 
         public class Member
         {
@@ -86,22 +90,26 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "nico")]
             public string Nick { get; set; }
+
             /// <summary>
             /// 用户加入频道的时间
             /// </summary>
             [JsonProperty(PropertyName = "joined_at")]
             public DateTimeOffset JoinedAt { get; set; }
+
             /// <summary>
             /// 用户在频道内的身份组ID
             /// </summary>
             [JsonProperty(PropertyName = "roles")]
             public Enums.DefaultRole[] Roles { get; set; }
+
             /// <summary>
             /// 用户的频道基础信息，只有成员相关接口中会填充此信息
             /// </summary>
             [JsonProperty(PropertyName = "user")]
             public User? User { get; set; }
         }
+
         public class User
         {
             /// <summary>
@@ -109,26 +117,31 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "id")]
             public string ID { get; set; }
+
             /// <summary>
             /// 用户名
             /// </summary>
             [JsonProperty(PropertyName = "username")]
             public string UserName { get; set; }
+
             /// <summary>
             /// 是否是机器人
             /// </summary>
             [JsonProperty(PropertyName = "bot")]
             public bool isBot { get; set; }
+
             /// <summary>
             /// 用户头像地址
             /// </summary>
             [JsonProperty(PropertyName = "avatar")]
             public string? Avatar { get; set; }
+
             /// <summary>
             /// 特殊关联应用的 openid，需要特殊申请并配置后才会返回。如需申请，请联系平台运营人员。
             /// </summary>
             [JsonProperty(PropertyName = "union_openid")]
             public string? UnionOpenID { get; set; }
+
             /// <summary>
             /// 机器人关联的互联应用的用户信息，与union_openid关联的应用是同一个。如需申请，请联系平台运营人员。
             /// </summary>
@@ -143,61 +156,73 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "author")]
             public User Author { get; set; }
+
             /// <summary>
             /// 消息内容
             /// </summary>
             [JsonProperty(PropertyName = "content")]
             public string Content { get; set; }
+
             /// <summary>
             /// 消息 ID
             /// </summary>
             [JsonProperty(PropertyName = "id")]
             public string ID { get; set; }
+
             /// <summary>
             /// 子频道 ID
             /// </summary>
             [JsonProperty(PropertyName = "channel_id")]
             public string ChannelID { get; set; }
+
             /// <summary>
             /// 频道 ID
             /// </summary>
             [JsonProperty(PropertyName = "guild_id")]
             public string GuildID { get; set; }
+
             /// <summary>
             /// 消息中@的人
             /// </summary>
             [JsonProperty(PropertyName = "mentions")]
             public User[] Mentions { get; set; }
+
             /// <summary>
             /// 消息创建者的member信息
             /// </summary>
             [JsonProperty(PropertyName = "member")]
             public Member Member { get; set; }
+
             /// <summary>
             /// 用于消息间的排序，seq 在同一子频道中按从先到后的顺序递增，不同的子频道之间消息无法排序。(目前只在消息事件中有值，2022年8月1日 后续废弃)
             /// </summary>
             [JsonProperty(PropertyName = "seq")]
             public int Seq { get; set; }
+
             /// <summary>
             /// 子频道消息 seq，用于消息间的排序，seq 在同一子频道中按从先到后的顺序递增，不同的子频道之间消息无法排序
             /// </summary>
             [JsonProperty(PropertyName = "seq_in_channel")]
             public int SeqInChannel { get; set; }
+
             /// <summary>
             /// 消息创建时间
             /// </summary>
             [JsonProperty(PropertyName = "timestamp")]
             public DateTimeOffset Time { get; set; }
+
             /// <summary>
             /// 消息编辑时间
             /// </summary>
             [JsonProperty(PropertyName = "edited_timestamp")]
             public DateTimeOffset? EditedTime { get; set; }
+
             /// <summary>
             /// 是否是@全员消息
             /// </summary>
             [JsonProperty(PropertyName = "mention_everyone")]
             public bool? MentionEveryone { get; set; }
+
             /// <summary>
             /// 引用消息对象
             /// </summary>
@@ -211,17 +236,20 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "attachments")]
             public List<JToken>? Attachments { get; set; }
+
             /// <summary>
             /// embed
             /// </summary>
             [JsonProperty(PropertyName = "embeds")]
             public List<JToken>? Embeds { get; set; }
+
             /// <summary>
             /// ark消息
             /// </summary>
             [JsonProperty(PropertyName = "ark")]
             public JToken? Ark { get; set; }
         }
+
         public class MessageReference
         {
             /// <summary>
@@ -229,6 +257,7 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "message_id")]
             public string MessageId { get; set; }
+
             /// <summary>
             /// 是否忽略获取引用消息详情错误，默认否
             /// </summary>
@@ -243,22 +272,24 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "version")]
             public int Version { get; set; }
+
             /// <summary>
             /// 会话ID
             /// </summary>
             [JsonProperty(PropertyName = "session_id")]
             public Guid SessionId { get; set; }
+
             /// <summary>
             /// 用户信息
             /// </summary>
             [JsonProperty(PropertyName = "user")]
             public User User { get; set; }
+
             /// <summary>
             /// shard 该参数是用来进行水平分片的。该参数是个拥有两个元素的数组。例如：[0,4]，代表分为四个片，当前链接是第 0 个片，业务稍后应该继续建立 shard 为[1,4],[2,4],[3,4]的链接，才能完整接收事件。
             /// </summary>
             [JsonProperty(PropertyName = "shard")]
             public int[] Shard { get; set; }
-
         }
 
         public class ResumeData
@@ -268,11 +299,13 @@ public partial class Guild
             /// </summary>
             [JsonProperty(PropertyName = "token")]
             public string Token { get; set; }
+
             /// <summary>
             /// 会话ID
             /// </summary>
             [JsonProperty(PropertyName = "session_id")]
             public Guid SessionId { get; set; }
+
             /// <summary>
             /// 在接收事件时候的 s 字段
             /// </summary>
@@ -306,12 +339,15 @@ public partial class Guild
             [JsonProperty(PropertyName = "properties")]
             public Properties Prop { get; set; } = new Properties();
 
-            public class Properties {
+            public class Properties
+            {
                 // 自动获取当前运行系统类型
                 [JsonProperty(PropertyName = "$os")]
                 public string Os { get; set; } = Environment.OSVersion.Platform.ToString();
+
                 [JsonProperty(PropertyName = "$browser")]
                 public string Browser { get; set; } = "KanonBot";
+
                 [JsonProperty(PropertyName = "$device")]
                 public string Device { get; set; } = "KanonBot";
             }

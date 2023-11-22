@@ -24,7 +24,7 @@ namespace KanonBot.API.OSU
 
         public static Mode? String2Mode(string? value)
         {
-            value = value?.ToLower();    // 大写字符转小写
+            value = value?.ToLower(); // 大写字符转小写
             return value switch
             {
                 "osu" => OSU.Enums.Mode.OSU,
@@ -56,12 +56,16 @@ namespace KanonBot.API.OSU
             /// </summary>
             [Description("")]
             Unknown,
+
             [Description("osu")]
             OSU,
+
             [Description("taiko")]
             Taiko,
+
             [Description("fruits")]
             Fruits,
+
             [Description("mania")]
             Mania,
         }
@@ -74,8 +78,10 @@ namespace KanonBot.API.OSU
         {
             [Description("best")]
             Best,
+
             [Description("firsts")]
             Firsts,
+
             [Description("recent")]
             Recent,
         }
@@ -106,9 +112,9 @@ namespace KanonBot.API.OSU
 
             [Description("qualified")]
             qualified,
+
             [Description("loved")]
             loved
         }
-
     }
 }

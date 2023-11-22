@@ -1,25 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Net.WebSockets;
-using Websocket.Client;
+using System.Threading.Tasks;
+using KanonBot;
+using KanonBot.Event;
 using KanonBot.Message;
 using KanonBot.Serializer;
-using KanonBot.Event;
 using Newtonsoft.Json;
 using Serilog;
-using KanonBot;
+using Websocket.Client;
 
 namespace KanonBot.Drivers;
+
 public partial class OneBot
 {
     public class Client : OneBot, IDriver, ISocket
     {
-
         IWebsocketClient instance;
         public API api;
         public string? selfID { get; private set; }
+
         public Client(string url)
         {
             // 初始化
@@ -33,9 +34,9 @@ public partial class OneBot
                 {
                     Options =
                     {
-                            KeepAliveInterval = TimeSpan.FromSeconds(5),
-                            // Proxy = ...
-                            // ClientCertificates = ...
+                        KeepAliveInterval = TimeSpan.FromSeconds(5),
+                        // Proxy = ...
+                        // ClientCertificates = ...
                     }
                 };
                 //client.Options.SetRequestHeader("Origin", "xxx");
@@ -54,18 +55,23 @@ public partial class OneBot
             //     Console.WriteLine($"Disconnection happened, type: {info.Type}"));
 
             // 拿Tasks异步执行
-            client.MessageReceived.Subscribe(msgAction => Task.Run(() =>
-            {
-                try
-                {
-                    this.Parse(msgAction);
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("未捕获的异常 ↓\n{ex}", ex);
-                    this.Dispose();
-                }
-            }));
+            client
+                .MessageReceived
+                .Subscribe(
+                    msgAction =>
+                        Task.Run(() =>
+                        {
+                            try
+                            {
+                                this.Parse(msgAction);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error("未捕获的异常 ↓\n{ex}", ex);
+                                this.Dispose();
+                            }
+                        })
+                );
 
             this.instance = client;
         }
@@ -124,7 +130,10 @@ public partial class OneBot
                             else if (metaEventType == "lifecycle")
                             {
                                 this.selfID = (string)m["self_id"]!;
-                                this.eventAction?.Invoke(this, new Ready(this.selfID, Platform.OneBot));
+                                this.eventAction?.Invoke(
+                                    this,
+                                    new Ready(this.selfID, Platform.OneBot)
+                                );
                             }
                             else
                             {
@@ -151,6 +160,7 @@ public partial class OneBot
             this.msgAction += action;
             return this;
         }
+
         public IDriver onEvent(IDriver.EventDelegate action)
         {
             this.eventAction += action;
@@ -172,6 +182,4 @@ public partial class OneBot
             this.instance.Dispose();
         }
     }
-
-
 }

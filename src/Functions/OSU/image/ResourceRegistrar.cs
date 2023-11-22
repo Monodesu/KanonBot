@@ -1,9 +1,9 @@
-﻿using SixLabors.Fonts;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SixLabors.Fonts;
 
 namespace KanonBot.Image.OSU
 {
@@ -20,6 +20,5 @@ namespace KanonBot.Image.OSU
         public static FontFamily avenirLTStdMedium = fonts.Add(
             "./work/fonts/AvenirLTStd-Medium.ttf"
         );
-
     }
 }

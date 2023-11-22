@@ -14,9 +14,9 @@ using Newtonsoft.Json;
 using Serilog;
 
 namespace KanonBot.Drivers;
+
 public partial class OneBot
 {
-
     public class Server : OneBot, IDriver
     {
         public class Socket : ISocket
@@ -24,25 +24,30 @@ public partial class OneBot
             public API api;
             IWebSocketConnection inner;
             public string selfID { get; private set; }
+
             public Socket(IWebSocketConnection socket)
             {
                 this.api = new(this);
                 this.inner = socket;
                 this.selfID = socket.ConnectionInfo.Headers["X-Self-ID"];
             }
+
             public void Send(string message)
             {
                 this.inner.Send(message);
             }
+
             public IWebSocketConnectionInfo ConnectionInfo()
             {
                 return this.inner.ConnectionInfo;
             }
+
             public void Close()
             {
                 this.inner.Close();
             }
         }
+
         class Clients
         {
             private Dictionary<Guid, Socket> inner = new();
@@ -52,12 +57,14 @@ public partial class OneBot
             {
                 return this.inner.GetValueOrDefault(k);
             }
+
             public void Set(Guid k, Socket v)
             {
                 mut.WaitOne();
                 this.inner.Add(k, v);
                 mut.ReleaseMutex();
             }
+
             public Socket? Remove(Guid k)
             {
                 mut.WaitOne();
@@ -65,19 +72,19 @@ public partial class OneBot
                 mut.ReleaseMutex();
                 return s;
             }
+
             public IEnumerable<KeyValuePair<Guid, Socket>> Iter()
             {
                 return this.inner;
             }
         }
+
         Clients clients = new();
         WebSocketServer instance;
+
         public Server(string url)
         {
-            var server = new WebSocketServer(url)
-            {
-                RestartAfterListenError = true
-            };
+            var server = new WebSocketServer(url) { RestartAfterListenError = true };
             Fleck.FleckLog.LogAction = (level, message, ex) =>
             {
                 switch (level)
@@ -117,38 +124,44 @@ public partial class OneBot
                 return;
             }
 
-
             socket.OnError = (e) =>
             {
                 this.Disconnect(socket.ConnectionInfo.Id);
-                Log.Error($"[{OneBot.platform} Core] {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 连接异常断开");
+                Log.Error(
+                    $"[{OneBot.platform} Core] {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 连接异常断开"
+                );
             };
             socket.OnOpen = () =>
             {
                 this.clients.Set(socket.ConnectionInfo.Id, new Socket(socket));
-                Log.Information($"[{OneBot.platform} Core] 收到来自 {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 的连接");
+                Log.Information(
+                    $"[{OneBot.platform} Core] 收到来自 {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 的连接"
+                );
             };
             socket.OnClose = () =>
             {
                 this.Disconnect(socket.ConnectionInfo.Id);
-                Log.Information($"[{OneBot.platform} Core] {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 连接断开");
+                Log.Information(
+                    $"[{OneBot.platform} Core] {socket.ConnectionInfo.ClientIpAddress}:{socket.ConnectionInfo.ClientPort} 连接断开"
+                );
             };
-            socket.OnMessage = message => Task.Run(() =>
-            {
-                try
+            socket.OnMessage = message =>
+                Task.Run(() =>
                 {
-                    var s = this.clients.Get(socket.ConnectionInfo.Id);
-                    if (s != null)
-                        this.Parse(message, s);
-                    else
-                        socket.Close();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error("未捕获的异常 ↓\n{ex}", ex);
-                    this.Disconnect(socket.ConnectionInfo.Id);
-                }
-            });
+                    try
+                    {
+                        var s = this.clients.Get(socket.ConnectionInfo.Id);
+                        if (s != null)
+                            this.Parse(message, s);
+                        else
+                            socket.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("未捕获的异常 ↓\n{ex}", ex);
+                        this.Disconnect(socket.ConnectionInfo.Id);
+                    }
+                });
         }
 
         void Parse(string msg, Socket socket)
@@ -187,7 +200,10 @@ public partial class OneBot
                             catch (JsonSerializationException)
                             {
                                 // throw new NotSupportedException($"不支持的消息格式，请使用数组消息格式");
-                                Log.Error("不支持的消息格式，请使用数组消息格式，断开来自{0}的连接", socket.ConnectionInfo().ClientIpAddress);
+                                Log.Error(
+                                    "不支持的消息格式，请使用数组消息格式，断开来自{0}的连接",
+                                    socket.ConnectionInfo().ClientIpAddress
+                                );
                                 this.Disconnect(socket.ConnectionInfo().Id);
                                 return;
                             }
@@ -211,7 +227,10 @@ public partial class OneBot
                             }
                             else if (metaEventType == "lifecycle")
                             {
-                                this.eventAction?.Invoke(socket, new Ready((string)m["self_id"]!, Platform.OneBot));
+                                this.eventAction?.Invoke(
+                                    socket,
+                                    new Ready((string)m["self_id"]!, Platform.OneBot)
+                                );
                             }
                             else
                             {
@@ -238,12 +257,12 @@ public partial class OneBot
             s?.Close();
         }
 
-
         public IDriver onMessage(IDriver.MessageDelegate action)
         {
             this.msgAction += action;
             return this;
         }
+
         public IDriver onEvent(IDriver.EventDelegate action)
         {
             this.eventAction += action;
@@ -254,10 +273,10 @@ public partial class OneBot
         {
             return Task.Run(() => this.instance.Start(SocketAction));
         }
+
         public void Dispose()
         {
             this.instance.Dispose();
         }
-
     }
 }

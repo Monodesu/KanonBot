@@ -1,29 +1,27 @@
-﻿using System.CommandLine;
+﻿using System;
+using System.CommandLine;
 using System.IO;
+using System.Reflection;
 using KanonBot.API;
 using KanonBot.Command;
 using KanonBot.Drivers;
 using KanonBot.Functions.OSU;
-
+using KanonBot.Image.OSU;
 using KanonBot.Message;
+using LanguageExt;
 using LanguageExt.UnsafeValueAccess;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
-using static LinqToDB.Common.Configuration;
-using static KanonBot.BindService;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
 using static KanonBot.API.OSU.DataStructure;
-using SixLabors.ImageSharp;
-using KanonBot.Image.OSU;
-using System;
-using LanguageExt;
-using System.Reflection;
+using static KanonBot.BindService;
+using static LinqToDB.Common.Configuration;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace KanonBot.OSU
 {
     public static partial class Basic
     {
-
         private enum ScoreEnum
         {
             Recent,
@@ -34,7 +32,7 @@ namespace KanonBot.OSU
 
         [Command("best", "bp")]
         [Params("m", "mode", "q", "quality", "u", "user", "username", "i", "index")]
-        public async static Task score_best(CommandContext args, Target target)
+        public static async Task score_best(CommandContext args, Target target)
         {
             var osu_username = "";
             bool isSelfQuery = false;
@@ -42,75 +40,83 @@ namespace KanonBot.OSU
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
             int index = 0;
 
-            args.GetParameters<string>(["u", "user", "username"]).Match
-                (
-                Some: try_username =>
-                {
-                    osu_username = try_username;
-                },
-                None: () => { }
-                );
-            args.GetDefault<string>().Match
-                (
-                Some: try_default =>
-                {
-                    if (IsNumber(try_default))
+            args.GetParameters<string>([ "u", "user", "username" ])
+                .Match(
+                    Some: try_username =>
                     {
-                        var x = int.Parse(try_default) - 1;
-                        if (x > 100 || x < 0)
-                            osu_username = try_default;
-                        else
+                        osu_username = try_username;
+                    },
+                    None: () => { }
+                );
+            args.GetDefault<string>()
+                .Match(
+                    Some: try_default =>
+                    {
+                        if (IsNumber(try_default))
                         {
-                            isSelfQuery = true;
-                            index = x;
+                            var x = int.Parse(try_default) - 1;
+                            if (x > 100 || x < 0)
+                                osu_username = try_default;
+                            else
+                            {
+                                isSelfQuery = true;
+                                index = x;
+                            }
                         }
+                        else
+                            osu_username = try_default;
+                    },
+                    None: () =>
+                    {
+                        if (osu_username == "")
+                            isSelfQuery = true;
                     }
-                    else
-                        osu_username = try_default;
-                },
-                None: () =>
-                {
-                    if (osu_username == "") isSelfQuery = true;
-                }
                 );
-            args.GetParameters<string>(["m", "mode"]).Match
-                (
-                Some: try_mode =>
-                {
-                    mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
-                },
-                None: () => { }
+            args.GetParameters<string>([ "m", "mode" ])
+                .Match(
+                    Some: try_mode =>
+                    {
+                        mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
+                    },
+                    None: () => { }
                 );
-            args.GetParameters<string>(["q", "quality"]).Match
-                (
-                Some: try_quality =>
-                {
-                    if (try_quality == "high" || try_quality == "h")
-                        quality = true;
-                },
-                None: () => { });
-            args.GetParameters<string>(["i", "index"]).Match
-                (
-                Some: try_index =>
-                {
-                    index = int.Parse(try_index) - 1;
-                },
-                None: () => { }
+            args.GetParameters<string>([ "q", "quality" ])
+                .Match(
+                    Some: try_quality =>
+                    {
+                        if (try_quality == "high" || try_quality == "h")
+                            quality = true;
+                    },
+                    None: () => { }
+                );
+            args.GetParameters<string>([ "i", "index" ])
+                .Match(
+                    Some: try_index =>
+                    {
+                        index = int.Parse(try_index) - 1;
+                    },
+                    None: () => { }
                 );
 
-            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(target, isSelfQuery, osu_username, mode); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
+            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(
+                target,
+                isSelfQuery,
+                osu_username,
+                mode
+            ); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
             bool IsBound = DBOsuInfo != null;
-            if (OnlineOSUUserInfo == null) return; // 查询失败
+            if (OnlineOSUUserInfo == null)
+                return; // 查询失败
 
             UserPanelData data = new() { userInfo = OnlineOSUUserInfo };
             data.userInfo.PlayMode = OnlineOSUUserInfo.PlayMode;
 
-            await ProcessScore(data, target, ScoreEnum.Best, index, new List<string>(), quality, isSelfQuery);
+            await ProcessScore(data, target, ScoreEnum.Best, index, [ ], quality, isSelfQuery);
         }
 
         [Command("recent", "re", "passed", "pr")]
         [Params("m", "mode", "q", "quality", "u", "user", "username", "i", "index")]
-        public async static Task score_recent(CommandContext args, Target target)
+        public static async Task score_recent(CommandContext args, Target target)
         {
             var osu_username = "";
             bool isSelfQuery = false;
@@ -118,75 +124,83 @@ namespace KanonBot.OSU
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
             int index = 0;
 
-            args.GetParameters<string>(["u", "user", "username"]).Match
-                (
-                Some: try_username =>
-                {
-                    osu_username = try_username;
-                },
-                None: () => { }
-                );
-            args.GetDefault<string>().Match
-                (
-                Some: try_default =>
-                {
-                    if (IsNumber(try_default))
+            args.GetParameters<string>([ "u", "user", "username" ])
+                .Match(
+                    Some: try_username =>
                     {
-                        var x = int.Parse(try_default) - 1;
-                        if (x > 100 || x < 0)
-                            osu_username = try_default;
-                        else
+                        osu_username = try_username;
+                    },
+                    None: () => { }
+                );
+            args.GetDefault<string>()
+                .Match(
+                    Some: try_default =>
+                    {
+                        if (IsNumber(try_default))
                         {
-                            isSelfQuery = true;
-                            index = x;
+                            var x = int.Parse(try_default) - 1;
+                            if (x > 100 || x < 0)
+                                osu_username = try_default;
+                            else
+                            {
+                                isSelfQuery = true;
+                                index = x;
+                            }
                         }
+                        else
+                            osu_username = try_default;
+                    },
+                    None: () =>
+                    {
+                        if (osu_username == "")
+                            isSelfQuery = true;
                     }
-                    else
-                        osu_username = try_default;
-                },
-                None: () =>
-                {
-                    if (osu_username == "") isSelfQuery = true;
-                }
                 );
-            args.GetParameters<string>(["m", "mode"]).Match
-                (
-                Some: try_mode =>
-                {
-                    mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
-                },
-                None: () => { }
+            args.GetParameters<string>([ "m", "mode" ])
+                .Match(
+                    Some: try_mode =>
+                    {
+                        mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
+                    },
+                    None: () => { }
                 );
-            args.GetParameters<string>(["q", "quality"]).Match
-                (
-                Some: try_quality =>
-                {
-                    if (try_quality == "high" || try_quality == "h")
-                        quality = true;
-                },
-                None: () => { });
-            args.GetParameters<string>(["i", "index"]).Match
-                (
-                Some: try_index =>
-                {
-                    index = int.Parse(try_index) - 1;
-                },
-                None: () => { }
+            args.GetParameters<string>([ "q", "quality" ])
+                .Match(
+                    Some: try_quality =>
+                    {
+                        if (try_quality == "high" || try_quality == "h")
+                            quality = true;
+                    },
+                    None: () => { }
+                );
+            args.GetParameters<string>([ "i", "index" ])
+                .Match(
+                    Some: try_index =>
+                    {
+                        index = int.Parse(try_index) - 1;
+                    },
+                    None: () => { }
                 );
 
-            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(target, isSelfQuery, osu_username, mode); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
+            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(
+                target,
+                isSelfQuery,
+                osu_username,
+                mode
+            ); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
             bool IsBound = DBOsuInfo != null;
-            if (OnlineOSUUserInfo == null) return; // 查询失败
+            if (OnlineOSUUserInfo == null)
+                return; // 查询失败
 
             UserPanelData data = new() { userInfo = OnlineOSUUserInfo };
             data.userInfo.PlayMode = OnlineOSUUserInfo.PlayMode;
 
-            await ProcessScore(data, target, ScoreEnum.Recent, index, new List<string>(), quality, isSelfQuery);
+            await ProcessScore(data, target, ScoreEnum.Recent, index, [ ], quality, isSelfQuery);
         }
 
         [Command("passed", "pr")]
         [Params("m", "mode", "q", "quality", "u", "user", "username", "i", "index")]
-        public async static Task score_passrecent(CommandContext args, Target target)
+        public static async Task score_passrecent(CommandContext args, Target target)
         {
             var osu_username = "";
             bool isSelfQuery = false;
@@ -194,75 +208,91 @@ namespace KanonBot.OSU
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
             int index = 0;
 
-            args.GetParameters<string>(["u", "user", "username"]).Match
-                (
-                Some: try_username =>
-                {
-                    osu_username = try_username;
-                },
-                None: () => { }
-                );
-            args.GetDefault<string>().Match
-                (
-                Some: try_default =>
-                {
-                    if (IsNumber(try_default))
+            args.GetParameters<string>([ "u", "user", "username" ])
+                .Match(
+                    Some: try_username =>
                     {
-                        var x = int.Parse(try_default) - 1;
-                        if (x > 100 || x < 0)
-                            osu_username = try_default;
-                        else
+                        osu_username = try_username;
+                    },
+                    None: () => { }
+                );
+            args.GetDefault<string>()
+                .Match(
+                    Some: try_default =>
+                    {
+                        if (IsNumber(try_default))
                         {
-                            isSelfQuery = true;
-                            index = x;
+                            var x = int.Parse(try_default) - 1;
+                            if (x > 100 || x < 0)
+                                osu_username = try_default;
+                            else
+                            {
+                                isSelfQuery = true;
+                                index = x;
+                            }
                         }
+                        else
+                            osu_username = try_default;
+                    },
+                    None: () =>
+                    {
+                        if (osu_username == "")
+                            isSelfQuery = true;
                     }
-                    else
-                        osu_username = try_default;
-                },
-                None: () =>
-                {
-                    if (osu_username == "") isSelfQuery = true;
-                }
                 );
-            args.GetParameters<string>(["m", "mode"]).Match
-                (
-                Some: try_mode =>
-                {
-                    mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
-                },
-                None: () => { }
+            args.GetParameters<string>([ "m", "mode" ])
+                .Match(
+                    Some: try_mode =>
+                    {
+                        mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
+                    },
+                    None: () => { }
                 );
-            args.GetParameters<string>(["q", "quality"]).Match
-                (
-                Some: try_quality =>
-                {
-                    if (try_quality == "high" || try_quality == "h")
-                        quality = true;
-                },
-                None: () => { });
-            args.GetParameters<string>(["i", "index"]).Match
-                (
-                Some: try_index =>
-                {
-                    index = int.Parse(try_index) - 1;
-                },
-                None: () => { }
+            args.GetParameters<string>([ "q", "quality" ])
+                .Match(
+                    Some: try_quality =>
+                    {
+                        if (try_quality == "high" || try_quality == "h")
+                            quality = true;
+                    },
+                    None: () => { }
+                );
+            args.GetParameters<string>([ "i", "index" ])
+                .Match(
+                    Some: try_index =>
+                    {
+                        index = int.Parse(try_index) - 1;
+                    },
+                    None: () => { }
                 );
 
-            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(target, isSelfQuery, osu_username, mode); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
+            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(
+                target,
+                isSelfQuery,
+                osu_username,
+                mode
+            ); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
             bool IsBound = DBOsuInfo != null;
-            if (OnlineOSUUserInfo == null) return; // 查询失败
+            if (OnlineOSUUserInfo == null)
+                return; // 查询失败
 
             UserPanelData data = new() { userInfo = OnlineOSUUserInfo };
             data.userInfo.PlayMode = OnlineOSUUserInfo.PlayMode;
 
-            await ProcessScore(data, target, ScoreEnum.PassedRecent, index, new List<string>(), quality, isSelfQuery);
+            await ProcessScore(
+                data,
+                target,
+                ScoreEnum.PassedRecent,
+                index,
+                [ ],
+                quality,
+                isSelfQuery
+            );
         }
 
         [Command("score")]
         [Params("m", "mode", "q", "quality", "md", "mods", "u", "user", "username", "b", "beatmap")]
-        public async static Task score_specific(CommandContext args, Target target)
+        public static async Task score_specific(CommandContext args, Target target)
         {
             var osu_username = "";
             bool isSelfQuery = false;
@@ -273,106 +303,118 @@ namespace KanonBot.OSU
             bool shouldContinue = true;
 
             // score在查询指定用户成绩时，必须单独指定用户名，不能使用默认值处理
-            await args.GetDefault<string>().Match
-                (
-                Some: async try_default =>
-                {
-                    if (IsNumber(try_default))
-                        beatmap = int.Parse(try_default);
-                    else
+            await args.GetDefault<string>()
+                .Match(
+                    Some: async try_default =>
                     {
-                        await target.reply("谱面id有误，请重新检查。");
+                        if (IsNumber(try_default))
+                            beatmap = int.Parse(try_default);
+                        else
+                        {
+                            await target.reply("谱面id有误，请重新检查。");
+                            shouldContinue = false;
+                        }
+                    },
+                    None: async () =>
+                    {
+                        await target.reply("没有指定谱面id，请重新检查。");
                         shouldContinue = false;
                     }
-                },
-                None: async () =>
-                {
-                    await target.reply("没有指定谱面id，请重新检查。");
-                    shouldContinue = false;
-                }
                 );
-            args.GetParameters<string>(["u", "user", "username"]).Match
-                (
-                Some: try_username =>
-                {
-                    osu_username = try_username;
-                },
-                None: () =>
-                {
-                    isSelfQuery = true;
-                }
-                );
-            args.GetParameters<string>(["m", "mode"]).Match
-                (
-                Some: try_mode =>
-                {
-                    mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
-                },
-                None: () => { }
-                );
-            args.GetParameters<string>(["md", "mods"]).Match
-                (
-                Some: try_mods =>
-                {
-                    mods = try_mods;
-                },
-                None: () => { }
-                );
-            args.GetParameters<string>(["q", "quality"]).Match
-                (
-                Some: try_quality =>
-                {
-                    if (try_quality == "high" || try_quality == "h")
-                        quality = true;
-                },
-                None: () => { });
-            args.GetParameters<string>(["b", "beatmap"]).Match
-                (
-                Some: async try_beatmap =>
-                {
-                    if (IsNumber(try_beatmap))
-                        beatmap = int.Parse(try_beatmap);
-                    else
+            args.GetParameters<string>([ "u", "user", "username" ])
+                .Match(
+                    Some: try_username =>
                     {
-                        await target.reply("谱面id有误，请重新检查。");
-                        shouldContinue = false;
+                        osu_username = try_username;
+                    },
+                    None: () =>
+                    {
+                        isSelfQuery = true;
                     }
-                },
-                None: () => { }
+                );
+            args.GetParameters<string>([ "m", "mode" ])
+                .Match(
+                    Some: try_mode =>
+                    {
+                        mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
+                    },
+                    None: () => { }
+                );
+            args.GetParameters<string>([ "md", "mods" ])
+                .Match(
+                    Some: try_mods =>
+                    {
+                        mods = try_mods;
+                    },
+                    None: () => { }
+                );
+            args.GetParameters<string>([ "q", "quality" ])
+                .Match(
+                    Some: try_quality =>
+                    {
+                        if (try_quality == "high" || try_quality == "h")
+                            quality = true;
+                    },
+                    None: () => { }
                 );
 
-            if (!shouldContinue) return;
-            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(target, isSelfQuery, osu_username, mode); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
+            var bm = args.GetParameters<string>([ "b", "beatmap" ])
+                .Filter(IsNumber)
+                .Map(int.Parse);
+            if (bm.IsNone)
+            {
+                await target.reply("谱面id有误，请重新检查。");
+                return;
+            }
+            beatmap = bm.Value();
+
+            if (!shouldContinue)
+                return;
+            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(
+                target,
+                isSelfQuery,
+                osu_username,
+                mode
+            ); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
             bool IsBound = DBOsuInfo != null;
-            if (OnlineOSUUserInfo == null) return; // 查询失败
+            if (OnlineOSUUserInfo == null)
+                return; // 查询失败
 
             UserPanelData data = new() { userInfo = OnlineOSUUserInfo };
             data.userInfo.PlayMode = OnlineOSUUserInfo.PlayMode;
 
             // 解析Mod
-            List<string> mods_list = new();
-            try
-            {
-                mods_list = Enumerable
-                    .Range(0, mods.Length / 2)
-                    .Select(p => new string(mods.AsSpan().Slice(p * 2, 2)).ToUpper())
-                    .ToList();
-            }
-            catch { }
-
-            await ProcessScore(data, target, ScoreEnum.Score, beatmap, mods_list, quality, isSelfQuery);
+            List<string> mods_list = Utils.ParseMods(mods);
+            await ProcessScore(
+                data,
+                target,
+                ScoreEnum.Score,
+                beatmap,
+                mods_list,
+                quality,
+                isSelfQuery
+            );
         }
 
-        private async static Task ProcessScore(UserPanelData data, Target target, ScoreEnum se, int index, List<string> mods_list, bool quality, bool isSelfQuery)
+        private static async Task ProcessScore(
+            UserPanelData data,
+            Target target,
+            ScoreEnum se,
+            int index,
+            List<string> mods_list,
+            bool quality,
+            bool isSelfQuery
+        )
         {
-
             if (se == ScoreEnum.Score)
             {
-                var scoreData = await API.OSU.V2.GetUserBeatmapScore(
-                    data.userInfo!.Id,
-                    index,
-                    mods_list.ToArray(),
-                    data.userInfo.PlayMode
+                var scoreData = await API.OSU
+                    .V2
+                    .GetUserBeatmapScore(
+                        data.userInfo!.Id,
+                        index,
+                        mods_list.ToArray(),
+                        data.userInfo.PlayMode
                     );
                 if (scoreData == null)
                 {
@@ -383,7 +425,9 @@ namespace KanonBot.OSU
                     return;
                 }
                 //ppy的getscore api不会返回beatmapsets信息，需要手动获取
-                var beatmapSetInfo = await API.OSU.V2.GetBeatmapAsync(scoreData!.Score!.Beatmap!.BeatmapId);
+                var beatmapSetInfo = await API.OSU
+                    .V2
+                    .GetBeatmapAsync(scoreData!.Score!.Beatmap!.BeatmapId);
                 scoreData.Score.Beatmapset = beatmapSetInfo!.Beatmapset;
 
                 var c_data = await PerformanceCalculator.CalculatePanelData(scoreData.Score);
@@ -417,13 +461,15 @@ namespace KanonBot.OSU
                     default:
                         return;
                 }
-                var scores = await API.OSU.V2.GetUserScores(
-                    data.userInfo!.Id,
-                    op_type,
-                    data.userInfo.PlayMode,
-                    1,
-                    index,
-                    includeFails
+                var scores = await API.OSU
+                    .V2
+                    .GetUserScores(
+                        data.userInfo!.Id,
+                        op_type,
+                        data.userInfo.PlayMode,
+                        1,
+                        index,
+                        includeFails
                     );
                 if (scores == null)
                 {
@@ -432,7 +478,9 @@ namespace KanonBot.OSU
                 }
                 if (scores!.Length > 0)
                 {
-                    var performance_data = await PerformanceCalculator.CalculatePanelData(scores![0]);
+                    var performance_data = await PerformanceCalculator.CalculatePanelData(
+                        scores![0]
+                    );
                     using var stream = new MemoryStream();
                     using var img = await OsuScorePanelV2.Draw(performance_data);
 
@@ -504,7 +552,6 @@ namespace KanonBot.OSU
             //        }
             //}
             //catch { }
-
         }
     }
 }

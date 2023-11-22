@@ -15,7 +15,7 @@ fn bindings_csharp() -> Result<(), Error> {
         },
         rosu_pp_ffi::my_inventory(),
     )
-    .write_file("./bindings/bindings.cs")?;
+    .write_file("./bindings/bindings.generated.cs")?;
 
     Ok(())
 }

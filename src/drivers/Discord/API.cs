@@ -1,17 +1,19 @@
-using Newtonsoft.Json.Linq;
-using KanonBot.Message;
 using System.IO;
-using Discord.WebSocket;
-using Discord;
 using System.Net.Http;
+using Discord;
+using Discord.WebSocket;
+using KanonBot.Message;
+using Newtonsoft.Json.Linq;
 
 namespace KanonBot.Drivers;
+
 public partial class Discord
 {
     // API 部分 * 包装 Driver
     public class API
     {
         private string AuthToken;
+
         public API(string authToken)
         {
             this.AuthToken = $"Bot {authToken}";
@@ -24,7 +26,8 @@ public partial class Discord
 
         async public Task SendMessage(ISocketMessageChannel channel, Chain msgChain)
         {
-            foreach (var seg in msgChain.Iter()) {
+            foreach (var seg in msgChain.Iter())
+            {
                 switch (seg)
                 {
                     case ImageSegment s:
@@ -32,22 +35,42 @@ public partial class Discord
                         {
                             case ImageSegment.Type.Base64:
                                 var _uuid = Guid.NewGuid();
-                                using (var _s = Utils.Byte2Stream(Convert.FromBase64String(s.value)))
-                                    await channel.SendFileAsync(_s, $"{_uuid}.jpg",
-                                        embed: new EmbedBuilder { ImageUrl = $"attachment://{_uuid}.jpg" }.Build());
+                                using (
+                                    var _s = Utils.Byte2Stream(Convert.FromBase64String(s.value))
+                                )
+                                    await channel.SendFileAsync(
+                                        _s,
+                                        $"{_uuid}.jpg",
+                                        embed: new EmbedBuilder
+                                        {
+                                            ImageUrl = $"attachment://{_uuid}.jpg"
+                                        }.Build()
+                                    );
                                 break;
                             case ImageSegment.Type.File:
                                 var __uuid = Guid.NewGuid();
                                 using (var __s = Utils.LoadFile2ReadStream(s.value))
-                                await channel.SendFileAsync(__s, $"{__uuid}.jpg",
-                                embed: new EmbedBuilder { ImageUrl = $"attachment://{__uuid}.jpg" }.Build());
+                                    await channel.SendFileAsync(
+                                        __s,
+                                        $"{__uuid}.jpg",
+                                        embed: new EmbedBuilder
+                                        {
+                                            ImageUrl = $"attachment://{__uuid}.jpg"
+                                        }.Build()
+                                    );
 
                                 break;
                             case ImageSegment.Type.Url:
                                 var ___uuid = Guid.NewGuid();
                                 using (var ___s = await s.value.GetStreamAsync())
-                                await channel.SendFileAsync(___s, $"{___uuid}.jpg",
-                                embed: new EmbedBuilder { ImageUrl = $"attachment://{___uuid}.jpg" }.Build());
+                                    await channel.SendFileAsync(
+                                        ___s,
+                                        $"{___uuid}.jpg",
+                                        embed: new EmbedBuilder
+                                        {
+                                            ImageUrl = $"attachment://{___uuid}.jpg"
+                                        }.Build()
+                                    );
                                 break;
                             default:
                                 break;
@@ -64,10 +87,5 @@ public partial class Discord
                 }
             }
         }
-
-      
-
-       
-
     }
 }

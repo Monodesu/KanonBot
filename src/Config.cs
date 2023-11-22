@@ -7,19 +7,23 @@ using LanguageExt.UnitsOfMeasure;
 using Tomlyn.Model;
 
 namespace KanonBot;
+
 public class Config
 {
     public static Base? inner;
+
     public class OpenAI : ITomlMetadataProvider
     {
         public string? Key { get; set; }
         public int MaxTokens { get; set; } //def 16.
+
         //OpenAI generally recommend altering Temperature or top_p but not both.
         public double Temperature { get; set; } //def 1
         public double Top_p { get; set; } //def 1
         public string? PreDefine { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
     }
+
     public class Mail : ITomlMetadataProvider
     {
         public string? smtpHost { get; set; }
@@ -27,8 +31,8 @@ public class Config
         public string? userName { get; set; }
         public string? passWord { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
-
     }
+
     public class Database : ITomlMetadataProvider
     {
         public string? type { get; set; }
@@ -38,8 +42,8 @@ public class Config
         public string? user { get; set; }
         public string? password { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
-
     }
+
     public class OSU : ITomlMetadataProvider
     {
         public int clientId { get; set; }
@@ -47,6 +51,7 @@ public class Config
         public string? v1key { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
     }
+
     public class OSS : ITomlMetadataProvider
     {
         public string? url { get; set; }
@@ -55,8 +60,8 @@ public class Config
         public string? endPoint { get; set; }
         public string? bucketName { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
-
     }
+
     public class OneBot : ITomlMetadataProvider
     {
         public string? host { get; set; }
@@ -66,6 +71,7 @@ public class Config
         public long? managementGroup { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
     }
+
     public class Guild : ITomlMetadataProvider
     {
         public bool sandbox { get; set; }
@@ -74,12 +80,14 @@ public class Config
         public string? token { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
     }
+
     public class KOOK : ITomlMetadataProvider
     {
         public string? botID { get; set; }
         public string? token { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
     }
+
     public class Base : ITomlMetadataProvider
     {
         public bool debug { get; set; }
@@ -93,17 +101,14 @@ public class Config
         public Mail? mail { get; set; }
         public OpenAI? openai { get; set; }
         TomlPropertiesMetadata? ITomlMetadataProvider.PropertiesMetadata { get; set; }
+
         public static Base Default()
         {
             return new Base()
             {
                 debug = true,
                 dev = true,
-                osu = new()
-                {
-                    clientId = 0,
-                    clientSecret = ""
-                },
+                osu = new() { clientId = 0, clientSecret = "" },
                 onebot = new()
                 {
                     managementGroup = 0,
@@ -119,11 +124,7 @@ public class Config
                     token = "",
                     sandbox = true
                 },
-                kook = new()
-                {
-                    botID = "",
-                    token = ""
-                },
+                kook = new() { botID = "", token = "" },
                 oss = new()
                 {
                     url = "",
@@ -158,6 +159,7 @@ public class Config
                 }
             };
         }
+
         public void save(string path)
         {
             using var f = new StreamWriter(path);
@@ -174,7 +176,6 @@ public class Config
             return Json.Serialize(this);
         }
     }
-
 
     public static Base load(string path)
     {

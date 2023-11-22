@@ -31,11 +31,12 @@ namespace KanonBot.Image.OSU
         // 极坐标转直角坐标系
         public static PointF r82xy(R8 r8)
         {
-            PointF xy = new()
-            {
-                X = (float)(r8.r * Math.Sin(r8._8 * Math.PI / 180)),
-                Y = (float)(r8.r * Math.Cos(r8._8 * Math.PI / 180))
-            };
+            PointF xy =
+                new()
+                {
+                    X = (float)(r8.r * Math.Sin(r8._8 * Math.PI / 180)),
+                    Y = (float)(r8.r * Math.Cos(r8._8 * Math.PI / 180))
+                };
             return xy;
         }
 
@@ -65,9 +66,7 @@ namespace KanonBot.Image.OSU
                 points[i] = xy;
                 xy.X += hi.nodesize.Width / 10;
                 xy.Y += hi.nodesize.Height / 10;
-                image.Mutate(
-                    x => x.Fill(hi.abilityLineColor, new EllipsePolygon(xy, hi.nodesize))
-                );
+                image.Mutate(x => x.Fill(hi.abilityLineColor, new EllipsePolygon(xy, hi.nodesize)));
             }
             image.Mutate(
                 x =>

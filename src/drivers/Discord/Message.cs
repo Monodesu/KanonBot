@@ -9,13 +9,12 @@ public partial class Discord
 {
     [GeneratedRegex(@"\(met\)(.*?)\(met\)", RegexOptions.Multiline)]
     private static partial Regex AtPattern();
+
     [GeneratedRegex(@"\(rol\)(.*?)\(rol\)", RegexOptions.Multiline)]
     private static partial Regex AtAdminPattern();
 
     public class Message
     {
-     
-
         /// <summary>
         /// 解析部分附件只支持图片
         /// </summary>

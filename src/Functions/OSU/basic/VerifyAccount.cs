@@ -1,16 +1,16 @@
-﻿using KanonBot.Account;
-using KanonBot.Drivers;
-using KanonBot;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using KanonBot;
+using KanonBot.Account;
 using KanonBot.API;
-using static KanonBot.BindService;
+using KanonBot.Drivers;
 using LanguageExt.UnsafeValueAccess;
-using System.Runtime.CompilerServices;
+using static KanonBot.BindService;
 
 namespace KanonBot.OSU
 {
@@ -86,10 +86,9 @@ namespace KanonBot.OSU
                 {
                     if (OnlineOsuInfo.PlayMode != (API.OSU.Enums.Mode)mode)
                     {
-                        OnlineOsuInfo = await API.OSU.V2.GetUser(
-                            osu_username,
-                            (API.OSU.Enums.Mode)mode
-                        );
+                        OnlineOsuInfo = await API.OSU
+                            .V2
+                            .GetUser(osu_username, (API.OSU.Enums.Mode)mode);
                     }
                 }
             }
@@ -102,10 +101,9 @@ namespace KanonBot.OSU
                 {
                     if (OnlineOsuInfo.PlayMode != (API.OSU.Enums.Mode)mode)
                     {
-                        OnlineOsuInfo = await API.OSU.V2.GetUser(
-                            osu_username,
-                            (API.OSU.Enums.Mode)mode
-                        );
+                        OnlineOsuInfo = await API.OSU
+                            .V2
+                            .GetUser(osu_username, (API.OSU.Enums.Mode)mode);
                     }
                 }
             }
@@ -164,17 +162,18 @@ namespace KanonBot.OSU
                             != OnlineOsuInfo.PlayMode
                     ) // 如果查询的模式與數據庫中用戶保存的不一致，那么就需要重新查询一次
                     {
-                        OnlineOsuInfo = await API.OSU.V2.GetUser(
-                            osu_username,
-                            API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value
-                        ); // 重新获取正確的用户信息
+                        OnlineOsuInfo = await API.OSU
+                            .V2
+                            .GetUser(
+                                osu_username,
+                                API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode)!.Value
+                            ); // 重新获取正確的用户信息
                     }
                     else if (mode != null && mode != OnlineOsuInfo.PlayMode)
                     {
-                        OnlineOsuInfo = await API.OSU.V2.GetUser(
-                            osu_username,
-                            (API.OSU.Enums.Mode)mode
-                        ); // 重新获取正確的用户信息
+                        OnlineOsuInfo = await API.OSU
+                            .V2
+                            .GetUser(osu_username, (API.OSU.Enums.Mode)mode); // 重新获取正確的用户信息
                     }
                 }
                 if (OnlineOsuInfo == null)

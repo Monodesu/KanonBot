@@ -1,7 +1,7 @@
-using KanonBot.Drivers;
 using System.CommandLine;
 using System.Data;
 using System.Reflection;
+using KanonBot.Drivers;
 
 namespace KanonBot.Command
 {

@@ -1,7 +1,8 @@
-using Newtonsoft.Json;
 using System.ComponentModel;
+using Newtonsoft.Json;
 
 namespace KanonBot.Drivers;
+
 public partial class OneBot
 {
     public class Enums
@@ -504,10 +505,10 @@ public partial class OneBot
             [Description("video")]
             Video,
 
-            /// <summary>	
-            /// <para>音乐分享</para>	
-            /// <para>只能发送</para>	
-            /// </summary>	
+            /// <summary>
+            /// <para>音乐分享</para>
+            /// <para>只能发送</para>
+            /// </summary>
             [Description("music")]
             Music,
 

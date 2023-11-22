@@ -1,4 +1,5 @@
 namespace KanonBot.Drivers;
+
 public partial class Kook
 {
     public class Enums

@@ -10,11 +10,11 @@ using NullValueHandling = Newtonsoft.Json.NullValueHandling;
 // 部分参考 https://github.com/DeepOceanSoft/Sora
 
 namespace KanonBot.Drivers;
+
 public partial class OneBot
 {
     public class Models
     {
-
         public class Anonymous
         {
             /// <summary>
@@ -57,19 +57,22 @@ public partial class OneBot
             [JsonProperty(PropertyName = "message_type")]
             [JsonConverter(typeof(JsonEnumConverter))]
             public Enums.MessageType MessageType { get; set; }
+
             [JsonProperty(PropertyName = "user_id")]
             public long? UserId { get; set; }
+
             [JsonProperty(PropertyName = "group_id")]
             public long? GroupId { get; set; }
+
             [JsonProperty(PropertyName = "message")]
             public List<Segment> Message { get; set; }
+
             [JsonProperty(PropertyName = "auto_escape")]
             public bool AutoEscape { get; set; }
         }
 
         public class CQRequest
         {
-
             [JsonProperty(PropertyName = "action")]
             [JsonConverter(typeof(JsonEnumConverter))]
             public Enums.Actions action { get; init; }
@@ -80,26 +83,28 @@ public partial class OneBot
             [JsonProperty(PropertyName = "params")]
             public dynamic Params { get; init; }
         }
+
         public class CQResponse
         {
-
             [JsonProperty(PropertyName = "status")]
             public string Status { get; init; }
+
             [JsonProperty(PropertyName = "retcode")]
             public int RetCode { get; init; }
+
             [JsonProperty(PropertyName = "echo")]
             public Guid Echo { get; init; }
+
             [JsonProperty(PropertyName = "data")]
             public JObject Data { get; init; }
-
         }
 
         public class CQGroupAddRequest
         {
-
             [JsonProperty(PropertyName = "sub_type")]
             [JsonConverter(typeof(JsonEnumConverter))]
             public Enums.GroupRequestType RequestType { get; init; }
+
             [JsonProperty(PropertyName = "approve")]
             public bool Approve { get; set; }
 
@@ -112,18 +117,25 @@ public partial class OneBot
             [JsonProperty(PropertyName = "role")]
             [JsonConverter(typeof(JsonEnumConverter))]
             public Enums.GroupRole Role { get; set; }
+
             [JsonProperty(PropertyName = "user_id")]
             public long UserId { get; set; }
+
             [JsonProperty(PropertyName = "area")]
             public string Area { get; set; }
+
             [JsonProperty(PropertyName = "card")]
             public string Aard { get; set; }
+
             [JsonProperty(PropertyName = "level")]
             public string Level { get; set; }
+
             [JsonProperty(PropertyName = "nickname")]
             public string NickName { get; set; }
+
             [JsonProperty(PropertyName = "sex")]
             public string Sex { get; set; }
+
             [JsonProperty(PropertyName = "age")]
             public int Age { get; set; }
         }

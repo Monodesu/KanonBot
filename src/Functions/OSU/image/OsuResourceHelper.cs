@@ -1,25 +1,24 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using KanonBot.API;
-
+using KanonBot.API.OSU;
+using LanguageExt.ClassInstances;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Diagnostics;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using static KanonBot.API.OSU.DataStructure;
+using static KanonBot.Image.OSU.ResourceRegistrar;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
-using System.Collections.Generic;
-using SixLabors.ImageSharp.Diagnostics;
-using KanonBot.API.OSU;
-using static KanonBot.Image.OSU.ResourceRegistrar;
-using static KanonBot.API.OSU.DataStructure;
-using LanguageExt.ClassInstances;
 
 namespace KanonBot.Image.OSU
 {
@@ -83,7 +82,11 @@ namespace KanonBot.Image.OSU
             return await ReadImageRgba(coverPath);
         }
 
-        public static async Task<Image<Rgba32>> GetInfoV2BannerAsync(long osu_uid, UserPanelData.CustomMode ColorMode, float SideImgBrightness)
+        public static async Task<Image<Rgba32>> GetInfoV2BannerAsync(
+            long osu_uid,
+            UserPanelData.CustomMode ColorMode,
+            float SideImgBrightness
+        )
         {
             string sidePicPath;
             if (File.Exists($"./work/panelv2/user_customimg/{osu_uid}.png"))
@@ -101,7 +104,10 @@ namespace KanonBot.Image.OSU
             return sidePic;
         }
 
-        public static async Task<Image<Rgba32>> GetInfoV2PanelAsync(long osu_uid, UserPanelData.CustomMode ColorMode)
+        public static async Task<Image<Rgba32>> GetInfoV2PanelAsync(
+            long osu_uid,
+            UserPanelData.CustomMode ColorMode
+        )
         {
             string panelPath;
             if (File.Exists($"./work/panelv2/user_infopanel/{osu_uid}.png"))
@@ -118,7 +124,12 @@ namespace KanonBot.Image.OSU
             return panel;
         }
 
-        public static async Task<Image<Rgba32>> GetCountryOrRegionFlagAsync(string code, int version, float CountryFlagAlpha = 1.0f, float CountryFlagBrightness = 1.0f)
+        public static async Task<Image<Rgba32>> GetCountryOrRegionFlagAsync(
+            string code,
+            int version,
+            float CountryFlagAlpha = 1.0f,
+            float CountryFlagBrightness = 1.0f
+        )
         {
             var flags = await ReadImageRgba($"./work/flags/{code}.png");
             if (version == 1)
@@ -148,7 +159,11 @@ namespace KanonBot.Image.OSU
             {
                 try
                 {
-                    bp1bgPath = await V2.SayoDownloadBeatmapBackgroundImg(sid, bid, "./work/background/");
+                    bp1bgPath = await V2.SayoDownloadBeatmapBackgroundImg(
+                        sid,
+                        bid,
+                        "./work/background/"
+                    );
                 }
                 catch (Exception ex)
                 {
@@ -158,22 +173,5 @@ namespace KanonBot.Image.OSU
             }
             return await ReadImageRgba(bp1bgPath!);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }

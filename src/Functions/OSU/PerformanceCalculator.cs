@@ -26,12 +26,39 @@ namespace KanonBot.Functions.OSU
                 this.calculator.Calculate(scoreParams.Context);
         }
 
-        public static readonly ImmutableArray<string> mods_str =
-            ImmutableArray.Create("NF", "EZ", "TD", "HD", "HR", "SD", "DT", "RX",
-            "HT", "NC", "FL", "AU", "SO", "AP", "PF", "K4",
-            "K5", "K6", "K7", "K8", "FI", "RD", "CN", "TG",
-            "K9", "KC", "K1", "K3", "K2", "S2", "MR");
-
+        public static readonly ImmutableArray<string> mods_str = ImmutableArray.Create(
+            "NF",
+            "EZ",
+            "TD",
+            "HD",
+            "HR",
+            "SD",
+            "DT",
+            "RX",
+            "HT",
+            "NC",
+            "FL",
+            "AU",
+            "SO",
+            "AP",
+            "PF",
+            "K4",
+            "K5",
+            "K6",
+            "K7",
+            "K8",
+            "FI",
+            "RD",
+            "CN",
+            "TG",
+            "K9",
+            "KC",
+            "K1",
+            "K3",
+            "K2",
+            "S2",
+            "MR"
+        );
 
         public struct PPInfo
         {
@@ -177,9 +204,10 @@ namespace KanonBot.Functions.OSU
             }
         }
 
-        async public static Task<API.OSU.DataStructure.ScorePanelData> CalculatePanelSSData(API.OSU.Models.Beatmap map)
+        public static async Task<API.OSU.DataStructure.ScorePanelData> CalculatePanelSSData(
+            API.OSU.Models.Beatmap map
+        )
         {
-
             Beatmap beatmap;
             try
             {
@@ -187,9 +215,7 @@ namespace KanonBot.Functions.OSU
                 await API.OSU.V2.BeatmapFileChecker(map.BeatmapId);
                 // 读取铺面
                 beatmap = new Beatmap(
-                    await File.ReadAllBytesAsync(
-                        $"./work/beatmap/{map.BeatmapId}.osu"
-                    )
+                    await File.ReadAllBytesAsync($"./work/beatmap/{map.BeatmapId}.osu")
                 );
             }
             catch (Exception)
@@ -238,26 +264,25 @@ namespace KanonBot.Functions.OSU
                 data.scoreInfo.Accuracy * 100.00
             };
             data.ppInfo.ppStats = accs.Select(acc =>
-            {
-                var p = ScoreParams.New();
-                new Params
                 {
-                    mode = data.scoreInfo.Mode,
-                    mods = data.scoreInfo.Mods,
-                    acc = acc,
-                }.build(ref p);
-                return beatmap.Calculate(p).ToPPInfo().ppStat;
-            })
+                    var p = ScoreParams.New();
+                    new Params
+                    {
+                        mode = data.scoreInfo.Mode,
+                        mods = data.scoreInfo.Mods,
+                        acc = acc,
+                    }.build(ref p);
+                    return beatmap.Calculate(p).ToPPInfo().ppStat;
+                })
                 .ToList();
             return data;
         }
 
-        async public static Task<API.OSU.DataStructure.ScorePanelData> CalculatePanelData(API.OSU.Models.Score score)
+        public static async Task<API.OSU.DataStructure.ScorePanelData> CalculatePanelData(
+            API.OSU.Models.Score score
+        )
         {
-            var data = new API.OSU.DataStructure.ScorePanelData
-            {
-                scoreInfo = score
-            };
+            var data = new API.OSU.DataStructure.ScorePanelData { scoreInfo = score };
             var statistics = data.scoreInfo.Statistics!;
             Beatmap beatmap;
             try
@@ -304,16 +329,16 @@ namespace KanonBot.Functions.OSU
                 data.scoreInfo.Accuracy * 100.00
             };
             data.ppInfo.ppStats = accs.Select(acc =>
-            {
-                var p = ScoreParams.New();
-                new Params
                 {
-                    mode = data.scoreInfo.Mode,
-                    mods = data.scoreInfo.Mods,
-                    acc = acc,
-                }.build(ref p);
-                return beatmap.Calculate(p).ToPPInfo().ppStat;
-            })
+                    var p = ScoreParams.New();
+                    new Params
+                    {
+                        mode = data.scoreInfo.Mode,
+                        mods = data.scoreInfo.Mods,
+                        acc = acc,
+                    }.build(ref p);
+                    return beatmap.Calculate(p).ToPPInfo().ppStat;
+                })
                 .ToList();
 
             return data;

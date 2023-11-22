@@ -1,6 +1,6 @@
 using System.Threading.Channels;
-using libKook = Kook;
 using libDiscord = Discord;
+using libKook = Kook;
 using Msg = KanonBot.Message;
 
 namespace KanonBot.Drivers;

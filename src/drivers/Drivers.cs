@@ -1,7 +1,6 @@
 using KanonBot.Event;
 using KanonBot.Serializer;
 
-
 namespace KanonBot.Drivers;
 
 public enum Platform
@@ -23,6 +22,7 @@ public interface IDriver
     Task Start();
     void Dispose();
 }
+
 public interface ISocket
 {
     string? selfID { get; }
@@ -38,10 +38,12 @@ public interface IReply
 public class Drivers
 {
     List<IDriver> driverList;
+
     public Drivers()
     {
         this.driverList = new();
     }
+
     public Drivers append(IDriver n)
     {
         this.driverList.Add(n);

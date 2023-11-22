@@ -2,22 +2,22 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
-using System.Text;
+using System.Reactive.Subjects;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 //using KanonBot.API;
 using Kook;
 using LanguageExt;
 using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Cms;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
 //using static KanonBot.LegacyImage.Draw;
 using Color = SixLabors.ImageSharp.Color;
 using Img = SixLabors.ImageSharp.Image;
-using Org.BouncyCastle.Cms;
-using System.Reactive.Subjects;
 
 namespace KanonBot;
 
@@ -25,13 +25,18 @@ public static partial class Utils
 {
     private static RandomNumberGenerator rng = RandomNumberGenerator.Create();
 
+    public static List<string> ParseMods(string mods) =>
+        Enumerable
+            .Range(0, mods.Length / 2)
+            .Select(p => new string(mods.AsSpan().Slice(p * 2, 2)).ToUpper())
+            .ToList();
+
     public static byte[] GenerateRandomBytes(int length)
     {
         byte[] randomBytes = new byte[length];
         rng.GetBytes(randomBytes);
         return randomBytes;
     }
-
 
     public static async Task<Option<T>> TimeOut<T>(this Task<T> task, TimeSpan delay)
     {
@@ -105,17 +110,13 @@ public static partial class Utils
         {
             fs.Write(buffer, 0, buffer.Length);
         }
-        return Path.GetFullPath(fileName);;
+        return Path.GetFullPath(fileName);
+        ;
     }
 
     public static Stream LoadFile2ReadStream(string filePath)
     {
-        var fs = new FileStream(
-            filePath,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.ReadWrite
-        );
+        var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         return fs;
     }
 
@@ -236,7 +237,8 @@ public static partial class Utils
                 int randomIndex = randomBytes[i] % str.Length;
                 sb.Append(str[randomIndex]);
             }
-            if (o < 6) sb.Append('-');
+            if (o < 6)
+                sb.Append('-');
         }
         return sb.ToString();
     }
@@ -318,6 +320,7 @@ public static partial class Utils
 
     [GeneratedRegex(@"^http(s)?://([\w-]+\.)+[\w-]+(/[\w- ./?%&=]*)?$")]
     private static partial Regex UrlRegex();
+
     public static bool IsUrl(string str)
     {
         try
@@ -332,6 +335,7 @@ public static partial class Utils
 
     [GeneratedRegex(@"([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,5})+")]
     private static partial Regex EmailRegex();
+
     public static bool IsMailAddr(string str)
     {
         if (EmailRegex().IsMatch(str))
@@ -401,7 +405,12 @@ public static partial class Utils
 
     public static void SendDebugMail(string mailto, string body)
     {
-        var mailContent = new Mail.MailContent(new List<string> { mailto }, $"KanonBot 错误自动上报 - 发生于 {DateTime.Now}", body, false);
+        var mailContent = new Mail.MailContent(
+            new List<string> { mailto },
+            $"KanonBot 错误自动上报 - 发生于 {DateTime.Now}",
+            body,
+            false
+        );
         try
         {
             Mail.Send(mailContent);
@@ -411,7 +420,7 @@ public static partial class Utils
 
     public static void SendMail(string mailto, string subject, string body, bool isBodyHtml)
     {
-        var mailContent = new Mail.MailContent(new List<string> { mailto }, subject, body, isBodyHtml);
+        var mailContent = new Mail.MailContent([ mailto ], subject, body, isBodyHtml);
         try
         {
             Mail.Send(mailContent);
@@ -419,13 +428,13 @@ public static partial class Utils
         catch { }
     }
 
-    async public static Task<Image<Rgba32>> ReadImageRgba(string path)
+    public static async Task<Image<Rgba32>> ReadImageRgba(string path)
     {
         using var img = await Img.LoadAsync(path);
         return img.CloneAs<Rgba32>();
     }
 
-    async public static Task<(Image<Rgba32>, IImageFormat)> ReadImageRgbaWithFormat(string path)
+    public static async Task<(Image<Rgba32>, IImageFormat)> ReadImageRgbaWithFormat(string path)
     {
         using var s = Utils.LoadFile2ReadStream(path);
         var img = await Img.LoadAsync<Rgba32>(s);
@@ -509,7 +518,7 @@ public static partial class Utils
         return gradient[^1].colour;
     }
 
-    static public Color ForStarDifficulty(double starDifficulty) =>
+    public static Color ForStarDifficulty(double starDifficulty) =>
         SampleFromLinearGradient(
                 new[]
                 {

@@ -1,9 +1,9 @@
-using KanonBot.Drivers;
-using LanguageExt.Common;
-using LinqToDB.Extensions;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text;
+using KanonBot.Drivers;
+using LanguageExt.Common;
+using LinqToDB.Extensions;
 
 namespace KanonBot.Command
 {
@@ -65,17 +65,20 @@ namespace KanonBot.Command
             var sb = target.msg.ToString().ToCharArray();
             for (int i = 0; i < sb.Length; i++)
             {
-                if (sb[i] != '=') break;
+                if (sb[i] != '=')
+                    break;
                 // 标记前端空格
                 for (int j = i - 1; j >= 0; j--)
                 {
-                    if (sb[j] != ' ') break;
+                    if (sb[j] != ' ')
+                        break;
                     sb[j] = '÷';
                 }
                 // 标记后端空格
                 for (int j = i + 1; j < sb.Length; j++)
                 {
-                    if (sb[j] != ' ') break;
+                    if (sb[j] != ' ')
+                        break;
                     sb[j] = '÷';
                 }
             }
@@ -151,7 +154,7 @@ namespace KanonBot.Command
                             currentValue = "";
                         }
 
-                        var keyValuePair = part.Split(['='], 2);
+                        var keyValuePair = part.Split([ '=' ], 2);
                         currentKey = keyValuePair[0];
                         currentValue = keyValuePair.Length > 1 ? keyValuePair[1] : part;
                     }

@@ -20,7 +20,13 @@ namespace KanonBot
             public string Body { get; }
             public bool IsBodyHtml { get; }
 
-            public MailContent(List<string> recipients, string subject, string body, bool isBodyHtml, List<string>? cc = null)
+            public MailContent(
+                List<string> recipients,
+                string subject,
+                string body,
+                bool isBodyHtml,
+                List<string>? cc = null
+            )
             {
                 if (recipients == null || recipients.Count == 0)
                     throw new ArgumentException("Recipients cannot be empty.", nameof(recipients));
@@ -29,7 +35,7 @@ namespace KanonBot
                 Subject = subject ?? throw new ArgumentNullException(nameof(subject));
                 Body = body ?? throw new ArgumentNullException(nameof(body));
                 IsBodyHtml = isBodyHtml;
-                CC = cc ?? new List<string>(); 
+                CC = cc ?? [ ];
             }
         }
 

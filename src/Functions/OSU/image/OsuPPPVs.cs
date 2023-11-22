@@ -1,27 +1,26 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using KanonBot.API;
-
+using KanonBot.API.OSU;
+using KanonBot.Image;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Diagnostics;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using static KanonBot.API.OSU.DataStructure;
+using static KanonBot.Image.OSU.OsuInfoPanelV1;
+using static KanonBot.Image.OSU.OsuResourceHelper;
+using static KanonBot.Image.OSU.ResourceRegistrar;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
-using System.Collections.Generic;
-using SixLabors.ImageSharp.Diagnostics;
-using static KanonBot.API.OSU.DataStructure;
-using KanonBot.API.OSU;
-using static KanonBot.Image.OSU.ResourceRegistrar;
-using static KanonBot.Image.OSU.OsuResourceHelper;
-using KanonBot.Image;
-using static KanonBot.Image.OSU.OsuInfoPanelV1;
 
 namespace KanonBot.Image.OSU
 {

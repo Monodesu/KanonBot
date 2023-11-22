@@ -1,13 +1,13 @@
-﻿using SixLabors.ImageSharp.Drawing;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace KanonBot.Image
 {
@@ -84,17 +84,31 @@ namespace KanonBot.Image
             );
         }
 
-        public static IImageProcessingContext ApplyRoundedCorners_Part(this IImageProcessingContext ctx,
-            float cornerRadiusLT, float cornerRadiusRT, float cornerRadiusLB, float cornerRadiusRB)
+        public static IImageProcessingContext ApplyRoundedCorners_Part(
+            this IImageProcessingContext ctx,
+            float cornerRadiusLT,
+            float cornerRadiusRT,
+            float cornerRadiusLB,
+            float cornerRadiusRB
+        )
         {
             Size size = ctx.GetCurrentSize();
-            IPathCollection corners = BuildCorners_Part(size.Width, size.Height, cornerRadiusLT, cornerRadiusRT, cornerRadiusLB, cornerRadiusRB);
+            IPathCollection corners = BuildCorners_Part(
+                size.Width,
+                size.Height,
+                cornerRadiusLT,
+                cornerRadiusRT,
+                cornerRadiusLB,
+                cornerRadiusRB
+            );
 
-            ctx.SetGraphicsOptions(new GraphicsOptions()
-            {
-                Antialias = true,
-                AlphaCompositionMode = PixelAlphaCompositionMode.DestOut // enforces that any part of this shape that has color is punched out of the background
-            });
+            ctx.SetGraphicsOptions(
+                new GraphicsOptions()
+                {
+                    Antialias = true,
+                    AlphaCompositionMode = PixelAlphaCompositionMode.DestOut // enforces that any part of this shape that has color is punched out of the background
+                }
+            );
 
             // mutating in here as we already have a cloned original
             // use any color (not Transparent), so the corners will be clipped
@@ -105,19 +119,39 @@ namespace KanonBot.Image
             return ctx;
         }
 
-        public static IImageProcessingContext RoundCorner_Parts(this IImageProcessingContext processingContext, Size size,
-            float cornerRadiusLT, float cornerRadiusRT, float cornerRadiusLB, float cornerRadiusRB)
+        public static IImageProcessingContext RoundCorner_Parts(
+            this IImageProcessingContext processingContext,
+            Size size,
+            float cornerRadiusLT,
+            float cornerRadiusRT,
+            float cornerRadiusLB,
+            float cornerRadiusRB
+        )
         {
-            return processingContext.Resize(new SixLabors.ImageSharp.Processing.ResizeOptions
-            {
-                Size = size,
-                Mode = ResizeMode.Crop
-            }).ApplyRoundedCorners_Part(cornerRadiusLT, cornerRadiusRT, cornerRadiusLB, cornerRadiusRB);
+            return processingContext
+                .Resize(
+                    new SixLabors.ImageSharp.Processing.ResizeOptions
+                    {
+                        Size = size,
+                        Mode = ResizeMode.Crop
+                    }
+                )
+                .ApplyRoundedCorners_Part(
+                    cornerRadiusLT,
+                    cornerRadiusRT,
+                    cornerRadiusLB,
+                    cornerRadiusRB
+                );
         }
 
-
-        private static IPathCollection BuildCorners_Part(int imageWidth, int imageHeight,
-             float cornerRadiusLT, float cornerRadiusRT, float cornerRadiusLB, float cornerRadiusRB)
+        private static IPathCollection BuildCorners_Part(
+            int imageWidth,
+            int imageHeight,
+            float cornerRadiusLT,
+            float cornerRadiusRT,
+            float cornerRadiusLB,
+            float cornerRadiusRB
+        )
         {
             //CREARE SQUARE
             var rectLT = new RectangularPolygon(-0.5f, -0.5f, cornerRadiusLT, cornerRadiusLT);
@@ -125,28 +159,41 @@ namespace KanonBot.Image
             var rectLB = new RectangularPolygon(-0.5f, -0.5f, cornerRadiusLB, cornerRadiusLB);
             var rectRB = new RectangularPolygon(-0.5f, -0.5f, cornerRadiusRB, cornerRadiusRB);
 
-            float rightPos, bottomPos;
+            float rightPos,
+                bottomPos;
             //TOP LEFT
-            IPath cornerTopLeft = rectLT.Clip(new EllipsePolygon(cornerRadiusLT - 0.5f, cornerRadiusLT - 0.5f, cornerRadiusLT));
+            IPath cornerTopLeft = rectLT.Clip(
+                new EllipsePolygon(cornerRadiusLT - 0.5f, cornerRadiusLT - 0.5f, cornerRadiusLT)
+            );
 
             //TOP RIGHT
-            IPath cornerTopRight = rectRT.Clip(new EllipsePolygon(cornerRadiusRT - 0.5f, cornerRadiusRT - 0.5f, cornerRadiusRT));
+            IPath cornerTopRight = rectRT.Clip(
+                new EllipsePolygon(cornerRadiusRT - 0.5f, cornerRadiusRT - 0.5f, cornerRadiusRT)
+            );
             rightPos = imageWidth - cornerTopRight.Bounds.Width + 1;
             cornerTopRight = cornerTopRight.RotateDegree(90).Translate(rightPos, 0);
 
             //BOTTOM LEFT
-            IPath cornerBottomLeft = rectLB.Clip(new EllipsePolygon(cornerRadiusLB - 0.5f, cornerRadiusLB - 0.5f, cornerRadiusLB));
+            IPath cornerBottomLeft = rectLB.Clip(
+                new EllipsePolygon(cornerRadiusLB - 0.5f, cornerRadiusLB - 0.5f, cornerRadiusLB)
+            );
             bottomPos = imageHeight - cornerBottomLeft.Bounds.Height + 1;
             cornerBottomLeft = cornerBottomLeft.RotateDegree(-90).Translate(0, bottomPos);
 
             //BOTTOM RIGHT
-            IPath cornerBottomRight = rectRB.Clip(new EllipsePolygon(cornerRadiusRB - 0.5f, cornerRadiusRB - 0.5f, cornerRadiusRB));
+            IPath cornerBottomRight = rectRB.Clip(
+                new EllipsePolygon(cornerRadiusRB - 0.5f, cornerRadiusRB - 0.5f, cornerRadiusRB)
+            );
             rightPos = imageWidth - cornerBottomRight.Bounds.Width + 1;
             bottomPos = imageHeight - cornerBottomRight.Bounds.Height + 1;
             cornerBottomRight = cornerBottomRight.RotateDegree(180).Translate(rightPos, bottomPos);
 
-            return new PathCollection(cornerTopLeft, cornerBottomLeft, cornerTopRight, cornerBottomRight);
+            return new PathCollection(
+                cornerTopLeft,
+                cornerBottomLeft,
+                cornerTopRight,
+                cornerBottomRight
+            );
         }
-
     }
 }

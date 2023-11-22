@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 
 namespace KanonBot.Drivers;
+
 public partial class Guild
 {
     // API 部分 * 包装 Driver
@@ -10,7 +11,8 @@ public partial class Guild
         public static readonly string SandboxEndPoint = "https://sandbox.api.sgroup.qq.com";
         string EndPoint;
         string AuthToken;
-        public API(string authToken,bool sandbox)
+
+        public API(string authToken, bool sandbox)
         {
             this.EndPoint = sandbox ? SandboxEndPoint : DefaultEndPoint;
             this.AuthToken = authToken;
@@ -21,20 +23,22 @@ public partial class Guild
             return this.EndPoint.WithHeader("Authorization", this.AuthToken);
         }
 
-        async public Task<string> GetWebsocketUrl()
+        public async Task<string> GetWebsocketUrl()
         {
-            return (await this.http().AppendPathSegments("gateway", "bot").GetJsonAsync<JObject>())["url"]!.ToString();
+            return (await this.http().AppendPathSegments("gateway", "bot").GetJsonAsync<JObject>())[
+                "url"
+            ]!.ToString();
         }
 
-        async public Task<Models.MessageData> SendMessage(string ChannelID, Models.SendMessageData data)
+        public async Task<Models.MessageData> SendMessage(
+            string ChannelID,
+            Models.SendMessageData data
+        )
         {
             return await this.http()
                 .AppendPathSegments("channels", ChannelID, "messages")
                 .PostJsonAsync(data)
                 .ReceiveJson<Models.MessageData>();
         }
-
-
-
     }
 }

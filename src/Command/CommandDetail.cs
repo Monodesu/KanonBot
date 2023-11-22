@@ -1,9 +1,9 @@
-using KanonBot.Drivers;
-using LanguageExt.Common;
-using LinqToDB.Extensions;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text;
+using KanonBot.Drivers;
+using LanguageExt.Common;
+using LinqToDB.Extensions;
 
 namespace KanonBot.Command
 {

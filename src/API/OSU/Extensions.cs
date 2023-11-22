@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace KanonBot.API.OSU
 {
-    static public class Extensions
+    public static class Extensions
     {
         public static string ToStr(this Enums.UserScoreType type)
         {
             return Utils.GetObjectDescription(type)!;
         }
+
         public static string ToStr(this Enums.Mode mode)
         {
             return Utils.GetObjectDescription(mode)!;

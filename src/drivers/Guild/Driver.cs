@@ -1,9 +1,11 @@
 using System.Net.WebSockets;
-using Websocket.Client;
-using KanonBot.Serializer;
 using KanonBot.Event;
+using KanonBot.Serializer;
 using Newtonsoft.Json.Linq;
+using Websocket.Client;
+
 namespace KanonBot.Drivers;
+
 public partial class Guild : ISocket, IDriver
 {
     public static readonly Platform platform = Platform.Guild;
@@ -17,6 +19,7 @@ public partial class Guild : ISocket, IDriver
     Enums.Intent intents;
     System.Timers.Timer heartbeatTimer = new();
     int lastSeq = 0;
+
     public Guild(long appID, string token, Enums.Intent intents, bool sandbox = false)
     {
         // 初始化变量
@@ -38,10 +41,9 @@ public partial class Guild : ISocket, IDriver
             {
                 Options =
                 {
-                        KeepAliveInterval = TimeSpan.FromSeconds(5),
-                        // Proxy = ...
-                        // ClientCertificates = ...
-
+                    KeepAliveInterval = TimeSpan.FromSeconds(5),
+                    // Proxy = ...
+                    // ClientCertificates = ...
                 }
             };
             client.Options.SetRequestHeader("Authorization", this.AuthToken);
@@ -60,14 +62,22 @@ public partial class Guild : ISocket, IDriver
         //     Console.WriteLine($"Disconnection happened, type: {info.Type}"));
 
         // 拿Tasks异步执行
-        client.MessageReceived.Subscribe(msgAction => Task.Run(() =>
-        {
-            try
-            {
-                this.Parse(msgAction);
-            }
-            catch (Exception ex) { Log.Error("未捕获的异常 ↓\n{ex}", ex); }
-        }));
+        client
+            .MessageReceived
+            .Subscribe(
+                msgAction =>
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            this.Parse(msgAction);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error("未捕获的异常 ↓\n{ex}", ex);
+                        }
+                    })
+            );
 
         this.instance = client;
     }
@@ -85,14 +95,17 @@ public partial class Guild : ISocket, IDriver
                 break;
             case Enums.EventType.AtMessageCreate:
                 var MessageData = (obj.Data as JObject)?.ToObject<Models.MessageData>();
-                this.msgAction?.Invoke(new Target() {
-                    platform = Platform.Guild,
-                    sender = MessageData!.Author.ID,
-                    selfAccount = this.selfID,
-                    msg = Message.Parse(MessageData!),
-                    raw = MessageData,
-                    socket = this
-                });
+                this.msgAction?.Invoke(
+                    new Target()
+                    {
+                        platform = Platform.Guild,
+                        sender = MessageData!.Author.ID,
+                        selfAccount = this.selfID,
+                        msg = Message.Parse(MessageData!),
+                        raw = MessageData,
+                        socket = this
+                    }
+                );
                 break;
             case Enums.EventType.Resumed:
                 // 恢复连接成功
@@ -110,7 +123,7 @@ public partial class Guild : ISocket, IDriver
         // Log.Debug("收到消息: {@0} 数据: {1}", obj, obj.Data?.ToString(Formatting.None));
 
         if (obj.Seq != null)
-            this.lastSeq = obj.Seq.Value;   // 存储最后一次seq
+            this.lastSeq = obj.Seq.Value; // 存储最后一次seq
 
         switch (obj.Operation)
         {
@@ -120,32 +133,45 @@ public partial class Guild : ISocket, IDriver
             case Enums.OperationCode.Hello:
                 var heartbeatInterval = (obj.Data as JObject)!["heartbeat_interval"]!.Value<int>();
 
-                SetHeartBeatTicker(heartbeatInterval);  // 设置心跳定时器
+                SetHeartBeatTicker(heartbeatInterval); // 设置心跳定时器
 
-                this.Send(this.SessionId switch {
-                    null => Json.Serialize(new Models.PayloadBase<Models.IdentityData> {    // 鉴权
-                    Operation = Enums.OperationCode.Identify,
-                    Data = new Models.IdentityData{
-                        Token = this.AuthToken,
-                        Intents = this.intents,
-                        Shard = new int[] { 0, 1 },
+                this.Send(
+                    this.SessionId switch
+                    {
+                        null
+                            => Json.Serialize(
+                                new Models.PayloadBase<Models.IdentityData>
+                                { // 鉴权
+                                    Operation = Enums.OperationCode.Identify,
+                                    Data = new Models.IdentityData
+                                    {
+                                        Token = this.AuthToken,
+                                        Intents = this.intents,
+                                        Shard = new int[] { 0, 1 },
+                                    }
+                                }
+                            ),
+                        not null
+                            => Json.Serialize(
+                                new Models.PayloadBase<Models.ResumeData>
+                                { // 鉴权
+                                    Operation = Enums.OperationCode.Resume,
+                                    Data = new Models.ResumeData
+                                    {
+                                        Token = this.AuthToken,
+                                        SessionId = this.SessionId.Value,
+                                        Seq = this.lastSeq,
+                                    }
+                                }
+                            )
                     }
-                    }),
-                    not null => Json.Serialize(new Models.PayloadBase<Models.ResumeData> {    // 鉴权
-                    Operation = Enums.OperationCode.Resume,
-                    Data = new Models.ResumeData{
-                        Token = this.AuthToken,
-                        SessionId = this.SessionId.Value,
-                        Seq = this.lastSeq,
-                    }
-                    })
-                });
+                );
                 break;
             case Enums.OperationCode.Reconnect:
-                this.instance.Reconnect();    // 重连
+                this.instance.Reconnect(); // 重连
                 break;
             case Enums.OperationCode.InvalidSession:
-                this.Dispose();      // 销毁客户端
+                this.Dispose(); // 销毁客户端
                 throw new ArgumentNullException("无效的session，需要重新鉴权");
             case Enums.OperationCode.HeartbeatACK:
                 // 无需处理
@@ -153,38 +179,39 @@ public partial class Guild : ISocket, IDriver
             default:
                 break;
         }
-
     }
 
     void SetHeartBeatTicker(int interval)
     {
-        this.heartbeatTimer = new System.Timers.Timer(interval);    // 初始化定时器
+        this.heartbeatTimer = new System.Timers.Timer(interval); // 初始化定时器
         this.heartbeatTimer.Elapsed += (s, e) =>
         {
             HeartBeatTicker();
         };
-        this.heartbeatTimer.AutoReset = true;   // 设置定时器是否重复触发
-        this.heartbeatTimer.Enabled = true;  // 启动定时器
+        this.heartbeatTimer.AutoReset = true; // 设置定时器是否重复触发
+        this.heartbeatTimer.Enabled = true; // 启动定时器
     }
 
     void HeartBeatTicker()
     {
         // Log.Debug("Sending heartbeat..");   // log（仅测试）
-        var j = Json.Serialize(new Models.PayloadBase<Models.IdentityData> {
-            Operation = Enums.OperationCode.Heartbeat,
-            Seq = this.lastSeq
-        });
+        var j = Json.Serialize(
+            new Models.PayloadBase<Models.IdentityData>
+            {
+                Operation = Enums.OperationCode.Heartbeat,
+                Seq = this.lastSeq
+            }
+        );
 
         this.Send(j);
     }
-
-
 
     public IDriver onMessage(IDriver.MessageDelegate action)
     {
         this.msgAction += action;
         return this;
     }
+
     public IDriver onEvent(IDriver.EventDelegate action)
     {
         this.eventAction += action;

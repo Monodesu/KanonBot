@@ -4,6 +4,7 @@ using KanonBot.Event;
 using Serilog.Events;
 
 namespace KanonBot.Drivers;
+
 public partial class Discord : ISocket, IDriver
 {
     public static readonly Platform platform = Platform.Discord;
@@ -13,6 +14,7 @@ public partial class Discord : ISocket, IDriver
     event IDriver.EventDelegate? eventAction;
     string token;
     public API api;
+
     public Discord(string token, string botID)
     {
         // 初始化变量
@@ -25,14 +27,18 @@ public partial class Discord : ISocket, IDriver
         client.Log += LogAsync;
 
         // client.MessageUpdated += this.Parse;
-        client.MessageReceived += msg => Task.Run(() =>
-        {
-            try
+        client.MessageReceived += msg =>
+            Task.Run(() =>
             {
-                this.Parse(msg);
-            }
-            catch (Exception ex) { Log.Error("未捕获的异常 ↓\n{ex}", ex); }
-        });
+                try
+                {
+                    this.Parse(msg);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("未捕获的异常 ↓\n{ex}", ex);
+                }
+            });
         client.Ready += () =>
         {
             // 连接成功
@@ -41,6 +47,7 @@ public partial class Discord : ISocket, IDriver
 
         this.instance = client;
     }
+
     private static async Task LogAsync(LogMessage message)
     {
         var severity = message.Severity switch
@@ -53,10 +60,15 @@ public partial class Discord : ISocket, IDriver
             LogSeverity.Debug => LogEventLevel.Debug,
             _ => LogEventLevel.Information
         };
-        Log.Write(severity, message.Exception, "[Discord] [{Source}] {Message}", message.Source, message.Message);
+        Log.Write(
+            severity,
+            message.Exception,
+            "[Discord] [{Source}] {Message}",
+            message.Source,
+            message.Message
+        );
         await Task.CompletedTask;
     }
-
 
     private void Parse(SocketMessage message)
     {
@@ -66,33 +78,31 @@ public partial class Discord : ISocket, IDriver
         // 过滤掉bot消息和系统消息
         if (message.Source != MessageSource.User)
         {
-            this.eventAction?.Invoke(
-                this,
-                new RawEvent(message)
-            );
+            this.eventAction?.Invoke(this, new RawEvent(message));
         }
         else
         {
-            this.msgAction?.Invoke(new Target()
-            {
-                platform = Platform.Discord,
-                sender = message.Author.Id.ToString(),
-                selfAccount = this.selfID,
-                msg = Message.Parse(message),
-                raw = message,
-                socket = this
-            });
+            this.msgAction?.Invoke(
+                new Target()
+                {
+                    platform = Platform.Discord,
+                    sender = message.Author.Id.ToString(),
+                    selfAccount = this.selfID,
+                    msg = Message.Parse(message),
+                    raw = message,
+                    socket = this
+                }
+            );
         }
         message.Channel.SendMessageAsync("hello");
-
     }
-
 
     public IDriver onMessage(IDriver.MessageDelegate action)
     {
         this.msgAction += action;
         return this;
     }
+
     public IDriver onEvent(IDriver.EventDelegate action)
     {
         this.eventAction += action;

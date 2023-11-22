@@ -8,10 +8,17 @@ namespace KanonBot
 {
     public static class RetryHelper
     {
-        public static async Task<T> RetryOnExceptionAsync<T>(int times, TimeSpan delay, Func<Task<T>> operation)
+        public static async Task<T> RetryOnExceptionAsync<T>(
+            int times,
+            TimeSpan delay,
+            Func<Task<T>> operation
+        )
         {
             if (times <= 0)
-                throw new ArgumentOutOfRangeException(nameof(times), "Retry times must be greater than 0!");
+                throw new ArgumentOutOfRangeException(
+                    nameof(times),
+                    "Retry times must be greater than 0!"
+                );
 
             for (int i = 0; ; i++)
             {

@@ -1,9 +1,10 @@
 using KanonBot.Event;
+using Kook.WebSocket;
 using Serilog.Events;
 using libKook = Kook;
-using Kook.WebSocket;
 
 namespace KanonBot.Drivers;
+
 public partial class Kook : ISocket, IDriver
 {
     public static readonly Platform platform = Platform.Guild;
@@ -13,6 +14,7 @@ public partial class Kook : ISocket, IDriver
     event IDriver.EventDelegate? eventAction;
     string token;
     public API api;
+
     public Kook(string token, string botID)
     {
         // 初始化变量
@@ -25,22 +27,30 @@ public partial class Kook : ISocket, IDriver
         client.Log += LogAsync;
 
         // client.MessageUpdated += this.Parse;
-        client.DirectMessageReceived += (msg, user, channel) => Task.Run(() =>
-        {
-            try
+        client.DirectMessageReceived += (msg, user, channel) =>
+            Task.Run(() =>
             {
-                this.Parse(msg);
-            }
-            catch (Exception ex) { Log.Error("未捕获的异常 ↓\n{ex}", ex); }
-        });
-        client.MessageReceived += (msg, user, channel) => Task.Run(() =>
-        {
-            try
+                try
+                {
+                    this.Parse(msg);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("未捕获的异常 ↓\n{ex}", ex);
+                }
+            });
+        client.MessageReceived += (msg, user, channel) =>
+            Task.Run(() =>
             {
-                this.Parse(msg);
-            }
-            catch (Exception ex) { Log.Error("未捕获的异常 ↓\n{ex}", ex); }
-        });
+                try
+                {
+                    this.Parse(msg);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("未捕获的异常 ↓\n{ex}", ex);
+                }
+            });
         client.Ready += () =>
         {
             // 连接成功
@@ -49,6 +59,7 @@ public partial class Kook : ISocket, IDriver
 
         this.instance = client;
     }
+
     private static async Task LogAsync(libKook.LogMessage message)
     {
         var severity = message.Severity switch
@@ -61,47 +72,55 @@ public partial class Kook : ISocket, IDriver
             libKook.LogSeverity.Debug => LogEventLevel.Debug,
             _ => LogEventLevel.Information
         };
-        Log.Write(severity, message.Exception, "[KOOK] [{Source}] {Message}", message.Source, message.Message);
+        Log.Write(
+            severity,
+            message.Exception,
+            "[KOOK] [{Source}] {Message}",
+            message.Source,
+            message.Message
+        );
         await Task.CompletedTask;
     }
-
 
     private void Parse(SocketMessage message)
     {
         // 过滤掉bot消息和系统消息
         if (message.Source != libKook.MessageSource.User)
         {
-            this.eventAction?.Invoke(
-                this,
-                new RawEvent(message)
-            );
+            this.eventAction?.Invoke(this, new RawEvent(message));
         }
         else
         {
-            this.msgAction?.Invoke(new Target()
-            {
-                platform = Platform.KOOK,
-                sender = message.Author.Id.ToString(),
-                selfAccount = this.selfID,
-                msg = Message.Parse(message),
-                raw = message,
-                socket = this
-            });
+            this.msgAction?.Invoke(
+                new Target()
+                {
+                    platform = Platform.KOOK,
+                    sender = message.Author.Id.ToString(),
+                    selfAccount = this.selfID,
+                    msg = Message.Parse(message),
+                    raw = message,
+                    socket = this
+                }
+            );
         }
-
     }
-    private async Task ParseUpdateMessage(libKook.Cacheable<libKook.IMessage, Guid> before, SocketMessage after, ISocketMessageChannel channel)
+
+    private async Task ParseUpdateMessage(
+        libKook.Cacheable<libKook.IMessage, Guid> before,
+        SocketMessage after,
+        ISocketMessageChannel channel
+    )
     {
         var message = await before.GetOrDownloadAsync();
         Log.Debug($"{message} -> {after}");
     }
-
 
     public IDriver onMessage(IDriver.MessageDelegate action)
     {
         this.msgAction += action;
         return this;
     }
+
     public IDriver onEvent(IDriver.EventDelegate action)
     {
         this.eventAction += action;

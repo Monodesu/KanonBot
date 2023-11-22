@@ -4,7 +4,7 @@ namespace KanonBot.Bot
 {
     public static class Help
     {
-        public async static Task Execute(Target target)
+        public static async Task Execute(Target target)
         {
             await target.reply(
                 """

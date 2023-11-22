@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using KanonBot.Command;
 using KanonBot.Drivers;
-using LanguageExt.UnsafeValueAccess;
-using LanguageExt.SomeHelp;
 using KanonBot.OSU;
+using LanguageExt.SomeHelp;
+using LanguageExt.UnsafeValueAccess;
 
 namespace KanonBot
 {
@@ -21,12 +21,11 @@ namespace KanonBot
 
         [Command("bind", "link")]
         [Params("osu", "steam")]
-        public async static Task Bind(CommandContext args, Target target)
+        public static async Task Bind(CommandContext args, Target target)
         {
             var op_osu = args.GetParameter<string>("osu");
 
-            await op_osu.Match
-                (
+            await op_osu.Match(
                 Some: async op =>
                 {
                     await HandleOSULink(target, op);
@@ -36,11 +35,11 @@ namespace KanonBot
                     await target.reply("请按照以下格式进行绑定。\n!link osu=您的osu用户名 ");
                     return;
                 }
-                );
+            );
             await Task.CompletedTask;
         }
 
-        private async static Task HandleOSULink(Target target, string osu_username)
+        private static async Task HandleOSULink(Target target, string osu_username)
         {
             var (baseuid, platform) = RetrieveCurrentUserInfo(target);
             var online_osu_userinfo = await API.OSU.V2.GetUser(osu_username);
@@ -59,7 +58,9 @@ namespace KanonBot
                     await target.reply($"你已绑定该账户。");
                     return;
                 }
-                await target.reply($"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果这是你的账户，请联系管理员更新账户信息。");
+                await target.reply(
+                    $"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果这是你的账户，请联系管理员更新账户信息。"
+                );
                 return;
             }
 
@@ -81,7 +82,9 @@ namespace KanonBot
             {
                 if (await PerformBinding(long.Parse(baseuid), online_osu_userinfo))
                 {
-                    await target.reply($"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至desu.life账户 {baseuid} 。");
+                    await target.reply(
+                        $"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至desu.life账户 {baseuid} 。"
+                    );
                     await GeneralUpdate.UpdateUser(online_osu_userinfo.Id, true);
                 }
                 else
@@ -102,23 +105,36 @@ namespace KanonBot
             return (AccInfo.uid, AccInfo.platform);
         }
 
-        public async static Task<Database.Models.UserOSU?> CheckOSUUserBinding(long osuUserId)
+        public static async Task<Database.Models.UserOSU?> CheckOSUUserBinding(long osuUserId)
         {
             return await Database.Client.GetOsuUser(osuUserId);
         }
 
-        public async static Task<Database.Models.UserOSU?> CheckCurrentUserOSUBinding(long base_uid)
+        public static async Task<Database.Models.UserOSU?> CheckCurrentUserOSUBinding(long base_uid)
         {
             return await Database.Client.GetOsuUserByUID(base_uid);
         }
 
-        private async static Task<bool> PerformBinding(long desulife_uid, API.OSU.Models.User online_osu_userinfo)
+        private static async Task<bool> PerformBinding(
+            long desulife_uid,
+            API.OSU.Models.User online_osu_userinfo
+        )
         {
-            if (online_osu_userinfo.CoverUrl == null) online_osu_userinfo.CoverUrl = new Uri("");
-            return await Database.Client.InsertOsuUser(desulife_uid, online_osu_userinfo.Id, online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2);
+            if (online_osu_userinfo.CoverUrl == null)
+                online_osu_userinfo.CoverUrl = new Uri("");
+            return await Database
+                .Client
+                .InsertOsuUser(
+                    desulife_uid,
+                    online_osu_userinfo.Id,
+                    online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2
+                );
         }
 
-        public static async Task<(Option<API.OSU.Models.User>, Option<Database.Models.User>)> ParseAt(string atmsg)
+        public static async Task<(
+            Option<API.OSU.Models.User>,
+            Option<Database.Models.User>
+        )> ParseAt(string atmsg)
         {
             var res = SplitKvp(atmsg);
             if (res.IsNone)
@@ -161,14 +177,22 @@ namespace KanonBot
             if (dbosu is null)
                 return (None, Some(dbuser!));
 
-            var osuacc = await API.OSU.V2.GetUser(dbosu.osu_uid,(API.OSU.Enums.Mode)API.OSU.Enums.String2Mode(dbosu.osu_mode)!);
+            var osuacc = await API.OSU
+                .V2
+                .GetUser(
+                    dbosu.osu_uid,
+                    (API.OSU.Enums.Mode)API.OSU.Enums.String2Mode(dbosu.osu_mode)!
+                );
             if (osuacc is null)
                 return (None, Some(dbuser!));
             else
                 return (Some(osuacc!), Some(dbuser!));
         }
 
-        public static async Task<Database.Models.User?> GetBaseAccount(string uid, Platform platform)
+        public static async Task<Database.Models.User?> GetBaseAccount(
+            string uid,
+            Platform platform
+        )
         {
             return await Database.Client.GetUsersByUID(uid, platform);
         }
@@ -196,24 +220,35 @@ namespace KanonBot
                 case Platform.OneBot:
                     if (target.raw is OneBot.Models.CQMessageEventBase o)
                     {
-                        return new AccInfo() { platform = Platform.OneBot, uid = o.UserId.ToString() };
+                        return new AccInfo()
+                        {
+                            platform = Platform.OneBot,
+                            uid = o.UserId.ToString()
+                        };
                     }
                     break;
                 case Platform.KOOK:
                     if (target.raw is Kook.WebSocket.SocketMessage k)
                     {
-                        return new AccInfo() { platform = Platform.KOOK, uid = k.Author.Id.ToString() };
+                        return new AccInfo()
+                        {
+                            platform = Platform.KOOK,
+                            uid = k.Author.Id.ToString()
+                        };
                     }
                     break;
                 case Platform.Discord:
                     if (target.raw is Discord.WebSocket.SocketMessage d)
                     {
-                        return new AccInfo() { platform = Platform.Discord, uid = d.Author.Id.ToString() };
+                        return new AccInfo()
+                        {
+                            platform = Platform.Discord,
+                            uid = d.Author.Id.ToString()
+                        };
                     }
                     break;
             }
             return new() { platform = Platform.Unknown, uid = "" };
         }
-
     }
 }

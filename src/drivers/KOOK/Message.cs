@@ -1,8 +1,8 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using KanonBot.Message;
-using libKook = Kook;
 using Kook.WebSocket;
+using libKook = Kook;
 
 namespace KanonBot.Drivers;
 
@@ -10,12 +10,13 @@ public partial class Kook
 {
     [GeneratedRegex(@"\(met\)(.*?)\(met\)", RegexOptions.Multiline)]
     private static partial Regex AtPattern();
+
     [GeneratedRegex(@"\(rol\)(.*?)\(rol\)", RegexOptions.Multiline)]
     private static partial Regex AtAdminPattern();
 
     public class Message
     {
-        public async static Task<List<Models.MessageCreate>> Build(API api, Chain msgChain)
+        public static async Task<List<Models.MessageCreate>> Build(API api, Chain msgChain)
         {
             var msglist = new List<Models.MessageCreate>();
             foreach (var seg in msgChain.Iter())

@@ -12,7 +12,7 @@ fn bindings_c() -> Result<(), Error> {
         },
         rosu_pp_ffi::my_inventory(),
     )
-    .write_file("bindings/bindings.h")?;
+    .write_file("bindings/bindings.generated.h")?;
 
     Ok(())
 }

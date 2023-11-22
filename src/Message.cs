@@ -13,6 +13,7 @@ public class RawSegment : IMsgSegment, IEquatable<RawSegment>
 {
     public Object value { get; set; }
     public string type { get; set; }
+
     public RawSegment(string type, Object value)
     {
         this.type = type;
@@ -21,7 +22,8 @@ public class RawSegment : IMsgSegment, IEquatable<RawSegment>
 
     public string Build()
     {
-        return value switch {
+        return value switch
+        {
             JObject j => $"<raw;{type}={j.ToString(Formatting.None)}>",
             _ => $"<raw;{type}={value}>",
         };
@@ -40,9 +42,11 @@ public class RawSegment : IMsgSegment, IEquatable<RawSegment>
             return false;
     }
 }
+
 public class TextSegment : IMsgSegment, IEquatable<TextSegment>
 {
     public string value { get; set; }
+
     public TextSegment(string msg)
     {
         this.value = msg;
@@ -66,9 +70,11 @@ public class TextSegment : IMsgSegment, IEquatable<TextSegment>
             return false;
     }
 }
+
 public class EmojiSegment : IMsgSegment, IEquatable<EmojiSegment>
 {
     public string value { get; set; }
+
     public EmojiSegment(string value)
     {
         this.value = value;
@@ -92,11 +98,14 @@ public class EmojiSegment : IMsgSegment, IEquatable<EmojiSegment>
             return false;
     }
 }
+
 public class AtSegment : IMsgSegment, IEquatable<AtSegment>
 {
     public Platform platform { get; set; }
+
     // all 表示全体成员
     public string value { get; set; }
+
     public AtSegment(string target, Platform platform)
     {
         this.value = target;
@@ -134,12 +143,14 @@ public class ImageSegment : IMsgSegment, IEquatable<ImageSegment>
 {
     public enum Type
     {
-        File,   // 如果是file就是文件地址
+        File, // 如果是file就是文件地址
         Base64,
         Url
     }
+
     public Type t { get; set; }
     public string value { get; set; }
+
     public ImageSegment(string value, Type t)
     {
         this.value = value;
@@ -172,9 +183,10 @@ public class ImageSegment : IMsgSegment, IEquatable<ImageSegment>
     }
 }
 
-public class Chain: IEquatable<Chain>
+public class Chain : IEquatable<Chain>
 {
     List<IMsgSegment> msgList { get; set; }
+
     public Chain()
     {
         this.msgList = new();
@@ -195,11 +207,13 @@ public class Chain: IEquatable<Chain>
         this.Add(new TextSegment(v));
         return this;
     }
+
     public Chain at(string v, Platform p)
     {
         this.Add(new AtSegment(v, p));
         return this;
     }
+
     public Chain image(string v, ImageSegment.Type t)
     {
         this.Add(new ImageSegment(v, t));
@@ -210,7 +224,6 @@ public class Chain: IEquatable<Chain>
     {
         return this.msgList.AsEnumerable();
     }
-
 
     public string Build()
     {
@@ -228,6 +241,7 @@ public class Chain: IEquatable<Chain>
     }
 
     public int Length() => this.msgList.Count;
+
     public bool StartsWith(string s)
     {
         if (this.msgList.Count == 0)
@@ -235,16 +249,19 @@ public class Chain: IEquatable<Chain>
         else
             return this.msgList[0] is TextSegment t && t.value.StartsWith(s);
     }
+
     public bool StartsWith(AtSegment at)
     {
         if (this.msgList.Count == 0)
             return false;
         else
-            return this.msgList[0] is AtSegment t && t.value == at.value && t.platform == at.platform;
+            return this.msgList[0] is AtSegment t
+                && t.value == at.value
+                && t.platform == at.platform;
     }
 
-    public T? Find<T>() where T : class, IMsgSegment =>
-        this.msgList.Find(t => t is T) as T;
+    public T? Find<T>()
+        where T : class, IMsgSegment => this.msgList.Find(t => t is T) as T;
 
     public bool Equals(Chain? other)
     {

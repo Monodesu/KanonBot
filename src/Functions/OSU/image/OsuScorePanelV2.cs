@@ -1,27 +1,26 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using KanonBot.API;
-
+using KanonBot.API.OSU;
+using KanonBot.Image;
+using LanguageExt.ClassInstances;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Diagnostics;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using static KanonBot.API.OSU.DataStructure;
+using static KanonBot.Image.OSU.OsuResourceHelper;
+using static KanonBot.Image.OSU.ResourceRegistrar;
 using Img = SixLabors.ImageSharp.Image;
 using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
-using System.Collections.Generic;
-using SixLabors.ImageSharp.Diagnostics;
-using static KanonBot.API.OSU.DataStructure;
-using KanonBot.API.OSU;
-using static KanonBot.Image.OSU.ResourceRegistrar;
-using static KanonBot.Image.OSU.OsuResourceHelper;
-using KanonBot.Image;
-using LanguageExt.ClassInstances;
 
 namespace KanonBot.Image.OSU
 {
@@ -33,7 +32,10 @@ namespace KanonBot.Image.OSU
             var score = new Image<Rgba32>(1950, 1088);
 
             //avatar
-            using var avatar = await GetUserAvatarAsync(data.scoreInfo!.User!.Id, data.scoreInfo.User!.AvatarUrl!);
+            using var avatar = await GetUserAvatarAsync(
+                data.scoreInfo!.User!.Id,
+                data.scoreInfo.User!.AvatarUrl!
+            );
 
             using var panel = data.scoreInfo.Mode switch
             {
@@ -45,8 +47,12 @@ namespace KanonBot.Image.OSU
             };
 
             // bg
-            using var bg = await TryAsync(GetBeatmapBackgroundImageAsync(
-                data.scoreInfo.Beatmapset!.Id, data.scoreInfo.Beatmap!.BeatmapId))
+            using var bg = await TryAsync(
+                    GetBeatmapBackgroundImageAsync(
+                        data.scoreInfo.Beatmapset!.Id,
+                        data.scoreInfo.Beatmap!.BeatmapId
+                    )
+                )
                 .IfFail(await ReadImageRgba("./work/legacy/load-failed-img.png"));
             using var smallBg = bg.Clone(x => x.RoundCorner(new Size(433, 296), 20));
             using var backBlack = new Image<Rgba32>(1950 - 2, 1088);

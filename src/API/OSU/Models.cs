@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
-using KanonBot.Serializer;
+﻿using KanonBot.Serializer;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NullValueHandling = Newtonsoft.Json.NullValueHandling;
 
 namespace KanonBot.API.OSU
 {
-    static public class Models
+    public static class Models
     {
         public class PPlusData
         {
@@ -150,10 +150,11 @@ namespace KanonBot.API.OSU
         {
             // 不包含在json解析中，用作分辨mode
             public Enums.Mode Mode { get; set; }
-            [JsonProperty(PropertyName = "max_combo")]
 
+            [JsonProperty(PropertyName = "max_combo")]
             // 共有部分
             public int MaxCombo { get; set; }
+
             [JsonProperty(PropertyName = "star_rating")]
             public double StarRating { get; set; }
 
@@ -168,20 +169,26 @@ namespace KanonBot.API.OSU
             // osu部分
             [JsonProperty(PropertyName = "aim_difficulty")]
             public double AimDifficulty { get; set; }
+
             [JsonProperty(PropertyName = "flashlight_difficulty")]
             public double FlashlightDifficulty { get; set; }
+
             [JsonProperty(PropertyName = "overall_difficulty")]
             public double OverallDifficulty { get; set; }
+
             [JsonProperty(PropertyName = "slider_factor")]
             public double SliderFactor { get; set; }
+
             [JsonProperty(PropertyName = "speed_difficulty")]
             public double SpeedDifficulty { get; set; }
 
             // taiko
             [JsonProperty(PropertyName = "stamina_difficulty")]
             public double StaminaDifficulty { get; set; }
+
             [JsonProperty(PropertyName = "rhythm_difficulty")]
             public double RhythmDifficulty { get; set; }
+
             [JsonProperty(PropertyName = "colour_difficulty")]
             public double ColourDifficulty { get; set; }
 
@@ -256,6 +263,7 @@ namespace KanonBot.API.OSU
 
             [JsonProperty(PropertyName = "version")]
             public string? Version { get; set; }
+
             // Accuracy = OD
 
             [JsonProperty(PropertyName = "accuracy")]
@@ -282,7 +290,10 @@ namespace KanonBot.API.OSU
             [JsonProperty(PropertyName = "cs")]
             public double CS { get; set; }
 
-            [JsonProperty(PropertyName = "deleted_at", NullValueHandling = NullValueHandling.Ignore)]
+            [JsonProperty(
+                PropertyName = "deleted_at",
+                NullValueHandling = NullValueHandling.Ignore
+            )]
             public DateTimeOffset? DeletedAt { get; set; }
 
             [JsonProperty(PropertyName = "drain")]
@@ -315,7 +326,10 @@ namespace KanonBot.API.OSU
             [JsonProperty(PropertyName = "checksum", NullValueHandling = NullValueHandling.Ignore)]
             public string? Checksum { get; set; }
 
-            [JsonProperty(PropertyName = "beatmapset", NullValueHandling = NullValueHandling.Ignore)]
+            [JsonProperty(
+                PropertyName = "beatmapset",
+                NullValueHandling = NullValueHandling.Ignore
+            )]
             public Beatmapset? Beatmapset { get; set; }
 
             [JsonProperty(PropertyName = "failtimes")]
@@ -402,7 +416,10 @@ namespace KanonBot.API.OSU
             [JsonProperty(PropertyName = "last_updated")]
             public DateTimeOffset LastUpdated { get; set; }
 
-            [JsonProperty(PropertyName = "legacy_thread_url", NullValueHandling = NullValueHandling.Ignore)]
+            [JsonProperty(
+                PropertyName = "legacy_thread_url",
+                NullValueHandling = NullValueHandling.Ignore
+            )]
             public Uri? LegacyThreadUrl { get; set; }
 
             [JsonProperty(PropertyName = "nominations_summary")]
@@ -411,13 +428,19 @@ namespace KanonBot.API.OSU
             [JsonProperty(PropertyName = "ranked")]
             public long Ranked { get; set; }
 
-            [JsonProperty(PropertyName = "ranked_date", NullValueHandling = NullValueHandling.Ignore)]
+            [JsonProperty(
+                PropertyName = "ranked_date",
+                NullValueHandling = NullValueHandling.Ignore
+            )]
             public DateTimeOffset? RankedDate { get; set; }
 
             [JsonProperty(PropertyName = "storyboard")]
             public bool Storyboard { get; set; }
 
-            [JsonProperty(PropertyName = "submitted_date", NullValueHandling = NullValueHandling.Ignore)]
+            [JsonProperty(
+                PropertyName = "submitted_date",
+                NullValueHandling = NullValueHandling.Ignore
+            )]
             public DateTimeOffset? SubmittedDate { get; set; }
 
             [JsonProperty(PropertyName = "tags")]
@@ -425,6 +448,7 @@ namespace KanonBot.API.OSU
 
             [JsonProperty(PropertyName = "ratings")]
             public long[]? Ratings { get; set; }
+
             [JsonProperty(PropertyName = "beatmaps", NullValueHandling = NullValueHandling.Ignore)]
             public Beatmap[]? Beatmaps { get; set; }
 
@@ -436,18 +460,25 @@ namespace KanonBot.API.OSU
         {
             [JsonProperty(PropertyName = "cover")]
             public string? Cover { get; set; }
+
             [JsonProperty(PropertyName = "cover@2x")]
             public string? Cover2x { get; set; }
+
             [JsonProperty(PropertyName = "card")]
             public string? Card { get; set; }
+
             [JsonProperty(PropertyName = "card@2x")]
             public string? Card2x { get; set; }
+
             [JsonProperty(PropertyName = "list")]
             public string? List { get; set; }
+
             [JsonProperty(PropertyName = "list@2x")]
             public string? List2x { get; set; }
+
             [JsonProperty(PropertyName = "slimcover")]
             public string? SlimCover { get; set; }
+
             [JsonProperty(PropertyName = "slimcover@2x")]
             public string? SlimCover2x { get; set; }
         }
@@ -457,7 +488,10 @@ namespace KanonBot.API.OSU
             [JsonProperty(PropertyName = "download_disabled")]
             public bool DownloadDisabled { get; set; }
 
-            [JsonProperty(PropertyName = "more_information", NullValueHandling = NullValueHandling.Ignore)]
+            [JsonProperty(
+                PropertyName = "more_information",
+                NullValueHandling = NullValueHandling.Ignore
+            )]
             public string? MoreInformation { get; set; }
         }
 
@@ -573,9 +607,15 @@ namespace KanonBot.API.OSU
             {
                 public override bool CanConvert(Type t) => t == typeof(long) || t == typeof(long?);
 
-                public override object? ReadJson(JsonReader reader, Type t, object? existingValue, JsonSerializer serializer)
+                public override object? ReadJson(
+                    JsonReader reader,
+                    Type t,
+                    object? existingValue,
+                    JsonSerializer serializer
+                )
                 {
-                    if (reader.TokenType == JsonToken.Null) return null;
+                    if (reader.TokenType == JsonToken.Null)
+                        return null;
                     var value = serializer.Deserialize<string>(reader);
                     if (Int64.TryParse(value, out long l))
                     {
@@ -584,7 +624,11 @@ namespace KanonBot.API.OSU
                     throw new Exception("Cannot unmarshal type long");
                 }
 
-                public override void WriteJson(JsonWriter writer, object? untypedValue, JsonSerializer serializer)
+                public override void WriteJson(
+                    JsonWriter writer,
+                    object? untypedValue,
+                    JsonSerializer serializer
+                )
                 {
                     if (untypedValue == null)
                     {
@@ -762,6 +806,7 @@ namespace KanonBot.API.OSU
 
             [JsonProperty("scores_recent_count")]
             public long ScoresRecentCount { get; set; }
+
             [JsonProperty("is_restricted", NullValueHandling = NullValueHandling.Ignore)]
             public bool? IsRestricted { get; set; }
 
@@ -969,10 +1014,11 @@ namespace KanonBot.API.OSU
             public int Length { get; set; }
         }
 
-        public class BeatmapScore   // 只是比score多了个当前bid的排名
+        public class BeatmapScore // 只是比score多了个当前bid的排名
         {
             [JsonProperty("position")]
             public int Position { get; set; }
+
             [JsonProperty("score")]
             public Score? Score { get; set; }
         }
@@ -1108,19 +1154,24 @@ namespace KanonBot.API.OSU
         {
             [JsonProperty("Total")]
             public double Total { get; set; }
+
             [JsonProperty("aim")]
             public double aim { get; set; }
+
             [JsonProperty("speed")]
             public double speed { get; set; }
+
             [JsonProperty("accuracy")]
             public double accuracy { get; set; }
+
             [JsonProperty("flashlight")]
             public double flashlight { get; set; }
+
             [JsonProperty("effective_miss_count")]
             public double effective_miss_count { get; set; }
+
             [JsonProperty("pp")]
             public double pp { get; set; }
         }
     }
 }
-

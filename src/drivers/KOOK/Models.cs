@@ -4,13 +4,13 @@ using Newtonsoft.Json;
 using NullValueHandling = Newtonsoft.Json.NullValueHandling;
 
 namespace KanonBot.Drivers;
+
 public partial class Kook
 {
     public class Models
     {
         public class MessageCreate
         {
-
             [JsonProperty(PropertyName = "type")]
             public Enums.MessageType MessageType { get; set; }
 
@@ -26,7 +26,10 @@ public partial class Kook
             [JsonProperty(PropertyName = "nonce", NullValueHandling = NullValueHandling.Ignore)]
             public Guid? Nonce { get; set; }
 
-            [JsonProperty(PropertyName = "temp_target_id", NullValueHandling = NullValueHandling.Ignore)]
+            [JsonProperty(
+                PropertyName = "temp_target_id",
+                NullValueHandling = NullValueHandling.Ignore
+            )]
             public string? EphemeralUserId { get; set; }
 
             public MessageCreate Clone()

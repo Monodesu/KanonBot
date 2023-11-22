@@ -22,28 +22,43 @@ namespace KanonBot.Account
             var user = await GetOrCreateUser(mailAddr, target);
 
             // 不处理失败操作
-            if (user.Item1 == null || user.Item2 != Enums.Operation.Failed) return;
+            if (user.Item1 == null || user.Item2 != Enums.Operation.Failed)
+                return;
             var platform = GetPlatformString(target.platform);
 
-            var emailContent = PrepareEmailContent(mailAddr, verifyCode, platform, user.Item3!, (int)user.Item2);
+            var emailContent = PrepareEmailContent(
+                mailAddr,
+                verifyCode,
+                platform,
+                user.Item3!,
+                (int)user.Item2
+            );
 
             SendMail(mailAddr, "[来自desu.life自动发送的邮件]请验证您的邮箱", emailContent, true);
             await target.reply("验证邮件发送成功，请检查您的邮箱。");
             await Database.Client.SetVerifyMail(mailAddr, verifyCode);
         }
 
-        private static string PrepareEmailContent(string mailAddr, string verifyCode, string platform, string uid, int operation)
+        private static string PrepareEmailContent(
+            string mailAddr,
+            string verifyCode,
+            string platform,
+            string uid,
+            int operation
+        )
         {
-            if(mailaddr_verify_template_string == "")
+            if (mailaddr_verify_template_string == "")
             {
                 var templatePath = "./mail_desu_life_mailaddr_verify_template.txt";
                 mailaddr_verify_template_string = System.IO.File.ReadAllText(templatePath);
             }
-            
-            var verificationLink = $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op={operation}";
+
+            var verificationLink =
+                $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op={operation}";
             var temp_string = mailaddr_verify_template_string;
-            return temp_string.Replace("{{mailaddress}}", mailAddr)
-                           .Replace("{{veritylink}}", verificationLink);
+            return temp_string
+                .Replace("{{mailaddress}}", mailAddr)
+                .Replace("{{veritylink}}", verificationLink);
         }
 
         private static string GetPlatformString(Platform platform)
@@ -58,7 +73,11 @@ namespace KanonBot.Account
             };
         }
 
-        private static async Task<(Database.Models.User?, Enums.Operation, string?)> GetOrCreateUser(string mailAddr, Target target)
+        private static async Task<(
+            Database.Models.User?,
+            Enums.Operation,
+            string?
+        )> GetOrCreateUser(string mailAddr, Target target)
         {
             // 检测该邮箱是否已注册为基础账户
             bool isRegistered = await Database.Client.IsRegd(mailAddr);
@@ -73,30 +92,53 @@ namespace KanonBot.Account
                 case Platform.Guild:
                     var guildInfo = target.raw as Guild.Models.MessageData;
                     uid = guildInfo?.Author.ID ?? uid;
-                    isAppend = await CheckUserBinding(dbuser, guildInfo?.Author.ID, dbuser.qq_guild_uid!, target);
+                    isAppend = await CheckUserBinding(
+                        dbuser,
+                        guildInfo?.Author.ID,
+                        dbuser.qq_guild_uid!,
+                        target
+                    );
                     break;
                 case Platform.OneBot:
                     var oneBotInfo = target.raw as OneBot.Models.CQMessageEventBase;
                     uid = oneBotInfo?.UserId.ToString() ?? uid;
-                    isAppend = await CheckUserBinding(dbuser, oneBotInfo?.UserId.ToString(), dbuser.qq_id.ToString(), target);
+                    isAppend = await CheckUserBinding(
+                        dbuser,
+                        oneBotInfo?.UserId.ToString(),
+                        dbuser.qq_id.ToString(),
+                        target
+                    );
                     break;
                 case Platform.KOOK:
                     var kookInfo = target.raw as Kook.WebSocket.SocketMessage;
                     uid = kookInfo?.Author.Id.ToString() ?? uid;
-                    isAppend = await CheckUserBinding(dbuser, kookInfo?.Author.Id.ToString(), dbuser.kook_uid!, target);
+                    isAppend = await CheckUserBinding(
+                        dbuser,
+                        kookInfo?.Author.Id.ToString(),
+                        dbuser.kook_uid!,
+                        target
+                    );
                     break;
                 case Platform.Discord:
                     var discordInfo = target.raw as Discord.WebSocket.SocketMessage;
                     uid = discordInfo?.Author.Id.ToString() ?? uid;
-                    isAppend = await CheckUserBinding(dbuser, discordInfo?.Author.Id.ToString(), dbuser.discord_uid!, target);
+                    isAppend = await CheckUserBinding(
+                        dbuser,
+                        discordInfo?.Author.Id.ToString(),
+                        dbuser.discord_uid!,
+                        target
+                    );
                     break;
             }
 
             // 基本账户存在，且已绑定，发送通知
             if (isAppend)
             {
-                await target.reply(new Chain().msg($"您当前平台的账户已绑定到邮箱 {HideMailAddr(dbuser.email!)}。"));
-                return (dbuser, Enums.Operation.Failed, null); ;
+                await target.reply(
+                    new Chain().msg($"您当前平台的账户已绑定到邮箱 {HideMailAddr(dbuser.email!)}。")
+                );
+                return (dbuser, Enums.Operation.Failed, null);
+                ;
             }
 
             // 基本账户存在，但未绑定，执行绑定操作（平台方）
@@ -121,7 +163,12 @@ namespace KanonBot.Account
             return (null, Enums.Operation.Failed, null);
         }
 
-        private static async Task<bool> CheckUserBinding(Database.Models.User dbuser, string? currentUid, string dbUid, Target target)
+        private static async Task<bool> CheckUserBinding(
+            Database.Models.User dbuser,
+            string? currentUid,
+            string dbUid,
+            Target target
+        )
         {
             if (currentUid == null)
                 return false;
@@ -139,6 +186,5 @@ namespace KanonBot.Account
 
             return false;
         }
-
     }
 }

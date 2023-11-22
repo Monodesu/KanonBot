@@ -1,10 +1,10 @@
+using System.Net;
 using Flurl.Util;
 using KanonBot.API;
-using KanonBot.OSU;
+using KanonBot.Command;
 using KanonBot.Drivers;
 using KanonBot.Message;
-using System.Net;
-using KanonBot.Command;
+using KanonBot.OSU;
 
 namespace KanonBot
 {
@@ -24,20 +24,23 @@ namespace KanonBot
             var verifyCode = RandomStr(32, true);
             if (!IsMailAddr(mailAddr))
             {
-                await target.reply("ÇëÊäÈëÓÐÐ§µÄµç×ÓÓÊ¼þµØÖ·¡£");
+                await target.reply("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½Äµï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Ö·ï¿½ï¿½");
                 return;
             }
 
             var dbuser = await GetDbUser(mailAddr);
             var op = await GetUserIdAndCheckBindStatusAsync(target, dbuser);
-            if (op == AccountOperation.None) return;
+            if (op == AccountOperation.None)
+                return;
 
             string platform = GetPlatform(target.platform);
             string uid = GetPlatformUID(target);
-            string read_html = System.IO.File.ReadAllText("./mail_desu_life_mailaddr_verify_template.txt");
+            string read_html = System
+                .IO
+                .File
+                .ReadAllText("./mail_desu_life_mailaddr_verify_template.txt");
 
             await SendVerificationMail(op, target, mailAddr, verifyCode, platform, uid);
-
         }
 
         private static async Task<Database.Models.User?> GetDbUser(string mailAddr)
@@ -46,7 +49,10 @@ namespace KanonBot
             return mail_has_regd ? (await Database.Client.GetUser(mailAddr))! : null;
         }
 
-        private static async Task<AccountOperation> GetUserIdAndCheckBindStatusAsync(Target target, Database.Models.User? dbuser)
+        private static async Task<AccountOperation> GetUserIdAndCheckBindStatusAsync(
+            Target target,
+            Database.Models.User? dbuser
+        )
         {
             return target.platform switch
             {
@@ -58,7 +64,10 @@ namespace KanonBot
             };
         }
 
-        private static async Task<AccountOperation> HandleGuildAsync(Target target, Database.Models.User? dbuser)
+        private static async Task<AccountOperation> HandleGuildAsync(
+            Target target,
+            Database.Models.User? dbuser
+        )
         {
             if (target.raw is Guild.Models.MessageData g)
             {
@@ -87,7 +96,10 @@ namespace KanonBot
             return AccountOperation.None;
         }
 
-        private static async Task<AccountOperation> HandleOneBotAsync(Target target, Database.Models.User? dbuser)
+        private static async Task<AccountOperation> HandleOneBotAsync(
+            Target target,
+            Database.Models.User? dbuser
+        )
         {
             if (target.raw is OneBot.Models.CQMessageEventBase o)
             {
@@ -116,7 +128,10 @@ namespace KanonBot
             return AccountOperation.None;
         }
 
-        private static async Task<AccountOperation> HandleKookAsync(Target target, Database.Models.User? dbuser)
+        private static async Task<AccountOperation> HandleKookAsync(
+            Target target,
+            Database.Models.User? dbuser
+        )
         {
             if (target.raw is Kook.WebSocket.SocketMessage k)
             {
@@ -144,7 +159,10 @@ namespace KanonBot
             return AccountOperation.None;
         }
 
-        private static async Task<AccountOperation> HandleDiscordAsync(Target target, Database.Models.User? dbuser)
+        private static async Task<AccountOperation> HandleDiscordAsync(
+            Target target,
+            Database.Models.User? dbuser
+        )
         {
             if (target.raw is Discord.WebSocket.SocketMessage d)
             {
@@ -156,7 +174,9 @@ namespace KanonBot
                         return await ReplyUserBoundMsg(target);
                     }
                 }
-                var d1 = await Database.Client.GetUsersByUID(d.Author.Id.ToString(), Platform.Discord);
+                var d1 = await Database
+                    .Client
+                    .GetUsersByUID(d.Author.Id.ToString(), Platform.Discord);
                 if (d1 != null)
                 {
                     if (d1.email != null)
@@ -189,16 +209,20 @@ namespace KanonBot
             switch (target.platform)
             {
                 case Platform.Guild:
-                    if (target.raw is Guild.Models.MessageData g) return g.Author.ID.ToString();
+                    if (target.raw is Guild.Models.MessageData g)
+                        return g.Author.ID.ToString();
                     break;
                 case Platform.OneBot:
-                    if (target.raw is OneBot.Models.CQMessageEventBase o) return o.UserId.ToString();
+                    if (target.raw is OneBot.Models.CQMessageEventBase o)
+                        return o.UserId.ToString();
                     break;
                 case Platform.KOOK:
-                    if (target.raw is Kook.WebSocket.SocketMessage k) return k.Author.Id.ToString();
+                    if (target.raw is Kook.WebSocket.SocketMessage k)
+                        return k.Author.Id.ToString();
                     break;
                 case Platform.Discord:
-                    if (target.raw is Discord.WebSocket.SocketMessage d) return d.Author.Id.ToString();
+                    if (target.raw is Discord.WebSocket.SocketMessage d)
+                        return d.Author.Id.ToString();
                     break;
                 default:
                     throw new NotSupportedException();
@@ -206,34 +230,53 @@ namespace KanonBot
             throw new NotSupportedException();
         }
 
-        private static async Task<AccountOperation> ReplyUserExistingMsg(Target target, string? email)
+        private static async Task<AccountOperation> ReplyUserExistingMsg(
+            Target target,
+            string? email
+        )
         {
-            await target.reply(new Chain()
-                            .msg($"ÄúÄ¿Ç°µÄÆ½Ì¨ÕË»§ÒÑ¾­ºÍÓÊÏäÎª" +
-                            $"{HideMailAddr(email ?? "undefined@undefined.undefined")}" +
-                            $"µÄÓÃ»§°ó¶¨ÁË¡£"));
+            await target.reply(
+                new Chain().msg(
+                    $"ï¿½ï¿½Ä¿Ç°ï¿½ï¿½Æ½Ì¨ï¿½Ë»ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª"
+                        + $"{HideMailAddr(email ?? "undefined@undefined.undefined")}"
+                        + $"ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ë¡ï¿½"
+                )
+            );
             return AccountOperation.None;
         }
 
         private static async Task<AccountOperation> ReplyUserBoundMsg(Target target)
         {
-            await target.reply("ÄúÌá¹©µÄÓÊÏäÒÑ¾­ÓëÄúÄ¿Ç°µÄÆ½Ì¨°ó¶¨ÁË¡£");
+            await target.reply("ï¿½ï¿½ï¿½á¹©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿Ç°ï¿½ï¿½Æ½Ì¨ï¿½ï¿½ï¿½Ë¡ï¿½");
             return AccountOperation.None;
         }
 
-        private static async Task SendVerificationMail(AccountOperation op, Target target, string mailAddr, string verifyCode, string platform, string uid)
+        private static async Task SendVerificationMail(
+            AccountOperation op,
+            Target target,
+            string mailAddr,
+            string verifyCode,
+            string platform,
+            string uid
+        )
         {
-            string read_html = System.IO.File.ReadAllText("./mail_desu_life_mailaddr_verify_template.txt");
+            string read_html = System
+                .IO
+                .File
+                .ReadAllText("./mail_desu_life_mailaddr_verify_template.txt");
 
-            string mail_subject = "[À´×Ôdesu.life×Ô¶¯·¢ËÍµÄÓÊ¼þ]ÇëÑéÖ¤ÄúµÄÓÊÏä";
-            string send_fail_msg = "·¢ËÍÓÊ¼þÊ§°Ü£¬ÇëÁªÏµ¹ÜÀíÔ±¡£";
-
+            string mail_subject = "[ï¿½ï¿½ï¿½ï¿½desu.lifeï¿½Ô¶ï¿½ï¿½ï¿½ï¿½Íµï¿½ï¿½Ê¼ï¿½]ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½";
+            string send_fail_msg = "ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½Ê§ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½";
 
             switch (op)
             {
                 case AccountOperation.Register:
-                    read_html = read_html.Replace("{{{{mailaddress}}}}", mailAddr).Replace("{{{{veritylink}}}}",
-                        $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=1");
+                    read_html = read_html
+                        .Replace("{{{{mailaddress}}}}", mailAddr)
+                        .Replace(
+                            "{{{{veritylink}}}}",
+                            $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=1"
+                        );
                     try
                     {
                         SendMail(mailAddr, mail_subject, read_html, true);
@@ -244,11 +287,15 @@ namespace KanonBot
                         await target.reply($"{send_fail_msg} [{ex}]");
                         break;
                     }
-                    await target.reply("×¢²áÑéÖ¤ÓÊ¼þ·¢ËÍ³É¹¦£¬Çë¼ÌÐø´ÓÓÊÏäÄÚ²Ù×÷£¬×¢Òâ¼ì²éÀ¬»øÏä¡£");
+                    await target.reply("×¢ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Í³É¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä¡£");
                     break;
                 case AccountOperation.Verify:
-                    read_html = read_html.Replace("{{{{mailaddress}}}}", mailAddr).Replace("{{{{veritylink}}}}",
-                        $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=2");
+                    read_html = read_html
+                        .Replace("{{{{mailaddress}}}}", mailAddr)
+                        .Replace(
+                            "{{{{veritylink}}}}",
+                            $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=2"
+                        );
                     try
                     {
                         SendMail(mailAddr, mail_subject, read_html, true);
@@ -259,11 +306,15 @@ namespace KanonBot
                         await target.reply($"{send_fail_msg} [{ex}]");
                         break;
                     }
-                    await target.reply("°ó¶¨ÑéÖ¤ÓÊ¼þ·¢ËÍ³É¹¦£¬Çë¼ÌÐø´ÓÓÊÏäÄÚ²Ù×÷£¬×¢Òâ¼ì²éÀ¬»øÏä¡£");
+                    await target.reply("ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Í³É¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä¡£");
                     break;
                 case AccountOperation.AppendEmail:
-                    read_html = read_html.Replace("{{{{mailaddress}}}}", mailAddr).Replace("{{{{veritylink}}}}",
-                        $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=3");
+                    read_html = read_html
+                        .Replace("{{{{mailaddress}}}}", mailAddr)
+                        .Replace(
+                            "{{{{veritylink}}}}",
+                            $"https://desu.life/verify-email?mailAddr={mailAddr}&verifyCode={verifyCode}&platform={platform}&uid={uid}&op=3"
+                        );
                     try
                     {
                         SendMail(mailAddr, mail_subject, read_html, true);
@@ -274,12 +325,11 @@ namespace KanonBot
                         await target.reply($"{send_fail_msg} [{ex}]");
                         break;
                     }
-                    await target.reply("µç×ÓÓÊÏä×·¼ÓÑéÖ¤ÓÊ¼þ·¢ËÍ³É¹¦£¬Çë¼ÌÐø´ÓÓÊÏäÄÚ²Ù×÷£¬×¢Òâ¼ì²éÀ¬»øÏä¡£");
+                    await target.reply("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×·ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Í³É¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä¡£");
                     break;
                 default:
                     break;
             }
         }
-
     }
 }

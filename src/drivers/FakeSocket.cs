@@ -1,6 +1,6 @@
-using Microsoft.VisualBasic.CompilerServices;
 //using KanonBot.API;
 using KanonBot.Message;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace KanonBot.Drivers;
 

@@ -1,20 +1,25 @@
-﻿using Aliyun.OSS.Common;
-using Aliyun.OSS;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Aliyun.OSS;
+using Aliyun.OSS.Common;
 
 namespace KanonBot.API
 {
     public static class OSS
     {
         private static Config.OSS config = Config.inner!.oss!;
+
         public static string? PutFile(string key, byte[] data)
         {
             var stream = Utils.Byte2Stream(data);
-            var client = new OssClient(config.endPoint, config.accessKeyId!, config.accessKeySecret!);
+            var client = new OssClient(
+                config.endPoint,
+                config.accessKeyId!,
+                config.accessKeySecret!
+            );
             try
             {
                 var res = client.PutObject(config.bucketName!, key, stream);
@@ -22,8 +27,13 @@ namespace KanonBot.API
             }
             catch (OssException ex)
             {
-                Log.Error("oss上传文件失败: {0}; Error info: {1}. \nRequestID:{2}\tHostID:{3}",
-                    ex.ErrorCode, ex.Message, ex.RequestId, ex.HostId);
+                Log.Error(
+                    "oss上传文件失败: {0}; Error info: {1}. \nRequestID:{2}\tHostID:{3}",
+                    ex.ErrorCode,
+                    ex.Message,
+                    ex.RequestId,
+                    ex.HostId
+                );
             }
             catch (Exception ex)
             {
@@ -43,7 +53,11 @@ namespace KanonBot.API
 
         public static void ListAllBuckets()
         {
-            var client = new OssClient(config.endPoint, config.accessKeyId!, config.accessKeySecret!);
+            var client = new OssClient(
+                config.endPoint,
+                config.accessKeyId!,
+                config.accessKeySecret!
+            );
             var buckets = client.ListBuckets();
 
             foreach (var bucket in buckets)

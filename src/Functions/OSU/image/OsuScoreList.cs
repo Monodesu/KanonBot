@@ -1,28 +1,27 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using KanonBot.API;
-
+using KanonBot.API.OSU;
+using KanonBot.Functions.OSU;
+using KanonBot.Image;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Diagnostics;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using Img = SixLabors.ImageSharp.Image;
-using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
-using System.Collections.Generic;
-using SixLabors.ImageSharp.Diagnostics;
 using static KanonBot.API.OSU.DataStructure;
-using KanonBot.API.OSU;
-using static KanonBot.Image.OSU.ResourceRegistrar;
-using KanonBot.Image;
 using static KanonBot.Image.OSU.OsuInfoPanelV2;
 using static KanonBot.Image.OSU.OsuResourceHelper;
-using KanonBot.Functions.OSU;
+using static KanonBot.Image.OSU.ResourceRegistrar;
+using Img = SixLabors.ImageSharp.Image;
+using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 
 namespace KanonBot.Image.OSU
 {
@@ -40,7 +39,7 @@ namespace KanonBot.Image.OSU
             List<API.OSU.Models.Score> TBP,
             List<int> Rank,
             API.OSU.Models.User userInfo
-            )
+        )
         {
             //设定textOption/drawOption
             var textOptions = new RichTextOptions(new Font(TorusSemiBold, 120))
@@ -90,11 +89,13 @@ namespace KanonBot.Image.OSU
             {
                 try
                 {
-                    scorebgPath = await API.OSU.V2.SayoDownloadBeatmapBackgroundImg(
-                        TBP[0].Beatmapset!.Id,
-                        TBP[0].Beatmap!.BeatmapId,
-                        "./work/background/"
-                    );
+                    scorebgPath = await API.OSU
+                        .V2
+                        .SayoDownloadBeatmapBackgroundImg(
+                            TBP[0].Beatmapset!.Id,
+                            TBP[0].Beatmap!.BeatmapId,
+                            "./work/background/"
+                        );
                 }
                 catch (Exception ex)
                 {
@@ -123,10 +124,9 @@ namespace KanonBot.Image.OSU
                 {
                     try
                     {
-                        avatarPath = await userInfo.AvatarUrl.DownloadFileAsync(
-                            "./work/avatar/",
-                            $"{userInfo.Id}.png"
-                        );
+                        avatarPath = await userInfo
+                            .AvatarUrl
+                            .DownloadFileAsync("./work/avatar/", $"{userInfo.Id}.png");
                     }
                     catch (Exception ex)
                     {
@@ -504,7 +504,9 @@ namespace KanonBot.Image.OSU
                 );
                 textMeasurePos =
                     textMeasurePos
-                    + TextMeasurer.MeasureSize(TBP[i].Beatmap!.BeatmapId.ToString(), textOptions).Width
+                    + TextMeasurer
+                        .MeasureSize(TBP[i].Beatmap!.BeatmapId.ToString(), textOptions)
+                        .Width
                     + 5;
 
                 //split
@@ -536,7 +538,9 @@ namespace KanonBot.Image.OSU
                 );
                 textMeasurePos =
                     textMeasurePos
-                    + TextMeasurer.MeasureSize(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions).Width
+                    + TextMeasurer
+                        .MeasureSize(ppinfo1.ppInfo.star.ToString("0.##*"), textOptions)
+                        .Width
                     + 5;
 
                 //split

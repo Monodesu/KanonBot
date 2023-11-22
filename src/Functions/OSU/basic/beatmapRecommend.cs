@@ -1,20 +1,19 @@
 ﻿using System.CommandLine;
 using System.IO;
 using KanonBot.API;
+using KanonBot.API.OSU;
 using KanonBot.Command;
 using KanonBot.Drivers;
 using KanonBot.Functions.OSU;
-
 using KanonBot.Message;
 using LanguageExt.UnsafeValueAccess;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
-using static LinqToDB.Common.Configuration;
-using static KanonBot.BindService;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
 using static KanonBot.API.OSU.DataStructure;
-using SixLabors.ImageSharp;
-using KanonBot.API.OSU;
+using static KanonBot.BindService;
+using static LinqToDB.Common.Configuration;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace KanonBot.OSU
 {
@@ -22,7 +21,7 @@ namespace KanonBot.OSU
     {
         [Command("recommend")]
         [Params("m", "mode", "u", "user", "username", "mods", "md")]
-        public async static Task beatmapRecommend(CommandContext args, Target target)
+        public static async Task beatmapRecommend(CommandContext args, Target target)
         {
             var osu_username = "";
             bool isSelfQuery = false;
@@ -32,32 +31,33 @@ namespace KanonBot.OSU
 
             API.OSU.Enums.Mode? mode = API.OSU.Enums.Mode.OSU;
 
-            args.GetParameters<string>(["u", "user", "username"]).Match
-                (
-                Some: try_username =>
-                {
-                    osu_username = try_username;
-                },
-                None: () => { }
+            args.GetParameters<string>([ "u", "user", "username" ])
+                .Match(
+                    Some: try_username =>
+                    {
+                        osu_username = try_username;
+                    },
+                    None: () => { }
                 );
-            args.GetParameters<string>(["mods", "md"]).Match
-                (
-                Some: try_mods =>
-                {
-                    mods_string = try_mods;
-                },
-                None: () => { }
+            args.GetParameters<string>([ "mods", "md" ])
+                .Match(
+                    Some: try_mods =>
+                    {
+                        mods_string = try_mods;
+                    },
+                    None: () => { }
                 );
-            args.GetDefault<string>().Match
-                (
-                Some: try_name =>
-                {
-                    osu_username = try_name;
-                },
-                None: () =>
-                {
-                    if (osu_username == "") isSelfQuery = true;
-                }
+            args.GetDefault<string>()
+                .Match(
+                    Some: try_name =>
+                    {
+                        osu_username = try_name;
+                    },
+                    None: () =>
+                    {
+                        if (osu_username == "")
+                            isSelfQuery = true;
+                    }
                 );
             // only support osu!std for now
 
@@ -71,19 +71,26 @@ namespace KanonBot.OSU
             //    );
 
 
-            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(target, isSelfQuery, osu_username, mode); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
+            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(
+                target,
+                isSelfQuery,
+                osu_username,
+                mode
+            ); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
             bool IsBound = DBOsuInfo != null;
-            if (OnlineOSUUserInfo == null) return; // 查询失败
-
+            if (OnlineOSUUserInfo == null)
+                return; // 查询失败
 
             //获取前50bp
-            var allBP = await API.OSU.V2.GetUserScores(
-                OnlineOSUUserInfo.Id,
-                API.OSU.Enums.UserScoreType.Best,
-                API.OSU.Enums.Mode.OSU,
-                20,
-                0
-            );
+            var allBP = await API.OSU
+                .V2
+                .GetUserScores(
+                    OnlineOSUUserInfo.Id,
+                    API.OSU.Enums.UserScoreType.Best,
+                    API.OSU.Enums.Mode.OSU,
+                    20,
+                    0
+                );
             if (allBP == null)
             {
                 await target.reply("打过的图太少了，多玩一玩再来寻求推荐吧~");
@@ -103,16 +110,8 @@ namespace KanonBot.OSU
             var data = new List<Database.Models.OsuStandardBeatmapTechData>();
 
             //解析mod
-            List<string> mods = new();
-            try
-            {
-                mods_string = mods_string.ToLower().Trim();
-                mods = Enumerable
-                    .Range(0, mods_string.Length / 2)
-                    .Select(p => new string(mods_string.AsSpan().Slice(p * 2, 2)).ToUpper())
-                    .ToList<string>();
-            }
-            catch { }
+            List<string> mods = Utils.ParseMods(mods_string);
+            mods_string = mods_string.ToLower().Trim();
 
             if (mods.Count == 0)
             {
@@ -159,13 +158,15 @@ namespace KanonBot.OSU
                         dt = true;
                     }
                 }
-                data = await Database.Client.GetOsuStandardBeatmapTechData(
-                    (int)ppinfo.ppInfo.ppStat.aim!,
-                    (int)ppinfo.ppInfo.ppStat.speed!,
-                    (int)ppinfo.ppInfo.ppStat.acc!,
-                    isDiffReductionMod ? NFEZHT_range : normal_range,
-                    dt
-                );
+                data = await Database
+                    .Client
+                    .GetOsuStandardBeatmapTechData(
+                        (int)ppinfo.ppInfo.ppStat.aim!,
+                        (int)ppinfo.ppInfo.ppStat.speed!,
+                        (int)ppinfo.ppInfo.ppStat.acc!,
+                        isDiffReductionMod ? NFEZHT_range : normal_range,
+                        dt
+                    );
                 if (data.Count > 0)
                 {
                     if (mods.Count == 0)
@@ -240,13 +241,15 @@ namespace KanonBot.OSU
                     }
                 }
                 //使用解析到的mod 如果是EZ/HT 需要适当把pprange放宽
-                data = await Database.Client.GetOsuStandardBeatmapTechData(
-                    (int)ppinfo.ppInfo.ppStat.aim!,
-                    (int)ppinfo.ppInfo.ppStat.speed!,
-                    (int)ppinfo.ppInfo.ppStat.acc!,
-                    isDiffReductionMod ? NFEZHT_range : normal_range,
-                    dt
-                );
+                data = await Database
+                    .Client
+                    .GetOsuStandardBeatmapTechData(
+                        (int)ppinfo.ppInfo.ppStat.aim!,
+                        (int)ppinfo.ppInfo.ppStat.speed!,
+                        (int)ppinfo.ppInfo.ppStat.acc!,
+                        isDiffReductionMod ? NFEZHT_range : normal_range,
+                        dt
+                    );
 
                 if (data.Count > 0)
                 {

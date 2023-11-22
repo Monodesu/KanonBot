@@ -1,38 +1,37 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using KanonBot.API;
-
+using KanonBot.API.OSU;
+using KanonBot.Image;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.Diagnostics;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using Img = SixLabors.ImageSharp.Image;
-using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
-using System.Collections.Generic;
-using SixLabors.ImageSharp.Diagnostics;
 using static KanonBot.API.OSU.DataStructure;
-using KanonBot.API.OSU;
-using static KanonBot.Image.OSU.ResourceRegistrar;
-using KanonBot.Image;
 using static KanonBot.Image.OSU.OsuInfoPanelV2;
 using static KanonBot.Image.OSU.OsuResourceHelper;
+using static KanonBot.Image.OSU.ResourceRegistrar;
+using Img = SixLabors.ImageSharp.Image;
+using ResizeOptions = SixLabors.ImageSharp.Processing.ResizeOptions;
 
 namespace KanonBot.Image.OSU
 {
     public static class OsuInfoPanelV1
     {
         public static async Task<Img> Draw(
-                UserPanelData data,
-                bool isBonded = false,
-                bool eventmode = false,
-                bool isDataOfDayAvaiavle = true
-            )
+            UserPanelData data,
+            bool isBonded = false,
+            bool eventmode = false,
+            bool isDataOfDayAvaiavle = true
+        )
         {
             var info = new Image<Rgba32>(1200, 857);
             // custom panel
@@ -53,7 +52,10 @@ namespace KanonBot.Image.OSU
 
             //avatar
             var avatarPath = $"./work/avatar/{data.userInfo.Id}.png";
-            using var avatar = await GetUserAvatarAsync(data.userInfo!.Id, data.userInfo!.AvatarUrl!);
+            using var avatar = await GetUserAvatarAsync(
+                data.userInfo!.Id,
+                data.userInfo!.AvatarUrl!
+            );
 
             avatar.Mutate(x => x.Resize(190, 190).RoundCorner(new Size(190, 190), 40));
             info.Mutate(x => x.DrawImage(avatar, new Point(39, 55), 1));
@@ -68,11 +70,16 @@ namespace KanonBot.Image.OSU
                     {
                         if (data.badgeId[i] > -1)
                         {
-                            using var badge = await Img.LoadAsync<Rgba32>($"./work/badges/{data.badgeId[i]}.png");
+                            using var badge = await Img.LoadAsync<Rgba32>(
+                                $"./work/badges/{data.badgeId[i]}.png"
+                            );
                             badge.Mutate(x => x.Resize(86, 40));
-                            info.Mutate(x => x.DrawImage(badge, new Point(272 + (dbcountl * 100), 152), 1));
+                            info.Mutate(
+                                x => x.DrawImage(badge, new Point(272 + (dbcountl * 100), 152), 1)
+                            );
                             ++dbcountl;
-                            if (dbcountl > 4) break;
+                            if (dbcountl > 4)
+                                break;
                         }
                     }
                 }
@@ -85,7 +92,9 @@ namespace KanonBot.Image.OSU
                 GraphicsOptions = new GraphicsOptions { Antialias = true }
             };
 
-            using var flags = await Img.LoadAsync($"./work/flags/{data.userInfo.Country!.Code}.png");
+            using var flags = await Img.LoadAsync(
+                $"./work/flags/{data.userInfo.Country!.Code}.png"
+            );
             info.Mutate(x => x.DrawImage(flags, new Point(272, 212), 1));
             using var modeicon = await Img.LoadAsync(
                 $"./work/legacy/mode_icon/{data.userInfo.PlayMode.ToStr()}.png"
@@ -558,56 +567,6 @@ namespace KanonBot.Image.OSU
             return info;
         }
 
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
         public static Img DrawString(string str, float fontSize)
         {
             var font = new Font(HarmonySans, fontSize);
@@ -630,6 +589,5 @@ namespace KanonBot.Image.OSU
             );
             return img;
         }
-
     }
 }

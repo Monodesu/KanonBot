@@ -1,21 +1,20 @@
 ﻿using System.CommandLine;
 using System.IO;
 using KanonBot.API;
+using KanonBot.API.OSU;
 using KanonBot.Command;
 using KanonBot.Drivers;
 using KanonBot.Functions.OSU;
-
 using KanonBot.Message;
+using LanguageExt;
 using LanguageExt.UnsafeValueAccess;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
-using static LinqToDB.Common.Configuration;
-using static KanonBot.BindService;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
 using static KanonBot.API.OSU.DataStructure;
-using SixLabors.ImageSharp;
-using KanonBot.API.OSU;
-using LanguageExt;
+using static KanonBot.BindService;
+using static LinqToDB.Common.Configuration;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace KanonBot.OSU
 {
@@ -23,39 +22,46 @@ namespace KanonBot.OSU
     {
         [Command("seasonalpass")]
         [Params("m", "mode")]
-        public async static Task seasonalpass(CommandContext args, Target target)
+        public static async Task seasonalpass(CommandContext args, Target target)
         {
             Enums.Mode mode = Enums.Mode.Unknown;
 
-            args.GetDefault<string>().Match
-                (
-                Some: try_mode =>
-                {
-                    mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
-                },
-                None: () => { }
+            args.GetDefault<string>()
+                .Match(
+                    Some: try_mode =>
+                    {
+                        mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
+                    },
+                    None: () => { }
                 );
-            args.GetParameters<string>(["m", "mode"]).Match
-                (
-                Some: try_mode =>
-                {
-                    mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
-                },
-                None: () => { }
+            args.GetParameters<string>([ "m", "mode" ])
+                .Match(
+                    Some: try_mode =>
+                    {
+                        mode = API.OSU.Enums.String2Mode(try_mode) ?? API.OSU.Enums.Mode.OSU;
+                    },
+                    None: () => { }
                 );
 
-
-            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(target, true, "", mode); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
+            var (DBUser, DBOsuInfo, OnlineOSUUserInfo) = await GetOSUOperationInfo(
+                target,
+                true,
+                "",
+                mode
+            ); // 查詢用戶是否有效（是否綁定，是否存在，osu!用戶是否可用），并返回所有信息
             bool IsBound = DBOsuInfo != null;
-            if (OnlineOSUUserInfo == null) return; // 查询失败
+            if (OnlineOSUUserInfo == null)
+                return; // 查询失败
 
-            if (mode == Enums.Mode.Unknown) mode = (Enums.Mode)Enums.String2Mode(DBOsuInfo!.osu_mode)!;
+            if (mode == Enums.Mode.Unknown)
+                mode = (Enums.Mode)Enums.String2Mode(DBOsuInfo!.osu_mode)!;
 
-
-            var seasonalpassinfo = await Database.Client.GetSeasonalPassInfo(
-               OnlineOSUUserInfo!.Id,
-               mode.ToStr()  //GetObjectDescription(mode!)!
-           )!;
+            var seasonalpassinfo = await Database
+                .Client
+                .GetSeasonalPassInfo(
+                    OnlineOSUUserInfo!.Id,
+                    mode.ToStr() //GetObjectDescription(mode!)!
+                )!;
             if (seasonalpassinfo == null)
             {
                 await target.reply("用户在本季度暂无季票信息。");
@@ -95,7 +101,6 @@ namespace KanonBot.OSU
                 + $"({t}%)"
                 + $"\n共获得了了{seasonalpassinfo.point}pt\n距离升级大约还需要{Math.Abs(temppoint)}pt";
             await target.reply(str);
-
         }
     }
 }

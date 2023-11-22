@@ -1,7 +1,7 @@
 using System.ComponentModel;
 
-
 namespace KanonBot.Drivers;
+
 public partial class Guild
 {
     public class Enums
@@ -10,10 +10,13 @@ public partial class Guild
         {
             // 全体成员
             Member = 1,
+
             // 管理员
             GuildAdmin = 2,
+
             // 群主/创建者
             Owner = 3,
+
             // 子频道管理员
             ChannelAdmin = 4,
         }
@@ -121,7 +124,7 @@ public partial class Guild
             /// </summary>
             [Description("")]
             Unknown,
-            
+
             /// <summary>
             /// 鉴权成功
             /// </summary>
@@ -141,26 +144,31 @@ public partial class Guild
             /// </summary>
             [Description("GUILD_CREATE")]
             GuildCreate,
+
             /// <summary>
             /// 当guild资料发生变更时
             /// </summary>
             [Description("GUILD_UPDATE")]
             GuildUpdate,
+
             /// <summary>
             /// 当机器人退出guild时
             /// </summary>
             [Description("GUILD_DELETE")]
             GuildDelete,
+
             /// <summary>
             /// 当channel被创建时
             /// </summary>
             [Description("CHANNEL_CREATE")]
             ChannelCreate,
+
             /// <summary>
             /// 当channel被更新时
             /// </summary>
             [Description("CHANNEL_UPDATE")]
             ChannelUpdate,
+
             /// <summary>
             /// 当channel被删除时
             /// </summary>
@@ -174,11 +182,13 @@ public partial class Guild
             /// </summary>
             [Description("GUILD_MEMBER_ADD")]
             GuildMemberAdd,
+
             /// <summary>
             /// 当成员资料发生变更时
             /// </summary>
             [Description("GUILD_MEMBER_UPDATE")]
             GuildMemberUpdate,
+
             /// <summary>
             /// 当成员被移除时
             /// </summary>
@@ -192,6 +202,7 @@ public partial class Guild
             /// </summary>
             [Description("MESSAGE_CREATE")]
             MessageCreate,
+
             /// <summary>
             /// 删除（撤回）消息事件
             /// </summary>
@@ -205,6 +216,7 @@ public partial class Guild
             /// </summary>
             [Description("MESSAGE_REACTION_ADD")]
             MessageReactionAdd,
+
             /// <summary>
             /// 删除消息表情表态
             /// </summary>
@@ -218,6 +230,7 @@ public partial class Guild
             /// </summary>
             [Description("DIRECT_MESSAGE_CREATE")]
             DirectMessageCreate,
+
             /// <summary>
             /// 删除（撤回）消息事件
             /// </summary>
@@ -239,6 +252,7 @@ public partial class Guild
             /// </summary>
             [Description("MESSAGE_AUDIT_PASS")]
             MessageAuditPass,
+
             /// <summary>
             /// 消息审核不通过
             /// </summary>
@@ -252,36 +266,43 @@ public partial class Guild
             /// </summary>
             [Description("FORUM_THREAD_CREATE")]
             ForumThreadCreate,
+
             /// <summary>
             /// 当用户更新主题时
             /// </summary>
             [Description("FORUM_THREAD_UPDATE")]
             ForumThreadUpdate,
+
             /// <summary>
             /// 当用户删除主题时
             /// </summary>
             [Description("FORUM_THREAD_DELETE")]
             ForumThreadDelete,
+
             /// <summary>
             /// 当用户创建帖子时
             /// </summary>
             [Description("FORUM_POST_CREATE")]
             ForumPostCreate,
+
             /// <summary>
             /// 当用户删除帖子时
             /// </summary>
             [Description("FORUM_POST_DELETE")]
             ForumPostDelete,
+
             /// <summary>
             /// 当用户回复评论时
             /// </summary>
             [Description("FORUM_REPLY_CREATE")]
             ForumReplyCreate,
+
             /// <summary>
             /// 当用户删除评论时
             /// </summary>
             [Description("FORUM_REPLY_DELETE")]
             ForumReplyDelete,
+
             /// <summary>
             /// 当用户发表审核通过时
             /// </summary>
@@ -295,16 +316,19 @@ public partial class Guild
             /// </summary>
             [Description("AUDIO_START")]
             AudioStart,
+
             /// <summary>
             /// 音频播放完成时
             /// </summary>
             [Description("AUDIO_FINISH")]
             AudioFinish,
+
             /// <summary>
             /// 上麦时
             /// </summary>
             [Description("AUDIO_ON_MIC")]
             AudioOnMic,
+
             /// <summary>
             /// 下麦时
             /// </summary>
@@ -318,12 +342,12 @@ public partial class Guild
             /// </summary>
             [Description("AT_MESSAGE_CREATE")]
             AtMessageCreate,
+
             /// <summary>
             /// 当频道的消息被删除时
             /// </summary>
             [Description("PUBLIC_MESSAGE_DELETE")]
             PublicMessageDelete,
         }
-
     }
 }
