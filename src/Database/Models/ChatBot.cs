@@ -6,7 +6,7 @@ namespace KanonBot.Database;
 public static partial class Models
 {
     [Table("chatbot")]
-    public class ChatBot
+    public class Bot
     {
         [PrimaryKey]
         public int uid { get; set; }

@@ -19,7 +19,7 @@ public class Connection : LinqToDB.Data.DataConnection
     public ITable<Bottle> Bottle => this.GetTable<Bottle>();
     public ITable<BadgeRedemptionCode> BadgeRedemptionCode => this.GetTable<BadgeRedemptionCode>();
     public ITable<BadgeExpirationDateRec> BadgeExpirationDateRec => this.GetTable<BadgeExpirationDateRec>();
-    public ITable<ChatBot> ChatBot => this.GetTable<ChatBot>();
+    public ITable<Models.Bot> Bots => this.GetTable<Models.Bot>();
 
     // ... other tables ...
 }

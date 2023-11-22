@@ -719,9 +719,9 @@ public class Client
     )
     {
         using var db = GetInstance();
-        var data = await db.ChatBot.FirstOrDefaultAsync(it => it.uid == uid);
+        var data = await db.Bots.FirstOrDefaultAsync(it => it.uid == uid);
         var result = await db.InsertOrReplaceAsync(
-            new ChatBot()
+            new Models.Bot()
             {
                 uid = (int)uid,
                 botdefine = botdefine,
@@ -732,9 +732,9 @@ public class Client
         return result > -1;
     }
 
-    public static async Task<ChatBot?> GetChatBotInfo(long uid)
+    public static async Task<Models.Bot?> GetChatBotInfo(long uid)
     {
         using var db = GetInstance();
-        return await db.ChatBot.Where(it => it.uid == uid).FirstOrDefaultAsync();
+        return await db.Bots.Where(it => it.uid == uid).FirstOrDefaultAsync();
     }
 }
