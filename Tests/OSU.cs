@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using KanonBot;
 using KanonBot.API;
-using KanonBot.Functions.OSU.RosuPP;
+
 using KanonBot.Image.OSU;
 using KanonBot.Serializer;
 using RosuPP;
@@ -10,6 +10,7 @@ using static KanonBot.API.OSU.Extensions;
 using API = KanonBot.API;
 using Kook;
 using KanonBot.API.OSU;
+using KanonBot.Functions.OSU;
 
 namespace Tests;
 

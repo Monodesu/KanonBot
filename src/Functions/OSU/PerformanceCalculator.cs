@@ -1,9 +1,10 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Runtime.InteropServices;
 using RosuPP;
 
-namespace KanonBot.Functions.OSU.RosuPP
+namespace KanonBot.Functions.OSU
 {
     public static class PerformanceCalculator
     {

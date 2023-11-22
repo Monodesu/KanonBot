@@ -1,9 +1,10 @@
-﻿using KanonBot.Functions.OSU.RosuPP;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KanonBot.Functions.OSU;
 
 namespace KanonBot.API.OSU
 {

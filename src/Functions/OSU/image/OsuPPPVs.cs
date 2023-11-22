@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Numerics;
 using KanonBot.API;
-using KanonBot.Functions.OSU.RosuPP;
+
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;

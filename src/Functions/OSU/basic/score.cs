@@ -4,7 +4,7 @@ using KanonBot.API;
 using KanonBot.Command;
 using KanonBot.Drivers;
 using KanonBot.Functions.OSU;
-using KanonBot.Functions.OSU.RosuPP;
+
 using KanonBot.Message;
 using LanguageExt.UnsafeValueAccess;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -16,7 +16,6 @@ using static KanonBot.API.OSU.DataStructure;
 using SixLabors.ImageSharp;
 using KanonBot.Image.OSU;
 using System;
-using static KanonBot.Functions.OSU.RosuPP.PerformanceCalculator;
 using LanguageExt;
 using System.Reflection;
 

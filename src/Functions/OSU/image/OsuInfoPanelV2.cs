@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Numerics;
 using KanonBot.API;
-using KanonBot.Functions.OSU.RosuPP;
+
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
@@ -21,6 +21,7 @@ using KanonBot.API.OSU;
 using static KanonBot.Image.OSU.ResourceRegistrar;
 using static KanonBot.Image.OSU.OsuResourceHelper;
 using KanonBot.Image;
+using KanonBot.Functions.OSU;
 
 namespace KanonBot.Image.OSU
 {
