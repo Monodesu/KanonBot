@@ -82,19 +82,5 @@ public class Misc
     //     };
     //     KanonBot.Mail.Send(ms);
     // }
-
-    [Fact]
-    public void Image()
-    {
-        // 自定义info图片测试
-        Img.Helper helper = new();
-        var lines = File.ReadLines("./TestFiles/ImageHelper示例文件.txt");
-        foreach (string s in lines)
-        {
-            helper.Parse(s.Trim());
-        }
-        var image = helper.Build();
-        image.Save("./TestFiles/ImageHelper示例文件.png");
-    }
 }
 

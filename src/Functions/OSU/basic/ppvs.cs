@@ -103,16 +103,16 @@ namespace KanonBot.OSU
             API.OSU.DataStructure.PPVSPanelData data = new();
 
             var d1 = await Database.Client.GetOsuPPlusData(user1.Id);
-            if (d1 == null)
+            if (d1 is null)
             {
                 var d1temp = await API.OSU.V2.TryGetUserPlusData(user1);
-                if (d1temp == null)
+                if (d1temp is null)
                 {
                     await target.reply("获取pp+数据时出错，等会儿再试试吧");
                     return;
                 }
                 d1 = d1temp.User;
-                await Database.Client.UpdateOsuPPlusData(d1, OnlineOSUUserInfo.Id);
+                await Database.Client.UpdateOsuPPlusData(d1temp.User!, OnlineOSUUserInfo.Id);
             }
             data.u2Name = OnlineOSUUserInfo.Username;
             data.u2 = d1;
@@ -127,7 +127,7 @@ namespace KanonBot.OSU
                     return;
                 }
                 d2 = d2temp.User;
-                await Database.Client.UpdateOsuPPlusData(d2, user2.Id);
+                await Database.Client.UpdateOsuPPlusData(d2temp.User!, user2.Id);
             }
             data.u1Name = user2.Username;
             data.u1 = d2;
