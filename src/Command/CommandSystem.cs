@@ -96,7 +96,15 @@ namespace KanonBot.Command
                 return;
             }
 
-            var commandPrefix = parts[0].TrimStart('/', '!', '@');
+            if (parts[0].IndexOf('/') != -1) parts[0] = parts[0].Substring(parts[0].IndexOf('/'));
+            else if (parts[0].IndexOf('!') != -1) parts[0] = parts[0].Substring(parts[0].IndexOf('!'));
+            else
+            {
+                Log.Warning("Unknown command.");
+                return;
+            }
+
+            var commandPrefix = parts[0].TrimStart('/', '!');
 
             // 如果找不到主命令，立即返回
             if (!commands.TryGetValue(commandPrefix, out var currentCommand))
@@ -154,7 +162,7 @@ namespace KanonBot.Command
                             currentValue = "";
                         }
 
-                        var keyValuePair = part.Split([ '=' ], 2);
+                        var keyValuePair = part.Split(['='], 2);
                         currentKey = keyValuePair[0];
                         currentValue = keyValuePair.Length > 1 ? keyValuePair[1] : part;
                     }

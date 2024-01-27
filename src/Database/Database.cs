@@ -785,4 +785,10 @@ public class Client
         }
     }
 
+
+    public static async Task<UserQQGuild?> GetUserByQQGuildID(string guildId)
+    {
+        using var db = GetInstance();
+        return await db.UserQQGuild.Where(it => it.guild_id == guildId).FirstOrDefaultAsync();
+    }
 }

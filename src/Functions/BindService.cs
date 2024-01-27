@@ -8,6 +8,7 @@ using KanonBot.Drivers;
 using KanonBot.OSU;
 using LanguageExt.SomeHelp;
 using LanguageExt.UnsafeValueAccess;
+using static KanonBot.Config;
 
 namespace KanonBot
 {
@@ -35,11 +36,14 @@ namespace KanonBot
             // get email
             var email = await Database.Client.GetEmailAddressByVerifyToken(token, "link", "qq");
 
-            if (email == null) return; // 一般不可能出现，但是做个保险
+            if (email == null)
+            {
+                await target.reply("Token无效。");
+                return;
+            }
 
             if (target.platform == Platform.OneBot)
             {
-
                 if (!await Database.Client.LinkOneBot(email, long.Parse(target.sender!)))
                 {
                     await target.reply("连接失败了！请联系管理员。");
@@ -49,6 +53,13 @@ namespace KanonBot
             }
             else if (target.platform == Platform.Guild)
             {
+                // 检查是否已绑定
+                if (await Database.Client.GetUserByQQGuildID(target.sender!) != null)
+                {
+                    await target.reply("已经连接过了哦，不可以再连接了。");
+                    return;
+                }
+
                 var userInfo = await Database.Client.GetUser(email);
                 if (!await Database.Client.LinkQQGuild(userInfo!.uid, target.sender!))
                 {
@@ -135,6 +146,7 @@ namespace KanonBot
             return await Database.Client.GetUsersByUID(uid, platform);
         }
 
+
         public static async Task<Database.Models.User?> GetBaseAccountByOsuUid(long osu_uid)
         {
             return await Database.Client.GetUserByOsuUID(osu_uid);
@@ -150,13 +162,13 @@ namespace KanonBot
             switch (target.platform)
             {
                 case Platform.Guild:
-                    if (target.raw is Guild.Models.MessageData g)
+                    if (target.raw is KanonBot.Drivers.Guild.Models.MessageData g)
                     {
                         return new AccInfo() { platform = Platform.Guild, uid = g.Author.ID };
                     }
                     break;
                 case Platform.OneBot:
-                    if (target.raw is OneBot.Models.CQMessageEventBase o)
+                    if (target.raw is KanonBot.Drivers.OneBot.Models.CQMessageEventBase o)
                     {
                         return new AccInfo()
                         {

@@ -5,7 +5,7 @@ namespace KanonBot.Database
 {
     public static partial class Models
     {
-        [Table("user_qqguild")]
+        [Table("users_qqguild")]
         public class UserQQGuild
         {
             [Column]

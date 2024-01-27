@@ -43,13 +43,13 @@ namespace KanonBot.OSU
             DBUser = await GetBaseAccount(baseuid, platform);
             if (DBUser == null)
             {
-                await target.reply("您还没有绑定desu.life账户，请使用!link email=您的邮箱 来进行绑定或注册。");
+                await target.reply("您还没有绑定desu.life账户，请在官网注册并绑定账号后使用。");
                 return (DBUser, DBOsuInfo, OnlineOsuInfo);
             }
             DBOsuInfo = await CheckOsuAccount(DBUser.uid);
             if (DBOsuInfo == null)
             {
-                await target.reply("您还没有绑定osu账户，请使用!link osu=您的osu用户名 来绑定您的osu账户。");
+                await target.reply("您还没有绑定osu账户，请在官网绑定账号后使用。");
                 return (DBUser, DBOsuInfo, OnlineOsuInfo);
             }
             mode ??= API.OSU.Enums.String2Mode(DBOsuInfo.osu_mode);
