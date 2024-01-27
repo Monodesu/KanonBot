@@ -19,15 +19,14 @@ public partial class Guild : ISocket, IDriver
     Enums.Intent intents;
     System.Timers.Timer heartbeatTimer = new();
     int lastSeq = 0;
-
-    public Guild(long appID, string token, Enums.Intent intents, bool sandbox = false)
+    public Guild(string appID, string clientSecret, Enums.Intent intents, bool sandbox = false)
     {
         // 初始化变量
 
-        this.AuthToken = $"Bot {appID}.{token}";
+        api = new(sandbox);
+        api.UpdateAuthTokenAsync(appID, clientSecret).Wait();
+        AuthToken = api.AuthToken!;
         this.intents = intents;
-
-        this.api = new(AuthToken, sandbox);
 
         // 获取频道ws地址
 
@@ -46,7 +45,8 @@ public partial class Guild : ISocket, IDriver
                     // ClientCertificates = ...
                 }
             };
-            client.Options.SetRequestHeader("Authorization", this.AuthToken);
+            client.Options.SetRequestHeader("Authorization", AuthToken);
+            client.Options.SetRequestHeader("X-Union-Appid", appID);
             return client;
         });
 
@@ -95,17 +95,15 @@ public partial class Guild : ISocket, IDriver
                 break;
             case Enums.EventType.AtMessageCreate:
                 var MessageData = (obj.Data as JObject)?.ToObject<Models.MessageData>();
-                this.msgAction?.Invoke(
-                    new Target()
-                    {
-                        platform = Platform.Guild,
-                        sender = MessageData!.Author.ID,
-                        selfAccount = this.selfID,
-                        msg = Message.Parse(MessageData!),
-                        raw = MessageData,
-                        socket = this
-                    }
-                );
+                this.msgAction?.Invoke(new Target()
+                {
+                    platform = Platform.Guild,
+                    sender = MessageData!.Author.ID,
+                    selfAccount = this.selfID,
+                    msg = Message.Parse(MessageData!),
+                    raw = MessageData,
+                    socket = this
+                });
                 break;
             case Enums.EventType.Resumed:
                 // 恢复连接成功
@@ -119,8 +117,9 @@ public partial class Guild : ISocket, IDriver
 
     void Parse(ResponseMessage msg)
     {
+        //Log.Information($"{msg}");
         var obj = Json.Deserialize<Models.PayloadBase<JToken>>(msg.Text)!;
-        // Log.Debug("收到消息: {@0} 数据: {1}", obj, obj.Data?.ToString(Formatting.None));
+        //Log.Debug("收到消息: {@0} 数据: {1}", obj, obj.Data?.ToString(Newtonsoft.Json.Formatting.None) ?? null);
 
         if (obj.Seq != null)
             this.lastSeq = obj.Seq.Value; // 存储最后一次seq
@@ -135,37 +134,29 @@ public partial class Guild : ISocket, IDriver
 
                 SetHeartBeatTicker(heartbeatInterval); // 设置心跳定时器
 
-                this.Send(
-                    this.SessionId switch
-                    {
-                        null
-                            => Json.Serialize(
-                                new Models.PayloadBase<Models.IdentityData>
-                                { // 鉴权
-                                    Operation = Enums.OperationCode.Identify,
-                                    Data = new Models.IdentityData
-                                    {
-                                        Token = this.AuthToken,
-                                        Intents = this.intents,
-                                        Shard = new int[] { 0, 1 },
-                                    }
-                                }
-                            ),
-                        not null
-                            => Json.Serialize(
-                                new Models.PayloadBase<Models.ResumeData>
-                                { // 鉴权
-                                    Operation = Enums.OperationCode.Resume,
-                                    Data = new Models.ResumeData
-                                    {
-                                        Token = this.AuthToken,
-                                        SessionId = this.SessionId.Value,
-                                        Seq = this.lastSeq,
-                                    }
-                                }
-                            )
-                    }
-                );
+                this.Send(this.SessionId switch
+                {
+                    null => Json.Serialize(new Models.PayloadBase<Models.IdentityData>
+                    {    // 鉴权
+                        Operation = Enums.OperationCode.Identify,
+                        Data = new Models.IdentityData
+                        {
+                            Token = this.AuthToken,
+                            Intents = this.intents,
+                            Shard = new int[] { 0, 1 },
+                        }
+                    }),
+                    not null => Json.Serialize(new Models.PayloadBase<Models.ResumeData>
+                    {    // 鉴权
+                        Operation = Enums.OperationCode.Resume,
+                        Data = new Models.ResumeData
+                        {
+                            Token = this.AuthToken,
+                            SessionId = this.SessionId.Value,
+                            Seq = this.lastSeq,
+                        }
+                    })
+                });
                 break;
             case Enums.OperationCode.Reconnect:
                 this.instance.Reconnect(); // 重连
@@ -195,13 +186,11 @@ public partial class Guild : ISocket, IDriver
     void HeartBeatTicker()
     {
         // Log.Debug("Sending heartbeat..");   // log（仅测试）
-        var j = Json.Serialize(
-            new Models.PayloadBase<Models.IdentityData>
-            {
-                Operation = Enums.OperationCode.Heartbeat,
-                Seq = this.lastSeq
-            }
-        );
+        var j = Json.Serialize(new Models.PayloadBase<Models.IdentityData>
+        {
+            Operation = Enums.OperationCode.Heartbeat,
+            Seq = this.lastSeq
+        });
 
         this.Send(j);
     }
@@ -220,6 +209,7 @@ public partial class Guild : ISocket, IDriver
 
     public void Send(string message)
     {
+        // Log.Information(message);
         this.instance.Send(message);
     }
 

@@ -93,35 +93,33 @@ if (config.dev)
 
 // 测试消息处理
 
-while (true)
-{
-    Log.Warning("请输入消息: ");
-    var input = Console.ReadLine();
-    if (string.IsNullOrEmpty(input))
-        return;
-    var sender = parseInt("123456789");
-    Log.Warning("解析消息: {0}", input);
-    await ProcessCommand(
-        new Target()
-        {
-            msg = new Msg.Chain().msg(input!.Trim()),
-            sender = $"{sender.Value()}",
-            platform = Platform.OneBot,
-            selfAccount = null,
-            socket = new FakeSocket()
-            {
-                action = (msg) =>
-                {
-                    Log.Information("本地测试消息 {0}", msg);
-                }
-            },
-            raw = new OneBot.Models.CQMessageEventBase() { UserId = sender.Value(), }
-        }
-    );
-}
+//while (true)
+//{
+//    Log.Warning("请输入消息: ");
+//    var input = Console.ReadLine();
+//    if (string.IsNullOrEmpty(input)) return;
+//    var sender = parseInt("123456789");
+//    Log.Warning("解析消息: {0}", input);
+//    await ProcessCommand(new Target()
+//    {
 
-await Task.Delay(500);
-Environment.Exit(0);
+//        msg = new Msg.Chain().msg(input!.Trim()),
+//        sender = $"{sender.Value()}",
+//        platform = Platform.OneBot,
+//        selfAccount = null,
+//        socket = new FakeSocket()
+//        {
+//            action = (msg) =>
+//            {
+//                Log.Information("本地测试消息 {0}", msg);
+//            }
+//        },
+//        raw = new OneBot.Models.CQMessageEventBase()
+//        {
+//            UserId = sender.Value(),
+//        }
+//    });
+//}
 
 Log.Information("注册用户数据更新事件");
 //GeneralUpdate.DailyUpdate();
@@ -171,9 +169,9 @@ var drivers = new Drivers()
     )
     .append(
         new Guild(
-            config.guild!.appID,
-            config.guild.token!,
-            Guild.Enums.Intent.GuildAtMessage | Guild.Enums.Intent.DirectMessages,
+            config.guild!.appID.ToString(),
+            config.guild.secret!,
+            Guild.Enums.Intent.AtMessage,
             config.guild.sandbox
         )
             .onMessage(
@@ -181,21 +179,21 @@ var drivers = new Drivers()
                 {
                     var api = (target.socket as Guild)!.api;
                     var messageData = (target.raw as Guild.Models.MessageData)!;
-                    Log.Information("← 收到QQ Guild消息 {0}", target.msg);
-                    Log.Debug("↑ QQ Guild详情 {@0}", messageData);
-                    Log.Debug("↑ QQ Guild附件 {@0}", Json.Serialize(messageData.Attachments));
+                    Log.Information("← 收到QQ API消息 {0}", target.msg);
+                    Log.Debug("↑ QQ API详情 {@0}", messageData);
+                    Log.Debug("↑ QQ API附件 {@0}", Json.Serialize(messageData.Attachments));
                     try
                     {
                         await ProcessCommand(target);
                     }
                     catch (Flurl.Http.FlurlHttpException ex)
                     {
-                        Log.Error("请求 API 时发生异常<QQ Guild>，{0}", ex);
+                        Log.Error("请求 API 时发生异常<QQ API>，{0}", ex);
                         await target.reply("请求 API 时发生异常");
                     }
                     catch (Exception ex)
                     {
-                        Log.Error("发生未知错误<QQ Guild>，{0}", ex);
+                        Log.Error("发生未知错误<QQ API>，{0}", ex);
                         await target.reply("发生未知错误");
                     }
                 }
@@ -208,13 +206,13 @@ var drivers = new Drivers()
                         case RawEvent r:
                             var data = (r.value as Guild.Models.PayloadBase<JToken>)!;
                             Log.Debug(
-                                "收到QQ Guild事件: {@0} 数据: {1}",
+                                "收到QQ API事件: {@0} 数据: {1}",
                                 data,
                                 data.Data?.ToString(Formatting.None)
                             );
                             break;
                         case Ready l:
-                            Log.Debug("收到QQ Guild生命周期事件 {h}", l);
+                            Log.Debug("收到QQ API生命周期事件 {h}", l);
                             break;
                         default:
                             break;

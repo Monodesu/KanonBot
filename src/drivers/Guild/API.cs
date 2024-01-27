@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using static KanonBot.Functions.OSU.RosuPP.PerformanceCalculator;
 
 namespace KanonBot.Drivers;
 
@@ -10,24 +11,56 @@ public partial class Guild
         public static readonly string DefaultEndPoint = "https://api.sgroup.qq.com";
         public static readonly string SandboxEndPoint = "https://sandbox.api.sgroup.qq.com";
         string EndPoint;
-        string AuthToken;
+        public string? AuthToken;
+        private DateTime tokenExpiryTime;
 
-        public API(string authToken, bool sandbox)
+        public API(bool sandbox)
         {
             this.EndPoint = sandbox ? SandboxEndPoint : DefaultEndPoint;
-            this.AuthToken = authToken;
+        }
+
+        public async Task UpdateAuthTokenAsync(string appId, string clientSecret)
+        {
+            if (!(DateTime.Now >= this.tokenExpiryTime || string.IsNullOrEmpty(this.AuthToken)))
+                return;
+
+            string access_token = "", expires_in = "";
+
+            try
+            {
+                JObject j = new()
+                {
+                    { "appId", appId },
+                    { "clientSecret", clientSecret },
+                };
+
+                var response = await "https://bots.qq.com/app/getAppAccessToken"
+                    .PostJsonAsync(j)
+                    .ReceiveJson<JObject>();
+
+                access_token = response["access_token"]!.ToString();
+                expires_in = response["expires_in"]!.ToString();
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"获取 access_token 失败: {ex.Message}");
+            }
+
+            this.AuthToken = $"QQBot {access_token}";
+
+            this.tokenExpiryTime = DateTime.Now.AddSeconds(int.Parse(expires_in));
         }
 
         IFlurlRequest http()
         {
-            return this.EndPoint.WithHeader("Authorization", this.AuthToken);
+            return this.EndPoint.WithHeader("Authorization", AuthToken);
         }
 
         public async Task<string> GetWebsocketUrl()
         {
-            return (await this.http().AppendPathSegments("gateway", "bot").GetJsonAsync<JObject>())[
-                "url"
-            ]!.ToString();
+            //var x = await this.http().AppendPathSegments("gateway", "bot").GetJsonAsync<JObject>();
+            //Log.Information(x.ToString());
+            return (await this.http().AppendPathSegments("gateway", "bot").GetJsonAsync<JObject>())["url"]!.ToString();
         }
 
         public async Task<Models.MessageData> SendMessage(
@@ -35,10 +68,14 @@ public partial class Guild
             Models.SendMessageData data
         )
         {
+
             return await this.http()
                 .AppendPathSegments("channels", ChannelID, "messages")
                 .PostJsonAsync(data)
                 .ReceiveJson<Models.MessageData>();
         }
+
+
+
     }
 }

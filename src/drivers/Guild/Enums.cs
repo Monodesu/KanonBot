@@ -108,7 +108,7 @@ public partial class Guild
             //  - AUDIO_START           // 音频开始播放时
             //  - AUDIO_FINISH          // 音频播放结束时
             Audio = 1 << 29, // 音频机器人事件
-            GuildAtMessage = 1 << 30, // 只接收@消息事件
+            AtMessage = 1 << 30, // 只接收@消息事件
 
             None = 0,
         }
