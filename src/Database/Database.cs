@@ -737,4 +737,52 @@ public class Client
         using var db = GetInstance();
         return await db.Bots.Where(it => it.uid == uid).FirstOrDefaultAsync();
     }
+
+    public static async Task<string?> GetEmailAddressByVerifyToken(string token, string op, string platform)
+    {
+        using var db = GetInstance();
+        var uv = await db.UserVerify
+            .Where(it => it.token == token)
+            .Where(it => it.op == op)
+            .Where(it => it.platform == platform)
+            .FirstOrDefaultAsync();
+        if (uv != null)
+        {
+            await db.UserVerify.Where(it => it.email == uv.email).DeleteAsync();
+            if (uv.gen_time < DateTimeOffset.Now)
+                return null;
+            return uv.email;
+        }
+        return null;
+    }
+
+    public static async Task<bool> LinkOneBot(string mailAddr, long qqId)
+    {
+        using var db = GetInstance();
+        var res = await db.Users
+            .Where(it => it.email == mailAddr)
+            .Set(it => it.qq_id, qqId)
+            .UpdateAsync();
+        return res > -1;
+    }
+
+    public static async Task<bool> LinkQQGuild(long uid, string guildId)
+    {
+        using var db = GetInstance();
+        var d = new UserQQGuild()
+        {
+            uid = uid,
+            guild_id = guildId
+        };
+        try
+        {
+            await db.InsertAsync(d);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
 }

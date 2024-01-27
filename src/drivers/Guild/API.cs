@@ -1,5 +1,4 @@
 using Newtonsoft.Json.Linq;
-using static KanonBot.Functions.OSU.RosuPP.PerformanceCalculator;
 
 namespace KanonBot.Drivers;
 

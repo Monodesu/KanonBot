@@ -20,82 +20,46 @@ namespace KanonBot
         }
 
         [Command("bind", "link")]
-        [Params("osu", "steam")]
         public static async Task Bind(CommandContext args, Target target)
         {
-            var op_osu = args.GetParameter<string>("osu");
+            string? token = null;
+            args.GetDefault<string>().IfSome(u => token = u);
 
-            await op_osu.Match(
-                Some: async op =>
+            if (string.IsNullOrEmpty(token))
+            {
+                await target.reply("请指定Token。");
+                return;
+
+            }
+
+            // get email
+            var email = await Database.Client.GetEmailAddressByVerifyToken(token, "link", "qq");
+
+            if (email == null) return; // 一般不可能出现，但是做个保险
+
+            if (target.platform == Platform.OneBot)
+            {
+
+                if (!await Database.Client.LinkOneBot(email, long.Parse(target.sender!)))
                 {
-                    await HandleOSULink(target, op);
-                },
-                None: async () =>
-                {
-                    await target.reply("请按照以下格式进行绑定。\n!link osu=您的osu用户名 ");
+                    await target.reply("连接失败了！请联系管理员。");
                     return;
                 }
-            );
-            await Task.CompletedTask;
-        }
-
-        private static async Task HandleOSULink(Target target, string osu_username)
-        {
-            var (baseuid, platform) = RetrieveCurrentUserInfo(target);
-            var online_osu_userinfo = await API.OSU.V2.GetUser(osu_username);
-
-            if (online_osu_userinfo == null)
-            {
-                await target.reply($"没有找到osu用户名为 {osu_username} 的osu用户，绑定失败。");
-                return;
+                await target.reply("连接成功~");
             }
-
-            var db_osu_userinfo = await CheckOSUUserBinding(online_osu_userinfo.Id);
-            if (db_osu_userinfo != null)
+            else if (target.platform == Platform.Guild)
             {
-                if (baseuid == db_osu_userinfo.uid.ToString())
+                var userInfo = await Database.Client.GetUser(email);
+                if (!await Database.Client.LinkQQGuild(userInfo!.uid, target.sender!))
                 {
-                    await target.reply($"你已绑定该账户。");
+                    await target.reply("连接失败了！请联系管理员。");
                     return;
                 }
-                await target.reply(
-                    $"此osu账户已被用户ID为 {db_osu_userinfo.uid} 的用户绑定了，如果这是你的账户，请联系管理员更新账户信息。"
-                );
-                return;
+                await target.reply("连接成功~");
             }
-
-            var DBUser = await GetBaseAccount(baseuid, platform);
-            if (DBUser == null)
+            else
             {
-                await target.reply("您还没有绑定desu.life账户，请使用!reg 您的邮箱来进行绑定或注册。");
-                return;
-            }
-
-            var osuuserinfo = await CheckCurrentUserOSUBinding(long.Parse(baseuid));
-            if (osuuserinfo != null)
-            {
-                await target.reply($"您已经与osu uid为 {osuuserinfo.osu_uid} 的用户绑定过了。");
-                return;
-            }
-
-            try
-            {
-                if (await PerformBinding(long.Parse(baseuid), online_osu_userinfo))
-                {
-                    await target.reply(
-                        $"绑定成功，已将osu用户 {online_osu_userinfo.Id} 绑定至desu.life账户 {baseuid} 。"
-                    );
-                    await GeneralUpdate.UpdateUser(online_osu_userinfo.Id, true);
-                }
-                else
-                {
-                    await target.reply($"绑定失败，请稍后再试。");
-                }
-            }
-            catch
-            {
-                await target.reply($"在绑定用户时出错，请联系管理员。");
-                return;
+                await target.reply("该指令在当前平台不可用。");
             }
         }
 
@@ -103,32 +67,6 @@ namespace KanonBot
         {
             var AccInfo = GetBaseAccInfo(target);
             return (AccInfo.uid, AccInfo.platform);
-        }
-
-        public static async Task<Database.Models.UserOSU?> CheckOSUUserBinding(long osuUserId)
-        {
-            return await Database.Client.GetOsuUser(osuUserId);
-        }
-
-        public static async Task<Database.Models.UserOSU?> CheckCurrentUserOSUBinding(long base_uid)
-        {
-            return await Database.Client.GetOsuUserByUID(base_uid);
-        }
-
-        private static async Task<bool> PerformBinding(
-            long desulife_uid,
-            API.OSU.Models.User online_osu_userinfo
-        )
-        {
-            if (online_osu_userinfo.CoverUrl == null)
-                online_osu_userinfo.CoverUrl = new Uri("");
-            return await Database
-                .Client
-                .InsertOsuUser(
-                    desulife_uid,
-                    online_osu_userinfo.Id,
-                    online_osu_userinfo.CoverUrl.ToString() == "" ? 0 : 2
-                );
         }
 
         public static async Task<(

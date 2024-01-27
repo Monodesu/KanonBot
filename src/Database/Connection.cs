@@ -25,6 +25,7 @@ public class Connection : LinqToDB.Data.DataConnection
     public ITable<BadgeExpirationDateRec> BadgeExpirationDateRec =>
         this.GetTable<BadgeExpirationDateRec>();
     public ITable<Models.Bot> Bots => this.GetTable<Models.Bot>();
-
+    public ITable<UserVerify> UserVerify => this.GetTable<UserVerify>();
+    public ITable<UserQQGuild> UserQQGuild => this.GetTable<UserQQGuild>();
     // ... other tables ...
 }
