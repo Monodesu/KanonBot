@@ -124,7 +124,7 @@ namespace KanonBot.API
                 })
                 .GetAsync();
 
-            //Log.Error(await res.GetStringAsync());
+            //Log.Information(await res.GetStringAsync());
             if (res.StatusCode == 404)
                 return null;
             else
@@ -185,6 +185,7 @@ namespace KanonBot.API
                 .AppendPathSegments(new object[] { "users", userId, mode.ToStr() })
                 .GetAsync();
 
+            //Log.Information(await res.GetStringAsync());
             if (res.StatusCode == 404)
                 return null;
             else
@@ -209,6 +210,7 @@ namespace KanonBot.API
                 .SetQueryParam("key", "username")
                 .GetAsync();
 
+            //Log.Information(await res.GetStringAsync());
             if (res.StatusCode == 404)
                 return null;
             else

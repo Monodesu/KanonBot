@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "KanonBot": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "KANONBOT_TEST_USER_ID": "12345678"
+      }
+    }
+  }
+}

@@ -711,8 +711,8 @@ namespace KanonBot.API
                 [JsonProperty("account_history")]
                 public UserAccountHistory[] AccountHistory { get; set; }
 
-                [JsonProperty("active_tournament_banner", NullValueHandling = NullValueHandling.Ignore)]
-                public JObject? ActiveTournamentBanner { get; set; }
+                [JsonProperty("active_tournament_banners", NullValueHandling = NullValueHandling.Ignore)]
+                public JArray? ActiveTournamentBanners { get; set; }
 
                 [JsonProperty("badges")]
                 public UserBadge[] Badges { get; set; }
@@ -1048,10 +1048,10 @@ namespace KanonBot.API
                 [JsonProperty("count_50")]
                 public uint CountMeh { get; set; }
 
-                [JsonProperty("count_geki")]
+                [JsonProperty("count_geki", NullValueHandling = NullValueHandling.Ignore)]
                 public uint CountGeki { get; set; }
 
-                [JsonProperty("count_katu")]
+                [JsonProperty("count_katu", NullValueHandling = NullValueHandling.Ignore)]
                 public uint CountKatu { get; set; }
 
                 [JsonProperty("count_miss")]
